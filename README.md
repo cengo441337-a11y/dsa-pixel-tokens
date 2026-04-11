@@ -2,7 +2,7 @@
 
 [![FoundryVTT](https://img.shields.io/badge/FoundryVTT-v12-orange?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgo=)](https://foundryvtt.com/)
 [![Version](https://img.shields.io/badge/Version-0.2.0-brightgreen?style=for-the-badge)]()
-[![DSA](https://img.shields.io/badge/System-DSA%205%20%2F%20gdsa-blueviolet?style=for-the-badge)]()
+[![DSA](https://img.shields.io/badge/System-DSA%204.1%20%2F%20gdsa-blueviolet?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)]()
 
 > Animierte Pixel-Art Tokens im 16-Bit JRPG-Stil für FoundryVTT — DSA 5 & gdsa kompatibel.
@@ -118,7 +118,7 @@ dsa-pixel-tokens/
 
 | System | Status |
 |--------|--------|
-| DSA 5 (gdsa) | ✅ Vollständig |
+| DSA 4.1 (gdsa) | ✅ Vollständig |
 | FoundryVTT v12 | ✅ Verified |
 | FoundryVTT v11 | ✅ Minimum |
 | D&D 5e | ⚠️ HP-Hooks funktionieren |
