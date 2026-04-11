@@ -891,27 +891,204 @@ async function spawnZoneEffect(templateDoc, zoneName) {
   ui.notifications.info(`Zone: ${preset.label} aktiv (${squares.length} Felder)`);
 }
 
-function showZonePicker(templateDoc) {
-  const buttons = {};
-  for (const [name, preset] of Object.entries(ZONE_PRESETS)) {
-    buttons[name] = {
-      label: `${preset.icon} ${preset.label}`,
-      callback: () => spawnZoneEffect(templateDoc, name),
-    };
-  }
-  buttons.loeschen = {
-    label: "🗑 Zone löschen",
-    callback: () => {
-      clearZoneSprites(templateDoc.id);
-      templateDoc.unsetFlag("dsa-pixel-tokens", "zoneEffect");
-    },
+// ─── Zone Damage System ───────────────────────────────────────────────────────
+
+/**
+ * Returns all placeable Tokens whose center falls within the given template shape.
+ */
+function _getTokensInTemplate(templateDoc) {
+  if (!canvas.tokens?.placeables) return [];
+  const { x: tx, y: ty } = templateDoc;
+  const tObj = templateDoc.object;
+  if (!tObj?.shape) return [];
+  return canvas.tokens.placeables.filter(token => {
+    const cx = token.center.x - tx;
+    const cy = token.center.y - ty;
+    return tObj.shape.contains(cx, cy);
+  });
+}
+
+/**
+ * Spawns a floating damage/cost number that drifts upward and fades out above a token.
+ * @param {Token} token
+ * @param {number} amount
+ * @param {number} [color=0xff3333]  PIXI hex color (red for LeP, blue for AsP)
+ */
+function _showDamageNumber(token, amount, color = 0xff3333) {
+  const style = new PIXI.TextStyle({
+    fontFamily: "monospace",
+    fontSize: 22,
+    fontWeight: "bold",
+    fill: [color],
+    stroke: 0x000000,
+    strokeThickness: 4,
+    dropShadow: true,
+    dropShadowBlur: 6,
+    dropShadowColor: 0x000000,
+    dropShadowDistance: 1,
+  });
+
+  const text = new PIXI.Text(`-${amount}`, style);
+  text.anchor.set(0.5, 1.0);
+  text.x = token.center.x;
+  text.y = token.center.y - canvas.grid.size * 0.5;
+
+  const layer = canvas.interface ?? canvas.controls;
+  layer.addChild(text);
+
+  let tick = 0;
+  const total = 70;
+  const startY = text.y;
+  const drift = canvas.grid.size * 0.7;
+
+  const onTick = () => {
+    tick++;
+    const t = tick / total;
+    text.y = startY - drift * t;
+    text.alpha = 1 - Math.pow(t, 1.5);
+    if (tick >= total) {
+      canvas.app.ticker.remove(onTick);
+      if (!text.destroyed) { layer.removeChild(text); text.destroy(); }
+    }
   };
-  new Dialog({
-    title: `Zonen-Effekt — ${templateDoc.t?.toUpperCase() ?? "Vorlage"}`,
-    content: `<p style="margin-bottom:0.5rem">Wähle den Pixel-Art Effekt für diese Zone:</p>`,
-    buttons,
-    default: "zone_feuer",
-  }).render(true);
+  canvas.app.ticker.add(onTick);
+}
+
+/**
+ * Helper: reads an actor's LeP value regardless of system (gdsa / dnd5e / pf2e).
+ */
+function _getActorLeP(actor) {
+  const s = actor.system;
+  if (s?.LeP?.value !== undefined)             return { path: "system.LeP.value",            val: s.LeP.value };
+  if (s?.base?.LeP !== undefined)              return { path: "system.base.LeP",              val: s.base.LeP };
+  if (s?.status?.LeP !== undefined)            return { path: "system.status.LeP",            val: s.status.LeP };
+  if (s?.attributes?.hp?.value !== undefined)  return { path: "system.attributes.hp.value",   val: s.attributes.hp.value };
+  if (s?.hp?.value !== undefined)              return { path: "system.hp.value",               val: s.hp.value };
+  return null;
+}
+
+/**
+ * Helper: reads an actor's AsP value regardless of system.
+ */
+function _getActorAsP(actor) {
+  const s = actor.system;
+  if (s?.AsP?.value !== undefined)             return { path: "system.AsP.value",             val: s.AsP.value };
+  if (s?.base?.AsP !== undefined)              return { path: "system.base.AsP",              val: s.base.AsP };
+  if (s?.status?.AsP !== undefined)            return { path: "system.status.AsP",            val: s.status.AsP };
+  if (s?.mana?.value !== undefined)            return { path: "system.mana.value",             val: s.mana.value };
+  if (s?.attributes?.mana?.value !== undefined)return { path: "system.attributes.mana.value", val: s.attributes.mana.value };
+  return null;
+}
+
+/**
+ * Applies LeP damage to every token inside the template zone and optionally
+ * deducts AsP from the currently selected caster token.
+ *
+ * @param {MeasuredTemplateDocument} templateDoc
+ * @param {number} lepDamage  - LeP to subtract per token in zone (0 = no damage)
+ * @param {number} aspCost    - AsP to subtract from caster (0 = no cost)
+ * @param {Token|null} casterToken
+ */
+async function applyZoneDamage(templateDoc, lepDamage = 0, aspCost = 0, casterToken = null) {
+  if (lepDamage <= 0 && aspCost <= 0) return;
+
+  const tokens = _getTokensInTemplate(templateDoc);
+  let hit = 0;
+
+  if (lepDamage > 0) {
+    for (const token of tokens) {
+      const actor = token.actor;
+      if (!actor) continue;
+      const hp = _getActorLeP(actor);
+      if (!hp) continue;
+      const newVal = Math.max(0, hp.val - lepDamage);
+      await actor.update({ [hp.path]: newVal });
+      _showDamageNumber(token, lepDamage, 0xff3333);
+      hit++;
+    }
+    if (hit > 0) ui.notifications.info(`Zone-Schaden: ${hit} Token × ${lepDamage} LeP`);
+  }
+
+  if (aspCost > 0 && casterToken?.actor) {
+    const actor = casterToken.actor;
+    const asp = _getActorAsP(actor);
+    if (asp) {
+      await actor.update({ [asp.path]: Math.max(0, asp.val - aspCost) });
+      _showDamageNumber(casterToken, aspCost, 0x33aaff);
+      ui.notifications.info(`AsP -${aspCost} (${casterToken.name})`);
+    }
+  }
+}
+
+function showZonePicker(templateDoc) {
+  const casterToken = canvas.tokens.controlled[0] ?? null;
+
+  const zoneButtonsHtml = Object.entries(ZONE_PRESETS)
+    .map(([name, p]) =>
+      `<button type="button" data-zone="${name}"
+        style="font-size:1.05em;padding:5px 10px;cursor:pointer;min-width:120px">
+        ${p.icon} ${p.label}
+      </button>`
+    ).join("");
+
+  const content = `
+    <div style="display:flex;flex-direction:column;gap:10px;padding:4px 0 2px">
+      <p style="margin:0;color:#bbb;font-size:0.85em">Wähle den Pixel-Art Effekt für diese Zone:</p>
+      <div id="sf-zone-btns" style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center">
+        ${zoneButtonsHtml}
+      </div>
+      <hr style="margin:2px 0;border-color:#555">
+      <p style="margin:0;font-size:0.88em;font-weight:bold">⚔ Schaden-Einstellungen</p>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center">
+        <label style="font-size:0.9em">LeP Schaden pro Anwendung:</label>
+        <input id="sf-lep" type="number" min="0" value="0" style="width:56px;text-align:right">
+        <label style="font-size:0.9em">AsP Kosten (Caster):</label>
+        <input id="sf-asp" type="number" min="0" value="0" style="width:56px;text-align:right">
+      </div>
+      <p style="margin:0;font-size:0.8em;color:${casterToken ? "#7af" : "#f87"}">
+        ${casterToken ? `Caster: ${casterToken.name}` : "⚠ Kein Token ausgewählt — AsP-Abzug inaktiv"}
+      </p>
+    </div>
+  `;
+
+  const d = new Dialog({
+    title: `Zonen-Effekt — ${templateDoc.t?.toUpperCase() ?? "Zone"}`,
+    content,
+    buttons: {
+      damage: {
+        icon: '<i class="fas fa-bolt"></i>',
+        label: "Schaden anwenden",
+        callback: (html) => {
+          const lep = parseInt(html.find("#sf-lep").val()) || 0;
+          const asp = parseInt(html.find("#sf-asp").val()) || 0;
+          applyZoneDamage(templateDoc, lep, asp, casterToken);
+        },
+      },
+      loeschen: {
+        icon: '<i class="fas fa-trash"></i>',
+        label: "Zone löschen",
+        callback: () => {
+          clearZoneSprites(templateDoc.id);
+          templateDoc.unsetFlag("dsa-pixel-tokens", "zoneEffect");
+          ui.notifications.info("Zone gelöscht.");
+        },
+      },
+      close: {
+        label: "Schließen",
+      },
+    },
+    default: "damage",
+    render: (html) => {
+      html.find("[data-zone]").on("click", (e) => {
+        const zoneName = e.currentTarget.dataset.zone;
+        spawnZoneEffect(templateDoc, zoneName);
+        // Visual feedback: highlight active zone button
+        html.find("[data-zone]").css({ background: "", borderColor: "" });
+        $(e.currentTarget).css({ background: "rgba(255,200,0,0.25)", borderColor: "#ffcc00" });
+      });
+    },
+  });
+  d.render(true);
 }
 
 // ─── Auto-Makro Erstellung ────────────────────────────────────────────────────
@@ -1070,5 +1247,6 @@ globalThis.DSAPixelTokens = {
   spawnZoneEffect,
   showZonePicker,
   clearZoneSprites,
+  applyZoneDamage,
   ZONE_PRESETS,
 };

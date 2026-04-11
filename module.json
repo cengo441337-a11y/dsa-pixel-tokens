@@ -22,5 +22,7 @@
       "path": "lang/de.json"
     }
   ],
+  "manifest": "https://git.dc-infosec.de/admin/dsa-pixel-tokens/raw/branch/main/module.json",
+  "download": "https://git.dc-infosec.de/admin/dsa-pixel-tokens/archive/main.zip",
   "flags": {}
 }
