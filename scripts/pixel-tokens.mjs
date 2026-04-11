@@ -1,8 +1,10 @@
 /**
- * DSA Pixel-Art Tokens
- * Animated LPC sprite sheet support for FoundryVTT tokens
- * v0.1.0 — compatible with FoundryVTT v11/v12
+ * DSA Fantasy VTT — Pixel-Art Tokens + Dynamic VFX
+ * Animated LPC sprite sheet support + PIXI.Graphics spell effects for FoundryVTT
+ * v0.4.0 — compatible with FoundryVTT v12
  */
+
+import { hasVFX, hasProjectileVFX, spawnVFX, spawnProjectileVFX } from "./vfx.mjs";
 
 const MODULE_ID = "dsa-pixel-tokens";
 const SPRITE_NAME = `${MODULE_ID}-sprite`;
@@ -653,12 +655,20 @@ const _zoneSprites = new Map();
 
 /**
  * Spawn a one-shot effect at canvas coordinates.
+ * Tries the dynamic PIXI.Graphics VFX engine first; falls back to sprite sheet.
  * @param {number} x - Canvas X position
  * @param {number} y - Canvas Y position
  * @param {string|object} effect - Preset name ("feuerball") or config object
  * @param {object} [opts] - Optional overrides: { frames, fps, scale, frameSize }
  */
 async function spawnEffect(x, y, effect, opts = {}) {
+  // ── Dynamic VFX first (PIXI.Graphics, no sprite sheet needed) ──────────────
+  const effectName = typeof effect === "string" ? effect : null;
+  if (effectName && hasVFX(effectName)) {
+    await spawnVFX(x, y, effectName, opts);
+    return null; // Handled by VFX engine
+  }
+
   const preset = typeof effect === "string" ? EFFECT_PRESETS[effect] : effect;
   if (!preset) { console.warn(`[${MODULE_ID}] Unknown effect: ${effect}`); return; }
 
@@ -724,12 +734,19 @@ async function spawnEffect(x, y, effect, opts = {}) {
 
 /**
  * Spawn a projectile that travels from token A to token B, then explodes.
+ * Tries the dynamic PIXI.Graphics VFX engine first; falls back to sprite sheet.
  * @param {Token} fromToken - Source token
  * @param {Token} toToken   - Target token
  * @param {string} projectile - Effect preset for travel (e.g. "feuerball")
  * @param {string} [impact]   - Effect preset for impact (e.g. "explosion")
  */
 async function spawnProjectile(fromToken, toToken, projectile = "feuerball", impact = "explosion") {
+  // ── Dynamic VFX first ───────────────────────────────────────────────────────
+  if (hasProjectileVFX(projectile)) {
+    await spawnProjectileVFX(fromToken, toToken, projectile, impact);
+    return;
+  }
+
   const startX = fromToken.center.x;
   const startY = fromToken.center.y;
   const endX   = toToken.center.x;
