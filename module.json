@@ -1,20 +1,43 @@
 {
   "id": "dsa-pixel-tokens",
   "title": "DSA Pixel-Art Tokens",
-  "description": "Ersetzt Standard-Tokens durch animierte Pixel-Art Sprites im 16-Bit JRPG-Stil. LPC-kompatible Sprite Sheets, 4-Richtungs-Laufanimation, konfigurierbar pro Token.",
-  "version": "0.2.0",
+  "description": "Komplettes Pixel-Art DSA 4.1 Erweiterungsmodul für FoundryVTT. Animierte Token-Sprites, automatische Zauber- und Kampfeffekte, Pixel-Art Heldenbogen, Zonenzauber mit Schaden, Proben-Automation und mehr.",
+  "version": "0.3.0",
   "compatibility": {
-    "minimum": "11",
+    "minimum": "12",
     "verified": "12"
   },
   "authors": [
     {
       "name": "Deniz Ceylan",
-      "discord": ""
+      "url": "https://dc-infosec.de"
     }
   ],
-  "esmodules": ["scripts/pixel-tokens.mjs"],
-  "styles": ["styles/pixel-tokens.css"],
+  "relationships": {
+    "systems": [
+      {
+        "id": "gdsa",
+        "type": "system",
+        "compatibility": {}
+      }
+    ],
+    "requires": [
+      {
+        "id": "socketlib",
+        "type": "module",
+        "compatibility": {}
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/module.mjs",
+    "scripts/pixel-tokens.mjs"
+  ],
+  "styles": [
+    "styles/pixel-tokens.css",
+    "styles/sheet.css",
+    "styles/dialogs.css"
+  ],
   "languages": [
     {
       "lang": "de",

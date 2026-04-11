@@ -1,0 +1,331 @@
+<form class="dsa-pixel-sheet {{cssClass}}" autocomplete="off">
+
+  {{!-- ═══ HEADER: Portrait, Name, Rasse/Kultur/Profession ═══ --}}
+  <header class="sheet-header">
+    <img class="portrait" src="{{actor.img}}" data-edit="img" title="Portrait ändern" />
+    <div>
+      <input class="char-name" name="name" type="text" value="{{actor.name}}" placeholder="Heldenname" />
+      <div class="char-info">
+        <span title="Rasse">{{system.race}}</span> &middot;
+        <span title="Kultur">{{system.culture}}</span> &middot;
+        <span title="Profession">{{system.profession}}</span>
+      </div>
+      <div class="char-info">
+        AP: <strong>{{system.AP.free}}</strong> frei / {{system.AP.spent}} ausgegeben ({{system.AP.value}} gesamt)
+      </div>
+    </div>
+    <div class="derived-grid" style="max-width:260px">
+      <div class="derived-stat">
+        <div class="stat-label">INI</div>
+        <div class="stat-value">{{system.INIBasis.value}}</div>
+      </div>
+      <div class="derived-stat">
+        <div class="stat-label">MR</div>
+        <div class="stat-value">{{system.MR.value}}</div>
+      </div>
+      <div class="derived-stat">
+        <div class="stat-label">GS</div>
+        <div class="stat-value">{{system.GS.value}}</div>
+      </div>
+      <div class="derived-stat">
+        <div class="stat-label">WS</div>
+        <div class="stat-value">{{system.WS}}</div>
+      </div>
+      <div class="derived-stat">
+        <div class="stat-label">AT</div>
+        <div class="stat-value">{{system.ATBasis.value}}</div>
+      </div>
+      <div class="derived-stat">
+        <div class="stat-label">PA</div>
+        <div class="stat-value">{{system.PABasis.value}}</div>
+      </div>
+      <div class="derived-stat">
+        <div class="stat-label">FK</div>
+        <div class="stat-value">{{system.FKBasis.value}}</div>
+      </div>
+      <div class="derived-stat">
+        <div class="stat-label">AW</div>
+        <div class="stat-value">{{system.Dodge}}</div>
+      </div>
+    </div>
+  </header>
+
+  {{!-- ═══ RESOURCE BARS ═══ --}}
+  <div class="resource-bars">
+    <div class="resource-bar lep">
+      <div class="bar-label">LeP</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width: {{percent system.LeP.value system.LeP.max}}%"></div>
+        <div class="bar-text">{{system.LeP.value}} / {{system.LeP.max}}</div>
+      </div>
+    </div>
+    {{#if system.AsP.max}}
+    <div class="resource-bar asp">
+      <div class="bar-label">AsP</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width: {{percent system.AsP.value system.AsP.max}}%"></div>
+        <div class="bar-text">{{system.AsP.value}} / {{system.AsP.max}}</div>
+      </div>
+    </div>
+    {{/if}}
+    <div class="resource-bar aup">
+      <div class="bar-label">AuP</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width: {{percent system.AuP.value system.AuP.max}}%"></div>
+        <div class="bar-text">{{system.AuP.value}} / {{system.AuP.max}}</div>
+      </div>
+    </div>
+  </div>
+
+  {{!-- ═══ TAB NAVIGATION ═══ --}}
+  <nav class="sheet-tabs tabs" data-group="primary">
+    <a class="item active" data-tab="attributes" data-group="primary">
+      <i class="fas fa-dice-d20"></i> Werte
+    </a>
+    <a class="item" data-tab="talents" data-group="primary">
+      <i class="fas fa-book"></i> Talente
+    </a>
+    <a class="item" data-tab="combat" data-group="primary">
+      <i class="fas fa-crossed-swords"></i> Kampf
+    </a>
+    {{#if system.AsP.max}}
+    <a class="item" data-tab="magic" data-group="primary">
+      <i class="fas fa-hat-wizard"></i> Magie
+    </a>
+    {{/if}}
+    <a class="item" data-tab="equipment" data-group="primary">
+      <i class="fas fa-shield-alt"></i> Inventar
+    </a>
+    <a class="item" data-tab="notes" data-group="primary">
+      <i class="fas fa-scroll"></i> Notizen
+    </a>
+  </nav>
+
+  {{!-- ═══ TAB CONTENT ═══ --}}
+  <div class="sheet-body">
+
+    {{!-- ─── TAB: WERTE (Eigenschaften + Abgeleitete) ─── --}}
+    <div class="tab active" data-tab="attributes" data-group="primary">
+
+      <div class="section-title">Eigenschaften</div>
+      <div class="attr-grid">
+        {{#each attributes as |attr key|}}
+        <div class="attr-box rollable" data-roll="attribute" data-attr="{{key}}" title="{{attr.label}}: Probe würfeln">
+          <div class="attr-label">{{attr.short}}</div>
+          <div class="attr-value">{{attr.value}}</div>
+        </div>
+        {{/each}}
+      </div>
+
+      <div class="section-title">Vorteile & Nachteile</div>
+      <div class="panel">
+        {{#each advantages}}
+        <div class="advantage-entry">
+          <span class="tag success">V</span>
+          <span>{{this.name}}</span>
+          {{#if this.value}}<span class="dim">({{this.value}})</span>{{/if}}
+        </div>
+        {{/each}}
+        {{#each disadvantages}}
+        <div class="advantage-entry">
+          <span class="tag fail">N</span>
+          <span>{{this.name}}</span>
+          {{#if this.value}}<span class="dim">({{this.value}})</span>{{/if}}
+        </div>
+        {{/each}}
+      </div>
+
+      <div class="section-title">Sonderfertigkeiten</div>
+      <div class="panel">
+        {{#each specialAbilities}}
+        <span class="sf-tag">{{this.name}}</span>
+        {{/each}}
+      </div>
+
+    </div>
+
+    {{!-- ─── TAB: TALENTE ─── --}}
+    <div class="tab" data-tab="talents" data-group="primary">
+
+      {{#each talentCategories as |cat catKey|}}
+      <div class="section-title">{{cat.label}}</div>
+      <table class="talent-list">
+        <thead>
+          <tr>
+            <th>Talent</th>
+            <th>Probe</th>
+            <th>TaW</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each cat.talents}}
+          <tr>
+            <td class="talent-name rollable" data-roll="talent" data-talent="{{this.name}}"
+                data-probe="{{this.probe}}" data-taw="{{this.taw}}">
+              {{this.name}}
+            </td>
+            <td class="talent-probe">{{this.probeDisplay}}</td>
+            <td class="talent-taw">{{this.taw}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+      {{/each}}
+
+    </div>
+
+    {{!-- ─── TAB: KAMPF ─── --}}
+    <div class="tab" data-tab="combat" data-group="primary">
+
+      <div class="section-title">Kampftalente</div>
+      <table class="talent-list">
+        <thead>
+          <tr>
+            <th>Waffentalent</th>
+            <th>AT</th>
+            <th>PA</th>
+            <th>TaW</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each combatTalents}}
+          <tr>
+            <td class="talent-name">{{this.name}}</td>
+            <td class="rollable" data-roll="attack" data-talent="{{this.name}}"
+                data-at="{{this.at}}" title="Angriff würfeln">
+              {{this.at}}
+            </td>
+            <td class="rollable" data-roll="parry" data-talent="{{this.name}}"
+                data-pa="{{this.pa}}" title="Parade würfeln">
+              {{this.pa}}
+            </td>
+            <td class="talent-taw">{{this.taw}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+
+      <div class="section-title">Waffen</div>
+      <div class="panel">
+        {{#each weapons}}
+        <div class="weapon-entry" style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+          <span class="weapon-name">{{this.name}}</span>
+          <span class="dim" title="Trefferpunkte">{{this.tp}}</span>
+          <span class="dim" title="Reichweite">{{this.reichweite}}</span>
+          <span class="rollable" data-roll="damage" data-weapon="{{this.name}}"
+                data-tp="{{this.tp}}" title="Schaden würfeln">
+            <i class="fas fa-dice-d6"></i>
+          </span>
+        </div>
+        {{/each}}
+      </div>
+
+      <div class="section-title">Rüstung</div>
+      <div class="panel">
+        <div class="derived-grid">
+          <div class="derived-stat">
+            <div class="stat-label">RS</div>
+            <div class="stat-value">{{totalRS}}</div>
+          </div>
+          <div class="derived-stat">
+            <div class="stat-label">BE</div>
+            <div class="stat-value">{{totalBE}}</div>
+          </div>
+        </div>
+        {{#each armor}}
+        <div style="font-size:14px;padding:2px 0">
+          {{this.name}} — RS {{this.rs}}, BE {{this.be}}
+        </div>
+        {{/each}}
+      </div>
+
+    </div>
+
+    {{!-- ─── TAB: MAGIE ─── --}}
+    {{#if system.AsP.max}}
+    <div class="tab" data-tab="magic" data-group="primary">
+
+      <div class="section-title">Zauber</div>
+      {{#each spells}}
+      <div class="spell-entry">
+        <span class="spell-name rollable" data-roll="spell" data-spell="{{this.name}}"
+              data-probe="{{this.probe}}" data-zfw="{{this.zfw}}" data-kosten="{{this.kosten}}"
+              title="Zauberprobe: {{this.probeDisplay}}">
+          {{this.name}}
+        </span>
+        <span class="spell-probe">{{this.probeDisplay}}</span>
+        <span class="spell-zfw">{{this.zfw}}</span>
+        <span class="spell-cost">{{this.kosten}} AsP</span>
+      </div>
+      {{/each}}
+
+      {{#unless spells.length}}
+      <div class="panel" style="text-align:center;color:#888">
+        Keine Zauber vorhanden
+      </div>
+      {{/unless}}
+
+      <div class="section-title">Ritualfertigkeiten</div>
+      <div class="panel">
+        {{#each rituals}}
+        <div style="display:flex;justify-content:space-between;padding:2px 0">
+          <span>{{this.name}}</span>
+          <span class="dim">{{this.value}}</span>
+        </div>
+        {{/each}}
+      </div>
+
+    </div>
+    {{/if}}
+
+    {{!-- ─── TAB: INVENTAR ─── --}}
+    <div class="tab" data-tab="equipment" data-group="primary">
+
+      <div class="section-title">Ausrüstung</div>
+      <div class="panel">
+        {{#each items}}
+        <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+          <span>{{this.name}}</span>
+          <span class="dim">{{this.quantity}}x</span>
+          <span class="dim">{{this.weight}} Stn</span>
+        </div>
+        {{/each}}
+      </div>
+
+      <div class="section-title">Geld</div>
+      <div class="panel">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center">
+          <div>
+            <div class="stat-label">Dukaten</div>
+            <input type="number" name="system.money.dukaten" value="{{system.money.dukaten}}" min="0" />
+          </div>
+          <div>
+            <div class="stat-label">Silber</div>
+            <input type="number" name="system.money.silber" value="{{system.money.silber}}" min="0" />
+          </div>
+          <div>
+            <div class="stat-label">Heller</div>
+            <input type="number" name="system.money.heller" value="{{system.money.heller}}" min="0" />
+          </div>
+          <div>
+            <div class="stat-label">Kreuzer</div>
+            <input type="number" name="system.money.kreuzer" value="{{system.money.kreuzer}}" min="0" />
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    {{!-- ─── TAB: NOTIZEN ─── --}}
+    <div class="tab" data-tab="notes" data-group="primary">
+
+      <div class="section-title">Hintergrund</div>
+      <div class="panel">
+        {{editor content=system.notes target="system.notes" button=true editable=true}}
+      </div>
+
+    </div>
+
+  </div>
+
+</form>

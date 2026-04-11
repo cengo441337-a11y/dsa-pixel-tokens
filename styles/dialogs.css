@@ -1,0 +1,343 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   DSA Pixel-Art Tokens — Dialog & Chat Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Probe Dialog ─────────────────────────────────────────────────── */
+
+.dsa-pixel-probe-dialog {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: #e0e0e0;
+}
+
+.dsa-pixel-probe-dialog .probe-header {
+  text-align: center;
+  padding: 8px 0;
+  border-bottom: 2px solid #3a3a5e;
+  margin-bottom: 8px;
+}
+
+.dsa-pixel-probe-dialog .probe-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 11px;
+  color: #ffd700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dsa-pixel-probe-dialog .probe-attrs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.dsa-pixel-probe-dialog .probe-attr {
+  text-align: center;
+  background: #16213e;
+  border: 2px solid #3a3a5e;
+  padding: 6px 10px;
+  border-radius: 2px;
+  min-width: 60px;
+}
+
+.dsa-pixel-probe-dialog .probe-attr .attr-name {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.dsa-pixel-probe-dialog .probe-attr .attr-val {
+  font-size: 22px;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.dsa-pixel-probe-dialog .probe-taw {
+  text-align: center;
+  margin: 8px 0;
+}
+
+.dsa-pixel-probe-dialog .probe-taw .taw-label {
+  font-size: 13px;
+  color: #888;
+}
+
+.dsa-pixel-probe-dialog .probe-taw .taw-val {
+  font-size: 20px;
+  font-weight: bold;
+  color: #e94560;
+}
+
+.dsa-pixel-probe-dialog .probe-mod {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.dsa-pixel-probe-dialog .probe-mod label {
+  font-size: 14px;
+  color: #bbb;
+}
+
+.dsa-pixel-probe-dialog .probe-mod input {
+  width: 60px;
+  text-align: center;
+  font-size: 18px;
+  background: rgba(0,0,0,0.4);
+  border: 2px solid #3a3a5e;
+  color: #e0e0e0;
+  font-family: 'VT323', monospace;
+}
+
+/* ─── Spell Modification Dialog ────────────────────────────────────── */
+
+.dsa-pixel-spell-dialog {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+}
+
+.dsa-pixel-spell-dialog .spell-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 6px;
+  background: #16213e;
+  border: 2px solid #3a3a5e;
+  border-radius: 2px;
+}
+
+.dsa-pixel-spell-dialog .spell-info .info-label {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.dsa-pixel-spell-dialog .spell-info .info-value {
+  font-size: 15px;
+  color: #4a90d9;
+}
+
+.dsa-pixel-spell-dialog .mod-section {
+  margin: 6px 0;
+  padding: 6px;
+  background: rgba(0,0,0,0.2);
+  border-left: 3px solid #4a90d9;
+}
+
+.dsa-pixel-spell-dialog .mod-section .mod-label {
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+
+.dsa-pixel-spell-dialog .mod-section select {
+  width: 100%;
+  background: rgba(0,0,0,0.4);
+  color: #e0e0e0;
+  border: 2px solid #3a3a5e;
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+  padding: 3px;
+}
+
+.dsa-pixel-spell-dialog .cost-summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  margin-top: 10px;
+  background: #0f3460;
+  border: 2px solid #4a90d9;
+  border-radius: 2px;
+}
+
+.dsa-pixel-spell-dialog .cost-summary .total-label {
+  color: #888;
+}
+
+.dsa-pixel-spell-dialog .cost-summary .total-value {
+  font-size: 18px;
+  font-weight: bold;
+  color: #4a90d9;
+}
+
+.dsa-pixel-spell-dialog .cost-summary .probe-mod-display {
+  font-size: 16px;
+  color: #e94560;
+}
+
+/* ─── Attack Dialog ────────────────────────────────────────────────── */
+
+.dsa-pixel-attack-dialog {
+  font-family: 'VT323', monospace;
+}
+
+.dsa-pixel-attack-dialog .maneuver-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.dsa-pixel-attack-dialog .maneuver-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: #16213e;
+  border: 2px solid #3a3a5e;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-radius: 2px;
+  color: #e0e0e0;
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+}
+
+.dsa-pixel-attack-dialog .maneuver-btn:hover {
+  border-color: #e94560;
+  background: rgba(233,69,96,0.1);
+}
+
+.dsa-pixel-attack-dialog .maneuver-btn.selected {
+  border-color: #ffd700;
+  background: rgba(255,215,0,0.1);
+}
+
+.dsa-pixel-attack-dialog .maneuver-mods {
+  font-size: 13px;
+  color: #888;
+}
+
+/* ─── Chat Results ─────────────────────────────────────────────────── */
+
+.dsa-pixel-chat {
+  font-family: 'VT323', monospace;
+  background: #1a1a2e;
+  border: 2px solid #3a3a5e;
+  border-radius: 2px;
+  padding: 8px;
+  color: #e0e0e0;
+}
+
+.dsa-pixel-chat .chat-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  color: #ffd700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.dsa-pixel-chat .dice-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.dsa-pixel-chat .die {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  border: 2px solid #3a3a5e;
+  border-radius: 2px;
+  background: #16213e;
+}
+
+.dsa-pixel-chat .die.success {
+  border-color: #4ad94a;
+  color: #4ad94a;
+}
+
+.dsa-pixel-chat .die.fail {
+  border-color: #d94a4a;
+  color: #d94a4a;
+}
+
+.dsa-pixel-chat .die.crit {
+  border-color: #ffd700;
+  color: #ffd700;
+  box-shadow: 0 0 8px rgba(255,215,0,0.4);
+}
+
+.dsa-pixel-chat .die.fumble {
+  border-color: #ff3333;
+  color: #ff3333;
+  box-shadow: 0 0 8px rgba(255,0,0,0.4);
+}
+
+.dsa-pixel-chat .result-line {
+  text-align: center;
+  margin: 6px 0;
+  font-size: 16px;
+}
+
+.dsa-pixel-chat .result-success {
+  color: #4ad94a;
+  font-weight: bold;
+}
+
+.dsa-pixel-chat .result-fail {
+  color: #d94a4a;
+  font-weight: bold;
+}
+
+.dsa-pixel-chat .result-crit {
+  color: #ffd700;
+  font-weight: bold;
+  text-shadow: 0 0 8px rgba(255,215,0,0.4);
+}
+
+.dsa-pixel-chat .tap-star {
+  text-align: center;
+  font-size: 14px;
+  color: #888;
+}
+
+.dsa-pixel-chat .tap-star span {
+  color: #e94560;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.dsa-pixel-chat .chat-buttons {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.dsa-pixel-chat .chat-btn {
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 2px solid #3a3a5e;
+  padding: 4px 10px;
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+.dsa-pixel-chat .chat-btn:hover {
+  border-color: #ffd700;
+  color: #ffd700;
+}
+
+.dsa-pixel-chat .chat-btn.damage {
+  border-color: #e94560;
+  color: #e94560;
+}
+
+.dsa-pixel-chat .chat-btn.damage:hover {
+  background: #e94560;
+  color: white;
+}
