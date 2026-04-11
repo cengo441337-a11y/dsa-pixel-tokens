@@ -891,3 +891,117 @@
   color: var(--fx-text);
   margin-left: 4px;
 }
+
+/* ─── Sheet Helpers ───────────────────────────────────────────────────────── */
+
+/* Dimmed secondary text */
+.dsa-pixel-sheet .dim {
+  color: var(--fx-text-dim);
+  font-size: 14px;
+}
+
+/* V/N tag badges (Vorteile / Nachteile) */
+.dsa-pixel-sheet .tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: var(--fx-font-title);
+  flex-shrink: 0;
+}
+.dsa-pixel-sheet .tag.success {
+  background: rgba(20,100,40,0.5);
+  border: 1px solid rgba(34,204,85,0.5);
+  color: #22cc55;
+}
+.dsa-pixel-sheet .tag.fail {
+  background: rgba(100,20,20,0.5);
+  border: 1px solid rgba(200,50,50,0.5);
+  color: #cc4444;
+}
+
+/* Vorteil / Nachteil row */
+.dsa-pixel-sheet .advantage-entry {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 15px;
+}
+.dsa-pixel-sheet .advantage-entry:last-child {
+  border-bottom: none;
+}
+
+/* Sonderfertigkeit badge */
+.dsa-pixel-sheet .sf-tag {
+  display: inline-block;
+  background: rgba(60,40,10,0.45);
+  border: 1px solid var(--fx-border-lit);
+  color: var(--fx-gold);
+  font-size: 13px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  margin: 2px 2px;
+  font-family: var(--fx-font);
+}
+
+/* Notes textarea */
+.dsa-pixel-sheet .notes-area {
+  width: 100%;
+  min-height: 200px;
+  resize: vertical;
+  font-family: var(--fx-font);
+  font-size: 16px;
+  background: rgba(0,0,0,0.4);
+  color: var(--fx-text);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius);
+  padding: 8px;
+  line-height: 1.5;
+}
+.dsa-pixel-sheet .notes-area:focus {
+  border-color: var(--fx-gold);
+  outline: none;
+}
+
+/* Combat AT/PA columns */
+.dsa-pixel-sheet .combat-at {
+  text-align: center;
+  color: var(--fx-accent-red);
+  font-weight: bold;
+  cursor: pointer;
+}
+.dsa-pixel-sheet .combat-pa {
+  text-align: center;
+  color: var(--fx-asp);
+  font-weight: bold;
+  cursor: pointer;
+}
+.dsa-pixel-sheet .combat-at:hover { color: #ff6677; text-shadow: 0 0 5px rgba(200,48,64,0.5); }
+.dsa-pixel-sheet .combat-pa:hover { color: #88bbff; text-shadow: 0 0 5px rgba(68,136,255,0.5); }
+
+/* Weapon name */
+.dsa-pixel-sheet .weapon-name {
+  font-size: 16px;
+  color: var(--fx-text);
+}
+
+/* Ritual list items */
+.dsa-pixel-sheet .ritual-entry {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+  font-size: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+/* Generic gold glow on hover for rollable stat-value */
+.dsa-pixel-sheet .attr-box.rollable:hover .attr-value {
+  color: var(--fx-gold-bright);
+  text-shadow: 0 0 10px rgba(200,151,42,0.45);
+}
