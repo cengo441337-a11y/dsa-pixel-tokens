@@ -638,6 +638,18 @@ const EFFECT_PRESETS = {
   tod_animation:{ src: "modules/dsa-pixel-tokens/assets/fx_tod_animation.png",frames: 12, fps: 10, scaleGrid: 2, sound: "modules/dsa-pixel-tokens/assets/sounds/magic1.wav",  type: "target"                             },
 };
 
+const ZONE_PRESETS = {
+  zone_feuer:   { src: `modules/dsa-pixel-tokens/assets/zone_feuer.png`,   frames: 8, fps: 12, tileSize: 64, zoneType: "fill",    persistent: true,  label: "Feuerzone",   icon: "🔥" },
+  zone_eis:     { src: `modules/dsa-pixel-tokens/assets/zone_eis.png`,     frames: 6, fps: 8,  tileSize: 64, zoneType: "fill",    persistent: true,  label: "Eiszone",     icon: "❄️" },
+  zone_gift:    { src: `modules/dsa-pixel-tokens/assets/zone_gift.png`,    frames: 8, fps: 10, tileSize: 64, zoneType: "fill",    persistent: true,  label: "Giftzone",    icon: "☠️" },
+  zone_heilung: { src: `modules/dsa-pixel-tokens/assets/zone_heilung.png`, frames: 8, fps: 10, tileSize: 64, zoneType: "fill",    persistent: true,  label: "Heilzone",    icon: "✨" },
+  zone_sturm:   { src: `modules/dsa-pixel-tokens/assets/zone_sturm.png`,   frames: 8, fps: 14, tileSize: 64, zoneType: "scatter", persistent: false, label: "Sturmzone",   icon: "⚡" },
+  zone_dunkel:  { src: `modules/dsa-pixel-tokens/assets/zone_dunkel.png`,  frames: 8, fps: 10, tileSize: 64, zoneType: "fill",    persistent: true,  label: "Dunkelzone",  icon: "🌑" },
+};
+
+// templateId → Array of PIXI.AnimatedSprite (persistent zone tiles)
+const _zoneSprites = new Map();
+
 /**
  * Spawn a one-shot effect at canvas coordinates.
  * @param {number} x - Canvas X position
@@ -785,6 +797,123 @@ async function spawnProjectile(fromToken, toToken, projectile = "feuerball", imp
   canvas.app.ticker.add(onTick);
 }
 
+// ── Zone Spell System ────────────────────────────────────────────────────
+
+function _getGridSquaresInTemplate(templateDoc) {
+  const gridSize = canvas.grid.size;
+  const { x: tx, y: ty } = templateDoc;
+  const tObj = templateDoc.object;
+  if (!tObj?.shape) return [];
+  const b = tObj.shape.getBounds();
+  const squares = [];
+  const x0 = Math.floor(b.x / gridSize) * gridSize;
+  const y0 = Math.floor(b.y / gridSize) * gridSize;
+  const x1 = Math.ceil((b.x + b.width)  / gridSize) * gridSize;
+  const y1 = Math.ceil((b.y + b.height) / gridSize) * gridSize;
+  for (let ox = x0; ox < x1; ox += gridSize) {
+    for (let oy = y0; oy < y1; oy += gridSize) {
+      const cx = ox + gridSize / 2;
+      const cy = oy + gridSize / 2;
+      if (tObj.shape.contains(cx, cy)) {
+        squares.push({ x: tx + cx, y: ty + cy });
+      }
+    }
+  }
+  return squares;
+}
+
+async function _spawnZoneTile(worldX, worldY, preset, templateId) {
+  const baseTexture = await loadTexture(preset.src);
+  if (!baseTexture?.baseTexture) return null;
+  const bt = baseTexture.baseTexture;
+  bt.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  const fs = preset.tileSize ?? 64;
+  const textures = [];
+  for (let i = 0; i < preset.frames; i++) {
+    textures.push(new PIXI.Texture(bt, new PIXI.Rectangle(i * fs, 0, fs, fs)));
+  }
+  const sprite = new PIXI.AnimatedSprite(textures);
+  sprite.animationSpeed = preset.fps / 60;
+  sprite.loop = true;
+  sprite.anchor.set(0.5);
+  sprite.x = worldX;
+  sprite.y = worldY;
+  sprite.width  = canvas.grid.size;
+  sprite.height = canvas.grid.size;
+  sprite.alpha  = 0.85;
+  sprite.blendMode = PIXI.BLEND_MODES.ADD;
+  canvas.effects.addChild(sprite);
+  sprite.play();
+  if (!_zoneSprites.has(templateId)) _zoneSprites.set(templateId, []);
+  _zoneSprites.get(templateId).push(sprite);
+  return sprite;
+}
+
+function clearZoneSprites(templateId) {
+  const sprites = _zoneSprites.get(templateId) ?? [];
+  for (const s of sprites) {
+    s.stop();
+    s.destroy({ children: true });
+  }
+  _zoneSprites.delete(templateId);
+}
+
+async function spawnZoneEffect(templateDoc, zoneName) {
+  const preset = ZONE_PRESETS[zoneName];
+  if (!preset) return ui.notifications.warn(`Unbekannter Zonen-Effekt: ${zoneName}`);
+
+  const squares = _getGridSquaresInTemplate(templateDoc);
+  if (!squares.length) return ui.notifications.warn("Keine Gitterfelder im Template gefunden.");
+
+  const templateId = templateDoc.id;
+
+  if (preset.zoneType === "fill") {
+    for (const sq of squares) {
+      await _spawnZoneTile(sq.x, sq.y, preset, templateId);
+    }
+  } else if (preset.zoneType === "scatter") {
+    const shuffled = [...squares].sort(() => Math.random() - 0.5);
+    const count = Math.max(1, Math.floor(squares.length * 0.65));
+    for (const sq of shuffled.slice(0, count)) {
+      spawnEffect(sq.x, sq.y, zoneName.replace("zone_", ""));
+    }
+  } else if (preset.zoneType === "pulse") {
+    const cx = squares.reduce((s, q) => s + q.x, 0) / squares.length;
+    const cy = squares.reduce((s, q) => s + q.y, 0) / squares.length;
+    spawnEffect(cx, cy, zoneName.replace("zone_", ""));
+  }
+
+  // Persist zone ID on the template document so it survives reloads
+  if (preset.persistent && game.user.isGM) {
+    await templateDoc.setFlag("dsa-pixel-tokens", "zoneEffect", zoneName);
+  }
+
+  ui.notifications.info(`Zone: ${preset.label} aktiv (${squares.length} Felder)`);
+}
+
+function showZonePicker(templateDoc) {
+  const buttons = {};
+  for (const [name, preset] of Object.entries(ZONE_PRESETS)) {
+    buttons[name] = {
+      label: `${preset.icon} ${preset.label}`,
+      callback: () => spawnZoneEffect(templateDoc, name),
+    };
+  }
+  buttons.loeschen = {
+    label: "🗑 Zone löschen",
+    callback: () => {
+      clearZoneSprites(templateDoc.id);
+      templateDoc.unsetFlag("dsa-pixel-tokens", "zoneEffect");
+    },
+  };
+  new Dialog({
+    title: `Zonen-Effekt — ${templateDoc.t?.toUpperCase() ?? "Vorlage"}`,
+    content: `<p style="margin-bottom:0.5rem">Wähle den Pixel-Art Effekt für diese Zone:</p>`,
+    buttons,
+    default: "zone_feuer",
+  }).render(true);
+}
+
 // ─── Auto-Makro Erstellung ────────────────────────────────────────────────────
 
 function _macroCommand(name, preset) {
@@ -890,6 +1019,42 @@ Hooks.on("renderTokenHUD", (hud, html, _data) => {
   html.append(bar);
 });
 
+// Zone: Template angeklickt → Effekt-Picker
+Hooks.on("controlMeasuredTemplate", (templateObj, controlled) => {
+  if (!controlled || !game.user.isGM) return;
+  // Kleiner Button erscheint in der Template-Steuerleiste
+  // (wird über renderMeasuredTemplateConfig abgehandelt)
+});
+
+// Zone: Template gelöscht → Sprites entfernen
+Hooks.on("deleteMeasuredTemplate", (templateDoc) => {
+  clearZoneSprites(templateDoc.id);
+});
+
+// Zone: Scene geladen → persistente Zonen wiederherstellen
+Hooks.on("canvasReady", async () => {
+  if (!game.user.isGM) return;
+  for (const templateDoc of canvas.scene.templates) {
+    const zoneName = templateDoc.getFlag("dsa-pixel-tokens", "zoneEffect");
+    if (zoneName) {
+      // Kurze Verzögerung damit Canvas vollständig geladen ist
+      setTimeout(() => spawnZoneEffect(templateDoc, zoneName), 500);
+    }
+  }
+});
+
+// Zone: Doppelklick auf Template → Zone Picker öffnen
+Hooks.on("renderMeasuredTemplateConfig", (app, html, data) => {
+  const btn = $(`<button type="button" style="width:100%;margin-top:6px">
+    ⬡ Pixel-Art Zonen-Effekt wählen
+  </button>`);
+  btn.on("click", () => {
+    app.close();
+    showZonePicker(app.object.document);
+  });
+  html.find("footer").before(btn);
+});
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 globalThis.DSAPixelTokens = {
@@ -902,4 +1067,8 @@ globalThis.DSAPixelTokens = {
   spawnProjectile,
   refreshStatusIcons,
   effects: EFFECT_PRESETS,
+  spawnZoneEffect,
+  showZonePicker,
+  clearZoneSprites,
+  ZONE_PRESETS,
 };

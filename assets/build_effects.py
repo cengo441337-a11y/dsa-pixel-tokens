@@ -5,6 +5,7 @@ Run: python build_effects.py
 """
 
 import os
+import random
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 import math
@@ -1382,6 +1383,189 @@ def make_fulminictus(n_frames=8):
         frames.append(img)
     return frames
 
+# ─── Zone Tiles (64×64px, seamlessly tileable, looping) ───────────────────
+def make_zone_tile_sheet(name, frames, draw_frame_fn):
+    """Base helper: 64px-wide frames × frames, single row."""
+    SIZE = 64
+    sheet = Image.new("RGBA", (SIZE * frames, SIZE), (0, 0, 0, 0))
+    for f in range(frames):
+        frame = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+        draw_frame_fn(frame, f, frames)
+        sheet.paste(frame, (f * SIZE, 0))
+    sheet.save(f"zone_{name}.png")
+    print(f"  zone_{name}.png  ({frames} frames)")
+
+def make_zone_feuer(frames=8):
+    def draw(img, f, total):
+        px = img.load()
+        SIZE = 64
+        rng = random.Random(f * 7)
+        # Dark base
+        for y in range(SIZE):
+            for x in range(SIZE):
+                px[x, y] = (10, 3, 0, 180)
+        # Flame columns – 8 columns, each with animated tip
+        for col in range(8):
+            cx = col * 8 + 4
+            tip = int(SIZE * 0.6) - int((math.sin((f / total) * 2 * math.pi + col) + 1) * 8)
+            for y in range(tip, SIZE):
+                heat = (y - tip) / (SIZE - tip)
+                r = min(255, int(180 + heat * 75))
+                g = min(255, int(heat * 80))
+                b = 0
+                a = int(heat * 220)
+                for dx in range(-2, 3):
+                    nx = (cx + dx) % SIZE
+                    if rng.random() < 0.8:
+                        px[nx, y] = (r, g, b, a)
+        # Ember sparks
+        for _ in range(20):
+            ex = rng.randint(0, SIZE-1)
+            ey = rng.randint(0, int(SIZE*0.5))
+            px[ex, ey] = (255, 200, 50, rng.randint(100, 255))
+    make_zone_tile_sheet("feuer", frames, draw)
+
+def make_zone_eis(frames=6):
+    def draw(img, f, total):
+        px = img.load()
+        SIZE = 64
+        rng = random.Random(f * 13)
+        for y in range(SIZE):
+            for x in range(SIZE):
+                px[x, y] = (0, 15, 40, 160)
+        # Ice crystal grid
+        for gx in range(0, SIZE, 16):
+            for gy in range(0, SIZE, 16):
+                h = 4 + int((math.sin(f/total*2*math.pi + gx*0.3) + 1) * 4)
+                for dy in range(h):
+                    wx = max(0, h//2 - dy//2)
+                    for dx in range(-wx, wx+1):
+                        nx, ny = (gx+8+dx) % SIZE, gy+8-dy
+                        if 0 <= ny < SIZE:
+                            bright = int(180 + dy * 10)
+                            px[nx, ny] = (bright, bright, 255, 220)
+        # Shimmer pixels
+        for _ in range(30):
+            sx, sy = rng.randint(0,SIZE-1), rng.randint(0,SIZE-1)
+            if rng.random() < 0.5:
+                px[sx, sy] = (200, 230, 255, 255)
+    make_zone_tile_sheet("eis", frames, draw)
+
+def make_zone_gift(frames=8):
+    def draw(img, f, total):
+        px = img.load()
+        SIZE = 64
+        rng = random.Random(f * 11)
+        for y in range(SIZE):
+            for x in range(SIZE):
+                px[x, y] = (0, 20, 5, 170)
+        # Rising bubbles
+        for i in range(12):
+            bx = (i * 17 + rng.randint(-3, 3)) % SIZE
+            phase = (f / total + i * 0.15) % 1.0
+            by = int(SIZE * (1 - phase))
+            r = rng.randint(2, 5)
+            for dy in range(-r, r+1):
+                for dx in range(-r, r+1):
+                    if dx*dx + dy*dy <= r*r:
+                        nx, ny = (bx+dx)%SIZE, by+dy
+                        if 0 <= ny < SIZE:
+                            bright = int(60 + (1 - (dx*dx+dy*dy)/(r*r+1)) * 100)
+                            px[nx, ny] = (0, bright, 0, 200)
+        # Vapor wisps
+        for _ in range(25):
+            vx, vy = rng.randint(0,SIZE-1), rng.randint(0,SIZE//2)
+            px[vx, vy] = (50, 180, 50, rng.randint(80, 160))
+    make_zone_tile_sheet("gift", frames, draw)
+
+def make_zone_heilung(frames=8):
+    def draw(img, f, total):
+        px = img.load()
+        SIZE = 64
+        rng = random.Random(f * 5)
+        for y in range(SIZE):
+            for x in range(SIZE):
+                px[x, y] = (20, 15, 0, 120)
+        # Pulsing golden cross at center
+        pulse = (math.sin(f / total * 2 * math.pi) + 1) / 2
+        cx, cy = SIZE//2, SIZE//2
+        arm = int(8 + pulse * 6)
+        for i in range(-arm, arm+1):
+            a = int(180 + pulse * 75)
+            if 0 <= cx+i < SIZE:
+                px[cx+i, cy] = (255, int(200+pulse*55), 50, a)
+            if 0 <= cy+i < SIZE:
+                px[cx, cy+i] = (255, int(200+pulse*55), 50, a)
+        # Rising golden sparks
+        for i in range(18):
+            sx = (i * 13 + rng.randint(-4,4)) % SIZE
+            phase = (f / total + i * 0.1) % 1.0
+            sy = int(SIZE * (1 - phase))
+            if 0 <= sy < SIZE:
+                c = int(200 + rng.random() * 55)
+                px[sx, sy] = (255, c, 30, rng.randint(150, 255))
+    make_zone_tile_sheet("heilung", frames, draw)
+
+def make_zone_sturm(frames=8):
+    def draw(img, f, total):
+        px = img.load()
+        SIZE = 64
+        rng = random.Random(f * 17)
+        for y in range(SIZE):
+            for x in range(SIZE):
+                px[x, y] = (5, 5, 20, 160)
+        # Swirling wind lines
+        angle_off = (f / total) * 2 * math.pi
+        for i in range(6):
+            start_a = angle_off + i * (math.pi / 3)
+            for t_step in range(40):
+                t = t_step / 40.0
+                r_val = t * 28
+                a_val = start_a + t * math.pi * 1.5
+                lx = int(SIZE//2 + r_val * math.cos(a_val)) % SIZE
+                ly = int(SIZE//2 + r_val * math.sin(a_val)) % SIZE
+                alpha = int(100 + t * 130)
+                px[lx, ly] = (160, 180, 255, alpha)
+        # Lightning sparks
+        for _ in range(15):
+            lx, ly = rng.randint(0,SIZE-1), rng.randint(0,SIZE-1)
+            if rng.random() < 0.4:
+                px[lx, ly] = (255, 255, 255, 255)
+                for dd in [(1,0),(-1,0),(0,1),(0,-1)]:
+                    nx2, ny2 = (lx+dd[0])%SIZE, (ly+dd[1])%SIZE
+                    px[nx2, ny2] = (200, 220, 255, 180)
+    make_zone_tile_sheet("sturm", frames, draw)
+
+def make_zone_dunkel(frames=8):
+    def draw(img, f, total):
+        px = img.load()
+        SIZE = 64
+        rng = random.Random(f * 19)
+        for y in range(SIZE):
+            for x in range(SIZE):
+                px[x, y] = (3, 0, 8, 190)
+        # Void tendrils from edges
+        pulse = (math.sin(f / total * 2 * math.pi) + 1) / 2
+        for i in range(5):
+            sx = rng.randint(0, SIZE-1)
+            length = int(10 + pulse * 15)
+            for step in range(length):
+                ty = (step * 2) % SIZE
+                tx = (sx + rng.randint(-1,1)) % SIZE
+                alpha = int(180 - step * 8)
+                if alpha > 0:
+                    px[tx, ty] = (80, 0, 120, alpha)
+                    px[SIZE-1-tx, SIZE-1-ty] = (80, 0, 120, alpha)
+        # Purple void particles
+        for _ in range(30):
+            vx, vy = rng.randint(0,SIZE-1), rng.randint(0,SIZE-1)
+            r_val = rng.randint(0,2)
+            for dy2 in range(-r_val, r_val+1):
+                for dx2 in range(-r_val, r_val+1):
+                    nx, ny = (vx+dx2)%SIZE, (vy+dy2)%SIZE
+                    px[nx, ny] = (100, 0, 160, rng.randint(150, 255))
+    make_zone_tile_sheet("dunkel", frames, draw)
+
 # ─── Build All ─────────────────────────────────────────────────────────────────
 
 EFFECTS = {
@@ -1553,3 +1737,11 @@ print("\n--- Status-Icons ---")
 make_status_icons()
 print("Status-Icons fertig!")
 print("Testbed: Frames/Dir=N, Reihen alle=0 (nur 1 Reihe)")
+
+print("\n--- Zone Tiles ---")
+make_zone_feuer(8)
+make_zone_eis(6)
+make_zone_gift(8)
+make_zone_heilung(8)
+make_zone_sturm(8)
+make_zone_dunkel(8)
