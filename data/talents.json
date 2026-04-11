@@ -1,1 +1,862 @@
-[]
+[
+  {
+    "name": "Akrobatik",
+    "probe": [
+      "MU",
+      "GE",
+      "KK"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Athletik",
+    "probe": [
+      "GE",
+      "KO",
+      "KK"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Fliegen",
+    "probe": [
+      "MU",
+      "IN",
+      "GE"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Gaukeleien",
+    "probe": [
+      "MU",
+      "CH",
+      "FF"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Klettern",
+    "probe": [
+      "MU",
+      "GE",
+      "KK"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Körperbeherrschung",
+    "probe": [
+      "MU",
+      "IN",
+      "GE"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Reiten",
+    "probe": [
+      "CH",
+      "GE",
+      "KK"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Schleichen",
+    "probe": [
+      "MU",
+      "IN",
+      "GE"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Schwimmen",
+    "probe": [
+      "GE",
+      "KO",
+      "KK"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Selbstbeherrschung",
+    "probe": [
+      "MU",
+      "KO",
+      "KK"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Sich Verstecken",
+    "probe": [
+      "MU",
+      "IN",
+      "GE"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Singen",
+    "probe": [
+      "IN",
+      "CH",
+      "CH"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Sinnenschärfe",
+    "probe": [
+      "KL",
+      "IN",
+      "IN"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Skifahren",
+    "probe": [
+      "GE",
+      "GE",
+      "KO"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Stimmen Imitieren",
+    "probe": [
+      "KL",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Tanzen",
+    "probe": [
+      "CH",
+      "GE",
+      "GE"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Taschendiebstahl",
+    "probe": [
+      "MU",
+      "IN",
+      "FF"
+    ],
+    "kategorie": "koerper",
+    "steigerung": "D"
+  },
+  {
+    "name": "Betören",
+    "probe": [
+      "IN",
+      "CH",
+      "CH"
+    ],
+    "kategorie": "gesellschaft",
+    "steigerung": "B"
+  },
+  {
+    "name": "Etikette",
+    "probe": [
+      "KL",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "gesellschaft",
+    "steigerung": "B"
+  },
+  {
+    "name": "Lehren",
+    "probe": [
+      "KL",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "gesellschaft",
+    "steigerung": "B"
+  },
+  {
+    "name": "Menschenkenntnis",
+    "probe": [
+      "KL",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "gesellschaft",
+    "steigerung": "B"
+  },
+  {
+    "name": "Schauspielerei",
+    "probe": [
+      "MU",
+      "KL",
+      "CH"
+    ],
+    "kategorie": "gesellschaft",
+    "steigerung": "B"
+  },
+  {
+    "name": "Schriftlicher Ausdruck",
+    "probe": [
+      "KL",
+      "IN",
+      "IN"
+    ],
+    "kategorie": "gesellschaft",
+    "steigerung": "B"
+  },
+  {
+    "name": "Sich Verkleiden",
+    "probe": [
+      "MU",
+      "CH",
+      "GE"
+    ],
+    "kategorie": "gesellschaft",
+    "steigerung": "B"
+  },
+  {
+    "name": "Überreden",
+    "probe": [
+      "MU",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "gesellschaft",
+    "steigerung": "B"
+  },
+  {
+    "name": "Überzeugen",
+    "probe": [
+      "KL",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "gesellschaft",
+    "steigerung": "B"
+  },
+  {
+    "name": "Fährtensuchen",
+    "probe": [
+      "KL",
+      "IN",
+      "IN"
+    ],
+    "kategorie": "natur",
+    "steigerung": "B"
+  },
+  {
+    "name": "Fallenstellen",
+    "probe": [
+      "KL",
+      "FF",
+      "KK"
+    ],
+    "kategorie": "natur",
+    "steigerung": "B"
+  },
+  {
+    "name": "Fesseln/Entfesseln",
+    "probe": [
+      "FF",
+      "GE",
+      "KK"
+    ],
+    "kategorie": "natur",
+    "steigerung": "B"
+  },
+  {
+    "name": "Fischen/Angeln",
+    "probe": [
+      "IN",
+      "FF",
+      "KK"
+    ],
+    "kategorie": "natur",
+    "steigerung": "B"
+  },
+  {
+    "name": "Orientierung",
+    "probe": [
+      "KL",
+      "IN",
+      "IN"
+    ],
+    "kategorie": "natur",
+    "steigerung": "B"
+  },
+  {
+    "name": "Wettervorhersage",
+    "probe": [
+      "KL",
+      "IN",
+      "IN"
+    ],
+    "kategorie": "natur",
+    "steigerung": "B"
+  },
+  {
+    "name": "Wildnisleben",
+    "probe": [
+      "IN",
+      "GE",
+      "KO"
+    ],
+    "kategorie": "natur",
+    "steigerung": "B"
+  },
+  {
+    "name": "Anatomie",
+    "probe": [
+      "MU",
+      "KL",
+      "FF"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Baukunst",
+    "probe": [
+      "KL",
+      "KL",
+      "FF"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Brett-/Kartenspiel",
+    "probe": [
+      "KL",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Geographie",
+    "probe": [
+      "KL",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Geschichtswissen",
+    "probe": [
+      "KL",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Gesteinskunde",
+    "probe": [
+      "KL",
+      "IN",
+      "FF"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Götter/Kulte",
+    "probe": [
+      "KL",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Heraldik",
+    "probe": [
+      "KL",
+      "KL",
+      "FF"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Hüttenkunde",
+    "probe": [
+      "KL",
+      "IN",
+      "KO"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Kriegskunst",
+    "probe": [
+      "MU",
+      "KL",
+      "CH"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Kryptographie",
+    "probe": [
+      "KL",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Magiekunde",
+    "probe": [
+      "KL",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Mechanik",
+    "probe": [
+      "KL",
+      "KL",
+      "FF"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Pflanzenkunde",
+    "probe": [
+      "KL",
+      "IN",
+      "FF"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Philosophie",
+    "probe": [
+      "KL",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Rechnen",
+    "probe": [
+      "KL",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Rechtskunde",
+    "probe": [
+      "KL",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Sagen/Legenden",
+    "probe": [
+      "KL",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Schätzen",
+    "probe": [
+      "KL",
+      "IN",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Sprachenkunde",
+    "probe": [
+      "KL",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Staatskunst",
+    "probe": [
+      "KL",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Sternkunde",
+    "probe": [
+      "KL",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Tierkunde",
+    "probe": [
+      "MU",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "wissen",
+    "steigerung": "B"
+  },
+  {
+    "name": "Lesen/Schreiben [Schrift]",
+    "probe": [
+      "KL",
+      "KL",
+      "FF"
+    ],
+    "kategorie": "sprachen",
+    "steigerung": "A-C"
+  },
+  {
+    "name": "Sprachen [Muttersprache]",
+    "probe": [
+      "KL",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "sprachen",
+    "steigerung": "A-C"
+  },
+  {
+    "name": "Sprachen [Fremdsprache]",
+    "probe": [
+      "KL",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "sprachen",
+    "steigerung": "A-C"
+  },
+  {
+    "name": "Abrichten",
+    "probe": [
+      "MU",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Ackerbau",
+    "probe": [
+      "IN",
+      "FF",
+      "KO"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Alchimie",
+    "probe": [
+      "MU",
+      "KL",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Bergbau",
+    "probe": [
+      "IN",
+      "KO",
+      "KK"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Bogenbau",
+    "probe": [
+      "KL",
+      "IN",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Boote Fahren",
+    "probe": [
+      "GE",
+      "KO",
+      "KK"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Brauer",
+    "probe": [
+      "KL",
+      "FF",
+      "KK"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Drucker",
+    "probe": [
+      "KL",
+      "FF",
+      "KK"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Falschspiel",
+    "probe": [
+      "MU",
+      "CH",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Feinmechanik",
+    "probe": [
+      "KL",
+      "FF",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Feuersteinbearbeitung",
+    "probe": [
+      "KL",
+      "FF",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Fleischer",
+    "probe": [
+      "KL",
+      "FF",
+      "KK"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Gerber/Kürschner",
+    "probe": [
+      "KL",
+      "FF",
+      "KO"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Glaskunst",
+    "probe": [
+      "FF",
+      "FF",
+      "KO"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Grobschmied",
+    "probe": [
+      "FF",
+      "KO",
+      "KK"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Handel",
+    "probe": [
+      "KL",
+      "IN",
+      "CH"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Hauswirtschaft",
+    "probe": [
+      "IN",
+      "CH",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Heilkunde Gift",
+    "probe": [
+      "MU",
+      "KL",
+      "IN"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Heilkunde Krankheiten",
+    "probe": [
+      "MU",
+      "KL",
+      "CH"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Heilkunde Seele",
+    "probe": [
+      "IN",
+      "CH",
+      "CH"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Heilkunde Wunden",
+    "probe": [
+      "KL",
+      "CH",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Holzbearbeitung",
+    "probe": [
+      "KL",
+      "FF",
+      "KK"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Instrumentenbauer",
+    "probe": [
+      "KL",
+      "IN",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Kartographie",
+    "probe": [
+      "KL",
+      "KL",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Kochen",
+    "probe": [
+      "KL",
+      "IN",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Kristallzucht",
+    "probe": [
+      "KL",
+      "IN",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  },
+  {
+    "name": "Lederarbeiten",
+    "probe": [
+      "KL",
+      "FF",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
+  }
+]

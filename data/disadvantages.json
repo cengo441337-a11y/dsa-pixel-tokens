@@ -1,1 +1,758 @@
-[]
+[
+  {
+    "name": "Albino",
+    "gp": -7,
+    "effekt": "Bei einem Albino – einer Veränderung von Geburt an, die bei allen menschlichen und menschenähnlichen Ras- sen vorkommen kann, wenn auch sehr selten – sind in Haut, Haaren und Augen keine Farb­pigmente",
+    "stufe": false
+  },
+  {
+    "name": "Angst vor [...]",
+    "gp": 0,
+    "effekt": "unterschiedliche Kosten",
+    "stufe": true
+  },
+  {
+    "name": "Animalische Magie",
+    "gp": -1,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Arkanophobie",
+    "gp": -3,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Arroganz",
+    "gp": -1,
+    "effekt": "Dieser Nachteil bringt den Helden dazu, sich allen anderen gegenüber hochnäsig zu benehmen und ihnen nichts oder fast nichts zuzutrauen, seine eigenen Fähigkeiten hin- gegen zu überschätzen",
+    "stufe": true
+  },
+  {
+    "name": "Artefaktgebunden",
+    "gp": -7,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Astraler Block, Voll- / Halbzauberer",
+    "gp": -10,
+    "effekt": "Ein Charakter mit diesem Nachteil regeneriert pro Ruhephase nur 261 Vorteile, Nachteile, Sonderfertigkeiten 1W6–1 AsP; eventuelle Intuitions-Würfe zur Rückgewinnung verlorener Astralpunkte und bei Rit",
+    "stufe": false
+  },
+  {
+    "name": "Astraler Block, Viertelzauberer",
+    "gp": -5,
+    "effekt": "Ein Charakter mit diesem Nachteil regeneriert pro Ruhephase nur 261 Vorteile, Nachteile, Sonderfertigkeiten 1W6–1 AsP; eventuelle Intuitions-Würfe zur Rückgewinnung verlorener Astralpunkte und bei Rit",
+    "stufe": false
+  },
+  {
+    "name": "Autoritätsgläubig",
+    "gp": -1,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Behäbig",
+    "gp": -5,
+    "effekt": "Ein behäbiger Held bewegt sich langsamer und bedächtiger als andere Mitglieder seiner Rasse",
+    "stufe": false
+  },
+  {
+    "name": "Blutdurst",
+    "gp": -1,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Blutrausch",
+    "gp": -15,
+    "effekt": "Der Held fällt in ei- nen Blutrausch (bei den Thorwalern auch als Walwut oder Swafskari gefürchtet), sobald eines der drei folgend genannten Ereignisse eintritt: spontaner Zorn (z.B",
+    "stufe": false
+  },
+  {
+    "name": "Brünstigkeit",
+    "gp": -1,
+    "effekt": "Der Held bekommt Beklem­ mungsgefühle durch Dunkelheit: Dies mö- gen dunkle Tunnel und Höhlen, aber auch finstere Wälder, vor allem aber einfach die Schwärze der Nacht sein",
+    "stufe": true
+  },
+  {
+    "name": "Dunkelangst",
+    "gp": -2,
+    "effekt": "Der Held bekommt Beklem­ mungsgefühle durch Dunkelheit: Dies mö- gen dunkle Tunnel und Höhlen, aber auch finstere Wälder, vor allem aber einfach die Schwärze der Nacht sein",
+    "stufe": true
+  },
+  {
+    "name": "Einarmig / Gelähmter Arm",
+    "gp": -15,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Einäugig",
+    "gp": -5,
+    "effekt": "Der Held hat irgend- wann im Verlauf seines bisherigen Lebens das Augenlicht eines Auges oder gar das Auge selbst verloren",
+    "stufe": false
+  },
+  {
+    "name": "Einbeinig",
+    "gp": -25,
+    "effekt": "Dem Held fehlt ein Bein, das er bei einem früheren Unfall, Kampf oder ähnlichem verloren hat",
+    "stufe": false
+  },
+  {
+    "name": "Einbildungen",
+    "gp": -5,
+    "effekt": "Der Held glaubt, aus einer übersteigerten Phantasie oder be- ginnendem Wahnsinn heraus, immer wieder Dinge wahrzunehmen, die in Wirklichkeit nicht existieren",
+    "stufe": false
+  },
+  {
+    "name": "Eingeschränkte Elementarnähe",
+    "gp": -3,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Eingeschränkter Sinn",
+    "gp": -5,
+    "effekt": "Ein Sinn des Helden ist besonders schlecht ausge- bildet: Alle Sinnenschärfe-Proben, die sich auf diesen Sinn beziehen, sind um 5 Punkte erschwert, und je nach Situ- ation kann der Meister dem Helden ",
+    "stufe": false
+  },
+  {
+    "name": "Einhändig",
+    "gp": -10,
+    "effekt": "Der Held hat eine Hand verloren (die linke Hand bei Rechts- händern)",
+    "stufe": false
+  },
+  {
+    "name": "Eitelkeit",
+    "gp": -1,
+    "effekt": "Ein eitler Held versucht, in jeder beliebigen Situation gut auszusehen und Eindruck zu schinden",
+    "stufe": true
+  },
+  {
+    "name": "Elfische Weltsicht",
+    "gp": -30,
+    "effekt": "Elfen sind ‘nicht ganz von dieser Welt’ – eine Aussage, der auch die meisten Elfen zustimmen wür- den",
+    "stufe": false
+  },
+  {
+    "name": "Farbenblind",
+    "gp": -5,
+    "effekt": "Der Held sieht nur Grauschattierungen, was bestimmte Proben erschwert, bestimmte Professionen unmög- lich macht und zudem bei Fernkampf-Pro- ben mit langer Reichweite (über 50 Schritt Entfernung) eine",
+    "stufe": false
+  },
+  {
+    "name": "Feste Gewohnheit",
+    "gp": -10,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Festgefügtes Denken",
+    "gp": -1,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Fettleibig",
+    "gp": -15,
+    "effekt": "Der Held ist für seine Spezies deutlich zu schwer, ohne dass das Zusatzgewicht aus Muskeln besteht",
+    "stufe": false
+  },
+  {
+    "name": "Fluch der Finsternis I / II / III",
+    "gp": -6,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Geiz",
+    "gp": -1,
+    "effekt": "Der Held ist ein angenehmes Leben gewohnt und kann viele Unannehmlich- keiten des Abenteurerlebens nicht ohne wei- teres ertragen: Er ist weinerlich, wenn es um Schlafplätze in der freien Natur geht",
+    "stufe": true
+  },
+  {
+    "name": "Gerechtigkeitswahn",
+    "gp": -1,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Gesucht I / II / III",
+    "gp": -15,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Glasknochen",
+    "gp": -7,
+    "effekt": "Der Held ist be­ sonders empfindlich gegen äußeren (mecha- nischen) Schaden, wie er aus Kampfschaden oder ähn­lichen Verletzungen resultiert: Die Wundschwellen eines Helden (üblicher- weise KO/2 – KO ",
+    "stufe": false
+  },
+  {
+    "name": "Goldgier",
+    "gp": -1,
+    "effekt": "Durch diesen Nachteil tut der Held durch seine Gier nach Reichtum und Schätzen manchmal Dinge, die nicht unbedingt ver- nünftig sind",
+    "stufe": true
+  },
+  {
+    "name": "Größenwahn",
+    "gp": -1,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Heimwehkrank",
+    "gp": -10,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Hitzeempfindlichkeit",
+    "gp": -7,
+    "effekt": "Der Held fühlt sich ab Temperaturen von etwa 25 °C in jeglicher Kleidung unwohl, ab 30 °C auch nackt",
+    "stufe": false
+  },
+  {
+    "name": "Höhenangst",
+    "gp": -3,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Impulsiv",
+    "gp": -5,
+    "effekt": "Auch und gerade unter Anspannung neigt der Charakter dazu, kein zweites Mal nachzudenken, sondern sofort zu handeln; sämtliche KL- oder IN-Proben, die eine solche direkte Aktion verhindern wür- den, s",
+    "stufe": false
+  },
+  {
+    "name": "Jähzorn",
+    "gp": -3,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Kälteempfindlichkeit",
+    "gp": -7,
+    "effekt": "Der Held fühlt sich bei Temperaturen von weniger etwa 10 °C deutlich unwohl und ist gezwun- gen, in dicker (behindernder) Kleidung he- rumzulaufen; bei Temperaturen von weniger als 0 °C fühlt er sich ",
+    "stufe": false
+  },
+  {
+    "name": "Kältestarre",
+    "gp": -10,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Kein Vertrauter",
+    "gp": -3,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Kristallgebunden",
+    "gp": -10,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Kleinwüchsig",
+    "gp": -5,
+    "effekt": "Der Held ist recht klein gewachsen – üblicherweise unter an- derthalb Schritt groß –, hat aber für seine Rasse normale Proportionen",
+    "stufe": false
+  },
+  {
+    "name": "Körpergebundene Kraft",
+    "gp": -7,
+    "effekt": "Dies ist gewissermaßen die ‘dunkle Seite’ von Zauberhaar (siehe S",
+    "stufe": false
+  },
+  {
+    "name": "Krankhafte Reinlichkeit",
+    "gp": -1,
+    "effekt": "Der Held fühlt sich extrem unwohl, wenn er selbst oder etwas in seiner Umgebung verschmutzt ist",
+    "stufe": true
+  },
+  {
+    "name": "Krankheitsanfällig",
+    "gp": -7,
+    "effekt": "Der Held ist anfällig für Krankheiten; KO-Proben zum Widerstand gegen Ansteckung oder zur Scha- densreduktion sind um 5 Punkte erschwert",
+    "stufe": false
+  },
+  {
+    "name": "Kurzatmig",
+    "gp": -1,
+    "effekt": "Der Charakter hat ein lah- mes Bein, ein zerschmettertes und steifes Kniegelenk oder dergleichen",
+    "stufe": false
+  },
+  {
+    "name": "Lahm",
+    "gp": -15,
+    "effekt": "Der Held glaubt, aus einer übersteigerten Phantasie oder be- ginnendem Wahnsinn heraus, immer wieder Dinge wahrzunehmen, die in Wirklichkeit nicht existieren",
+    "stufe": false
+  },
+  {
+    "name": "Lästige Mindergeister",
+    "gp": -3,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Lichtempfindlich",
+    "gp": -15,
+    "effekt": "Ein lichtemp- findlicher Charakter empfindet die Berüh- rung von Sonnenlicht als schmerzhaft und wird in allen Handlungen eingeschränkt: Alle Eigen­schaftsproben sind um 2 Punkte erschwert, Talent- un",
+    "stufe": false
+  },
+  {
+    "name": "Lichtscheu",
+    "gp": -10,
+    "effekt": "Ein lichtscheuer Cha- rakter verabscheut direktes Sonnenlicht und erleidet daher Nachteile bei allen Hand- lungen, die er im direkten Sonnenlicht aus- führt: Eigen­schaftsproben sind um 1 Punkt erschw",
+    "stufe": false
+  },
+  {
+    "name": "Madas Fluch I / II / III",
+    "gp": -3,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Medium",
+    "gp": -7,
+    "effekt": "Der Geist des Charakters ist sehr anfällig dafür, von Geistern übernom- men zu werden",
+    "stufe": false
+  },
+  {
+    "name": "Meeresangst",
+    "gp": -1,
+    "effekt": "Der Held mit diesem Nachteil hat Angst davor, sich an Bord eines Schiffes oder Bootes (oder gar ohne!) auf eine Wasserfläche zu begeben",
+    "stufe": true
+  },
+  {
+    "name": "Miserable Eigenschaft",
+    "gp": -10,
+    "effekt": "Eine Ei- genschaft, die der Held bei der Generierung auf einen Wert von 8 gesetzt hat (vor Einrech- nung der Modifikatoren aus Rasse, Kultur, Profession und eventuellen anderen Vor- und Nachteilen), w",
+    "stufe": false
+  },
+  {
+    "name": "Mondsüchtig",
+    "gp": -5,
+    "effekt": "Der Mond versetzt den Helden in einen entrückungsähnlichen Zustand",
+    "stufe": false
+  },
+  {
+    "name": "Moralkodex [Kirche]",
+    "gp": -12,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Nachtblind",
+    "gp": -10,
+    "effekt": "Der Held erleidet dop­ pelte Abzüge bei allen Modifikatoren, die aus mangelnder Beleuchtung herrühren, jedoch nur bis zu Maximalabzügen entsprechend völliger Finsternis (AT/PA je –8 im Nah- kampf, vie",
+    "stufe": false
+  },
+  {
+    "name": "Nahrungsrestriktion",
+    "gp": -5,
+    "effekt": "Der Held ist in der Auswahl seiner Nahrung eingeschränkt",
+    "stufe": false
+  },
+  {
+    "name": "Neid",
+    "gp": -1,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Neugier",
+    "gp": -1,
+    "effekt": "Dieser Nachteil bringt den Helden dazu, al- les, was irgendwie interessant wirkt, näher untersuchen zu wollen – und zwar unab- hängig von eventuellen Risiken, die das mit sich bringen könnte",
+    "stufe": true
+  },
+  {
+    "name": "Niedrige Astralkraft",
+    "gp": -1,
+    "effekt": "Der Held hat Schwierig- keiten damit, Verbindung mit dem umge- benden astralen Fluidum aufzunehmen",
+    "stufe": false
+  },
+  {
+    "name": "Niedrige Lebenskraft",
+    "gp": -2,
+    "effekt": "Der Held erhält einen Lebenspunkt weniger, als sich durch die normale Berechnung ergäbe",
+    "stufe": false
+  },
+  {
+    "name": "Niedrige Magieresistenz",
+    "gp": -2,
+    "effekt": "Der Held ist leichter durch Magie zu beeinflussen als andere",
+    "stufe": false
+  },
+  {
+    "name": "Pechmagnet",
+    "gp": -10,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Platzangst",
+    "gp": -3,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Prinzipientreue",
+    "gp": -12,
+    "effekt": "Das Madamal erinnert die Nivesen an Madas Frevel",
+    "stufe": false
+  },
+  {
+    "name": "Rachsucht",
+    "gp": -1,
+    "effekt": "Dieser Nachteil veranlasst den Helden in jeder Situation, in der er sich schlecht be- handelt oder in seiner Ehre beschnitten fühlt, unbedingt und ohne Rücksicht auf Verluste Rache zu wollen",
+    "stufe": true
+  },
+  {
+    "name": "Randgruppe",
+    "gp": -5,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Raubtiergeruch",
+    "gp": -5,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Raumangst",
+    "gp": -3,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Rückschlag",
+    "gp": -10,
+    "effekt": "Der Held hat offensichtlich kein besonders gutes Verhältnis zu Boron – aus dem ein oder an- deren Grund will es ihm nicht gelingen, ein- oder durchzuschlafen",
+    "stufe": false
+  },
+  {
+    "name": "Schlafstörungen I / II",
+    "gp": -10,
+    "effekt": "Der Held hat offensichtlich kein besonders gutes Verhältnis zu Boron – aus dem ein oder an- deren Grund will es ihm nicht gelingen, ein- oder durchzuschlafen",
+    "stufe": false
+  },
+  {
+    "name": "Schlafwandler",
+    "gp": -3,
+    "effekt": "Der Held neigt dazu, im Schlaf aufzustehen, herumzuwan- dern und sogar alltägliche Tätigkeiten zu verrichten, alles ohne Bewusstsein oder spä- tere Erinnerung",
+    "stufe": false
+  },
+  {
+    "name": "Schlechte Regeneration",
+    "gp": -10,
+    "effekt": "Ein Charakter mit diesem Nachteil regeneriert pro Ruhephase nur 1W6–1 LeP; eventuelle Konsti­tutions-Würfe zur Rückgewinnung verlorener Lebenspunkte oder zur Heilung von Wunden sind um 2 Punkte erschw",
+    "stufe": false
+  },
+  {
+    "name": "Schlechter Ruf",
+    "gp": -10,
+    "effekt": "Der Held ist berüchtigt für seine Herrschsucht, Rast- losigkeit, Sturheit, Ungerechtigkeit, Eidbrü- chigkeit und was dergleichen unerwünschte Eigenschaften mehr sind",
+    "stufe": false
+  },
+  {
+    "name": "Schneller Alternd",
+    "gp": -3,
+    "effekt": "Der Held al- tert schneller als andere Angehörige seiner Rasse, er bekommt früh Altersflecken und Falten, sein Haar ergraut bald oder fällt aus",
+    "stufe": false
+  },
+  {
+    "name": "Schulden",
+    "gp": -1,
+    "effekt": "Eine durchaus häufige Variante der Verpflichtungen (siehe Seite 273) sind Schul- den in großer Höhe, üblicherweise für die genossene Ausbildung, die Erstausstattung des Handwerksbetriebs oder dergleic",
+    "stufe": false
+  },
+  {
+    "name": "Schwache Ausstrahlung",
+    "gp": -1,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Schwacher Astralkörper",
+    "gp": -7,
+    "effekt": "Der Astralkörper des Zau- bernden, also jener Teil seiner Lebensseele, der die Astralenergie trägt, ist instabil",
+    "stufe": false
+  },
+  {
+    "name": "Schwanzlos",
+    "gp": -7,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Seffer Manich",
+    "gp": -7,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Selbstgespräche",
+    "gp": -3,
+    "effekt": "Der Held mur- melt oder redet häufig vor sich hin, wenn er über etwas nachdenkt, ohne sich dessen bewusst zu sein",
+    "stufe": false
+  },
+  {
+    "name": "Sensibler Geruchssinn SE",
+    "gp": -3,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Sippenlosigkeit",
+    "gp": -5,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Sonnensucht SE",
+    "gp": -3,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Speisegebote",
+    "gp": -5,
+    "effekt": "Aufgrund religiöser oder kultureller Vorbehalte wird der Held keine Nahrung zu sich nehmen, die entge- gen seiner Grundsätze gefangen, geschlachtet oder zubereitet wurde",
+    "stufe": false
+  },
+  {
+    "name": "Spielsucht",
+    "gp": -1,
+    "effekt": "Der Held hat das Verlangen nach Amü- sement und Lust auf Risiko",
+    "stufe": true
+  },
+  {
+    "name": "Sprachfehler",
+    "gp": -10,
+    "effekt": "Der Held hat Schwierigkeiten, sich zu artikulie- ren; möglicherweise äußert sich dies durch Stottern oder heftiges Lispeln oder durch extremes Nuscheln",
+    "stufe": false
+  },
+  {
+    "name": "Sprachfehler, für Magier/Scharlatane",
+    "gp": -15,
+    "effekt": "Der Held hat Schwierigkeiten, sich zu artikulie- ren; möglicherweise äußert sich dies durch Stottern oder heftiges Lispeln oder durch extremes Nuscheln",
+    "stufe": false
+  },
+  {
+    "name": "Spruchhemmung",
+    "gp": -10,
+    "effekt": "Die Zauberei des Helden versagt gelegentlich (und nicht einmal selten: etwa jedes siebte Mal)",
+    "stufe": false
+  },
+  {
+    "name": "Stigma",
+    "gp": -12,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Streitsucht",
+    "gp": -1,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Stubenhocker",
+    "gp": -20,
+    "effekt": "Der Held hat seine Jugend fast vollständig in staubigen Bibliotheken und muffigen Studierzimmern verbracht, so dass er im Vergleich zu anderen Heranwachsenden keine Gelegenheit hatte, körperliche Fähi",
+    "stufe": false
+  },
+  {
+    "name": "Sucht",
+    "gp": 0,
+    "effekt": "–GP je nach doppelter Stufe des Suchtmittels",
+    "stufe": false
+  },
+  {
+    "name": "Thesisgebunden",
+    "gp": -1,
+    "effekt": "Der Held kann nur ‘vom Blatt zaubern’ – jedes Mal, wenn er einen Zauber, in dem er diesen Nachteil hat, anwenden will, muss er ein Objekt in der Hand halten und ansehen, in dem die Thesis des Zau- ber",
+    "stufe": false
+  },
+  {
+    "name": "Tollpatsch",
+    "gp": -10,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Totenangst",
+    "gp": -1,
+    "effekt": "Hierbei hat der Held besonde- re Angst vor allem, was mit dem Tod zu tun hat",
+    "stufe": true
+  },
+  {
+    "name": "Übler Geruch",
+    "gp": -5,
+    "effekt": "Der Held riecht schlecht",
+    "stufe": false
+  },
+  {
+    "name": "Unangenehme Stimme",
+    "gp": -5,
+    "effekt": "Es ist anstrengend, die Stimme des Helden zu ertragen",
+    "stufe": false
+  },
+  {
+    "name": "Unansehnlich",
+    "gp": -5,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Unfähigkeit Talentgruppe Sprachen/Schriften",
+    "gp": -7,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Unfähigkeit Talentgruppen Kampf, Körper",
+    "gp": -15,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Wissen, Handwerk",
+    "gp": -10,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Unfähigkeit Fernkampf-Talente",
+    "gp": -5,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Unfähigkeit Nahkampf-Talente",
+    "gp": -10,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Unfähigkeit [Kampf-/Körper-Talent]",
+    "gp": -2,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Unfähigkeit für [anderes Talent]",
+    "gp": -1,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Unfrei",
+    "gp": -5,
+    "effekt": "Der Held ist erkennbar unfrei, d.h",
+    "stufe": false
+  },
+  {
+    "name": "Ungebildet",
+    "gp": -1,
+    "effekt": "Ein ungebildeter Held hat die Ausbildung seiner Fertigkeiten vernachlässigt: Für je 40 Start-AP, die er op- fert (siehe Seite 17), erhält er einen GP",
+    "stufe": false
+  },
+  {
+    "name": "Unstet",
+    "gp": -25,
+    "effekt": "Ein Charakter mit diesem Nachteil kann sich nur schwer längerfris­tig konzentrieren, ist verspielt und launisch",
+    "stufe": false
+  },
+  {
+    "name": "Unverträglichkeit mit verarbeitetem Metall",
+    "gp": -10,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Vergesslichkeit",
+    "gp": -5,
+    "effekt": "Der Held hat ein Gedächtnis wie ein Sieb: Ständig lässt er Aus- rüstungsgegenstände irgendwo liegen, ver- gisst wichtige Informationen und die Namen seiner Kameraden",
+    "stufe": false
+  },
+  {
+    "name": "Verpflichtungen",
+    "gp": -12,
+    "effekt": "Der Held ist gegenüber einer sozialen, magischen oder religiösen Gruppe oder gegenüber einer Einzelperson besondere Verpflichtungen ein- gegangen, die er einfach nicht brechen kann und auch nicht will",
+    "stufe": false
+  },
+  {
+    "name": "Verschwendungssucht",
+    "gp": -1,
+    "effekt": "Der Held hat kein Gespür für Geld und Werte",
+    "stufe": true
+  },
+  {
+    "name": "Verwöhnt",
+    "gp": -1,
+    "effekt": "Der Held ist ein angenehmes Leben gewohnt und kann viele Unannehmlich- keiten des Abenteurerlebens nicht ohne wei- teres ertragen: Er ist weinerlich, wenn es um Schlafplätze in der freien Natur geht",
+    "stufe": true
+  },
+  {
+    "name": "Vorurteile",
+    "gp": -1,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Wahnvorstellungen",
+    "gp": -10,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Wahrer Name",
+    "gp": -5,
+    "effekt": "Von Drachen und Kobolden heißt es, sie besitzen einen Zaubernamen, den sie niemandem nennen, da er ihr innerstes Selbst kennzeichnet",
+    "stufe": false
+  },
+  {
+    "name": "Weltfremd (nach Themenkomplex)",
+    "gp": -1,
+    "effekt": "",
+    "stufe": true
+  },
+  {
+    "name": "Widerwärtiges Aussehen",
+    "gp": -15,
+    "effekt": "Dieser Nachteil ist eine Steigerung von Unansehn- lich (siehe Seite 272)",
+    "stufe": false
+  },
+  {
+    "name": "Wilde Magie",
+    "gp": -7,
+    "effekt": "Hierbei hat der Held besonde- re Angst vor allem, was mit dem Tod zu tun hat",
+    "stufe": false
+  },
+  {
+    "name": "Zielschwierigkeiten",
+    "gp": -7,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Zögerlicher Zauberer",
+    "gp": -2,
+    "effekt": "",
+    "stufe": false
+  },
+  {
+    "name": "Zwergenwuchs",
+    "gp": -7,
+    "effekt": "",
+    "stufe": false
+  }
+]

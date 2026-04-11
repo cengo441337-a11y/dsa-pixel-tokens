@@ -1,0 +1,138 @@
+Probe: MU / IN / GE (+Mod.)
+Technik: Der Elf kauert sich auf dem Boden 
+zusammen und spricht leise die Formel a’dao valva 
+iama ... Es folgt der Name des Tieres, in das sich der 
+Elf verwandeln will.
+Zauberdauer: 20 Aktionen
+Wirkung: Der Zaubernde erhält die Gestalt des beim Erler-
+nen des Zaubers gewählten Tieres, das nicht kleiner als eine 
+Ratte und nicht größer als ein Pferd sein darf. Kleidung und 
+Ausrüstung werden nicht mit verwandelt. Der Elf behält seine 
+Verstandeskraft, ihm stehen jedoch die körperlichen Fähigkeiten 
+des Tieres, dessen Wahrnehmung und dessen LE zur Verfügung. 
+Er kann in Tiergestalt nicht zaubern und sich auch vor Ablauf 
+der Wirkungsdauer nicht zurückverwandeln. 
+Zu welchen körperlichen Aktivitäten ein Elf in Tiergestalt fähig ist, 
+hängt in erster Linie von den Möglichkeiten der Tiergestalt, in zweiter 
+Linie vom ZfW des Elfen ab. Natürlich ist es immer eine Frage des ge-
+sunden Menschenverstands, was einem Elf in einer Tiergestalt überhaupt 
+möglich ist und wo Proben gefordert werden müssen. (Ein Bär kann 
+ohne Probe eine Tür eindrücken, aber selbst bei besten Werten keinen 
+Schuh zubinden.) Als Faustregel sollten Sie davon ausgehen, dass ein 
+körperlicher Eigenschaftswert oder ein Kampfwert des Tiers nicht 
+höher sein darf als der doppelte ZfW des Elfen; bei einem eventuellen 
+Talentwert des Tiers ist die Grenze der ZfW. (Ein Elf, der den Zauber 
+nur mäßig beherrscht, ist auch mit dem Tierkörper nicht sonderlich 
+vertraut und kann dessen Stärken nur unvollkommen nutzen.) Weitere 
+Details sind Meisterentscheid. (Für die Kampfwerte einiger Tiere ist das 
+Lebensalter wichtig. Für eine Maraske gilt hier ZfP*/2 = Lebensalter 
+in Jahren, für einen Har­nischträger ZfP* x 30 Jahre.)
+Die Lebenspunkte werden bei der Verwandlung wie auch bei der Rückver-
+wandlung umgerechnet: Wenn der Elf vor dem Zauber schon die Hälfte 
+seiner LeP verlo­ren hat, dann ist auch das Tier geschwächt und verfügt 
+nur über die Hälfte seiner Lebensenergie. Wird das Tier während der 
+Verwandlung verletzt, so hat auch der Elf nach der Rückverwandlung 
+einen entsprechenden Anteil LeP verloren. Wunden, die ein Tier 
+erleidet, übertragen sich auf das entsprechende Körperteil des ­Elfen 
+(und auch umgekehrt).
+Ein Held mit dem Nachteil Elfische Weltsicht hat eine er-
+weiterte, über diese ‘funktionalen Aspekte’ hinausgehende 
+Vorstellung, die darauf beruht, sich in sein Seelentier – also 
+einen Teil seiner selbst – zu verwandeln, was besondere Aus-
+wirkungen nach sich zieht: Gelegentlich kommt es vor, 
+dass bei ihm die ­Instinkte des Tieres überhand nehmen 
+und den Elfenfalken dazu bringen, jetzt – und genau 
+jetzt – diesen ­schmackhaften Hasen zu schlagen, 
+ohne sich um solchen Unfug wie das eilige 
+Überbringen einer Botschaft zu scheren. 
+Kosten: 4 AsP für die Verwandlung plus 1 
+AsP pro Spielrunde; bei amphibischen Lebewesen 
+2 AsP/SR, bei wasserbewohnenden und fliegenden 
+Lebewesen 3 AsP/SR
+Zielobjekt: Einzelperson, freiwillig
+Reichweite: selbst
+Wirkungsdauer: nach AsP-Aufwand (vorher festlegen)
+Modifikationen und Varianten: Zauberdauer, Erzwingen, 
+Kosten, Wirkungsdauer (s.u.)
+ Die Achaz-Repräsentation dieses Zaubers erlaubt lediglich 
+die Verwandlung in Reptilien oder Amphibien.
+ Bei Tieren mit extrem hoher LE steigen die Kosten um 1 bis 
+7 AsP für die Verwandlung (1 AsP, wenn das Tier mehr LeP als 
+der Held hat, 7 AsP, wenn die LE wenigstens doppelt so hoch ist) 
+und 1 bis 2 AsP/SR. Gleiches gilt für magische Sonderfähigkeiten 
+und für Giftwirkung (giftiger Biss oder Stich etc.) des Tieres sowie 
+für anderweitige Spezialfähigkeiten. Die Einzelheiten der Kosten-
+steigerung sind immer Meisterentscheid. 
+ Für das Seelentier eines Elfen gelten die zeitabhängigen Kosten 
+nicht pro SR, sondern pro Stunde (dabei ist die Zeitverlängerung 
+durch die elfische Repräsentation bereits eingerechnet).
+ Bewusste Gestalt (+7; ab ZfW 11). Es ist möglich, die Wirkungs-
+dauer auf Aufrechterhalten zu ändern. 
+ Für das Erlernen weiterer Tierarten über die erste hinaus gelten 
+sinngemäß die Regeln für Hexalogien (­siehe WdZ 383ff.; für zweite und 
+folgende Varianten sind sowohl die Aktivierung als auch die Steigerung 
+(bis zum höchsten der beteiligten ZfW) um eine Spalte verbilligt). 
+ Grenzenlose Gestalt (+7). Wer wenigstens eine ­Version dieses 
+Spruchs auf ZfW 15+ beherrscht (s.o.), kann als weitere Version 
+auch die Verwandlung in ein Tier erlernen, das größer als ein Pferd 
+oder kleiner als eine Ratte ist. Es gelten die gerade genannten Regeln 
+für das Erlernen weiterer Tierarten. Der Zauber ist für eine solche 
+Variante prinzipiell um 7 Punkte erschwert. Welche Tiere in Frage 
+kommen, ist grundsätzlich mit dem Meister auszuhandeln.
+ Haut des Seelentiers (+7; nur elfische ­Repräsenta-tion). 
+Der Elf verschmilzt mit seinem Seelentier und gibt vollends 
+dem Tier und seinen Instinkten die Oberhand und hat fast 
+keine (Selbstbeherrschung +10) ­Kontrolle über seine 
+Handlungen. Dauer der Verwandlung: 1 Tag oder 1 Nacht. 
+Kosten: 12 AsP. Sofern ihm während der Verwandlung 
+kein Unheil widerfährt und die Um­gebung seinem 
+Seelentier entsprechend war, ist der Elf anschließend 
+vollkommen mit sich und der Welt ausgeglichen (1 
+Tag lang alle Zauber in elfischer Repräsentation 
+um 2 erleichtert, alle anderen Zauber um 1). 
+Es wird von einer Steigerung dieser Vari-
+ante in den Monats- und Jahresbereich 
+ADLERSCHWINGE
+WOLFSGESTALT
+16
+
+--- PAGE BREAK ---
+hinaus berichtet, mit der 
+ein Elf noch intensiver mit sei-
+nem Seelentier verschmelzen kann. 
+Diese überaus gefährliche Formel hat 
+jedoch schon dazu geführt, dass ein Elf 
+sich vollends in seiner Tierform verloren hat 
+und nur noch durch Antimagie zurückverwan-
+delt werden konnte.
+Reversalis: verwandelt eine Tierform zurück in 
+einen Elfen.
+Antimagie: kann in einer Zone des VERWANDLUNG 
+BEENDEN nur erschwert gewirkt werden und kann mit 
+diesem Antimagie-Spruch beendet werden.
+Merkmale: Form
+Komplexität: D
+Repräsentationen und Verbreitung: Elf6; Ach, Mag je 3; 
+Dru, Hex je (Elf)2 
+Die elfische Variante dient 
+vor allem dem Zweck, sich 
+in das Seelentier zu verwandeln, 
+so dass jeder Elf beim Erlernen des 
+Zaubers ein Tier wählen sollte, das 
+auch charakterlich zu ihm passt. Manche 
+Waldelfen beherrschen mehrere Varianten 
+des Zaubers, da sie neben dem Seelen- auch das 
+Sippentier kennen, die zwar oft übereinstimmen, 
+aber eben nicht immer. Bei Firn- und Auelfen ist das 
+Verwandeln in das Seelentier auch verbreitet, allerdings 
+ist das Beherrschen unterschiedlicher Tierformen hier fast 
+unbekannt. Menschen tun sich mit dieser Formel schwer, 
+weshalb sie auch nur in der Akademie der Verformung zu 
+Lowangen, in Sinoda, Kuslik, Punin, ­Tuzak und im Kreis der 
+Einfühlung erlernbar ist bzw. war. Mit etwas Tüftelarbeit lässt 
+sich die Formel jedoch auch aus Zauberstern und Silberhaar 
+deduzieren; selbiges gilt auch für das Corpus Mutantis, eines 
+der Standardwerke der Mutanda. 
+17
+D
+Form

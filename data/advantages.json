@@ -1,1 +1,512 @@
-[]
+[
+  {
+    "name": "Adlig, Adlige Abstammung",
+    "gp": 7,
+    "voraussetzung": "",
+    "effekt": "Der Held ist von her- vorgehobenem Stand, sei es, weil er einer ‘blaublütigen’ Familie entstammt, sei es, weil er für seine Taten oder in seiner Funktion als Amtsträger geadelt wurde"
+  },
+  {
+    "name": "Adlig, Adliges Erbe (erfordert Adlige Abstammung)",
+    "gp": 6,
+    "voraussetzung": "",
+    "effekt": "Der Held ist von her- vorgehobenem Stand, sei es, weil er einer ‘blaublütigen’ Familie entstammt, sei es, weil er für seine Taten oder in seiner Funktion als Amtsträger geadelt wurde"
+  },
+  {
+    "name": "Adlig, Amtsadel",
+    "gp": 5,
+    "voraussetzung": "",
+    "effekt": "Der Held ist von her- vorgehobenem Stand, sei es, weil er einer ‘blaublütigen’ Familie entstammt, sei es, weil er für seine Taten oder in seiner Funktion als Amtsträger geadelt wurde"
+  },
+  {
+    "name": "Affinität zu [Geistern, Elementaren, Dämonen]",
+    "gp": 5,
+    "voraussetzung": "",
+    "effekt": "Der Held hat aufgrund von Einflüssen seiner Geburtsstun- de, der Geister selbst, eines Familienfluchs o.ä"
+  },
+  {
+    "name": "Akademische Ausbildung (Gelehrter)",
+    "gp": 7,
+    "voraussetzung": "",
+    "effekt": "Der Held hat im Laufe seines Vorle- bens eine Akademie, Schule oder gar Uni- versität be­sucht, in der er eine umfassende und gründliche Ausbildung in den ‘akade- mischen Grund­kenntnissen’ genossen h"
+  },
+  {
+    "name": "Akademische Ausbildung (Magier)",
+    "gp": 25,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Akademische Ausbildung (Krieger)",
+    "gp": 20,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Altersresistenz",
+    "gp": 3,
+    "voraussetzung": "",
+    "effekt": "Ein altersresis­tenter Held ist (im natürlichen Rahmen) immun gegen Auswirkungen hohen Alters"
+  },
+  {
+    "name": "Astrale Regeneration I / II / III",
+    "gp": 12,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Astralmacht",
+    "gp": 1,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Ausdauernd",
+    "gp": 1,
+    "voraussetzung": "",
+    "effekt": "Der Zauberer verliert bei jedem Spruch nur halb so viel AuP wie ein Zauber- kundiger ohne diesen Vorteil und erleidet auch nur seltener direkt einen Punkt Erschöpfung bei seinen Zaubern"
+  },
+  {
+    "name": "Ausdauernder Zauberer",
+    "gp": 3,
+    "voraussetzung": "",
+    "effekt": "Der Zauberer verliert bei jedem Spruch nur halb so viel AuP wie ein Zauber- kundiger ohne diesen Vorteil und erleidet auch nur seltener direkt einen Punkt Erschöpfung bei seinen Zaubern"
+  },
+  {
+    "name": "Ausrüstungsvorteil",
+    "gp": 1,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Balance",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": "Für Helden mit diesem Vorteil sind alle Körperbeherrschungs-, Tan- zen-, Athletik- und Akrobatik-Proben um 3 und alle GE-Proben um 2 Punkte erleichtert, wenn diese mit dem Balance ­halten, Dre- hen in"
+  },
+  {
+    "name": "Begabung für [Merkmal] 8 /",
+    "gp": 12,
+    "voraussetzung": "",
+    "effekt": "Der Charakter hat ein beson- deres Talent im Umgang mit einem bestimmten Zauber – Erlernen und Steigern dieses Zauber- spruchs ist so erleichtert, dass die jeweils leich- tere (linke) Spalte der Steig"
+  },
+  {
+    "name": "Begabung für [Ritual]",
+    "gp": 1,
+    "voraussetzung": "",
+    "effekt": "Der Charakter hat ein beson- deres Talent im Umgang mit einem bestimmten Zauber – Erlernen und Steigern dieses Zauber- spruchs ist so erleichtert, dass die jeweils leich- tere (linke) Spalte der Steig"
+  },
+  {
+    "name": "Begabung für einzelnes Kampf-/Körper-Talent",
+    "gp": 6,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Begabung für einzelnes anderes Talent",
+    "gp": 4,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Begabung Talentgruppen Kampf/Körper",
+    "gp": 30,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Wissen, Handwerk",
+    "gp": 20,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Begabung für Talentgruppe Sprachen",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Begabung für Nahkampf-Talente",
+    "gp": 20,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Begabung für Fernkampf-Talente",
+    "gp": 15,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Begabung für [Zauber]",
+    "gp": 2,
+    "voraussetzung": "",
+    "effekt": "Der Charakter hat ein beson- deres Talent im Umgang mit einem bestimmten Zauber – Erlernen und Steigern dieses Zauber- spruchs ist so erleichtert, dass die jeweils leich- tere (linke) Spalte der Steig"
+  },
+  {
+    "name": "Beidhändig",
+    "gp": 12,
+    "voraussetzung": "",
+    "effekt": "Ein beidhändig be- gabter Held ist automatisch gleich gut mit beiden Händen, egal, ob es sich ums Schrei- ben oder Kämpfen handelt"
+  },
+  {
+    "name": "Beseelte Knochenkeule",
+    "gp": 3,
+    "voraussetzung": "",
+    "effekt": "Aus irgend- welchen Gründen ist der Held ein Sympathieträger unter den Ange- hörigen des Feenvolkes"
+  },
+  {
+    "name": "Besonderer Besitz",
+    "gp": 7,
+    "voraussetzung": "",
+    "effekt": "Ein Besonderer Be- sitz ist ein Ausrüstungsgegenstand, der norma- lerweise zu teuer ist, als dass er dem Helden zu Beginn seiner Karriere schon zur Verfügung stünde"
+  },
+  {
+    "name": "Breitgefächerte Bildung",
+    "gp": 7,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Dämmerungssicht",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": "Ein Held mit Dämmerungssicht erleidet bei schlechter Be- leuchtung nur die Hälfte der Abzüge auf AT, PA, Fernkampfwerte und Sinnenschärfe-Pro- ben, bei anderen Proben je nach Wichtigkeit des Ge­sichts"
+  },
+  {
+    "name": "Eidetisches Gedächtnis",
+    "gp": 35,
+    "voraussetzung": "",
+    "effekt": "Ein Held mit Eidetischem Gedächtnis kann sich an praktisch alles erinnern, was ihm bislang widerfahren ist, was er erlebt, gehört, gesehen oder gelesen hat"
+  },
+  {
+    "name": "Eigeboren",
+    "gp": 20,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Eisenaffine Aura",
+    "gp": 7,
+    "voraussetzung": "",
+    "effekt": "Der magiebegabte Cha- rakter ist im Vergleich zu den meisten ande- ren Zauberkundigen weniger durch Eisen und andere Metalle in seinem arkanen Wir- ken eingeschränkt: Er erleidet nur die leichten Ausw"
+  },
+  {
+    "name": "Eisern",
+    "gp": 7,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Empathie",
+    "gp": 30,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Entfernungssinn",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": "Der Held hat ein Auge für Entfernungen und Distanzen"
+  },
+  {
+    "name": "Ererbte Knochenkeule",
+    "gp": 2,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Feenfreund",
+    "gp": 7,
+    "voraussetzung": "",
+    "effekt": "Aus irgend- welchen Gründen ist der Held ein Sympathieträger unter den Ange- hörigen des Feenvolkes"
+  },
+  {
+    "name": "Feste Matrix",
+    "gp": 5,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Flink",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": "Ein flinker Held kann sich schneller bewegen als andere Mitglieder sei- ner Rasse"
+  },
+  {
+    "name": "Gebildet",
+    "gp": 1,
+    "voraussetzung": "",
+    "effekt": "Ein gebildeter Held hat sich besonders der Ausformung seiner Wis- sens- und Handwerks-Fertigkeiten gewid- met: Für je einen GP kann er für die Gene- rierung 40 Abenteuerpunkte erwerben, die er jedoch "
+  },
+  {
+    "name": "Gefahreninstinkt",
+    "gp": 12,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Geräuschhexerei",
+    "gp": 3,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Geweiht",
+    "gp": 18,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Glück",
+    "gp": 12,
+    "voraussetzung": "",
+    "effekt": "Ein Held, an dem sprich- wörtlich das Glück klebt, darf bis zu zwei Mal pro aventurischem Tag einen Würfel- wurf (eine AT oder PA, einen Schadenswurf, eine Talentprobe, aber auch das Ergebnis eines St"
+  },
+  {
+    "name": "Glück im Spiel",
+    "gp": 3,
+    "voraussetzung": "",
+    "effekt": "Wenn ein Held an einem Glücksspiel teilnimmt, kann dieses Spiel entweder am Tisch ausgespielt werden, oder der betreffende Spieler kann eine (er- schwerte) IN-Probe ablegen, um festzustel- len, ob Phe"
+  },
+  {
+    "name": "Gut Aussehend",
+    "gp": 5,
+    "voraussetzung": "",
+    "effekt": "Ein gut aussehender Held hat ein besonders attraktives Äußeres; sei es durch Gestalt und Gesicht oder durch Anmut der Bewegungen"
+  },
+  {
+    "name": "Guter Ruf",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": "Der Held ist bekannt für seine Freigiebigkeit, seine Gerechtigkeit, Hilfsbereitschaft oder dergleichen positive Charakterzüge, was sich darin niederschlägt, dass andere Menschen positiv und freundlich"
+  },
+  {
+    "name": "Gutes Gedächtnis",
+    "gp": 12,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Halbzauberer",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": "Dies ist eine stärkere Variante von Balance (siehe Seite 248)"
+  },
+  {
+    "name": "Herausragende Balance",
+    "gp": 20,
+    "voraussetzung": "",
+    "effekt": "Dies ist eine stärkere Variante von Balance (siehe Seite 248)"
+  },
+  {
+    "name": "Herausragende Eigenschaft",
+    "gp": 8,
+    "voraussetzung": "",
+    "effekt": "Der Held darf bei der Generierung mehr als 14 Generierungspunkte in eine Ei- genschaft stecken und damit das Spiel mit einem entsprechenden Eigen­schaftswert beginnen, der anschließend noch nach Ras- "
+  },
+  {
+    "name": "Herausragender Sechster Sinn",
+    "gp": 3,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Herausragender Sechster Sinn, Zauberer",
+    "gp": 7,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Herausragender Sinn",
+    "gp": 5,
+    "voraussetzung": "",
+    "effekt": "Ein Sinn des Helden ist besonders gut ausgebildet: Alle Sinnenschärfe-Proben, die sich auf diesen Sinn beziehen, sind um 5 Punkte erleichtert, und je nach Situation kann der Meister dem Helden auch Pr"
+  },
+  {
+    "name": "Herausragendes Aussehen",
+    "gp": 12,
+    "voraussetzung": "",
+    "effekt": "Der Held ist bekannt für seine Freigiebigkeit, seine Gerechtigkeit, Hilfsbereitschaft oder dergleichen positive Charakterzüge, was sich darin niederschlägt, dass andere Menschen positiv und freundlich"
+  },
+  {
+    "name": "Hitzeresistenz",
+    "gp": 5,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Hohe Lebenskraft",
+    "gp": 2,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Hohe Magieresistenz",
+    "gp": 2,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Immunität2) gegen einzelnes Gift",
+    "gp": 5,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Immunität2) gegen Gift-Gruppe",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Immunität2) gegen alle Gifte",
+    "gp": 35,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Immunität2) gegen einzelne Krankheit",
+    "gp": 3,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Immunität2) gegen Krankheiten",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Innerer Kompass",
+    "gp": 7,
+    "voraussetzung": "",
+    "effekt": "Dies heißt nicht mehr und nicht weniger, als dass der Held immer – auf dem Land, in der Stadt oder gar unterirdisch – weiß, wo Norden ist"
+  },
+  {
+    "name": "Kälteresistenz",
+    "gp": 5,
+    "voraussetzung": "",
+    "effekt": "Wesen, die resistent gegen Kälte sind, erleiden durch außerge- wöhnliche Umgebungstempera­turen keinen Schaden, so lange diese Temperaturen im er- träglichen Rahmen bleiben (bis –20 °C kalte Luft oder"
+  },
+  {
+    "name": "Kampfrausch",
+    "gp": 15,
+    "voraussetzung": "",
+    "effekt": "Im Gegensatz zum unkontrollierten Blutrausch (siehe den Nachteil auf Seite 261) können sich manche Menschen, Zwerge und Orks bewusst in einen Zustand versetzen, in dem sie keine Schmerzen verspüren un"
+  },
+  {
+    "name": "Koboldfreund",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": "Aus irgendwelchen Gründen ist der Held ein Sympathieträger bei Kobolden"
+  },
+  {
+    "name": "Kräfteschub (nach Eigenschaft)",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Linkshänder",
+    "gp": 5,
+    "voraussetzung": "",
+    "effekt": "Linkshänder haben leichte Vorteile im Kampf: Während der ers­ ten 5 Kampfrunden erhält ihr Gegner durch die Überraschung einen PA-Nachteil von 1 Punkt"
+  },
+  {
+    "name": "Machtvoller Vertrauter",
+    "gp": 5,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Magiegespür",
+    "gp": 12,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Meisterhandwerk, Viertelzauberer",
+    "gp": 1,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Meisterhandwerk, Halbzauberer",
+    "gp": 3,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Meisterhandwerk, Vollzauberer",
+    "gp": 5,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Nachtsicht",
+    "gp": 20,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Natürliche Waffen",
+    "gp": 1,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Natürlicher Rüstungsschutz",
+    "gp": 10,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Prophezeien",
+    "gp": 12,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Resistenz gegen einzelnes Gift",
+    "gp": 3,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Resistenz gegen Gift-Gruppe",
+    "gp": 7,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Resistenz gegen alle Gifte",
+    "gp": 25,
+    "voraussetzung": "",
+    "effekt": ""
+  },
+  {
+    "name": "Resistenz gegen Krankheiten",
+    "gp": 7,
+    "voraussetzung": "",
+    "effekt": "Der Charakter ist besonders widerstandsfähig gegen Krankheiten gleich welcher Art: Bei Resis­tenzproben gegen Krankheiten bzw"
+  },
+  {
+    "name": "Richtungssinn",
+    "gp": 3,
+    "voraussetzung": "",
+    "effekt": "Wesen, die resistent gegen Kälte sind, erleiden durch außerge- wöhnliche Umgebungstempera­turen keinen Schaden, so lange diese Temperaturen im er- träglichen Rahmen bleiben (bis –20 °C kalte Luft oder"
+  },
+  {
+    "name": "Schlangenmensch",
+    "gp": 25,
+    "voraussetzung": "",
+    "effekt": "Es gibt Lebewe- sen, die keine Schlangen sind und dennoch nur aus Gelenken zu bestehen scheinen (oder scheinbar überhaupt keine Knochen im Kör- per haben)"
+  },
+  {
+    "name": "Schnelle Heilung I / II / III",
+    "gp": 15,
+    "voraussetzung": "",
+    "effekt": ""
+  }
+]

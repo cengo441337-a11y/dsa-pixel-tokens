@@ -1,1 +1,270 @@
-[]
+[
+  {
+    "name": "Bronzeharnisch",
+    "rs": 3,
+    "be": 3,
+    "gewicht": 6000
+  },
+  {
+    "name": "Brustplatte",
+    "rs": 1,
+    "be": 1,
+    "gewicht": 2000
+  },
+  {
+    "name": "Brustschalen",
+    "rs": 1,
+    "be": 0,
+    "gewicht": 500
+  },
+  {
+    "name": "Dicke Kleidung",
+    "rs": 1,
+    "be": 1,
+    "gewicht": 3000
+  },
+  {
+    "name": "Eisenmantel",
+    "rs": 4,
+    "be": 3,
+    "gewicht": 6000
+  },
+  {
+    "name": "Fünflagenharnisch",
+    "rs": 3,
+    "be": 2,
+    "gewicht": 7000
+  },
+  {
+    "name": "Garether Platte",
+    "rs": 6,
+    "be": 4,
+    "gewicht": 14000
+  },
+  {
+    "name": "Gladiatorenschulter",
+    "rs": 2,
+    "be": 1,
+    "gewicht": 4000
+  },
+  {
+    "name": "Iryanrüstung",
+    "rs": 3,
+    "be": 2,
+    "gewicht": 3500
+  },
+  {
+    "name": "Kettenhemd",
+    "rs": 3,
+    "be": 3,
+    "gewicht": 6500
+  },
+  {
+    "name": "Kettenhemd, langes",
+    "rs": 4,
+    "be": 4,
+    "gewicht": 10000
+  },
+  {
+    "name": "Kettenmantel",
+    "rs": 5,
+    "be": 5,
+    "gewicht": 12000
+  },
+  {
+    "name": "Kettenweste",
+    "rs": 2,
+    "be": 2,
+    "gewicht": 5000
+  },
+  {
+    "name": "Krötenhaut",
+    "rs": 3,
+    "be": 2,
+    "gewicht": 4000
+  },
+  {
+    "name": "Kürass",
+    "rs": 3,
+    "be": 2,
+    "gewicht": 4000
+  },
+  {
+    "name": "Kusliker Lamellar",
+    "rs": 4,
+    "be": 3,
+    "gewicht": 7500
+  },
+  {
+    "name": "Lederharnisch",
+    "rs": 3,
+    "be": 3,
+    "gewicht": 4500
+  },
+  {
+    "name": "Leichte Platte",
+    "rs": 4,
+    "be": 3,
+    "gewicht": 7500
+  },
+  {
+    "name": "Mammutonpanzer",
+    "rs": 5,
+    "be": 3,
+    "gewicht": 6000
+  },
+  {
+    "name": "Maraskanischer Hartholzharnisch",
+    "rs": 4,
+    "be": 2,
+    "gewicht": 7000
+  },
+  {
+    "name": "Ringelpanzer",
+    "rs": 4,
+    "be": 3,
+    "gewicht": 7000
+  },
+  {
+    "name": "Schuppenpanzer",
+    "rs": 5,
+    "be": 5,
+    "gewicht": 12000
+  },
+  {
+    "name": "Spiegelpanzer",
+    "rs": 5,
+    "be": 4,
+    "gewicht": 10000
+  },
+  {
+    "name": "Tuchrüstung",
+    "rs": 2,
+    "be": 2,
+    "gewicht": 2500
+  },
+  {
+    "name": "Wattierte Unterkleidung",
+    "rs": 1,
+    "be": 1,
+    "gewicht": 2500
+  },
+  {
+    "name": "Wattierter Waffenrock",
+    "rs": 2,
+    "be": 2,
+    "gewicht": 3000
+  },
+  {
+    "name": "Baburiner Hut",
+    "rs": 2,
+    "be": 1,
+    "gewicht": 3000,
+    "addon": true
+  },
+  {
+    "name": "Drachenhelm",
+    "rs": 2,
+    "be": 1,
+    "gewicht": 3000,
+    "addon": true
+  },
+  {
+    "name": "Kettenhaube",
+    "rs": 1,
+    "be": 1,
+    "gewicht": 3500,
+    "addon": true
+  },
+  {
+    "name": "Kettenzeug",
+    "rs": 1,
+    "be": 1,
+    "gewicht": 12000,
+    "addon": true
+  },
+  {
+    "name": "Lederhelm",
+    "rs": 1,
+    "be": 1,
+    "gewicht": 1500,
+    "addon": true
+  },
+  {
+    "name": "Lederzeug",
+    "rs": 1,
+    "be": 1,
+    "gewicht": 2000,
+    "addon": true
+  },
+  {
+    "name": "Morion",
+    "rs": 2,
+    "be": 1,
+    "gewicht": 4000,
+    "addon": true
+  },
+  {
+    "name": "Plattenzeug",
+    "rs": 2,
+    "be": 2,
+    "gewicht": 9500,
+    "addon": true
+  },
+  {
+    "name": "Schaller (mit Bart)",
+    "rs": 2,
+    "be": 1,
+    "gewicht": 5000,
+    "addon": true
+  },
+  {
+    "name": "Streifenschurz",
+    "rs": 1,
+    "be": 0,
+    "gewicht": 3000,
+    "addon": true
+  },
+  {
+    "name": "Sturmhaube",
+    "rs": 2,
+    "be": 1,
+    "gewicht": 3500,
+    "addon": true
+  },
+  {
+    "name": "Tellerhelm",
+    "rs": 1,
+    "be": 1,
+    "gewicht": 1500,
+    "addon": true
+  },
+  {
+    "name": "Topfhelm",
+    "rs": 2,
+    "be": 2,
+    "gewicht": 4500,
+    "addon": true
+  },
+  {
+    "name": "Amazonenrüstung",
+    "rs": 5,
+    "be": 3,
+    "gewicht": 8000,
+    "komplett": true
+  },
+  {
+    "name": "Gestechrüstung",
+    "rs": 12,
+    "be": 10,
+    "gewicht": 30000,
+    "komplett": true
+  },
+  {
+    "name": "Horasischer Reiterharnisch",
+    "rs": 8,
+    "be": 5,
+    "gewicht": 17000,
+    "komplett": true
+  }
+]

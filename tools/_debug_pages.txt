@@ -1,0 +1,230 @@
+=== SEITE 31 (Armatrutz) ===
+Probe: IN / GE / KO
+Technik: Die Elfe streicht mit den Händen über 
+ihre Brust, während sie ama tharza spricht.
+Zauberdauer: 3 Aktionen
+Wirkung: Die Zaubernde erhält eine (zusätzliche) 
+‘stählerne Haut’, die ihren natürlichen Rüstungsschutz 
+erhöht. Die Stärke der zusätzlichen Rüstung darf maximal 
+ZfW/2 Punkte betragen. Die zusätzliche Rüstung erzeugt 
+keine Behinderung, wirkt wie alle stofflichen Rüstungen 
+gegen materielle Angriffe (und damit auch gegen alle Dämo-
+nen- und Elementarattacken, die eine materielle Komponente 
+haben), jedoch nicht gegen Zauber, die Schaden ohne materielle 
+Komponente erzeugen wie der FULMINICTUS. 
+Der ARMA­TRUTZ hält übrigens auch die Bisse von Tieren wie 
+Ratten oder Fledermäusen ab, die sich ungerüstete Stellen des 
+Körpers aussuchen und SP anstatt TP hervorrufen.
+Kosten: zusätzlicher RS mal zusätzlicher RS minus ZfP*/2 in AsP, 
+mindestens aber 4 AsP
+Beispiel: Die Elfe Lorindel trägt einen Lederharnisch (RS 3). 
+Diese Rüstung will sie auf RS 7 verstärken, benötigt also 4 
+zusätzliche RS-Punkte. 4 mal 4 ist 16. Bei der Zauberprobe hat 
+sie 5 Punkte übrig behalten; ZfP*/2 ist also 3. Lorindel muss 
+also 16 –3 gleich 13 AsP einsetzen.
+Zielobjekt: Einzelperson, freiwillig
+Reichweite: selbst
+Wirkungsdauer: maximal eine Spielrunde (A)
+Modifikationen und Varianten: Zauberdauer, Kosten, Reichweite 
+(Berührung), Wirkungsdauer
+ Körperschild (+4): Der Zauber wird 
+nur auf einen Teil des Körpers angewendet und 
+kostet entsprechend weniger. Bei den Trefferzonen 
+Brust, Rücken und Bauch werden die AsP-Kosten 
+halbiert, bei Kopf, Armen und Beinen geviertelt, betra-
+gen jeweils aber mindestens 3 AsP. (Zu den Trefferzonen 
+siehe WdS 107ff.)
+ Kraft des Fakirs (+3, ab ZfW 7). Unter der Wirkung 
+dieser Variante ist die Zauberin resistent gegen Schäden, die 
+1 SP oder weniger verursachen würden. Größere Schadenswir-
+kungen betreffen sie allerdings unvermindert. Mücken stechen 
+die Elfe nicht, und sie kann schadlos über Scherben gehen (nicht 
+jedoch rennen oder springen). Die Wirkungsdauer beträgt maximal 
+ZfP* Spielrunden (A), die Kosten 1 AsP pro SR.
+Reversalis: hebt einen wirkenden ARMATRUTZ auf.
+Antimagie: Sowohl EIGENSCHAFT WIEDERHERSTELLEN 
+als auch ERZBANN können die Wirkung beenden; kann in den 
+entsprechenden Zonen nur erschwert gewirkt werden. 
+Merkmale: Eigenschaften, Elementar (Erz)
+Komplexität: B
+Repräsentationen und Verbreitung: Elf, Mag je 6; Hex 3; Dru 2 
+Obwohl dieser Spruch ursprünglich von den Elfen stammt, gehört 
+er – wie auch der firnelfische FLIM FLAM – zu den meistgelehrten 
+Sprüchen an menschlichen ­Akademien, und auch Hexen und manchen 
+Drui­den ist diese Schutzformel nicht unbekannt. Andere Zauberkun-
+dige erlernen meist die leicht zugängliche elfische oder gildenmagische 
+Repräsentation, wenn sie Leib und Leben behüten wollen.
+ARMATRUTZ
+30
+B
+Eigenschaften 
+Elementar (Erz)
+
+
+=== SEITE 62 (Corpofesso) ===
+Probe: KL / KO / KK (+MR)
+Technik: Der Magier deutet mit der offenen 
+rechten Hand auf das Opfer, spricht die Formel 
+und ballt die Hand zur Faust.
+Zauberdauer: 5 Aktionen
+Wirkung: Das Opfer dieses Zauberspruches leidet unter 
+schmerzhafter Muskelschwäche: Es verliert schlagartig 
+ZfW/2 Punkte Körperkraft und ZfW/4 Punkte Gewandt-
+heit und erleidet ZfW/2 Punkte Erschöpfung. Während der 
+gesamten Wirkungsdauer ist es zu keiner Kraftanstrengung 
+(dazu zählen auch Kampfhandlungen) oder längerer Dauerbe-
+lastung fähig. Sinkt die KK gar unter 5, so ist das Opfer auch 
+nicht mehr in der Lage, sich ohne Hilfe fortzubewegen. Sollte ein 
+Opfer trotz der negativen Auswirkungen des Zaubers weiterhin 
+zu kämpfen versuchen, dann verliert es pro Kampfaktion (AT oder 
+PA) 1W6 ­Ausdauerpunkte und erleidet pro 5 Kampfrunden einen 
+Punkt Erschöpfung. Dieser Kampfzauber ist vor allem geeignet, 
+lästige Verfolger zu bremsen oder einen Gegner nur kampfunfähig, 
+nicht aber gleich zum Krüppel zu zaubern.
+Kosten: 8 AsP
+Zielobjekt: Einzelwesen
+Reichweite: 7 Schritt
+Wirkungsdauer: ZfP* mal 10 Kampfrunden, die Erschöpfung muss 
+jedoch durch Ruhe reduziert werden
+Modifikationen und Varianten: Zauberdau-
+er, Erzwingen, Kosten, Zielobjekt (mehrere), 
+Reichweite, Wirkungsdauer
+ In der Variante gegen mehrere Wesen kostet der 
+Zauber nur 6 AsP pro Opfer.
+Reversalis: hebt einen wirkenden CORPOFESSO auf 
+oder bewirkt eine Kräftigung des Betroffenen. 
+Antimagie: kann in einer Zone des EIGENSCHAFT WIE-
+DERHERSTELLEN nur erschwert gewirkt und von diesem 
+Zauber beendet werden.
+Merkmale: Eigenschaften
+Komplexität: C
+Repräsentationen und Verbreitung: Mag 4; Elf, Hex je (Mag) 2 
+Diese Eigenentwicklung aus Bethana wurde bei Veröffentlichung 
+mit gemischtem Echo aufgenommen: Während der damalige Beilun-
+ker Akademieleiter Saldor Foslarin äußerte, dass ‘so eine goblineske 
+Albernheit’ nie den Weg in den Kanon der gelehrten Sprüche finden 
+würde, haben alle ‘elfisch’ orientierten ­Schulen (Donnerbach, Norburg 
+und die Akademie der Verformungen in Lowangen) den Spruch freudig 
+angenommen. Dies ist auch der erste Zauber, dessen Meisterformel im 
+jährlichen Journal für angewandte Hermetik, dem Almanach 
+der Bethaner Akademie, der allgemeinen Öffentlichkeit zugänglich 
+gemacht wurde.
+CORPOFESSO
+GLIEDERSCHMERZ
+61
+C
+ 
+Eigenschaften 
+
+
+=== SEITE 20 (Adlerauge) ===
+Probe: MU / KO / KK
+Technik: Die Magierin presst die Hände so fest 
+sie kann aneinander, spricht die Formel und reißt 
+die Hände blitzartig auseinander.
+Zauberdauer: 10 Aktionen
+Wirkung: Nach Anwenden dieses Spruches verschwindet 
+aus einem Raum schlagartig und auf magische Weise alle 
+Luft, es herrscht ein Vakuum. Alle dort befindlichen Lebewe-
+sen drohen zu ersticken. (Es gilt der Schaden eines Würgegriffs 
+gemäß WdS 93: 1W6+2 SP(A) / KR.) Außerdem werden 
+Flammen gelöscht, und es treten beim Wiedereinströmen der 
+Luft heftige Winde auf. Ist der Raum oder das Gefäß besonders 
+gut gegen Lufteintritt versiegelt (z.B. verschlossene Fässer und 
+Flaschen), kann es passieren, dass er oder es durch den Unterdruck 
+zerstört wird.
+Gegen elementare Wesenheiten der Luft wirkt dieser Zauber verhee-
+rend: Mindergeister, die zum Teil aus Luft bestehen, werden auf der 
+Stelle vernichtet, Elementargeister oder Dschinne der Luft erleiden 
+2 x ZfP* Schadenspunkte, und es heißt, dass selbst ein Elementarer 
+Meister der Luft in der Abwesenheit seines Elements gelähmt ist.
+Kosten: 10 AsP + 1 AsP pro 5 Raumschritt
+Zielobjekt: Zone
+Reichweite: Die luftleere Zone entsteht maximal ZfW Schritt vom 
+Zaubernden entfernt. Ihre größte Ausdehnung 
+beträgt ZfW x 5 Raumschritt.
+Wirkungsdauer: ZfP* KR, danach strömt die Luft 
+auf natürliche Weise wieder ein.
+Modifikationen: Zauberdauer, Kosten, Reichweite, 
+Wirkungsdauer
+Reversalis: bewirkt einen AEROGELO.
+Antimagie: kann in einer Zone des VERÄNDERUNG 
+AUFHEBEN nur erschwert gewirkt und von diesem Zauber 
+beendet werden. Ein ZORN DER LUFT kann (wenn mehr 
+TP erzielt werden, als der AEROFUGO an ZfP* besitzt) ein 
+‘Leck’ in die Vakuumbegrenzung schlagen, so dass Luft langsam 
+wieder einströmt.
+Merkmale: Umwelt, Elementar (Luft)
+Komplexität: D
+Repräsentationen und Verbreitung: Ach, Mag je 2 
+Dieser seltene Spruch ist außerhalb seiner Anwenderschaft – bei den 
+Menschen nur die Magier des Konzils der Elementaren Gewalten – so 
+gut wie unbekannt. Unseres Wissens nach handelte es sich ursprünglich 
+um ein vorbereitendes Ritual zur Beschwörung bestimmter gehörnter 
+Dämonen, die erst dann in der Lage sind, in der Gegenwart von Luft 
+zu existieren, wenn sie in dieser Welt gebunden sind. Vermutet wird 
+weiterhin eine Hexalogie, die Elemente bannt, so etwa ein echsisches 
+Ritual, das einem Gebiet alle Feuchtigkeit entzieht.
+AEROFUGO
+VAKUUM
+19
+D
+Umwelt 
+Elementar (Luft)
+
+
+=== SEITE 130 (Fulminictus) ===
+Probe: KL / CH / KO (+MR)
+Technik: Der Borbaradianer berührt sein Op-
+fer mit der Hand (unter Umständen durch einen 
+gelungenen waffenlosen Angriff nachzuweisen) und 
+flüstert die Formel.
+Zauberdauer: 2 Aktionen (eine davon die Berührung)
+Wirkung: Das Opfer windet sich in unerträglichen 
+Schmerzen, als würden alle seine Muskeln ­gleichzeitig 
+von einem Krampf befallen. Es ist zu keiner kontrollierten 
+Bewegung fähig; ihm steht jedoch ein ­intuitiver Ausweich-
+versuch (auf Ausweichen/4) zu, wenn es an­ge­griffen wird. 
+Das Opfer verliert in jeder KR Ausdauer in Höhe von ZfP* 
+Ausdauerpunkten (borbaradianische Variante: 1W20 Punk-
+ten). Sinkt die AU da­durch unter 0, kann es sogar bis zum 
+Ende der Wirkungsdauer bewusstlos werden. Nach Ende der 
+Wirkung erleidet das Opfer ZfP*/2 Punkte (borbaradianische 
+Variante: 1W6 Punkte) Erschöpfung. Erleidet das Opfer während 
+der Wirkungsdauer weiteren, echten Schaden (SP), so fällt die 
+HÖLLENPEIN-Wirkung von ihm ab. 
+Kosten: 11 AsP (borbaradianische Variante: 1W20 AsP bzw. 
+1W20/2 LeP)
+Zielobjekt: Einzelwesen
+Reichweite: Berührung
+Wirkungsdauer: ZfP* mal 3 Kampfrunden
+Modifikationen und Varianten: Zauberdau-
+er, Zielobjekt (mehrere), Reichweite
+ Die Achaz-Variante hat in Wasser eine Reich-
+weite von 3 Schritt und ist gegen Nicht-Geschuppte 
+um 3 Punkte erleichtert.
+Reversalis: bewirkt Hochgefühl und Euphorie; gibt AuP 
+zurück und kann dadurch sogar eigentlich Kampfunfähige 
+kurzfristig auf den Beinen halten.
+Antimagie: kann in einer Zone des EINFLUSS BANNEN 
+nur erschwert gewirkt und von diesem Zauber beendet werden. 
+(Gegen die borbaradianische Variante wirkt auch der BELHAL-
+HARBANN.)
+Merkmale: Einfluss (borbaradianische Variante: Dämonisch 
+(Belhalhar), Einfluss))
+Komplexität: C
+Repräsentationen und Verbreitung: Bor 7; Ach, Mag je 3 
+Ein wissbegieriger Scholar kann den Zauber entweder bei einem 
+Borbaradianer oder einem Magier ähnlich finsterer Gesinnung 
+erlernen (meist jeweils die borba­radianische Variante) oder ihn 
+aus Archon Megalons Werk Die Angst rekonstruieren. Er wird in 
+Andergast, Bethana, an der Fasarer Al‘Achami und vor allem in der 
+Halle der Macht zu Lowangen gelehrt (jeweils die gildenmagische, 
+de-borbaradianisierte Thesis, jeweils nur an eigene Schüler); in Punin 
+ist die Thesis einsehbar. Die Achaz-Kristallomanten kennen einen 
+vergleichbaren Zauber.
+HÖLLENPEIN
+ZERREISSE DICH!
+129
+C
+Einfluss 

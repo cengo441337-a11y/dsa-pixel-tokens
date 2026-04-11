@@ -1,1 +1,786 @@
-[]
+[
+  {
+    "name": "Scharfschütze",
+    "ap": 300,
+    "voraussetzung": "SF Wuchtschlag",
+    "effekt": "2, bei einzelnen Scharfschützen und Jägern Kosten: 300 AP Niederwerfen: Dies ist eine besondere Form des Wuchtschlags",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Schildkampf I",
+    "ap": 200,
+    "voraussetzung": "KK 15; SF Schildkampf I",
+    "effekt": "Diese Fertigkeit im Um- gang mit Schilden, die auf der SF Linkhand basiert, gibt einem Schildkämpfer 2 weitere zusätzliche Punkte auf seinen Parade-Ba- siswert (so dass der PA-Wert mit dem Schild sich",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Schildkampf II",
+    "ap": 200,
+    "voraussetzung": "KK 15; SF Schildkampf I",
+    "effekt": "Diese nochmals weiterfüh- rende Fertigkeit im Umgang mit Schilden gibt einem Schildkämp­fer 2 weitere zusätz- liche Punkte auf seinen Parade-Basiswert (so dass der PA-Wert sich aus PA-Basis + PA-Modif",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Schildspalter",
+    "ap": 100,
+    "voraussetzung": "KK 15; SF Niederwerfen",
+    "effekt": "Der Kämpfer ist in der Lage, einen gezielten Angriff auf einen gegne- rischen Schild durchzuführen und diesen eventuell mit einem Schlag unbrauchbar zu machen",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Schnellladen (Bogen oder Armbrust)",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "Ein Held mit dieser Sonderfertigkeit ist durch Drill oder langjährige Praxis in der Lage, schneller einen Pfeil aus dem Köcher (oder vom Boden) auf die Sehne und an die Wange zu bringen; bei allen Bög",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Schnellziehen",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "Dies ist die Fertigkeit, eine Waffe möglichst schnell aus der Scheide zu ziehen und kampfbereit zu haben",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Spießgespann",
+    "ap": 100,
+    "voraussetzung": "TaW Speere 10; SF Sturm- angriff",
+    "effekt": "Mit dieser Sonderfertigkeit kann ein überlanger Spieß (Pike, Drachen- töter) gleichzeitig von zwei Personen ge- führt werden; wenn beiden eine AT oder PA gelingt, gelingt die gesamte Angriffs- oder Ab",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Sturmangriff",
+    "ap": 100,
+    "voraussetzung": "GE 10",
+    "effekt": "GE 10 Verbreitung: 5 Kosten: 300 AP (6 GP), verbilligt für Helden mit dem Vorteil Schlangenmensch (150 AP / 3 GP) Ausweichen II: Dies ist die Steigerung von Ausweichen I",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Tod von links",
+    "ap": 100,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Todesstoß",
+    "ap": 200,
+    "voraussetzung": "MU 15; SF Gezielter Stich",
+    "effekt": "Erlaubt ein Alles- oder-Nichts-Manöver mit einer zum Stich geeigneten Waffe, um einen Kampf mit einem Schlag zu been- den: Bei gelungener erschwerter Attacke und misslungener gegnerischer Abwehr werde",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Turnierreiterei",
+    "ap": 100,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Umreißen",
+    "ap": 100,
+    "voraussetzung": "KK 12; SF Finte",
+    "effekt": "Erlaubt eine Attacke mit be- stimmten Waffen, die keinen Schaden an- richtet, sondern den Gegner durch geschickte Technik von den Beinen holt",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Unterwasserkampf",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "Ein Held mit dieser ungewöhnlichen Sonderfertigkeit ist in der Lage, seine Bewegungen dem Widerstand des Wassers anzupassen und gerade so schnell zuzustoßen oder zuzugreifen, wie es effektiv ist – er ",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Waffe zerbrechen",
+    "ap": 200,
+    "voraussetzung": "KK 12; PA-Basis 9; SF Binden",
+    "effekt": "Mit dieser Sonder- fertigkeit kann ein Kämpfer bei seiner Parade die gegnerische Klinge mit der dafür ausgestatteten Parierwaffe auffangen und mit einer schnellen Bewegung zerbrechen",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Waffenmeister (Waffe)",
+    "ap": 400,
+    "voraussetzung": "",
+    "effekt": "Ein Held mit dieser Kampf-Son- derfertigkeit gehört zu den unangefochtenen Meistern seiner Waffengattung, von denen auf dem ganzen Kontinent zu keiner Zeit mehr als eine Handvoll existieren",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Waffenmeister (Schild)",
+    "ap": 400,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Waffenloses Manöver",
+    "ap": 0,
+    "voraussetzung": "",
+    "effekt": "je nach Manöver",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Waffenlose Kampftechnik: Bornländisch",
+    "ap": 100,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Waffenlose Kampftechnik: Gladiatorenstil",
+    "ap": 150,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Waffenlose Kampftechnik: Hammerfaust",
+    "ap": 150,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Waffenlose Kampftechnik: Hruruzat",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Waffenlose Kampftechnik: Mercenario",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Waffenlose Kampftechnik: Unauer Schule",
+    "ap": 150,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Waffenspezialisierung 20 AP mal Aktivierungsfaktor für die erste,",
+    "ap": 40,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Windmühle",
+    "ap": 200,
+    "voraussetzung": "SF Gegenhalten und Wuchtschlag",
+    "effekt": "Unter Einsatz dieser Sonderfer- tigkeit kann ein Kämpfer mit dem gewagten gleichnamigen Manöver besonderen Gewinn aus einem wuchtigen Angriff seines Gegners ziehen und einen gegnerischen Wuchtschlag i",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Wuchtschlag",
+    "ap": 200,
+    "voraussetzung": "IN und GE je 12; Sonder- fertigkeit Meisterparade oder Parierwaffen I",
+    "effekt": "3 Kosten: 200 AP Binden: Mit dieser Sonderfertigkeit kann ein Kämpfer mittels des gleichnamigen Manö- vers bei seiner Parade die gegnerische Waffe behindern und somit die nächste gegnerische PA erschw",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Apport",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Astrale Meditation",
+    "ap": 100,
+    "voraussetzung": "",
+    "effekt": "Wer diese Sonder- fertigkeit beherrscht, ist in der Lage, durch schiere Konzentration und etwas Zeitaufwand (1SR pro umgewandelten Punkt; erfordert eine Probe auf IN/CH/KO, erleichtert um den halben R",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Aura verhüllen",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Aurapanzer",
+    "ap": 500,
+    "voraussetzung": "MU 15, KL, IN, KO 13; SF Gedankenschutz; der Held muss sich für mindestens ein halbes Jahr zur Kontemplati- on zurückziehen; er darf nicht die Nachteile Ar­ka­no­phobie, Astraler Block, Jähzorn, Nied-",
+    "effekt": "MU 15, KL, IN, KO 13; SF Gedankenschutz; der Held muss sich für mindestens ein halbes Jahr zur Kontemplati- on zurückziehen; er darf nicht die Nachteile Ar­ka­no­phobie, Astraler Block, Jähzorn, Nied-",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Bannschwert",
+    "ap": 200,
+    "voraussetzung": "RK Druide, Geode (jeweils nur auf nicht-metallische Instrumente), Hexe, Kristallomant, Gildenmagier, Schamane",
+    "effekt": "Ein solcherart ver- zauberter Gegenstand kehrt auf Befehl zum Zauberer zurück, wenn er von diesem räumlich getrennt ist",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Blutmagie",
+    "ap": 200,
+    "voraussetzung": "RK Druide oder RK Geo- de (Herr der Erde), Werte s.o.; teilweise auf- einander aufbauend",
+    "effekt": "Der Zauberkundige hat sich die Methodik angeeignet, durch die Op- ferung von Tieren oder gar kulturschaffen- den Zweibeinern (kurz: durch Ausnutzung fremder Lebensenergie) seine Zauber und Rituale mit",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Chimärenmeister",
+    "ap": 250,
+    "voraussetzung": "MU 15, TaW Magiekunde 11, Merk­malskenntnis Dämonisch (Asfa- loth), ZfW CHIMAEROFORM 11",
+    "effekt": "Kenner dieser Son- derfertigkeit haben Erleichterungen bei der Konstruktion von Chimären; ihre Chimären sind zudem loyaler als üblich",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Dämonenbindung I",
+    "ap": 150,
+    "voraussetzung": "Magiekunde 11 / 15, IN- VOCATIO MINOR / MAIOR 15; Dämonen- bindung II erfordert Dämonenbindung I",
+    "effekt": "Der Be- schwörer kann einen Niederen / Gehörnten Dämon dauerhaft in der dritten Sphäre bin- den oder manifestieren, was ihn täglich AsP und LeP kostet, die üblicherweise in einem kurzen Ritual um Mitt",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Dämonenbindung II",
+    "ap": 250,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Druidenrache",
+    "ap": 100,
+    "voraussetzung": "Spruchzauberer; MU 15",
+    "effekt": "Durch dieses Ritual ist der Zau- berer in der Lage, all seine Reserven (seine LE, Eigenschaften und sogar Fertigkeitspunkte) in einen finalen, spektakulären Zauberspruch zu legen – und mit diesem zu v",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Druidische Dolchrituale",
+    "ap": 0,
+    "voraussetzung": "",
+    "effekt": "je nach Ritual",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Druidische Herrschaftsrituale",
+    "ap": 0,
+    "voraussetzung": "",
+    "effekt": "je nach Ritual",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Eiserner Wille I / II",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "Der Held hat geis­tige Techniken erlernt, die es ihm ermöglichen, seinen Geist gegen magische Beeinflus- sungen zu festigen",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Elementarharmonisierte Aura",
+    "ap": 700,
+    "voraussetzung": "KL 15, IN 15, Magiekunde 12, Merkmalskenntnis oder Begabung in mindes­ tens einem Element. Der Held muss sich für mindestens sechs Monate zur Kontemplation an einen geeigneten Ort zurückziehen und dar",
+    "effekt": "Der Zauberer kann die Merkmalskenntnis des Gegenelements seines bevorzugten Elements erlernen und ist dann in der Lage, Zauber des Gegenelements ohne weitere Einschrän- kungen zu sprechen",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Elfenlieder",
+    "ap": 0,
+    "voraussetzung": "",
+    "effekt": "je nach Elfenlied",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Exorzist",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "200 AP; halbe Kosten bei Merkmals- kenntnis Beschwörung Keulenrituale (OR)*: Mit diesen Ritualen kann ein Schamane seine Knochenkeule verzaubern",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Fernzauberei",
+    "ap": 100,
+    "voraussetzung": "Spruchzauberer; IN 12",
+    "effekt": "Für Kenner dieser Son­ derfertigkeit sind die Zuschläge auf die Zau- berprobe beim Zaubern auf die Distanz Ho- rizont halbiert",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Form der Formlosigkeit",
+    "ap": 150,
+    "voraussetzung": "TaW Magiekunde 11, INVO­CATIO MINOR oder I. MAIOR 11",
+    "effekt": "Mit dieser SF ist der Beschwörer in der Lage, dem Dämon bei (oder sogar nach) der Beschwörung zu- sätzliche Eigenschaften mitzugeben",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Geber der Gestalt",
+    "ap": 100,
+    "voraussetzung": "TaW Magiekunde 15, INVO­ CATIO MINOR oder I. MAIOR 15, Ritualkennt­ nis [Druide, Gildenmagie, Hexe oder Kristallo­ mant] 11, SF Form der Formlosigkeit",
+    "effekt": "Ein Beschwörer mit dieser SF kann beim nachträglichen Formen eines Dämons diesem erleichtert zusätzliche Eigenschaften mitgeben",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Gedankenschutz",
+    "ap": 250,
+    "voraussetzung": "",
+    "effekt": "2, einzelne Lehrmeister im Um- feld magischer und religiöser Traditionen Kosten: 500 AP Bann- und Schutzkreise: »Bannkreise halten Wesen in ihrem Inneren gefangen, Schutz- kreise dagegen schließen sie",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Gefäß der Sterne",
+    "ap": 250,
+    "voraussetzung": "KL, IN je 12",
+    "effekt": "Der Zauberer ist in der Lage, das ‘Gefäß’, das die Astralkraft auf- nimmt, zu vergrößern, d.h., er ist in der Lage, 286 Vorteile, Nachteile, Sonderfertigkeiten mehr permanente AE speichern, er wird ‘s",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Geodenrituale",
+    "ap": 0,
+    "voraussetzung": "",
+    "effekt": "je nach Ritual",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Golembauer",
+    "ap": 250,
+    "voraussetzung": "MU 15, TaW Magie- kunde 11, ZfW STEIN WANDLE 11+ oder ZfW STAUB WANDLE 11+",
+    "effekt": "Kenner dieser Sonderfer- tigkeit haben Erleichterungen bei der Er- schaffung von Golems, sowohl dämonischer wie auch elementarer Art; ihre Golems sind zudem loyaler als üblich",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Große Meditation Erlernen",
+    "ap": 100,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Hexenflüche",
+    "ap": 0,
+    "voraussetzung": "SF Dämonenbindung II, Be­herrschungs-Wert 15, RK [Druide, Gil- denmagie, Hexe oder Kristallomant] 11",
+    "effekt": "je nach Hexenfluch",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Höhere Dämonenbindung",
+    "ap": 250,
+    "voraussetzung": "SF Dämonenbindung II, Be­herrschungs-Wert 15, RK [Druide, Gil- denmagie, Hexe oder Kristallomant] 11",
+    "effekt": "Ein Be- schwörer mit dieser Sonderfertigkeit muss bei Bindung oder Manifestation eines Dämonen nur geringere AsP-Kosten aufwenden",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Hypervehemenz",
+    "ap": 300,
+    "voraussetzung": "",
+    "effekt": "Ermöglicht die Schaf- fung von Artefakten mittels ARCANOVI mit schier überwältigenden Effekten: Will ein Zauberer bei der Artefaktherstellung den Stapeleffekt nutzen, darf er zum Ansammeln von ZfP* be",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Invocatio Integra",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Keulenrituale",
+    "ap": 0,
+    "voraussetzung": "",
+    "effekt": "je nach Keulenritual; s.o.",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Konzentrationsstärke",
+    "ap": 100,
+    "voraussetzung": "Spruchzauberer; ZfW UNITATIO 10+",
+    "effekt": "Wird der Zaubernde durch einen äußeren Einfluss beim Zau­berwirken gestört, ist üblicherweise eine Selbst­beherrschungs-Probe nötig, um un- gestört weiter zaubern zu können",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Kraftkontrolle",
+    "ap": 300,
+    "voraussetzung": "",
+    "effekt": "Der Zauberkundige hat die Möglichkeit, durch schiere Konzen- tration bei jedem Zauberspruch oder Ritual einen Astralpunkt einzusparen",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Kraftlinienmagie I",
+    "ap": 50,
+    "voraussetzung": "RK Druide oder RK Geo- de (Herr der Erde), Werte s.o.; teilweise auf- einander aufbauend",
+    "effekt": "RK Druide oder RK Geo- de (Herr der Erde), Werte s.o.; teilweise auf- einander aufbauend Verbreitung und Kosten: je nach Ritual, s.o",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Akklimatisierung (Hitze/Kälte)",
+    "ap": 150,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "allgemein"
+  },
+  {
+    "name": "Berufsgeheimnis",
+    "ap": 100,
+    "voraussetzung": "das passende Handwerksta- lent auf TaW 15 oder höher, ein bis zwei pas- sende Hilfs-Talente jeweils auf TaW 7+",
+    "effekt": "Der Held hat von einem Zunftmeister ein Geheimnis der Hand- werkskunst erfahren, das ihm besondere Herstellungsverfahren oder die Verwendung spezieller Materialien erlaubt",
+    "kategorie": "allgemein"
+  },
+  {
+    "name": "Fälscher",
+    "ap": 100,
+    "voraussetzung": "",
+    "effekt": "Ermöglich das effektive Fälschen von Schriftstücken und Kunstwerken",
+    "kategorie": "allgemein"
+  },
+  {
+    "name": "Geländekunde",
+    "ap": 150,
+    "voraussetzung": "kann nur durch längeren Aufenthalt (mindestens 12 Monate) im ent- sprechenden Gelände erlernt werden; es ist allerdings auch kein weiterer Lernzeit-Auf- wand erforderlich. Die 12 Monate können unterbr",
+    "effekt": "Diese Fertigkeit steht einem Helden offen, wenn er längere Zeit in einer bestimmten Art von Wildnis verbringt",
+    "kategorie": "allgemein"
+  },
+  {
+    "name": "Kulturkunde",
+    "ap": 0,
+    "voraussetzung": "",
+    "effekt": "KL und IN mindestens 10, Kennt­nis der Sprache der Kultur mindes- tens 5",
+    "kategorie": "allgemein"
+  },
+  {
+    "name": "Meister der Improvisation",
+    "ap": 200,
+    "voraussetzung": "IN und FF mindestens 12",
+    "effekt": "Wer über diese Sonderfertigkeit verfügt, der kann fehlendes Werkzeug durch improvisierte Hilfsmittel kompensieren",
+    "kategorie": "allgemein"
+  },
+  {
+    "name": "Nandusgefälliges Wissen",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "Wer über diese Sonderfertigkeit verfügt, der besitzt eine für aventurische Verhältnisse fantastische All- gemeinbildung und ist in der Lage, Wissen aus verwandten Gebieten zu kombinieren und daraus di",
+    "kategorie": "allgemein"
+  },
+  {
+    "name": "Ortskenntnis",
+    "ap": 150,
+    "voraussetzung": "",
+    "effekt": "Der Held hat Kenntnis eines bestimmten Gebiets, seiner Weghindernisse, Wetterverhältnisse, Straßenbedingungen, wil­ den Tiere und dergleichen",
+    "kategorie": "allgemein"
+  },
+  {
+    "name": "Rosstäuscher",
+    "ap": 100,
+    "voraussetzung": "",
+    "effekt": "Mit Hilfe dieser Sonderfer- tigkeit kann ein Tier (auch aventurisch fast ausschließlich Pferde – daher der Name der SF) gezielt ‘geschminkt’, d.h",
+    "kategorie": "allgemein"
+  },
+  {
+    "name": "Standfest",
+    "ap": 200,
+    "voraussetzung": "GE 12",
+    "effekt": "Dies ist die erlernbare, schwächere Variante des Vorteils Balance (siehe Seite 248)",
+    "kategorie": "allgemein"
+  },
+  {
+    "name": "Talentspezialisierung",
+    "ap": 20,
+    "voraussetzung": "",
+    "effekt": "Oft sind Spezialisie- rungen möglich, weil der Held sich beson- ders mit einem Bereich des Talents beschäf- tigt hat (ob und welche Spezialisierungen im Einzelnen möglich sind, sollten Sie mit dem Mei",
+    "kategorie": "allgemein"
+  },
+  {
+    "name": "Aufmerksamkeit",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "Ein Held mit dieser Fä- higkeit benötigt nur eine Aktion (anstatt zweier), um sich im Kampf Orientierung (die gleichnamige längerfristige Handlung) zu verschaffen und seinen INI-Wert auf das mögliche ",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Ausfall",
+    "ap": 200,
+    "voraussetzung": "KO 12; SF Finte",
+    "effekt": "Ermöglicht dem Kämpfer, das gleichnamige Manöver durchzuführen: Er wandelt seine Abwehraktion ohne Malus in eine Angriffsaktion um und zwingt den Gegner zum umgekehrten Verhalten (dieser muss also zwe",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Ausweichen I",
+    "ap": 300,
+    "voraussetzung": "GE 12, SF Ausweichen I und Aufmerksamkeit",
+    "effekt": "Dies ist die Steigerung von Ausweichen I",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Ausweichen II",
+    "ap": 200,
+    "voraussetzung": "GE 15, SF Ausweichen II und Kampfre- flexe",
+    "effekt": "Dies ist die Steigerung von Ausweichen I",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Ausweichen III",
+    "ap": 200,
+    "voraussetzung": "GE 15, SF Ausweichen II und Kampfre- flexe",
+    "effekt": "Ein Held mit der dritten Stufe in dieser Son- derfertigkeit hat seine Fähigkeiten im Ausweichen perfektioniert: Er erhält weitere 3 Punkte als Bonus auf Ausweichen-Proben (insgesamt also 9 Punkte)",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Befreiungsschlag",
+    "ap": 100,
+    "voraussetzung": "KK 15, MU 12; Sonderfertig­keit Niederwerfen",
+    "effekt": "Ermöglicht das gleichna- mige Manöver: einen Rundumschlag gegen bis zu drei Gegner, um diese zurückzudrän- gen und sich Raum zu verschaffen",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Beidhändiger Kampf I",
+    "ap": 100,
+    "voraussetzung": "",
+    "effekt": "Diese Fertigkeit gibt einem Kämpfer deutlich besse- re Kontrolle über sämtliche Kampf- Handlungen mit der ‘falschen’ Hand",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Beidhändiger Kampf II",
+    "ap": 400,
+    "voraussetzung": "",
+    "effekt": "Der Erwerb dieser Sonderfertigkeit bedeutet, dass der Held die Perfektion im Linkshändigen Kampf erreicht hat und keinerlei Abzüge auf bei der Verwen- dung der falschen Hand hinnehmen muss",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Berittener Schütze",
+    "ap": 200,
+    "voraussetzung": "TaW Reiten 7; kann nur bei Fernkampf-Fertig- keiten eingesetzt werden, deren TaW 7 oder mehr beträgt",
+    "effekt": "Berittene Schüt- zen erleiden nur die Hälfte der Aufschläge, mit denen ein Schuss oder Wurf vom sich be- wegenden Reittier aus belegt ist; außerdem können sie ihre Waffen auf dem Pferderücken genauso ",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Betäubungsschlag",
+    "ap": 200,
+    "voraussetzung": "SF Finte und Wuchtschlag",
+    "effekt": "Diese Sonderfertigkeit er­möglicht es einem Kämpfer, einen sehr ge- zielten Schlag mit der stumpfen Seite seiner Waffe – das Manöver Betäubungsschlag – aus- zuführen und den Gegner damit möglicher- we",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Binden",
+    "ap": 200,
+    "voraussetzung": "IN und GE je 12; Sonder- fertigkeit Meisterparade oder Parierwaffen I",
+    "effekt": "Mit dieser Sonderfertigkeit kann ein Kämpfer mittels des gleichnamigen Manö- vers bei seiner Parade die gegnerische Waffe behindern und somit die nächste gegnerische PA erschweren oder die eigene AT e",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Blindkampf",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "Ein Nahkämpfer mit dieser sel- tenen Sonderfertigkeit ist in der Lage, auch mit verbundenen Augen, in völliger Dunkel- heit, gegen Unsichtbare oder gar bei Verlust des Augenlichts mit nur geringen Ein",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Defensiver Kampfstil",
+    "ap": 100,
+    "voraussetzung": "GE 12, SF Meisterparade",
+    "effekt": "Diese Sonderfertigkeit ermöglicht das Umwandeln der Angriffs- in eine Abwehraktion ohne den üblichen Malus von 4 Punkten, so dass dem Kämpfer damit zwei reguläre Paraden pro Kampfrunde zur Verfügung s",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Doppelangriff",
+    "ap": 100,
+    "voraussetzung": "SF Beidhändiger Kampf I",
+    "effekt": "Diese Sonderfertigkeit er- laubt das gleichzeitige Zuschlagen mit zwei (möglichst ähnlichen) Nahkampfwaffen gegen einen einzigen Gegner",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Eisenhagel",
+    "ap": 150,
+    "voraussetzung": "",
+    "effekt": "Ein Spezialist im Umgang mit Wurfscheiben, Wurfsternen oder ähnlichen Wurfgeschossen ist in der Lage, mehrere dieser Waffen gleichzeitig zu werfen, wobei die Fernkampf-Probe um die doppelte Zahl der v",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Entwaffnen",
+    "ap": 200,
+    "voraussetzung": "KK 12; SF Binden",
+    "effekt": "Ermöglicht einen Entwaff- nungsangriff gegen die Waffe eines Gegners: entweder mit einer erschwerten Angriffsak- tion oder mit einer erschwerten Abwehrak- tion (was die zusätzliche Sonderfertig­keit M",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Festnageln",
+    "ap": 200,
+    "voraussetzung": "GE 13, KK 13",
+    "effekt": "Ein Kämpfer mit dieser Son- derfertigkeit kann mit einer entsprechend geeigneten Waffe das gleichnamige Manöver ausführen und damit einen Gegner am Bo- den halten",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Finte",
+    "ap": 200,
+    "voraussetzung": "IN und GE je 12; Sonder- fertigkeit Meisterparade oder Parierwaffen I",
+    "effekt": "3 Kosten: 200 AP Binden: Mit dieser Sonderfertigkeit kann ein Kämpfer mittels des gleichnamigen Manö- vers bei seiner Parade die gegnerische Waffe behindern und somit die nächste gegnerische PA erschw",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Formation",
+    "ap": 100,
+    "voraussetzung": "SF Aufmerksamkeit",
+    "effekt": "Kämpfer, die diese Sonderfertig- keit erlernt haben, sind in der Lage, in einer Formation von mindestens drei Personen ihre Angriffs- und Abwehrfähigkeiten mit ihren Kameraden zu koordinieren",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Gegenhalten",
+    "ap": 200,
+    "voraussetzung": "MU 15, GE 12; SF Meis- terparade",
+    "effekt": "Kenntnis dieser Sonderfertig- keit ermöglicht einen Gegenangriff in einen feindlichen Angriff hinein",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Geschützmeister",
+    "ap": 100,
+    "voraussetzung": "",
+    "effekt": "Diese Sonderfertigkeit erlaubt es einem Geschützbefehliger bzw",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Gezielter Stich",
+    "ap": 100,
+    "voraussetzung": "SF Finte",
+    "effekt": "Erlaubt einen gezielten An- griff auf einen wenig geschützten Bereich des Gegners, der leichter Wunden erzeugt als normale Schläge",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Halbschwert",
+    "ap": 150,
+    "voraussetzung": "",
+    "effekt": "Diese Technik erlaubt es einem Kämpfer, mit bestimmten Waffen in kürzerer Distanzklasse zu kämpfen als für die Waffe üblich, und dabei nur geringere Abzüge in AT- und PA-Werten hinnehmen zu müssen",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Hammerschlag",
+    "ap": 200,
+    "voraussetzung": "MU 15; SF Niederwerfen",
+    "effekt": "Erlaubt ein Alles-oder- Nichts-Manöver, um einen Kampf mit einem Schlag zu beenden: Bei gelungener erschwerter Attacke und misslungener geg- nerischer Abwehr werden die TP deutlich erhöht",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Improvisierte Waffen",
+    "ap": 100,
+    "voraussetzung": "",
+    "effekt": "Wer sich mit dieser Sonderfertigkeit lange genug beschäftigt hat, ist in der Lage, fast jeden Gegenstand als Waffe zu verwenden – und damit allerlei Tricks zu veranstalten, die normalerweise mit impro",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Kampf im Wasser",
+    "ap": 100,
+    "voraussetzung": "",
+    "effekt": "Normalerweise erleiden Kämpfer, deren Element normalerweise das Land ist, beim Kampf im knie-, hüft- oder schultertiefen Wasser Abzüge auf ihre Kampfwerte",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Kampfgespür",
+    "ap": 300,
+    "voraussetzung": "AT-Basiswert 9; SF Aus- fall und Kampfreflexe",
+    "effekt": "1 Kosten: 200 AP Defensiver Kampfstil: Diese Sonderfertigkeit ermöglicht das Umwandeln der Angriffs- in eine Abwehraktion ohne den üblichen Malus von 4 Punkten, so dass dem Kämpfer damit zwei reguläre",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Kampfreflexe",
+    "ap": 300,
+    "voraussetzung": "IN 15; SF Aufmerksamkeit und Kampfreflexe",
+    "effekt": "IN 15; SF Aufmerksamkeit und Kampfreflexe Verbreitung: 3, bei erfahrenen Einzelkämp- fern Kosten: 300 AP Kampfreflexe: Ein Kämpfer mit dieser Fä- higkeit hat einen um 4 Punkte erhöhten Initiative-Wert",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Klingensturm",
+    "ap": 100,
+    "voraussetzung": "IN 15; SF Aufmerksamkeit und Kampfreflexe",
+    "effekt": "IN 15; SF Aufmerksamkeit und Kampfreflexe Verbreitung: 3, bei erfahrenen Einzelkämp- fern Kosten: 300 AP Kampfreflexe: Ein Kämpfer mit dieser Fä- higkeit hat einen um 4 Punkte erhöhten Initiative-Wert",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Klingentänzer",
+    "ap": 400,
+    "voraussetzung": "",
+    "effekt": "Ein Kämpfer mit dieser SF darf zur Bestimmung seiner Initiative 2W6 würfeln (hat also eine INI von IB+6+2W6)",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Klingenwand",
+    "ap": 100,
+    "voraussetzung": "IN 15; SF Aufmerksamkeit und Kampfreflexe",
+    "effekt": "IN 15; SF Aufmerksamkeit und Kampfreflexe Verbreitung: 3, bei erfahrenen Einzelkämp- fern Kosten: 300 AP Kampfreflexe: Ein Kämpfer mit dieser Fä- higkeit hat einen um 4 Punkte erhöhten Initiative-Wert",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Kriegsreiterei",
+    "ap": 300,
+    "voraussetzung": "",
+    "effekt": "Wer sich so weit mit seinem Pferd und dessen Verhalten im Kampf aus- kennt, dass er Übersicht und Ruhe bewahren kann, muss nur deutlich reduzierte Zuschlä- ge bei Kampfaktionen mit dem Pferd bzw",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Linkhand",
+    "ap": 300,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Meisterliches Entwaffnen",
+    "ap": 100,
+    "voraussetzung": "GE 15, SF Entwaffnen",
+    "effekt": "Mit dieser Sonderfertigkeit ist es möglich, auch Kämpfer mit Zweihandwaffen zu ent- waffnen",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Meisterparade",
+    "ap": 200,
+    "voraussetzung": "SF Beidhändiger Kampf I",
+    "effekt": "4 Kosten: 100 AP (2 GP) Doppelangriff: Diese Sonderfertigkeit er- laubt das gleichzeitige Zuschlagen mit zwei (möglichst ähnlichen) Nahkampfwaffen gegen einen einzigen Gegner",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Meisterschütze",
+    "ap": 300,
+    "voraussetzung": "",
+    "effekt": "Ein Meisterschütze kann u.a",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Niederwerfen",
+    "ap": 100,
+    "voraussetzung": "SF Wuchtschlag",
+    "effekt": "3, vor allem bei Axtkämpfern (Zwerge, Thorwaler) Kosten: 100 AP Beidhändiger Kampf I: Diese Fertigkeit gibt einem Kämpfer deutlich besse- re Kontrolle über sämtliche Kampf- Handlungen mit der ‘falsche",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Parierwaffen I",
+    "ap": 200,
+    "voraussetzung": "KK 12; SF Binden",
+    "effekt": "KK 12; SF Binden Verbreitung: 3 Kosten: 200 AP Festnageln: Ein Kämpfer mit dieser Son- derfertigkeit kann mit einer entsprechend geeigneten Waffe das gleichnamige Manöver ausführen und damit einen Geg",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Parierwaffen II",
+    "ap": 200,
+    "voraussetzung": "GE 15, SF Parierwaffen I",
+    "effekt": "Diese weiterführende Fer- tigkeit im Umgang mit Parierwaffen gibt einem entsprechend ausgestatteten Kämpfer weitere zusätzliche Parade-Boni, ermöglicht bestimmte Manöver und erlaubt eine zusätz- liche",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Reiterkampf",
+    "ap": 200,
+    "voraussetzung": "",
+    "effekt": "Reiter mit dieser Sonderfer- tigkeit müssen auf Reiten-Proben im Kampf nur geringere Zuschläge hinnehmen bzw",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Rüstungsgewöhnung I",
+    "ap": 150,
+    "voraussetzung": "KK 12; SF Rüstungsgewöh­ nung I",
+    "effekt": "Stadtgardisten tra- gen selten eine andere Rüs­tung als einen Wattierten Waffenrock und einen Helm; ebenso typisch ist es für Amboss­zwerge, in Kettenrüstung herumzulaufen",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Rüstungsgewöhnung II",
+    "ap": 300,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  },
+  {
+    "name": "Rüstungsgewöhnung III",
+    "ap": 450,
+    "voraussetzung": "",
+    "effekt": "",
+    "kategorie": "kampf"
+  }
+]

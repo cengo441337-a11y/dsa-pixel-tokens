@@ -1,0 +1,141 @@
+Probe: MU / IN / CH (+MR)
+Technik: Der Magier berührt mit Zeige- und 
+Mittelfinger der linken Hand den Waffenarm eines 
+Gefährten und spricht die Formel.
+Zauberdauer: 3 Aktionen
+Wirkung: Der Verzauberte verfällt in einen Kampf-
+rausch. Dabei erhöhen sich sein AT-Basiswert, MU und KK 
+um je 5 Punkte, während der PA-Basiswert, KL und CH um 
+je 5 Punkte sinken. Der Kämpfer kann keine Kampfmanöver 
+außer Ausweichen, Befreiungsschlag, Hammerschlag, Nie-
+derwerfen, Schildparade, Sturmangriff und Wuchtschlag 
+(sowie gewöhnliche AT- und PA-Aktionen) anwenden.
+Für die Veränderung des AT- und PA-Wertes gelten die oben 
+festgelegten Zahlen, eine Neuberechnung aufgrund der veränderten 
+Eigenschaften muss also nicht durchgeführt werden; die TP können 
+sich jedoch aufgrund der gesteigerten KK verbessern. 
+Das Opfer dieses Zaubers nimmt keine Schmerzen mehr wahr (der 
+Meister notiert die verlorenen LeP verdeckt) und wird auch von LeP/
+AuP-Verlust und Wunden nicht in seinem Kampfrausch behindert 
+(keine AT/PA-Einbußen, keine Kampfunfähigkeit). Nach Ablauf der 
+Wirkungsdauer beträgt die AU des Kämpfers 0 und er hat ZfP*/2 
+Punkte Erschöpfung erlitten. 
+Sind alle Gegner vor Ablauf der Wirkungsdauer besiegt, greift der 
+Rasende auch seine Kampfgefährten an und kann nur mittels Antimagie 
+davon abgebracht werden.
+Auf Personen mit dem Vorteil Kampfrausch oder dem Nachteil Blut-
+rausch gesprochen, ist dieser Spruch nicht um die MR erschwert. In 
+beiden Fällen ­schließen sich an die Wirkungsdauer des Zaubers noch 
+1W20 Kampfrunden lang die Auswirkungen des entsprechenden 
+Vor-/Nachteils an.
+Kosten: 11 AsP (borbaradianische Variante: 1W20 AsP bzw. 
+1W20/2 LeP)
+Zielobjekt: Einzelperson
+Reichweite: Berührung
+Wirkungsdauer: ZfP* x 5 Kampfrunden
+Modifikationen und Varianten: Zauberdauer, Erzwingen, 
+Kosten, Reichweite, Wirkungsdauer
+ Blutrausch (+3; ab ZfW 14): Das Opfer dieses ­Spruches 
+verwandelt sich in einen rasenden Wüterich, der ­alles an-
+greift, das sich ihm in den Weg stellt – sei es Freund oder 
+Feind. Die Werte-Veränderungen sind 2 Punkte ­stärker 
+als oben angegeben. Nach dem Amoklauf ist es 
+so ermattet, dass es keine weiteren anstrengen-
+den Aktionen unternehmen kann (AU fällt auf 0; 
+Verzauberter erleidet 2 x ZfP* Punkte Erschöpfung).
+ Borbaradianische Repräsentation: Kosten und 
+Wirkungsdauer werden mit 1W20 ausgewürfelt; enthält 
+automatisch die Blutrausch-Variante; als zusätzliches 
+Merkmal kommt Dämonisch (Belhalhar) hinzu und die 
+Modifikation Kosten kann nicht angewendet werden.
+ Achaz-Repräsentation: wirkt nur auf Geschuppte, ­kostet 
+jedoch auch nur 7 AsP (Kristallomanten-Bonus bereits einge-
+rechnet).
+Reversalis: hebt einen wirkenden KARNIFILO auf oder beruhigt 
+Walwütige und andere Berserker, bewirkt jedoch keine Eigen-
+schaftsänderung.
+Antimagie: kann nicht in einer Zone des EINFLUSS BANNEN 
+oder des EIGENSCHAFT WIEDERHERSTELLEN gewirkt werden 
+und kann mit diesen Antimagie-Sprüchen beendet werden. Gegen 
+die borbaradianische Variante wirkt auch der BELHALHARBANN.
+Merkmale: Einfluss, Eigenschaften (borbaradianische Variante: 
+Einfluss, Eigenschaften, Dämonisch (Belhalhar))
+Komplexität: C
+Repräsentationen und Verbreitung: Mag 4; Ach, Bor je 3 
+Die Struktur der Formel wie auch die fehlende Erwäh­nung in früh-
+zeitlichen Schriften lässt darauf schließen, dass es sich bei diesem 
+Zauber um eine Entwicklung der Schüler Borbarads oder sogar des 
+Dämonenmeisters selbst handelt. Gleichwohl fand der Zauber im 
+Lauf der Magierkriege schnell eine solche Verbreitung, dass der Ur-
+sprung im Dunkel blieb und die Gilden den damals noch als SAFT 
+KRAFT MONSTERMACHT bekannten Zauber für alle Magier 
+zum ­Studium freigaben. Da die Herkunft der Formel nunmehr 
+geklärt scheint, haben sich die Akademien, die dem Weg der 
+rechten Hand folgen, schon im Jahre 1007 BF geeinigt, die For-
+mel komplett aus ihrem Lehrplan zu streichen. Sie ist jedoch in 
+Andergast, Al’Anfa und Lowangen (Halle der Macht) weiterhin 
+verfüg- und erlernbar. Den Achaz schließlich ist eine Vari­ante 
+bekannt, die den Kampfrausch der Marus simulieren soll, 
+deren Thesiskern dem gildenmagischen aber bis auf wenige 
+Details gleicht – möglicher­weise diejenige Formel, aus der 
+der KARNIFILO einst entwickelt wurde.
+KARNIFILO
+RASEREI
+152
+C
+Einfluss 
+Eigenschaften
+
+--- PAGE BREAK ---
+Probe: KL / FF / KO
+Technik: Die Hexe legt kurz die Hände vor die 
+­Augen und konzentriert sich auf den Zauber.
+Zauberdauer: 10 Aktionen
+Wirkung: Mit diesem Zauber können Hexen sogar in 
+fast völliger Dunkelheit sehen. Üblicherweise erleiden 
+Lebewesen die halbe Dunkelheitsstufe (angefangen bei 
+Parade) als Abzug auf AT- und PA-Basiswerte und voll auf 
+ihren Fernkampfwert und auf ihre Sinnenschärfe-Proben oder 
+andere Talente, wo es auf das Sehen ankommt.
+Die dunkelste Dunkelheit ist hierbei Stufe 16 (siehe auch den 
+Zauber DUNKELHEIT auf Seite 69).
+Dieser Zauber senkt nun die Stufe der Dunkelheit um je einen 
+Punkt pro ZfP*. Zwar kann die Hexe Farben nur noch sehr blass 
+erkennen, aber Umrisse und Formen sind stark hervorgehoben. 
+Dieser Zauber kann nicht bei Tageslicht oder hellem Mondlicht 
+gewirkt werden (eine eingebaute Schutzfunktion); wird die Hexe 
+von plötzlichem hellen Licht überrascht, so ist sie für ZfP* Kampf-
+runden vollständig geblendet, für ZfP* SR noch mit Abzügen von je 
+2 Punkten durch tanzende Lichter gestraft. Um eine Blendung durch 
+plötzlich aufflammendes Licht zu vermeiden, muss der Hexe eine 
+Intuitions-Probe gelingen, damit sie die Augen rechtzeitig schließen 
+oder abwenden kann. Dieser Zauber wirkt auch gegen die verstärkte 
+Dunkelheit des gleichnamigen Zaubers.
+Kosten: 1 AsP pro 3 SR
+Zielobjekt: Einzelperson, freiwillig
+Reichweite: selbst
+Wirkungsdauer: je nach AsP-Einsatz (A)
+Modifikationen und Varianten: Zauberdauer, Reich-
+weite, Wirkungsdauer
+Reversalis: erzeugt eine Unempfindlichkeit gegen Licht, 
+was z.B. in der Wüste oder auf Schneefeldern von ­großem 
+Nutzen sein kann.
+Antimagie: kann in einer Zone des EIGENSCHAFT WIE-
+DERHERSTELLEN nur erschwert gesprochen und von diesem 
+Zauber beendet werden.
+Merkmale: Eigenschaften
+Komplexität: C
+Repräsentationen und Verbreitung: Hex 4, Elf 3 
+Dieser satuarische Zauber ist noch nicht allzu lange bekannt, und es 
+scheint, dass er auch in Hexenkreisen noch keine allzu weite Verbrei-
+tung gefunden hat, während ihn auf der anderen Seite bereits einige 
+Elfen kennen. Ob es sich um einen traditionellen Spruch oder eine 
+Neuentwicklung handelt, ist demzufolge ebenfalls unklar. Es scheint 
+so, als würde der Zauber die Augen der Hexe höchst empfindlich für 
+die geringste Spur von Licht machen, so dass bereits Mondlicht ihr 
+Schmerzen bereitet – was auch der Grund sein mag, warum der Spruch 
+eine so geringe Verbreitung erfahren hat. 
+KATZENAUGEN
+153
+C
+Eigenschaften 

@@ -1,0 +1,248 @@
+=== SEITE 14 (Abvenenum) ===
+Probe: KL / FF / KO
+Technik: Der Kristallomant fährt mit einem 
+­Smaragd mehrmals über den zu verzaubernden 
+Gegenstand.
+Zauberdauer: 40 Aktionen
+Wirkung: Die Struktur des verzauberten Gegenstands 
+wird gefestigt. Er wird hart wie ein Diamant und unbe­
+zwingbar wie ein Amboss. Er ist durch gewöhnliche Ge-
+walteinwirkung praktisch unzerstörbar (Strukturpunkte und 
+Härte werden verdreifacht; eine Härte von 0 bleibt demzufolge 
+0). Schadenszauberei wie ein IGNIFAXIUS kann dem Objekt 
+nur Schaden zufügen, wenn die angerichteten SP mindestens 
+ein Drittel der Strukturpunkte betragen. Da diese Formel einen 
+Teil ihrer Kraft aus der Essenz des Gegenstandes zieht, wird dieser 
+jedoch nach Ablauf der Wirkungsdauer ungewöhnlich zerbrechlich 
+(Strukturpunkte und Härte halbiert).
+Kosten: 5 AsP + 2 AsP pro angefangenem Stein Gewicht
+Zielobjekt: Einzelobjekt
+Reichweite: Berührung
+Wirkungsdauer: ZfP* Spielrunden, die negativen Nachwirkungen 
+sind ab Ablauf der Wirkungsdauer augenblicklich.
+Modifikationen und Varianten: Zauberdauer, Kosten, Reichweite, 
+Wirkungsdauer
+ Adamantenquader (+5). Für je 5 Punkte kann ein fünffaches 
+Gewicht verzaubert werden (für +15 betragen die Kosten also 5 AsP 
++ 2 AsP pro angefangener (5x5x5=) 125 Stein Gewicht). 
+ Kristallglanz (+3; ab ZfW 7). Der verzauberte Gegenstand 
+erhält nach Wunsch des Zaubernden zusätzlich eine Oberfläche, die 
+wie ein anderes Metall, wie Gestein oder Kristalle wirkt. Dies ist 
+jedoch eine rein optische Komponente, die von der inneren Struktur 
+unabhängig ist. 
+ Zauberstahl (+5; ab ZfW 7). Eine Variante mit zusätzlichen 
+Elementarkräften, die eigens für die Anwendung auf Waffen und 
+Rüstungen entwickelt wurde. Der Bruchfaktor einer Waffe oder 
+eines Schildes sinkt um ZfP* Punkte. Die TP einer Nahkampfwaf-
+fe steigen um ZfP*/3 Punkte, ebenso der RS einer verzauberten 
+Rüstung, die TP eines Geschosses oder einer Wurfwaffe um 
+ZfP*/4. Leider verkehren sich diese Boni auch hier nach 
+Ablauf der Wirkungsdauer in ihr Gegenteil. 
+Während der Wirkungsdauer können die so 
+verzauberten Waffen auch Dämonen und andere 
+magische Wesen verletzen. Diese TP-Steigerungen 
+sind nicht kumulativ zu Steigerungen aus hervorra-
+gender Schmiede­arbeit (WdS 181ff.).
+ Struktur wahren (+7; ab ZfW 11). Der Zauber wird 
+so modifiziert, dass er seine Kraft nicht aus der Struktur 
+des Materials zieht und der Gegenstand nach Ablauf der 
+Wirkungsdauer keine negativen Nachwirkungen erleidet. Die 
+Kosten betragen 7 AsP plus 4 AsP pro ange­fangenem Stein 
+Gewicht. 
+ Permanenz (+7; ab ZfW 11; nur in der kristallomantischen 
+Repräsentation). Der Gegenstand wird permanent gefestigt. Dies 
+erfordert den Aufwand von 1 permanenten AsP pro angefangenem 
+Stein Gewicht (bei der Variante Adamantenquader pro 5 etc. 
+Stein).
+Reversalis: erzeugt an Gegenständen einen Zerfallschaden wie beim 
+EISENROST (Seite 77). 
+Antimagie: OBJEKT ENTZAUBERN und ERZBANN wirken in ihren 
+verschiedenen Varianten ­gegen den ADAMANTIUM. Die erhöhten 
+TP der Zauberstahl-Variante werden von Rüstungen oder einem 
+ARMATRUTZ wie üblich gemindert. Die Entzauberung eines perma-
+nent gehärteten Gegenstandes kostet natürlich auch permanente AsP. 
+Merkmale: Objekt, Elementar (Erz)
+Komplexität: C
+Repräsentationen und Verbreitung: Ach6, Mag5, Dru(Mag)2 
+Dieser Zauber, eine Meisterformel der echsischen Kristallomanten, 
+wurde bei den Gildenmagiern schon vor einigen Dutzend Jahren 
+wiederentdeckt, jedoch nur wenigen Magiern mitgeteilt, da man 
+erhoffte, die Wirkung potenzieren zu können, und demzufolge 
+jede Schule das Geheimnis wie ihren Augapfel hütete. Als man 
+schließlich erkannte, dass mittlerweile fast jede Akademie über 
+die Formel verfügte, entschloss man sich, sie der Öffentlichkeit 
+zugänglich zu machen. In allen Schulen, die die Verzauberung 
+von Objekten lehren, sowie in Punin, der Fasarer Bannakade-
+mie, in Rash­dul und in Schwert und Stab Gareth gehört der 
+Spruch zum festen Lehrplan, an fast allen anderen Schulen 
+ist er zumindest bekannt.
+ADAMANTIUM
+ERZSTRUKTUR
+13
+C
+Objekt 
+Elementar (Erz)
+
+
+=== SEITE 15 ===
+So wie Lebewesen über eine Lebensenergie 
+verfügen und eventuell durch eine Rüstung mit 
+einem RS-Wert geschützt sind, so können auch 
+unbelebte Objekte einem weltlichen oder magischen 
+Schaden Widerstand entgegensetzen und beschädigt 
+werden. Das Maß dafür, wie viel Strukturschaden ein 
+Gegenstand einstecken kann, bevor er vollständig un-
+brauchbar ist, sind die Strukturpunkte (StP); welchen 
+Widerstand der Gegenstand einem Hieb oder Zauber entge-
+gensetzt, wird durch seine Härte (H) bestimmt. Ob ein Gegen-
+stand durch erlittenen Schaden zerbricht, wird schließlich durch 
+die Struktur (S) des Gegenstandes bestimmt, die gewissermaßen 
+einen ‘Bruchfaktor’ des Gegenstandes bezeichnet.
+  Die Strukturpunkte sind grob von der Masse des Gegenstandes 
+abhängig. Sie reichen von 1 StP für eine einfache Glasphiole über 
+3 StP für einen irdenen Teller, 10 für ein Seil, 30 für eine einfache 
+Brettertür und 50 für eine stabile Außentür, eine Truhe oder eine Mar-
+morstatue bis hin zu über 100 StP für Mauerstücke (je nach Dicke).
+  Die Härte ist fast ausschließlich abhängig vom ver­wendeten Bau-
+material und dessen Dicke. Eine Wehrmauer aus Granit, Basalt oder 
+Zwergenguss oder eine stählerne Platte erreichen hier Werte von über 
+30, normale Mauern liegen zwischen 12 für einfachste Ziegelkonstruk-
+tionen und 25 für stabile Feld­stein­mauern, eine Härte von mehr als 
+20 erreichen auch Eisenplatten auf einem federnden Holzuntergrund, 
+während gewöhnliche Eisen- oder Bronzeobjekte (z.B. Ketten) im Be-
+reich von 15 bis 20 liegen. Der beste Wert, den eine Holzkonstruktion 
+erreichen kann, liegt bei 12 für massive Steineiche (für Truhen, Aus-
+fallsluken von Burgen etc.); eine einfache Innentür, die meisten Möbel, 
+Fensterläden o.ä. erreichen bestenfalls Werte von 6 Punkten. Viele 
+Gegenstände des täglichen Gebrauchs haben Härte-Werte zwischen 
+1 und 5 Punkten, d.h., wenn man es darauf anlegt, sie mit einer 
+Waffe zu zerstören, wird einem das gelingen. Keine Härtepunkte 
+haben Stoffe (die aber gegen stumpfe Schläge annähernd immun 
+sind) und Objekte aus Feinglas oder edler Keramik. 
+  Die Struktur ist ein Maß für den ‘inneren Zusammenhalt’ 
+des Gegenstands und hängt sowohl von seiner Bauweise als 
+auch den verwendeten Materialien ab. Die Skala reicht hier 
+von 0 bis 21, wobei 0 einem Kartenhaus entspricht, 20 einer 
+massiven Stahlkugel. (21 ist der Wert für regeltechnisch un-
+zerbrechliche Gegenstände.) Strukturwerte von Objekten 
+des täglichen Gebrauchs sind: Türen (8 für eine dünne 
+Brettertür, 18 für eine massive, verstärkte Ausfalls-
+pforte), Fenster (6, wenn mit Ölpapier/Pergament 
+bezogen, 8 wenn verglast), Fesseln (6 bis 15 
+für Seile verschiedener Dicke, 12 bis 20 für 
+Ketten), Gefäße (Glasbehälter zwischen 2 und 
+8, Metallbehälter zwischen 5 und 18, Steingut/
+Porzellan zwischen 8 und 12), Waffe (18–BF), Rü-
+stung (6 für Stoff, 8 für Leder, 12 für Kette/Schuppe/
+Brigantine/Platte aus vielen Einzelteilen, 15 bis 18 für 
+massive Plattenteile wie Kürass). Sinken die StP eines 
+Gegenstands unter die Hälfte des ursprünglichen Werts, 
+muss eine Strukturprobe mit dem W20 abgelegt werden, bei 
+deren Misslingen das Objekt zerstört ist. Eine weitere Probe 
+ist beim Unterschreiten von einem Drittel der ursprünglichen 
+StP erforderlich; fallen die StP schließlich unter ein Viertel, so 
+muss bei jedem weiteren erlittenen Schaden eine Strukturprobe 
+abgelegt werden.
+  Gewöhnlicher Waffeneinsatz gegen Objekte muss die Härte 
+überwinden und die Strukturpunkte des Objekts langsam reduzieren; 
+sprich: von den TP der Waffe wird die Härte des Objekts (quasi als 
+RS) abgezogen, und die übrig bleibenden TP werden von den StP 
+des Gegenstands abgezogen. Zauber, die ausschließlich mittels des 
+Merkmals Schaden Strukturschaden anrichten (wie der DESIN-
+TEGRATUS), ignorieren die Härte des Gegenstandes; telekinetische 
+Manipulationen (MOTORICUS (Verbiegen, Unsichtbarer Hieb), 
+KLICKERADOMMS) müssen nur die halbe Härte des Gegenstands 
+überwinden; für elementare Sekundärschäden gelten je nach Element 
+unterschiedliche Regelungen (siehe S. 123).
+  Als Faustformel für das Beschädigen von Rüstungen können Sie 
+annehmen, dass die StP eines Rüstungsteils etwa dem Zehnfachen 
+seines RS entsprechen, die Härte etwa dem doppelten RS.
+  Bei der Betrachtung massiven Schadens durch Belagerungsgerät 
+– beim Sturm auf eine Burg oder deren Beschuss – wird eine andere 
+Skala verwendet: Belagerungswaffen richten auf dieser Skala soge-
+nannte TP* an, von denen bei jedem Treffer ein Drittel der Härte 
+abgezogen wird. Übrig bleibende SP* reduzieren die Baupunkte der 
+Konstruktion, die wiederum einem Zehntel der Strukturpunkte 
+entsprechen. Der Strukturwert der Konstruktion wird gehand-
+habt wie im Einsatz gegen Handwaffen. Als ‘Konstruktion’ 
+gelten in diesem Fall komplette Bauelemente einer Burg oder 
+eines Schiffs wie ein Torturm, ein Schritt Wand, ein Mast 
+oder ein Geschütz.
+  Um eine Tür mit der Schulter und vollem Gewichts­
+einsatz einzurennen, verwenden wir eine vereinfachte 
+Methode: Hier ist eine KK-Probe nötig, die um die 
+Härte der Tür erschwert ist. Die übrig behaltenen 
+Punkte aus der Probe reduzieren die StP. 
+Jeder Versuch, der die Tür noch nicht öffnet, 
+kostet den Einrennenden 1W6 SP(A).
+ 
+Experte:
+Strukturpunkte
+14
+
+
+=== SEITE 147 (Ignifaxius) ===
+Probe: KL / CH / KO (+Mod.)
+Technik: Der Zaubernde konzentriert sich auf 
+die astralen Schwingungen, die dem zu verlängern-
+den Spruch innewohnen, spricht die Formel und lässt 
+seine Kraft in den Spruch fließen.
+Zauberdauer: mehrere Tage Vorbereitung, der eigentliche 
+Zauber dauert etwa 1 Stunde.
+Wirkung: Wird dieser Spruch angewandt, während ein 
+anderer Spruch wirkt, so wird dessen Wirkungsdauer auf 
+permanent verlängert. Mit Permanenz lassen sich nur solche 
+Sprüche belegen, die eine begrenzte Wirkungsdauer haben, 
+nicht aber solche, deren Dauer augenblicklich ist (z.B. viele 
+Schadens- und Heilzauber).
+Zauber, deren Wirkungsdauer kürzer ist als die Zauber­dauer des 
+INFINITUM (1 Stunde), werden am Ende dieser Stunde gesprochen.
+Die Zauberprobe ist um die Hälfte der ursprünglichen AsP-Kosten 
+des zu verlängernden Spruches erschwert.
+Kosten: 49 AsP plus die (Mindest-)Kosten des zu verlängernden 
+Zaubers; von dieser Summe müssen 1/20 als permanente AsP auf-
+gewendet werden.
+Zielobjekt: einzelner Zauber
+Reichweite: Berührung (Der Magier muss im oder am Wirkungsbereich 
+des zu verlängernden Zaubers ­stehen.)
+Wirkungsdauer: permanent
+Modifikationen und Varianten: viele vermutet, keine bekannt
+Reversalis: keine Wirkung
+Antimagie: Die Wirkung eines INFINITUM könnte vermutlich mit 
+einem TEMPORALZAUBEREI BANNEN aufgehoben werden – 
+doch über diese Antimagie wird bislang nur spekuliert. Eine Zone 
+des METAMAGIE NEUTRALISIEREN erschwert das Wirken des 
+Zaubers; ein mittels INFINITUM verlängerter 
+Zauber kann jedoch mittels des DESTRUCTIBO 
+(nicht aber mittels anderer Antimagie) gebrochen 
+werden.
+Merkmale: Metamagie, Temporal
+Komplexität: F
+Repräsentationen und Verbreitung: Ach, Elf, Geo, 
+Mag je 1 
+Dieser Spruch (es scheint sich eher um ein ­langwieriges Ri-
+tual zur Einbindung in die Artefakterschaffung zu handeln) 
+ist die Formel, über die seit ihrem Verschwinden am meisten 
+diskutiert, spekuliert, konstruiert, veröffentlicht und zensiert 
+wurde, ohne dass ein Mensch, Echs, Elf oder Zwerg ihre Anwen-
+dung, geschweige denn das kleinste Bruchstück ihrer Thesis je zu 
+Gesicht bekommen hätte. Gerade bei ‘unerklärlichen’ Wirkungen 
+eines eigentlich bekannten Zaubers wird gerne behauptet, dass es 
+genau der INFINITUM sei, der diesen Effekt erziele.
+Im Spiel steht dieser Zauber nur wenigen mächtigen Meisterpersonen 
+(vom Range einer Nahema, eines Xeraan oder Galotta) zur Verfü-
+gung. Der Grund hierfür ist nicht nur das Spielgleichgewicht, sondern 
+auch das Gleichgewicht der Welt – denn irgendwoher muss die Kraft 
+kommen, die den Zauber aufrechterhält, und garantiert nicht aus den 
+läppischen permanenten AsP, die in den Zauber investiert werden. Die 
+Person, die den INFINITUM einsetzt, muss also von halbgöttlicher 
+Wesensart sein oder so mächtig, dass sie es sich erlauben kann, eine 
+Konfrontation mit den Wächtern des Gleichgewichts, namentlich 
+einem gewissen Teclador, schlimmstenfalls gar mit Satinav selbst, 
+zu riskieren.
+INFINITUM
+IMMERDAR
+146
+F
+Metamagie 
+Temporal
