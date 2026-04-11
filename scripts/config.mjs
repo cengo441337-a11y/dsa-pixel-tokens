@@ -140,54 +140,118 @@ export const PROBE_SOUNDS = {
   damage:    `modules/${MODULE_ID}/assets/sounds/random1.wav`,
 };
 
-// ─── Spontane Modifikationen (Zauber) ───────────────────────────────────────
-// Wird aus WdZ PDF verfeinert, hier Basiswerte
+// ─── Spontane Modifikationen (Zauber) — WdZ-konform ────────────────────────
+// Modifikationen kosten ZfP (Zauberfertigkeit-Punkte), NICHT Proben-Modifikatoren!
+// Gildenmagier: Zuschläge werden HALBIERT (erst aufsummieren, dann halbieren)
+// Max gleichzeitige Mods: Leiteigenschaft - 12 (min 1)
+// Max ZfP für Mods: ZfW
 
 export const SPELL_MODIFICATIONS = {
   reichweite: {
     label: "Reichweite",
+    desc: "Vergrößert oder verkleinert die Zauber-Reichweite um eine Stufe",
     options: [
-      { label: "Normal",         probeMod: 0,  aspMult: 1.0 },
-      { label: "Verdoppelt",     probeMod: +3, aspMult: 1.5 },
-      { label: "Verdreifacht",   probeMod: +6, aspMult: 2.0 },
-      { label: "Halbiert",       probeMod: -3, aspMult: 0.75 },
+      { label: "Normal",              zfpCost: 0, extraAkt: 0 },
+      { label: "Vergrößern (+1 Stufe)", zfpCost: 5, extraAkt: 1 },
+      { label: "Vergrößern (+2 Stufen)", zfpCost: 10, extraAkt: 2 },
+      { label: "Verkleinern (-1 Stufe)", zfpCost: 3, extraAkt: 1 },
     ],
   },
   zauberdauer: {
     label: "Zauberdauer",
+    desc: "Halbiert oder verdoppelt die Zauberdauer",
     options: [
-      { label: "Normal",         probeMod: 0,  aspMult: 1.0 },
-      { label: "Halbiert",       probeMod: +3, aspMult: 1.5 },
-      { label: "Verdoppelt",     probeMod: -3, aspMult: 0.75 },
+      { label: "Normal",              zfpCost: 0, extraAkt: 0 },
+      { label: "Halbiert",            zfpCost: 5, extraAkt: 0, durationMult: 0.5 },
+      { label: "Verdoppelt (Bonus)",   zfpCost: 0, extraAkt: 0, durationMult: 2.0, erleichterung: 3 },
     ],
   },
   wirkungsdauer: {
     label: "Wirkungsdauer",
+    desc: "Verlängert oder verkürzt die Wirkungsdauer des Zaubers",
     options: [
-      { label: "Normal",         probeMod: 0,  aspMult: 1.0 },
-      { label: "Verdoppelt",     probeMod: +3, aspMult: 1.5 },
-      { label: "Verdreifacht",   probeMod: +6, aspMult: 2.0 },
-      { label: "Halbiert",       probeMod: -3, aspMult: 0.75 },
+      { label: "Normal",              zfpCost: 0, extraAkt: 0 },
+      { label: "Verdoppelt",          zfpCost: 7, extraAkt: 1 },
+      { label: "Halbiert",            zfpCost: 3, extraAkt: 1 },
+      { label: "Aufrechterhaltend → fest", zfpCost: 7, extraAkt: 1 },
     ],
   },
   kosten: {
-    label: "AsP-Kosten",
+    label: "AsP einsparen",
+    desc: "Reduziert die AsP-Kosten des Zaubers",
     options: [
-      { label: "Normal",         probeMod: 0,  aspMult: 1.0 },
-      { label: "-25%",           probeMod: +3, aspMult: 0.75 },
-      { label: "-50%",           probeMod: +6, aspMult: 0.50 },
-      { label: "+50%",           probeMod: -3, aspMult: 1.5 },
+      { label: "Normal",              zfpCost: 0, extraAkt: 0, aspMult: 1.0 },
+      { label: "-10% AsP",            zfpCost: 3, extraAkt: 1, aspMult: 0.9 },
+      { label: "-20% AsP",            zfpCost: 6, extraAkt: 2, aspMult: 0.8 },
+      { label: "-30% AsP",            zfpCost: 9, extraAkt: 3, aspMult: 0.7 },
+      { label: "-40% AsP",            zfpCost: 12, extraAkt: 4, aspMult: 0.6 },
+      { label: "-50% AsP",            zfpCost: 15, extraAkt: 5, aspMult: 0.5 },
     ],
   },
   erzwingen: {
     label: "Erzwingen",
+    desc: "Erleichtert die Probe durch zusätzliche AsP (Kosten verdoppeln sich pro Stufe!)",
     options: [
-      { label: "Nicht erzwingen", probeMod: 0,  aspMult: 1.0 },
-      { label: "Erzwingen (+3)",  probeMod: +3, aspMult: 1.0 },
-      { label: "Erzwingen (+6)",  probeMod: +6, aspMult: 1.0 },
+      { label: "Nicht erzwingen",      zfpCost: 0, extraAkt: 0, aspExtra: 0 },
+      { label: "+1 Erleichterung",     zfpCost: 0, extraAkt: 1, aspExtra: 1,  erleichterung: 1 },
+      { label: "+2 Erleichterung",     zfpCost: 0, extraAkt: 2, aspExtra: 3,  erleichterung: 2 },
+      { label: "+3 Erleichterung",     zfpCost: 0, extraAkt: 3, aspExtra: 7,  erleichterung: 3 },
+      { label: "+4 Erleichterung",     zfpCost: 0, extraAkt: 4, aspExtra: 15, erleichterung: 4 },
+      { label: "+5 Erleichterung",     zfpCost: 0, extraAkt: 5, aspExtra: 31, erleichterung: 5 },
+    ],
+  },
+  technik: {
+    label: "Veränderte Technik",
+    desc: "Weglassen von Zauberkomponenten (Geste, Formel, etc.)",
+    options: [
+      { label: "Normal",              zfpCost: 0, extraAkt: 0 },
+      { label: "1 Komponente fehlt",   zfpCost: 7, extraAkt: 3 },
+      { label: "Zentrale Komp. fehlt", zfpCost: 12, extraAkt: 3 },
     ],
   },
 };
+
+/**
+ * Berechnet die Gesamt-ZfP-Kosten und AsP-Änderungen für gewählte Modifikationen.
+ * @param {object} selections - { reichweite: 0, zauberdauer: 1, ... } (Index in options-Array)
+ * @param {number} baseAsP - Basis-AsP-Kosten des Zaubers
+ * @param {string} rep - Repräsentation ("gildenmagisch", "hexisch", etc.)
+ * @returns {{ totalZfP, totalExtraAkt, finalAsP, erleichterung, errors }}
+ */
+export function calculateModifications(selections, baseAsP, rep = "gildenmagisch") {
+  let totalZfP = 0;
+  let totalExtraAkt = 0;
+  let aspMultiplier = 1.0;
+  let aspExtra = 0;
+  let erleichterung = 0;
+
+  for (const [modKey, optionIdx] of Object.entries(selections)) {
+    const mod = SPELL_MODIFICATIONS[modKey];
+    if (!mod) continue;
+    const opt = mod.options[optionIdx];
+    if (!opt || optionIdx === 0) continue; // 0 = Normal, skip
+
+    totalZfP += opt.zfpCost ?? 0;
+    totalExtraAkt += opt.extraAkt ?? 0;
+    if (opt.aspMult) aspMultiplier *= opt.aspMult;
+    aspExtra += opt.aspExtra ?? 0;
+    erleichterung += opt.erleichterung ?? 0;
+  }
+
+  // Gildenmagier: ZfP-Kosten halbiert (erst aufsummieren, dann halbieren)
+  if (rep === "gildenmagisch") {
+    totalZfP = Math.ceil(totalZfP / 2);
+  }
+
+  // Druiden: Erzwingen zu halben Kosten
+  if (rep === "druidisch") {
+    aspExtra = Math.ceil(aspExtra / 2);
+  }
+
+  const finalAsP = Math.max(1, Math.round(baseAsP * aspMultiplier) + aspExtra);
+
+  return { totalZfP, totalExtraAkt, finalAsP, erleichterung };
+}
 
 // ─── Steigerungstabelle (AP-Kosten) ─────────────────────────────────────────
 

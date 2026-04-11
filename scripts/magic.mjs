@@ -3,7 +3,7 @@
  * Zauberprobe mit Spontanmodifikationen, AsP-Berechnung, Zone-Markierung
  */
 
-import { MODULE_ID, SPELL_MODIFICATIONS, SPELL_EFFECT_MAP, resolveProbe, checkCritical, PROBE_SOUNDS } from "./config.mjs";
+import { MODULE_ID, SPELL_MODIFICATIONS, SPELL_EFFECT_MAP, resolveProbe, checkCritical, PROBE_SOUNDS, calculateModifications, REPRESENTATIONS } from "./config.mjs";
 
 // ─── Zauberprobe-Dialog mit Spontanmodifikationen ───────────────────────────
 
@@ -20,14 +20,22 @@ export async function showSpellDialog(actor, spellData) {
   const baseKosten = parseInt(spellData.kosten) || 0;
   const probeAttrs = (spellData.probe ?? []).map(a => sys[a]?.value ?? 10);
 
-  // Modifikations-Selects generieren
+  // Repräsentation des Casters ermitteln
+  const rep = actor.system?.repraesentation ?? "gildenmagisch";
+
+  // Modifikations-Selects generieren (ZfP-basiert, WdZ-konform)
   const modSections = Object.entries(SPELL_MODIFICATIONS).map(([key, mod]) => {
-    const options = mod.options.map((opt, i) =>
-      `<option value="${i}" ${i === 0 ? "selected" : ""}>${opt.label} (Probe: ${opt.probeMod >= 0 ? "+" : ""}${opt.probeMod}, AsP: ×${opt.aspMult})</option>`
-    ).join("");
+    const options = mod.options.map((opt, i) => {
+      const cost = opt.zfpCost ? `${opt.zfpCost} ZfP` : "";
+      const extra = opt.extraAkt ? `+${opt.extraAkt} Akt` : "";
+      const asp = opt.aspExtra ? `+${opt.aspExtra} AsP` : opt.aspMult && opt.aspMult !== 1.0 ? `×${opt.aspMult} AsP` : "";
+      const erl = opt.erleichterung ? `+${opt.erleichterung} Erl.` : "";
+      const info = [cost, extra, asp, erl].filter(Boolean).join(", ");
+      return `<option value="${i}" ${i === 0 ? "selected" : ""}>${opt.label}${info ? ` (${info})` : ""}</option>`;
+    }).join("");
     return `
       <div class="mod-section">
-        <div class="mod-label">${mod.label}</div>
+        <div class="mod-label">${mod.label} <span style="font-size:11px;color:#666">${mod.desc ?? ""}</span></div>
         <select data-mod="${key}">${options}</select>
       </div>`;
   }).join("");
@@ -67,15 +75,22 @@ export async function showSpellDialog(actor, spellData) {
             <input id="spell-extra-mod" type="number" value="0" style="width:50px;text-align:center;font-size:18px;background:rgba(0,0,0,0.4);border:2px solid #3a3a5e;color:#e0e0e0">
           </div>
 
-          <div class="cost-summary">
+          <div class="cost-summary" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
             <div>
-              <div class="total-label">Probe-Erschwernis:</div>
-              <div class="probe-mod-display" id="spell-total-mod">+0</div>
+              <div class="total-label">ZfP-Kosten:</div>
+              <div class="probe-mod-display" id="spell-total-zfp" style="color:#e94560">0</div>
+            </div>
+            <div>
+              <div class="total-label">Extra Aktionen:</div>
+              <div class="probe-mod-display" id="spell-total-akt" style="color:#ffd700">+0</div>
             </div>
             <div>
               <div class="total-label">AsP-Kosten:</div>
               <div class="total-value" id="spell-total-asp">${baseKosten}</div>
             </div>
+          </div>
+          <div style="text-align:center;font-size:12px;color:#888;margin-top:4px">
+            Rep: ${rep} ${rep === "gildenmagisch" ? "(ZfP halbiert)" : rep === "druidisch" ? "(Erzwingen halbe Kosten)" : rep === "hexisch" ? "(Misserfolg: 1/3 AsP)" : ""}
           </div>
         </div>
       `,
@@ -84,7 +99,7 @@ export async function showSpellDialog(actor, spellData) {
           icon: '<i class="fas fa-magic"></i>',
           label: "Zaubern!",
           callback: (html) => {
-            const result = _calculateModifications(html, baseKosten);
+            const result = _calculateModificationsFromHTML(html, baseKosten, rep);
             resolve(result);
           },
         },
@@ -92,45 +107,40 @@ export async function showSpellDialog(actor, spellData) {
       },
       default: "cast",
       render: (html) => {
-        // Live-Update bei Modifikationsänderungen
+        // Live-Update bei Modifikationsänderungen (ZfP-basiert)
         html.find("select[data-mod], #spell-extra-mod").on("input change", () => {
-          const result = _calculateModifications(html, baseKosten);
-          html.find("#spell-total-mod").text(
-            `${result.mod >= 0 ? "+" : ""}${result.mod}`
-          );
+          const result = _calculateModificationsFromHTML(html, baseKosten, rep);
+          html.find("#spell-total-zfp").text(result.totalZfP);
+          html.find("#spell-total-akt").text(`+${result.extraAkt}`);
           html.find("#spell-total-asp").text(result.aspCost);
 
-          // Farbe ändern basierend auf Schwierigkeit
-          const modEl = html.find("#spell-total-mod");
-          modEl.css("color", result.mod > 0 ? "#e94560" : result.mod < 0 ? "#4ad94a" : "#888");
+          // Farbe: rot wenn ZfP-Kosten hoch
+          html.find("#spell-total-zfp").css("color", result.totalZfP > 10 ? "#ff3333" : result.totalZfP > 0 ? "#e94560" : "#888");
         });
       },
     }).render(true);
   });
 }
 
-function _calculateModifications(html, baseKosten) {
-  let totalProbeMod = 0;
-  let aspMultiplier = 1.0;
-  const mods = {};
+function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch") {
+  const selections = {};
 
-  for (const [key, modDef] of Object.entries(SPELL_MODIFICATIONS)) {
+  for (const key of Object.keys(SPELL_MODIFICATIONS)) {
     const select = html.find(`select[data-mod="${key}"]`);
     const idx = parseInt(select.val()) || 0;
-    const opt = modDef.options[idx];
-    if (opt) {
-      totalProbeMod += opt.probeMod;
-      aspMultiplier *= opt.aspMult;
-      mods[key] = { index: idx, label: opt.label, probeMod: opt.probeMod, aspMult: opt.aspMult };
-    }
+    if (idx > 0) selections[key] = idx;
   }
 
+  const result = calculateModifications(selections, baseKosten, rep);
   const extraMod = parseInt(html.find("#spell-extra-mod").val()) || 0;
-  totalProbeMod += extraMod;
 
-  const aspCost = Math.max(1, Math.round(baseKosten * aspMultiplier));
-
-  return { mod: totalProbeMod, aspCost, mods };
+  return {
+    totalZfP: result.totalZfP,
+    extraAkt: result.totalExtraAkt,
+    aspCost: result.finalAsP,
+    erleichterung: result.erleichterung - extraMod, // negative extraMod = Erschwernis
+    selections,
+  };
 }
 
 // ─── Zauberprobe ausführen ──────────────────────────────────────────────────
@@ -149,7 +159,7 @@ export async function castSpell(actor, spellData) {
   const dialogResult = await showSpellDialog(actor, spellData);
   if (!dialogResult) return null;
 
-  const { mod, aspCost, mods } = dialogResult;
+  const { totalZfP, extraAkt, aspCost, erleichterung, selections } = dialogResult;
 
   // 2. AsP prüfen
   const currentAsP = actor.system.AsP?.value ?? 0;
@@ -158,15 +168,23 @@ export async function castSpell(actor, spellData) {
     return null;
   }
 
-  // 3. Würfeln
+  // 3. ZfP-Kosten vom ZfW abziehen (Spontanmodifikationen kosten ZfP, nicht Probe-Mod!)
+  const baseZfw = parseInt(spellData.zfw) || 0;
+  const effectiveZfw = baseZfw - totalZfP;
+  if (effectiveZfw < 0) {
+    ui.notifications.warn(`ZfW zu niedrig für diese Modifikationen! ZfW ${baseZfw} - ${totalZfP} ZfP = ${effectiveZfw}`);
+    return null;
+  }
+
+  // 4. Würfeln
   const roll = new Roll("3d20");
   await roll.evaluate();
   const dice = roll.terms[0].results.map(r => r.result);
 
-  // 4. Probe auswerten
+  // 5. Probe auswerten (Erleichterung aus Erzwingen wird als negativer Modifikator angewendet)
   const probeAttrs = (spellData.probe ?? []).map(a => actor.system[a]?.value ?? 10);
-  const zfw = parseInt(spellData.zfw) || 0;
-  const result = resolveProbe(dice, probeAttrs, zfw, mod);
+  const probeMod = -erleichterung; // Negativ = Erleichterung
+  const result = resolveProbe(dice, probeAttrs, effectiveZfw, probeMod);
   const crit = checkCritical(dice);
 
   // 5. Ergebnis-Flags
@@ -189,8 +207,12 @@ export async function castSpell(actor, spellData) {
     resultClass = "result-fail";
   }
 
-  // 6. AsP abziehen (bei Erfolg volle Kosten, bei Misserfolg halbe)
-  const actualCost = success ? aspCost : Math.ceil(aspCost / 2);
+  // 6. AsP abziehen
+  // Erfolg: volle Kosten | Misserfolg: halbe Kosten | Hexen: 1/3 bei Misserfolg
+  const rep = actor.system?.repraesentation ?? "gildenmagisch";
+  let failFraction = 0.5;
+  if (rep === "hexisch" || rep === "satuarisch") failFraction = 1/3;
+  const actualCost = success ? aspCost : Math.ceil(aspCost * failFraction);
   await actor.update({
     "system.AsP.value": Math.max(0, currentAsP - actualCost),
   });
