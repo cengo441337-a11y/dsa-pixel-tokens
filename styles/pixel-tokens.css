@@ -1,0 +1,57 @@
+/* DSA Pixel-Art Tokens — Stylesheet */
+
+/* Token Config Tab */
+.dsa-pixel-tab .form-group {
+  display: grid;
+  grid-template-columns: 1fr;
+  margin-bottom: 8px;
+}
+
+.dsa-pixel-tab .form-group label {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.dsa-pixel-tab .hint {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 2px;
+  font-style: italic;
+}
+
+.dsa-pixel-tab .inline-fields {
+  display: grid;
+  grid-template-columns: 1fr 80px;
+  gap: 8px;
+  align-items: center;
+}
+
+.dsa-pixel-tab .two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.dsa-pixel-tab .two-col > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dsa-pixel-settings {
+  padding: 8px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Pixel rendering — no interpolation */
+canvas.pixel-art-token {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Make PIXI sprite pixel-perfect */
+.pixel-token-container {
+  image-rendering: pixelated;
+}

@@ -1,0 +1,26 @@
+{
+  "id": "dsa-pixel-tokens",
+  "title": "DSA Pixel-Art Tokens",
+  "description": "Ersetzt Standard-Tokens durch animierte Pixel-Art Sprites im 16-Bit JRPG-Stil. LPC-kompatible Sprite Sheets, 4-Richtungs-Laufanimation, konfigurierbar pro Token.",
+  "version": "0.2.0",
+  "compatibility": {
+    "minimum": "11",
+    "verified": "12"
+  },
+  "authors": [
+    {
+      "name": "Deniz Ceylan",
+      "discord": ""
+    }
+  ],
+  "esmodules": ["scripts/pixel-tokens.mjs"],
+  "styles": ["styles/pixel-tokens.css"],
+  "languages": [
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "lang/de.json"
+    }
+  ],
+  "flags": {}
+}

@@ -1,0 +1,20 @@
+{
+  "DSA_PIXEL": {
+    "TabLabel": "Pixel-Art",
+    "Enable": "Pixel-Art Sprite aktivieren",
+    "SpriteSheet": "Sprite Sheet Pfad",
+    "SpriteSheetHint": "LPC-Format: 4 Reihen (Unten/Links/Rechts/Oben), je N Frames pro Reihe",
+    "FrameWidth": "Frame-Breite (px)",
+    "FrameHeight": "Frame-Höhe (px)",
+    "FramesPerDir": "Frames pro Richtung",
+    "FPS": "Animations-FPS",
+    "Scale": "Skalierung",
+    "ScaleHint": "1.0 = Token-Größe, 0.8 = etwas kleiner",
+    "RowOrder": "Reihenfolge der Richtungen",
+    "RowOrderLPC": "LPC (Unten/Links/Rechts/Oben)",
+    "RowOrderRPGM": "RPG Maker (Unten/Links/Rechts/Oben - gleich)",
+    "RowOrderCustom": "Benutzerdefiniert",
+    "OffsetX": "X-Versatz (px)",
+    "OffsetY": "Y-Versatz (px)"
+  }
+}

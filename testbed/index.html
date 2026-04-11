@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>DSA Pixel Token — Testbed</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1a1a2e; color: #eee; font-family: monospace; display: flex; height: 100vh; }
+
+    #sidebar {
+      width: 280px;
+      min-width: 280px;
+      background: #16213e;
+      padding: 16px;
+      overflow-y: auto;
+      border-right: 1px solid #333;
+    }
+    #sidebar h2 { color: #c9962a; margin-bottom: 12px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+    .group { margin-bottom: 12px; }
+    .group label { display: block; font-size: 0.75rem; color: #aaa; margin-bottom: 3px; }
+    .group input[type=text], .group input[type=number] {
+      width: 100%; padding: 5px 8px; background: #0f3460; border: 1px solid #444;
+      color: #eee; border-radius: 4px; font-family: monospace; font-size: 0.8rem;
+    }
+    .group input[type=range] { width: 100%; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .row4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; }
+
+    button {
+      width: 100%; padding: 8px; margin-top: 6px;
+      background: #c9962a; color: #000; border: none; border-radius: 4px;
+      font-weight: bold; cursor: pointer; font-family: monospace;
+    }
+    button:hover { background: #e6a830; }
+    button.secondary { background: #333; color: #eee; }
+    button.secondary:hover { background: #444; }
+
+    #log {
+      margin-top: 12px;
+      background: #0a0a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 8px;
+      font-size: 0.7rem;
+      height: 100px;
+      overflow-y: auto;
+      color: #88ff88;
+    }
+
+    #canvas-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    #canvas-wrap canvas { display: block; }
+
+    .controls-hint {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #555;
+      font-size: 0.72rem;
+    }
+
+    .dir-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .dir-btns button { margin: 0; padding: 6px; font-size: 0.8rem; }
+    .dir-btns .center { grid-column: 2; grid-row: 2; background: #333; color: #888; }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h2>⚔ DSA Pixel Token Testbed</h2>
+
+  <div class="group">
+    <label>Sprite Sheet (Pfad relativ zu testbed/)</label>
+    <input type="text" id="sheetPath" value="../assets/dsa_krieger.png">
+  </div>
+
+  <div class="group row2">
+    <div>
+      <label>Frame-Breite (px)</label>
+      <input type="number" id="frameW" value="64" min="8" max="256">
+    </div>
+    <div>
+      <label>Frame-Höhe (px)</label>
+      <input type="number" id="frameH" value="64" min="8" max="256">
+    </div>
+  </div>
+
+  <div class="group row2">
+    <div>
+      <label>Frames/Richtung</label>
+      <input type="number" id="framesPerDir" value="9" min="1" max="16">
+    </div>
+    <div>
+      <label>Idle Frame</label>
+      <input type="number" id="idleFrame" value="0" min="0" max="15">
+    </div>
+  </div>
+
+  <div class="group row2">
+    <div>
+      <label>Reihe: Unten</label>
+      <input type="number" id="rowDown" value="2" min="0" max="7">
+    </div>
+    <div>
+      <label>Reihe: Links</label>
+      <input type="number" id="rowLeft" value="1" min="0" max="7">
+    </div>
+  </div>
+  <div class="group row2">
+    <div>
+      <label>Reihe: Rechts</label>
+      <input type="number" id="rowRight" value="3" min="0" max="7">
+    </div>
+    <div>
+      <label>Reihe: Oben</label>
+      <input type="number" id="rowUp" value="0" min="0" max="7">
+    </div>
+  </div>
+
+  <div class="group">
+    <label>FPS: <span id="fpsLabel">8</span></label>
+    <input type="range" id="fps" min="1" max="30" value="8"
+      oninput="document.getElementById('fpsLabel').textContent=this.value">
+  </div>
+
+  <div class="group">
+    <label>Skalierung: <span id="scaleLabel">3</span>x</label>
+    <input type="range" id="scale" min="1" max="8" value="3" step="0.5"
+      oninput="document.getElementById('scaleLabel').textContent=this.value">
+  </div>
+
+  <button onclick="loadSprite()">▶ Sprite laden</button>
+  <button class="secondary" onclick="stopAnim()">⏹ Idle</button>
+
+  <h2 style="margin-top:16px">Richtung testen</h2>
+  <div class="dir-btns">
+    <div></div>
+    <button onclick="playDir('up')">↑</button>
+    <div></div>
+    <button onclick="playDir('left')">←</button>
+    <button class="center">·</button>
+    <button onclick="playDir('right')">→</button>
+    <div></div>
+    <button onclick="playDir('down')">↓</button>
+    <div></div>
+  </div>
+
+  <h2 style="margin-top:16px">Log</h2>
+  <div id="log"></div>
+</div>
+
+<div id="canvas-wrap">
+  <div id="pixi-container"></div>
+  <div class="controls-hint">Richtungstasten (WASD / Pfeile) — Leer = Idle</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.2/pixi.min.js"></script>
+<script>
+// ─── Pixi App ─────────────────────────────────────────────────────────────────
+const app = new PIXI.Application({
+  width: 600,
+  height: 500,
+  background: 0x2a2a3e,
+  antialias: false,
+});
+document.getElementById('pixi-container').appendChild(app.view);
+
+// Grid overlay
+const grid = new PIXI.Graphics();
+grid.lineStyle(1, 0x333355, 0.5);
+for (let x = 0; x <= 600; x += 64) grid.moveTo(x, 0).lineTo(x, 500);
+for (let y = 0; y <= 500; y += 64) grid.moveTo(0, y).lineTo(600, y);
+app.stage.addChild(grid);
+
+// Token container (centered)
+const tokenContainer = new PIXI.Container();
+tokenContainer.x = 300;
+tokenContainer.y = 250;
+app.stage.addChild(tokenContainer);
+
+// Selection ring
+const ring = new PIXI.Graphics();
+ring.lineStyle(2, 0xc9962a, 0.8);
+ring.drawCircle(0, 0, 36);
+ring.visible = false;
+tokenContainer.addChild(ring);
+
+let sprite = null;
+let sheetTextures = null; // { down:[], left:[], right:[], up:[] }
+let currentDir = 'down';
+let moveTimer = null;
+let animRunning = false;
+
+// ─── Log ──────────────────────────────────────────────────────────────────────
+function log(msg) {
+  const el = document.getElementById('log');
+  el.innerHTML += `<div>> ${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+// ─── Load Sprite ──────────────────────────────────────────────────────────────
+async function loadSprite() {
+  const path   = document.getElementById('sheetPath').value;
+  const fw     = parseInt(document.getElementById('frameW').value);
+  const fh     = parseInt(document.getElementById('frameH').value);
+  const fpd    = parseInt(document.getElementById('framesPerDir').value);
+  const rows   = {
+    down:  parseInt(document.getElementById('rowDown').value),
+    left:  parseInt(document.getElementById('rowLeft').value),
+    right: parseInt(document.getElementById('rowRight').value),
+    up:    parseInt(document.getElementById('rowUp').value),
+  };
+
+  log(`Lade: ${path}`);
+
+  // Remove old sprite
+  if (sprite) { sprite.destroy(); sprite = null; }
+
+  let baseTexture;
+  try {
+    baseTexture = await PIXI.Assets.load(path);
+  } catch(e) {
+    log(`FEHLER: ${e.message}`);
+    return;
+  }
+
+  const bt = baseTexture.baseTexture ?? baseTexture;
+  bt.scaleMode = PIXI.SCALE_MODES.NEAREST;
+
+  sheetTextures = {};
+  for (const [dir, row] of Object.entries(rows)) {
+    const frames = [];
+    for (let col = 0; col < fpd; col++) {
+      const rect = new PIXI.Rectangle(col * fw, row * fh, fw, fh);
+      frames.push(new PIXI.Texture(bt, rect));
+    }
+    sheetTextures[dir] = frames;
+  }
+
+  sprite = new PIXI.AnimatedSprite(sheetTextures['down']);
+  const sc = parseFloat(document.getElementById('scale').value);
+  sprite.scale.set(sc);
+  sprite.anchor.set(0.5, 0.5);
+  sprite.animationSpeed = parseInt(document.getElementById('fps').value) / 60;
+  sprite.loop = true;
+
+  tokenContainer.addChild(sprite);
+  ring.visible = true;
+
+  showIdle('down');
+  log(`OK — ${fw}×${fh}px, ${fpd} Frames/Richtung`);
+}
+
+// ─── Animation Control ────────────────────────────────────────────────────────
+function showIdle(dir) {
+  if (!sprite || !sheetTextures) return;
+  dir = dir || currentDir;
+  const idleFrame = parseInt(document.getElementById('idleFrame').value);
+  sprite.textures = sheetTextures[dir];
+  sprite.stop();
+  sprite.gotoAndStop(Math.min(idleFrame, sheetTextures[dir].length - 1));
+  currentDir = dir;
+  animRunning = false;
+}
+
+function playDir(dir) {
+  if (!sprite || !sheetTextures) return;
+  sprite.animationSpeed = parseInt(document.getElementById('fps').value) / 60;
+  sprite.textures = sheetTextures[dir];
+  if (!sprite.playing) sprite.play();
+  currentDir = dir;
+  animRunning = true;
+
+  if (moveTimer) clearTimeout(moveTimer);
+  moveTimer = setTimeout(() => showIdle(dir), 1200);
+}
+
+function stopAnim() {
+  showIdle(currentDir);
+}
+
+// ─── Keyboard ─────────────────────────────────────────────────────────────────
+const keysDown = new Set();
+
+document.addEventListener('keydown', (e) => {
+  if (keysDown.has(e.code)) return;
+  keysDown.add(e.code);
+
+  const map = {
+    'ArrowUp':'up', 'KeyW':'up',
+    'ArrowDown':'down', 'KeyS':'down',
+    'ArrowLeft':'left', 'KeyA':'left',
+    'ArrowRight':'right', 'KeyD':'right',
+  };
+  if (map[e.code]) playDir(map[e.code]);
+  if (e.code === 'Space') stopAnim();
+});
+
+document.addEventListener('keyup', (e) => {
+  keysDown.delete(e.code);
+  const dirs = ['ArrowUp','KeyW','ArrowDown','KeyS','ArrowLeft','KeyA','ArrowRight','KeyD'];
+  if (dirs.includes(e.code)) {
+    // Only stop if no other direction key held
+    const active = dirs.some(k => keysDown.has(k));
+    if (!active) showIdle(currentDir);
+  }
+});
+
+// ─── Scale/FPS live update ────────────────────────────────────────────────────
+document.getElementById('scale').addEventListener('input', () => {
+  if (sprite) sprite.scale.set(parseFloat(document.getElementById('scale').value));
+});
+document.getElementById('fps').addEventListener('input', () => {
+  if (sprite) sprite.animationSpeed = parseInt(document.getElementById('fps').value) / 60;
+});
+
+log('Testbed bereit. Sprite laden und loslegen.');
+</script>
+</body>
+</html>

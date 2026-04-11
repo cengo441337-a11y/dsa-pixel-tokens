@@ -1,0 +1,6 @@
+assets/monsters/*.png
+assets/icons/*.png
+assets/status/*.png
+assets/fx_*.png
+__pycache__/
+*.pyc
