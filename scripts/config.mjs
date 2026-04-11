@@ -83,49 +83,285 @@ export const WOUND_PENALTIES = {
 };
 
 // ─── Zauber → VFX Effekt-Mapping ────────────────────────────────────────────
-// Verknüpft Zaubernamen mit pixel-tokens.mjs EFFECT_PRESETS
+// Verknüpft DSA 4.1 Zaubernamen mit pixel-tokens.mjs EFFECT_PRESETS.
+// Abgedeckt: Gildenmagie, Hexen, Elfen, Druiden, Geodenzauber, Segen.
+// Unbekannte Zauber → guessSpellEffect() per Keyword-Fallback.
 
 export const SPELL_EFFECT_MAP = {
-  // Kampfzauber
-  "Ignifaxius":       { effect: "flammenpfeil", type: "projectile", impact: "feuerball" },
-  "Fulminictus":      { effect: "fulminictus",  type: "target" },
-  "Plumbumbarum":     { effect: "blitz",        type: "target" },
-  "Horriphobus":      { effect: "horriphobus",  type: "target" },
-  "Respondami":       { effect: "respondami",   type: "target" },
-  "Motoricus":        { effect: "motoricus",    type: "target" },
 
-  // Projektile
-  "Aquafaxius":       { effect: "aquafaxius",   type: "projectile", impact: "wasser" },
-  "Donnerkeil":       { effect: "donnerkeil",   type: "projectile", impact: "explosion" },
-  "Odem Arcanum":     { effect: "odem",         type: "projectile", impact: "gift" },
+  // ─── FEUER ────────────────────────────────────────────────────────────────
+  "Ignifaxius":            { effect: "flammenpfeil", type: "projectile", impact: "feuerball" },
+  "Ignimorpho":            { effect: "feuerball",    type: "target" },
+  "Flammenschwert":        { effect: "brennen",      type: "aura" },
+  "Flammenwall":           { effect: "brennen",      type: "zone" },
+  "Zorn der Salamander":   { effect: "explosion",    type: "zone" },
+  "Eldrakonstrukt":        { effect: "feuerball",    type: "target" },
+  "Zunder":                { effect: "brennen",      type: "target" },
+  "Flammenkörper":         { effect: "brennen",      type: "aura" },
+  "Feuersturm":            { effect: "explosion",    type: "zone" },
+  "Feuerball":             { effect: "feuerball",    type: "target" },
+  "Brennen":               { effect: "brennen",      type: "aura" },
 
-  // Auren / Buff
-  "Armatrutz":        { effect: "armatrutz",    type: "aura" },
-  "Visibili":         { effect: "visibili",     type: "aura" },
-  "Attributo":        { effect: "attributo",    type: "aura" },
-  "Schattenform":     { effect: "schattenform", type: "aura" },
-  "Verwandlung":      { effect: "verwandlung",  type: "aura" },
+  // ─── BLITZ / LUFT ────────────────────────────────────────────────────────
+  "Fulminictus":           { effect: "fulminictus",  type: "target" },
+  "Plumbumbarum":          { effect: "blitz",        type: "target" },
+  "Donnerkeil":            { effect: "donnerkeil",   type: "projectile", impact: "explosion" },
+  "Blitz Dich Find":       { effect: "blitz",        type: "target" },
+  "Windgeister rufen":     { effect: "wind",         type: "zone" },
+  "Sturm der See":         { effect: "wind",         type: "zone" },
+  "Wind":                  { effect: "wind",         type: "zone" },
+  "Orcanofaxius":          { effect: "explosion",    type: "zone" },
+  "Sturmwind":             { effect: "wind",         type: "zone" },
+  "Blitzstrahl":           { effect: "blitz",        type: "projectile", impact: "explosion" },
 
-  // Heilung
-  "Balsam Salabunde": { effect: "balsamsal",    type: "target" },
-  "Ruhe Körper":      { effect: "heilung",      type: "target" },
+  // ─── EIS / WASSER ────────────────────────────────────────────────────────
+  "Aquafaxius":            { effect: "aquafaxius",   type: "projectile", impact: "wasser" },
+  "Kältestrom":            { effect: "aquafaxius",   type: "projectile", impact: "eis" },
+  "Vereisungsfluch":       { effect: "eis",          type: "target" },
+  "Eissturm":              { effect: "eis",          type: "zone" },
+  "Blizzard":              { effect: "eis",          type: "zone" },
+  "Wellengang":            { effect: "wasser",       type: "zone" },
+  "Meeresboden":           { effect: "wasser",       type: "zone" },
+  "Wasserball":            { effect: "wasser",       type: "target" },
+  "Gefrierbrand":          { effect: "eis",          type: "target" },
+  "Eismantel":             { effect: "eis",          type: "aura" },
 
-  // Zonen / Fläche
-  "Invocatio":        { effect: "invocatio",    type: "zone" },
-  "Pandemonium":      { effect: "pandemonium",  type: "zone" },
-  "Fesselranken":     { effect: "fesselranken", type: "zone" },
-  "Planastral":       { effect: "planastral",   type: "zone" },
+  // ─── SCHATTEN / DUNKEL ───────────────────────────────────────────────────
+  "Auge des Limbus":       { effect: "schatten",     type: "target" },
+  "Dunkelheit":            { effect: "schatten",     type: "zone" },
+  "Finsternis":            { effect: "schatten",     type: "zone" },
+  "Seelenraub":            { effect: "schatten",     type: "target" },
+  "Schattengriff":         { effect: "schatten",     type: "target" },
+  "Schleier des Vergessens":{ effect: "schattenform",type: "aura" },
+  "Nachtauge":             { effect: "schatten",     type: "aura" },
+  "Schattenform":          { effect: "schattenform", type: "aura" },
+  "Düsteres Mal":          { effect: "schatten",     type: "target" },
 
-  // Kontroll
-  "Paralysis":        { effect: "paralysis",    type: "aura" },
-  "Silentium":        { effect: "silentium",    type: "aura" },
-  "Daemonenbann":     { effect: "daemonenbann", type: "zone" },
+  // ─── GIFT / FLUCH ────────────────────────────────────────────────────────
+  "Odem Arcanum":          { effect: "odem",         type: "projectile", impact: "gift" },
+  "Gift der Natter":       { effect: "gift",         type: "target" },
+  "Gärender Fluch":        { effect: "gift",         type: "target" },
+  "Eisenrost":             { effect: "gift",         type: "target" },
+  "Schlechtes Omen":       { effect: "gift",         type: "target" },
+  "Dumpfer Schmerz":       { effect: "horriphobus",  type: "target" },
+  "Böses Auge":            { effect: "horriphobus",  type: "target" },
+  "Siecher Leib":          { effect: "gift",         type: "target" },
+  "Pest der Geister":      { effect: "gift",         type: "target" },
 
-  // Elementar
-  "Brennen":          { effect: "brennen",      type: "aura" },
-  "Wind":             { effect: "wind",         type: "zone" },
-  "Portal":           { effect: "portal",       type: "zone" },
+  // ─── ANGST / KONTROLLE ───────────────────────────────────────────────────
+  "Horriphobus":           { effect: "horriphobus",  type: "target" },
+  "Sanftmut":              { effect: "respondami",   type: "target" },
+  "Respondami":            { effect: "respondami",   type: "target" },
+  "Motoricus":             { effect: "motoricus",    type: "target" },
+  "Somnigravis":           { effect: "paralysis",    type: "target" },
+  "Böser Blick":           { effect: "horriphobus",  type: "target" },
+  "Guttural":              { effect: "horriphobus",  type: "target" },
+  "Zwingtanz":             { effect: "motoricus",    type: "target" },
+  "Puppettenspiel":        { effect: "motoricus",    type: "target" },
+  "Geistesgestört":        { effect: "horriphobus",  type: "target" },
+  "Verwirrung":            { effect: "horriphobus",  type: "target" },
+  "Paralysis":             { effect: "paralysis",    type: "aura" },
+  "Bannbaladin":           { effect: "daemonenbann", type: "target" },
+  "Beherrschung brechen":  { effect: "daemonenbann", type: "target" },
+  "Geistes Bann":          { effect: "daemonenbann", type: "target" },
+  "Nekrophobie":           { effect: "horriphobus",  type: "target" },
+  "Hexenblick":            { effect: "horriphobus",  type: "target" },
+  "Krähenruf":             { effect: "respondami",   type: "target" },
+  "Tierbeherrschung":      { effect: "respondami",   type: "target" },
+
+  // ─── HEILUNG / BUFF ──────────────────────────────────────────────────────
+  "Balsam Salabunde":      { effect: "balsamsal",    type: "target" },
+  "Ruhe Körper":           { effect: "heilung",      type: "target" },
+  "Klarum Purum":          { effect: "heilung",      type: "target" },
+  "Armatrutz":             { effect: "armatrutz",    type: "aura" },
+  "Attributo":             { effect: "attributo",    type: "aura" },
+  "Gardianum":             { effect: "armatrutz",    type: "aura" },
+  "Krötenhaut":            { effect: "armatrutz",    type: "aura" },
+  "Adlerauge":             { effect: "attributo",    type: "aura" },
+  "Luchsenohr":            { effect: "attributo",    type: "aura" },
+  "Adlerauge Luchsenohr":  { effect: "attributo",    type: "aura" },
+  "Unitatio Gremii":       { effect: "attributo",    type: "aura" },
+  "Verständigung":         { effect: "attributo",    type: "aura" },
+  "Körper glätten":        { effect: "armatrutz",    type: "aura" },
+  "Blick des Phex":        { effect: "attributo",    type: "target" },
+  "Analüs":                { effect: "visibili",     type: "target" },
+  "Blick aufs Wesen":      { effect: "visibili",     type: "target" },
+  "Hellsicht":             { effect: "attributo",    type: "target" },
+  "Licht":                 { effect: "heilung",      type: "target" },
+  "Favilludo":             { effect: "heilung",      type: "zone" },
+  "Fulminictus Ignatius":  { effect: "attributo",    type: "aura" },
+  "Herrschaft der Elemente":{ effect: "attributo",   type: "aura" },
+  "Motoricus (WdZ)":       { effect: "motoricus",    type: "target" },
+
+  // ─── ILLUSION / TÄUSCHUNG ────────────────────────────────────────────────
+  "Visibili":              { effect: "visibili",     type: "aura" },
+  "Blendwerk":             { effect: "visibili",     type: "target" },
+  "Duplicatus":            { effect: "visibili",     type: "aura" },
+  "Flim Flam Funkel":      { effect: "visibili",     type: "target" },
+  "Nebelwand":             { effect: "wind",         type: "zone" },
+  "Zauberspiegel":         { effect: "armatrutz",    type: "aura" },
+  "Illusionen":            { effect: "visibili",     type: "target" },
+  "Große Illusionen":      { effect: "visibili",     type: "zone" },
+
+  // ─── STILLE / ZEIT ───────────────────────────────────────────────────────
+  "Silentium":             { effect: "silentium",    type: "aura" },
+  "Tempus Stasis":         { effect: "silentium",    type: "target" },
+  "Zauberschloß":          { effect: "silentium",    type: "aura" },
+
+  // ─── TELEPORTATION / RAUM ────────────────────────────────────────────────
+  "Portal":                { effect: "portal",       type: "zone" },
+  "Transversalis":         { effect: "portal",       type: "target" },
+  "Foramen":               { effect: "portal",       type: "zone" },
+  "Objektreise":           { effect: "portal",       type: "target" },
+  "Hexensprung":           { effect: "portal",       type: "aura" },
+  "Pentagramma":           { effect: "planastral",   type: "zone" },
+  "Sphärenklopfen":        { effect: "planastral",   type: "zone" },
+  "Planastral":            { effect: "planastral",   type: "zone" },
+
+  // ─── BESCHWÖRUNG / BANN ──────────────────────────────────────────────────
+  "Invocatio":             { effect: "invocatio",    type: "zone" },
+  "Daemonenbann":          { effect: "daemonenbann", type: "zone" },
+  "Geister bannen":        { effect: "daemonenbann", type: "target" },
+  "Manifesto":             { effect: "invocatio",    type: "zone" },
+  "Monstrum mortis":       { effect: "invocatio",    type: "target" },
+  "Reversalis":            { effect: "schadenflash", type: "target" },
+  "Desintegration":        { effect: "explosion",    type: "target" },
+  "Zorn Gottes":           { effect: "explosion",    type: "target" },
+
+  // ─── DSCHINN-BESCHWÖRUNG ─────────────────────────────────────────────────
+  "Invocatio Maximus":         { effect: "planastral",   type: "zone" },
+  "Dschinnenruf":              { effect: "invocatio",    type: "zone" },
+  "Feuer rufen":               { effect: "feuerball",    type: "zone" },
+  "Wasser rufen":              { effect: "wasser",       type: "zone" },
+  "Luft rufen":                { effect: "wind",         type: "zone" },
+  "Erde rufen":                { effect: "explosion",    type: "zone" },
+  "Elementar herbeirufen":     { effect: "invocatio",    type: "zone" },
+  "Elementargeister rufen":    { effect: "invocatio",    type: "zone" },
+  "Salamander rufen":          { effect: "brennen",      type: "zone" },
+  "Undine rufen":              { effect: "wasser",       type: "zone" },
+  "Sylphe rufen":              { effect: "wind",         type: "zone" },
+  "Gnome rufen":               { effect: "fesselranken", type: "zone" },
+
+  // ─── NATUR / BINDUNG ─────────────────────────────────────────────────────
+  "Fesselranken":          { effect: "fesselranken", type: "zone" },
+  "Spinnennetz":           { effect: "fesselranken", type: "target" },
+  "Pflanzenruf":           { effect: "fesselranken", type: "aura" },
+
+  // ─── VERWANDLUNG ─────────────────────────────────────────────────────────
+  "Verwandlung":           { effect: "verwandlung",  type: "aura" },
+  "Tier werden":           { effect: "verwandlung",  type: "aura" },
+  "Körper formen":         { effect: "verwandlung",  type: "aura" },
+
+  // ─── CHAOS / PANDÄMONIUM ─────────────────────────────────────────────────
+  "Pandemonium":           { effect: "pandemonium",  type: "zone" },
+  "Chaosfeld":             { effect: "pandemonium",  type: "zone" },
+
+  // ─── GEODENZAUBER (Erd/Stein) ────────────────────────────────────────────
+  "Steinwand":             { effect: "explosion",    type: "zone" },
+  "Erdbeben":              { effect: "explosion",    type: "zone" },
+  "Gesteinsform":          { effect: "verwandlung",  type: "target" },
+  "Lavastrom":             { effect: "feuerball",    type: "zone" },
+
+  // ─── ELFENZAUBER ─────────────────────────────────────────────────────────
+  "Eins mit der Natur":    { effect: "heilung",      type: "aura" },
+  "Tierfreund":            { effect: "respondami",   type: "target" },
+  "Naturverbundenheit":    { effect: "attributo",    type: "aura" },
+  "Elfenlied":             { effect: "attributo",    type: "zone" },
+
+  // ─── HEXENZAUBER ─────────────────────────────────────────────────────────
+  "Hexenauge":             { effect: "horriphobus",  type: "target" },
+  "Böser Blick (Hexe)":    { effect: "horriphobus",  type: "target" },
+  "Sieche":                { effect: "gift",         type: "target" },
+  "Alptraum":              { effect: "horriphobus",  type: "target" },
+  "Versteinern":           { effect: "paralysis",    type: "target" },
+  "Verhexen":              { effect: "gift",         type: "target" },
+
+  // ─── PFEIL-VERZAUBERUNGEN ────────────────────────────────────────────────
+  "Pfeil des Feuers":      { enchantArrow: true, effect: "flammenpfeil", impact: "feuerball", label: "Feuerpfeil",     color: "#ff6600" },
+  "Pfeil des Eises":       { enchantArrow: true, effect: "pfeil",        impact: "eis",       label: "Eispfeil",       color: "#88ccff" },
+  "Pfeil des Blitzes":     { enchantArrow: true, effect: "donnerkeil",   impact: "blitz",     label: "Blitzpfeil",     color: "#ffff44" },
+  "Pfeil der Luft":        { enchantArrow: true, effect: "donnerkeil",   impact: "blitz",     label: "Luftpfeil",      color: "#aaeeff" },
+  "Pfeil des Humus":       { enchantArrow: true, effect: "pfeil",        impact: "gift",      label: "Humuspfeil",     color: "#88aa44" },
+  "Pfeil des Giftes":      { enchantArrow: true, effect: "pfeil",        impact: "gift",      label: "Giftpfeil",      color: "#44cc44" },
+  "Pfeil des Wassers":     { enchantArrow: true, effect: "aquafaxius",   impact: "wasser",    label: "Wasserpfeil",    color: "#4488ff" },
+  "Pfeil der Dunkelheit":  { enchantArrow: true, effect: "pfeil",        impact: "schatten",  label: "Schattenpfeil",  color: "#8844cc" },
+  "Pfeil des (Elements)":  { enchantArrow: true, effect: "flammenpfeil", impact: "feuerball", label: "Elementarpfeil", color: "#ff8800" },
 };
+
+// ─── Keyword-Fallback für unbekannte Zauber ──────────────────────────────────
+// Wenn ein Zaubername nicht in SPELL_EFFECT_MAP steht, versucht diese Funktion
+// anhand von Schlüsselwörtern im Namen einen passenden Effekt zu raten.
+
+export function guessSpellEffect(spellName) {
+  const s = spellName.toLowerCase();
+
+  // Feuer
+  if (/feuer|flamm|igni|brand|glut|infern|pyro|zund/.test(s))
+    return { effect: "feuerball",    type: "target" };
+  // Eis / Frost
+  if (/eis|frost|kält|gefrior|blizzard|cryo/.test(s))
+    return { effect: "eis",          type: "target" };
+  // Blitz / Luft
+  if (/blitz|donner|sturm|wind|fulmin|orcan|luft|elektr/.test(s))
+    return { effect: "blitz",        type: "target" };
+  // Wasser
+  if (/wasser|aqua|meer|welle|regen|flut/.test(s))
+    return { effect: "wasser",       type: "target" };
+  // Gift / Fluch
+  if (/gift|fluch|pest|sieche|vergift|nekro|tod|leichen/.test(s))
+    return { effect: "gift",         type: "target" };
+  // Schatten / Dunkel
+  if (/schatten|dunkel|finster|nacht|limbus|seelen|dämon/.test(s))
+    return { effect: "schatten",     type: "target" };
+  // Heilung / Licht
+  if (/heil|balsam|ruhe|licht|segn|klaru|gesund|regenerat/.test(s))
+    return { effect: "heilung",      type: "target" };
+  // Schutz / Panzer
+  if (/schutz|armatur|panz|gardia|schild|kröten|körper glät/.test(s))
+    return { effect: "armatrutz",    type: "aura" };
+  // Buff / Stärken
+  if (/attribut|stärk|buff|adler|luchsen|einheit|verständ|herrschaft/.test(s))
+    return { effect: "attributo",    type: "aura" };
+  // Unsichtbar / Illusion
+  if (/unsicht|visibil|illusion|blendwerk|duplic|nebelwand|flim/.test(s))
+    return { effect: "visibili",     type: "aura" };
+  // Kontrolle / Angst
+  if (/horri|schreck|angst|furcht|böser blick|panik|verwirrung|guttural/.test(s))
+    return { effect: "horriphobus",  type: "target" };
+  // Schlaf / Lähmung
+  if (/schlaf|somni|paralys|lähmung|versteinern|stasis/.test(s))
+    return { effect: "paralysis",    type: "target" };
+  // Stille / Zeit
+  if (/silenti|stille|schloß|schloss|stumm/.test(s))
+    return { effect: "silentium",    type: "aura" };
+  // Teleport / Raum
+  if (/portal|transvers|foramen|hexensprung|teleport|reise/.test(s))
+    return { effect: "portal",       type: "zone" };
+  // Beschwörung
+  if (/invoc|beschwör|manifest|monstrum|ruf/.test(s))
+    return { effect: "invocatio",    type: "zone" };
+  // Bannen
+  if (/bann|daemon|geister|teufel/.test(s))
+    return { effect: "daemonenbann", type: "target" };
+  // Bewegung
+  if (/motoric|puppet|zwingtanz|telekinese/.test(s))
+    return { effect: "motoricus",    type: "target" };
+  // Verwandlung
+  if (/verwandl|transform|tier werden|körper formen/.test(s))
+    return { effect: "verwandlung",  type: "aura" };
+  // Pflanzen / Bindung
+  if (/ranken|fesselranken|spinnen|pflanzen/.test(s))
+    return { effect: "fesselranken", type: "zone" };
+  // Astral / Sphären
+  if (/planastral|sphären|astral|pentagramm/.test(s))
+    return { effect: "planastral",   type: "zone" };
+  // Chaos
+  if (/pandemon|chaos|chaos/.test(s))
+    return { effect: "pandemonium",  type: "zone" };
+
+  // Letzter Fallback: allgemeiner Magie-Flash
+  return { effect: "schadenflash",   type: "target" };
+}
 
 // ─── Probe → Sound-Mapping ──────────────────────────────────────────────────
 

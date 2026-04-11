@@ -8,7 +8,7 @@ import { PixelArtCharacterSheet } from "./sheet.mjs";
 import { registerDiceHooks } from "./dice-hooks.mjs";
 import { registerCombatHooks } from "./combat.mjs";
 import { registerMagicHooks } from "./magic.mjs";
-import { registerXMLImporter } from "./xml-parser.mjs";
+import { registerXMLImporter, showImportDialog } from "./xml-parser.mjs";
 
 // ─── Datenbanken (werden in ready geladen) ──────────────────────────────────
 
@@ -160,8 +160,23 @@ Hooks.once("ready", async () => {
   registerMagicHooks();
   registerXMLImporter();
 
-  // Exportiere Datenbanken für andere Module / Makros
-  globalThis.DSAPixelData = DATA;
+  // Globale Shortcuts für Makros / Konsole
+  globalThis.DSAPixelData   = DATA;
+  globalThis.DSAHeldImport  = showImportDialog;                             // DSAHeldImport()
+  globalThis.DSAEffekte     = () => DSAPixelTokens?.showEffectPicker?.();  // DSAEffekte()
+
+  // Effekt-Picker in den Settings integrieren
+  Hooks.on("renderSettings", (_app, html) => {
+    if (html.find("#dsa-pixel-fx-picker").length) return;
+    const btn = $(`
+      <button type="button" id="dsa-pixel-fx-picker" style="margin:4px 0;width:100%">
+        <i class="fas fa-magic"></i> Pixel Effekte (Vorschau & Test)
+      </button>
+    `);
+    btn.on("click", () => DSAPixelTokens?.showEffectPicker?.());
+    const target = html.find("#settings-game, .settings-list, section").last();
+    target.append(btn);
+  });
 
   console.log(`[${MODULE_ID}] ✓ Fully loaded`);
 });

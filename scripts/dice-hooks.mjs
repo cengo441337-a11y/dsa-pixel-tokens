@@ -4,7 +4,7 @@
  * Injiziert auch Parade/Schaden-Buttons mit Pixel-Art Styling.
  */
 
-import { MODULE_ID, SPELL_EFFECT_MAP, PROBE_SOUNDS } from "./config.mjs";
+import { MODULE_ID, SPELL_EFFECT_MAP, PROBE_SOUNDS, guessSpellEffect } from "./config.mjs";
 
 // ─── Sound Helper ───────────────────────────────────────────────────────────
 
@@ -19,17 +19,58 @@ async function playSound(soundPath) {
   }
 }
 
+// ─── Spell Name Extraction ──────────────────────────────────────────────────
+
+/**
+ * Extrahiert den Zaubernamen aus einer Chat-Nachricht.
+ * Sucht in unserem Format, gdsa-Format, und per Volltext-Abgleich.
+ */
+function extractSpellName(html) {
+  const content = html[0] ?? html;
+
+  // Unser Format: <div class="chat-title">⚡ ZauberName</div>
+  const ownTitle = content.querySelector?.(".chat-title");
+  if (ownTitle) {
+    const text = ownTitle.textContent.replace(/[⚡✨🌟⬡⚔⚗🔮]/g, "").trim();
+    if (SPELL_EFFECT_MAP[text]) return text;
+    // Teilübereinstimmung
+    for (const name of Object.keys(SPELL_EFFECT_MAP)) {
+      if (text.includes(name)) return name;
+    }
+  }
+
+  // gdsa / Foundry Standard: Überschriften und Hervorhebungen
+  const selectors = ["h3", "h4", ".card-header", ".item-name", ".flavor-text",
+    ".chat-headline", ".spell-name", "[data-spell]", "strong", "b"];
+  for (const sel of selectors) {
+    const els = content.querySelectorAll?.(sel) ?? [];
+    for (const el of els) {
+      const text = el.textContent.trim();
+      if (SPELL_EFFECT_MAP[text]) return text;
+      for (const name of Object.keys(SPELL_EFFECT_MAP)) {
+        if (text.includes(name)) return name;
+      }
+    }
+  }
+
+  // Volltext-Fallback: längste Übereinstimmung zuerst (verhindert Fehlmatches)
+  const fullText = content.textContent ?? "";
+  const sorted = Object.keys(SPELL_EFFECT_MAP).sort((a, b) => b.length - a.length);
+  for (const name of sorted) {
+    if (fullText.includes(name)) return name;
+  }
+
+  return null;
+}
+
 // ─── Chat Message Analysis ──────────────────────────────────────────────────
 
 /**
  * Analysiert eine gdsa Chat-Nachricht und erkennt den Probentyp.
- * gdsa verwendet Handlebars-Templates in templates/chat/chatTemplate/
- * Die Chat-HTML enthält Klassen wie .bntChatParry, .bntChatDamage, etc.
  */
 function analyzeGDSAChatMessage(message, html) {
   const content = html[0] ?? html;
 
-  // ── Ergebnis-Erkennung über Chat-Template Klassen ──
   const result = {
     type: null,       // "stat" | "skill" | "attack" | "parry" | "damage" | "spell"
     success: null,
@@ -37,73 +78,90 @@ function analyzeGDSAChatMessage(message, html) {
     fumble: false,
     actorId: null,
     tokenId: null,
+    spellName: null,
     dice: [],
   };
 
-  // Versuche Actor-ID aus Message zu extrahieren
   result.actorId = message.speaker?.actor ?? null;
   result.tokenId = message.speaker?.token ?? null;
 
-  // gdsa Chat-Templates haben bestimmte Klassen/Data-Attribute
-  const chatEl = content.querySelector?.(".chat-message") ?? content;
-
-  // Ergebnis aus Flags auslesen (wenn gdsa Flags setzt)
+  // Ergebnis aus Flags (gdsa setzt manchmal eigene Flags)
   const flags = message.flags?.gdsa ?? message.flags?.GDSA ?? {};
-  if (flags.type) result.type = flags.type;
-  if (flags.success !== undefined) result.success = flags.success;
+  if (flags.type)                     result.type    = flags.type;
+  if (flags.success !== undefined)    result.success = flags.success;
+  if (flags.spellName)                result.spellName = flags.spellName;
 
-  // Fallback: HTML-Analyse
-  // gdsa Angriff-Chat hat .bntChatParry Button
+  // HTML-Analyse für Typ
   if (content.querySelector?.(".bntChatParry")) {
     result.type = "attack";
-    result.success = true; // Parade-Button nur bei erfolgreichem Angriff
+    result.success = true;
   }
-
-  // gdsa Parade-Chat
   if (content.querySelector?.(".bntChatDamage") && !content.querySelector?.(".bntChatParry")) {
     result.type = "parry";
   }
-
-  // gdsa Schaden-Chat
   if (content.querySelector?.(".bntChatDogde")) {
-    result.type = "attack"; // Ausweichen-Button bei erfolgreichem Angriff
+    result.type = "attack";
     result.success = true;
   }
 
-  // Suche nach Würfelergebnissen im Text
+  // Würfelergebnisse aus dem DOM
   const diceSpans = content.querySelectorAll?.(".die-result, .dice-total, [data-result]") ?? [];
   for (const span of diceSpans) {
     const val = parseInt(span.textContent) || parseInt(span.dataset?.result);
     if (val) result.dice.push(val);
   }
 
-  // Erfolg/Misserfolg aus Text erkennen
-  const text = content.textContent?.toLowerCase() ?? "";
-  if (text.includes("gelungen") || text.includes("treffer") || text.includes("erfolg")) {
-    result.success = true;
-  }
-  if (text.includes("misslungen") || text.includes("daneben") || text.includes("gescheitert")) {
-    result.success = false;
-  }
-  if (text.includes("patzer") || text.includes("kritischer misserfolg")) {
-    result.fumble = true;
-    result.success = false;
-  }
-  if (text.includes("kritisch") && !result.fumble) {
-    result.critical = true;
-    result.success = true;
-  }
-  if (text.includes("glücklich") || text.includes("meisterhaft")) {
-    result.critical = true;
-    result.success = true;
-  }
+  // Erfolg/Misserfolg aus Text
+  const text = (content.textContent ?? "").toLowerCase();
+  if (text.includes("gelungen")   || text.includes("treffer")   || text.includes("erfolg"))   result.success = true;
+  if (text.includes("misslungen") || text.includes("daneben")   || text.includes("gescheitert")) result.success = false;
+  if (text.includes("patzer")     || text.includes("kritischer misserfolg")) { result.fumble = true;  result.success = false; }
+  if (text.includes("kritisch")   && !result.fumble)            result.critical = true;
+  if (text.includes("glücklich")  || text.includes("meisterhaft")) { result.critical = true; result.success = true; }
+  if (text.includes("zauber")     || text.includes("asp"))      { if (!result.type) result.type = "spell"; }
 
-  // Spell-Erkennung
-  if (text.includes("zauber") || text.includes("spell") || text.includes("asp")) {
-    if (!result.type) result.type = "spell";
-  }
+  // Zaubernamen extrahieren (unabhängig vom erkannten Typ)
+  result.spellName = result.spellName ?? extractSpellName(html);
+
+  // Wenn Zaubername gefunden aber kein Typ erkannt → Zauber
+  if (result.spellName && !result.type) result.type = "spell";
 
   return result;
+}
+
+// ─── Mapped Effect Trigger ──────────────────────────────────────────────────
+
+/**
+ * Triggert einen gemappten Zauber-VFX basierend auf SPELL_EFFECT_MAP-Eintrag.
+ * @param {Token} casterToken
+ * @param {Token|null} targetToken
+ * @param {object} mapping - SPELL_EFFECT_MAP entry
+ */
+function _triggerMappedEffect(casterToken, targetToken, mapping) {
+  if (typeof DSAPixelTokens === "undefined") return;
+
+  switch (mapping.type) {
+    case "projectile":
+      if (targetToken && targetToken !== casterToken) {
+        DSAPixelTokens.spawnProjectile(casterToken, targetToken, mapping.effect, mapping.impact ?? mapping.effect);
+      } else {
+        const pos = (targetToken ?? casterToken).center;
+        DSAPixelTokens.spawnEffect(pos.x, pos.y, mapping.effect);
+      }
+      break;
+    case "target": {
+      const pos = (targetToken ?? casterToken).center;
+      DSAPixelTokens.spawnEffect(pos.x, pos.y, mapping.effect);
+      break;
+    }
+    case "aura":
+      DSAPixelTokens.spawnEffect(casterToken.center.x, casterToken.center.y, mapping.effect);
+      break;
+    case "zone":
+      // Zonen brauchen ein Template — nur Notification
+      ui.notifications.info(`${mapping.effect} gelungen! Template platzieren für Zonen-Effekt.`);
+      break;
+  }
 }
 
 // ─── VFX Trigger ────────────────────────────────────────────────────────────
@@ -128,7 +186,6 @@ function triggerVFX(result) {
   switch (result.type) {
     case "attack":
       if (result.success) {
-        playSound(PROBE_SOUNDS.attack);
         // Treffer-Flash am Ziel
         if (targetToken) {
           setTimeout(() => {
@@ -137,54 +194,64 @@ function triggerVFX(result) {
         }
       }
       if (result.fumble) {
-        playSound(PROBE_SOUNDS.fumble);
+        playSound(PROBE_SOUNDS.fumble ?? null);
         DSAPixelTokens.spawnEffect(x, y, "schadenflash");
       }
       if (result.critical) {
-        playSound(PROBE_SOUNDS.critical);
+        playSound(PROBE_SOUNDS.critical ?? null);
       }
       break;
 
     case "parry":
       if (result.success) {
-        playSound(PROBE_SOUNDS.success);
+        playSound(PROBE_SOUNDS.success ?? null);
       }
       if (result.fumble) {
-        playSound(PROBE_SOUNDS.fumble);
+        playSound(PROBE_SOUNDS.fumble ?? null);
         DSAPixelTokens.spawnEffect(x, y, "schadenflash");
       }
       break;
 
-    case "spell":
+    case "spell": {
+      // Zaubername → SPELL_EFFECT_MAP → ggf. Keyword-Fallback → VFX
+      const mapping = result.spellName
+        ? (SPELL_EFFECT_MAP[result.spellName] ?? guessSpellEffect(result.spellName))
+        : null;
+
       if (result.success) {
-        playSound(PROBE_SOUNDS.spell);
-        // Zaubereffekt via Mapping triggern — erfordert Zaubernamen
-        // (wird bei der erweiterten Integration implementiert)
+        playSound(PROBE_SOUNDS.spell ?? null);
+        if (mapping && !mapping.enchantArrow) {
+          setTimeout(() => _triggerMappedEffect(actorToken, targetToken, mapping), 300);
+        }
+        // Pfeil-Verzauberung: nur Status-Meldung, kein direkter VFX
+        if (mapping?.enchantArrow) {
+          ui.notifications.info(
+            `✨ ${result.spellName} gewirkt — nächster Schuss fliegt als ${mapping.label}!`,
+            { permanent: false }
+          );
+        }
       }
+
       if (result.fumble) {
-        playSound(PROBE_SOUNDS.fumble);
+        playSound(PROBE_SOUNDS.fumble ?? null);
         DSAPixelTokens.spawnEffect(x, y, "schadenflash");
       }
       if (result.critical) {
-        playSound(PROBE_SOUNDS.critical);
-        DSAPixelTokens.spawnEffect(x, y, "heilung");
+        playSound(PROBE_SOUNDS.critical ?? null);
+        // Kritischer Zauber: Bonus-Glanz
+        setTimeout(() => DSAPixelTokens.spawnEffect(x, y, "heilung"), 400);
       }
       break;
-
-    case "damage":
-      if (targetToken) {
-        playSound(PROBE_SOUNDS.damage);
-      }
-      break;
+    }
 
     default:
-      // Talentprobe oder Eigenschaftsprobe
+      // Talentprobe / Eigenschaftsprobe
       if (result.fumble) {
-        playSound(PROBE_SOUNDS.fumble);
+        playSound(PROBE_SOUNDS.fumble ?? null);
         DSAPixelTokens.spawnEffect(x, y, "schadenflash");
       }
       if (result.critical) {
-        playSound(PROBE_SOUNDS.critical);
+        playSound(PROBE_SOUNDS.critical ?? null);
         DSAPixelTokens.spawnEffect(x, y, "heilung");
       }
       break;
@@ -193,95 +260,35 @@ function triggerVFX(result) {
 
 // ─── Button Enhancement ─────────────────────────────────────────────────────
 
-/**
- * Verbessert gdsa Chat-Buttons mit Pixel-Art Styling und zusätzlicher Funktionalität.
- */
 function enhanceChatButtons(html) {
-  // Parade-Button stylen
-  const parryBtns = html.find(".bntChatParry");
-  parryBtns.addClass("dsa-pixel-enhanced");
-  parryBtns.css({
-    "font-family": "'VT323', monospace",
-    "background": "#16213e",
-    "border": "2px solid #4a90d9",
-    "color": "#4a90d9",
-    "cursor": "pointer",
-  });
-
-  // Schaden-Button stylen
-  const dmgBtns = html.find(".bntChatDamage");
-  dmgBtns.addClass("dsa-pixel-enhanced");
-  dmgBtns.css({
-    "font-family": "'VT323', monospace",
-    "background": "#16213e",
-    "border": "2px solid #e94560",
-    "color": "#e94560",
-    "cursor": "pointer",
-  });
-
-  // Ausweichen-Button stylen
-  const dodgeBtns = html.find(".bntChatDogde");
-  dodgeBtns.addClass("dsa-pixel-enhanced");
-  dodgeBtns.css({
-    "font-family": "'VT323', monospace",
-    "background": "#16213e",
-    "border": "2px solid #4ad94a",
-    "color": "#4ad94a",
-    "cursor": "pointer",
-  });
-}
-
-// ─── Fernkampf Projektil-Automation ─────────────────────────────────────────
-
-/**
- * Erkennt Fernkampf-Angriffe und spielt Projektil-Animation ab.
- * Muss den Waffentyp erkennen (Bogen, Armbrust, etc.)
- */
-function handleRangedAttack(result) {
-  if (typeof DSAPixelTokens === "undefined") return;
-  if (result.type !== "attack" || !result.success) return;
-
-  const actorToken = result.tokenId
-    ? canvas.tokens.get(result.tokenId)
-    : canvas.tokens.placeables.find(t => t.actor?.id === result.actorId);
-
-  const targetToken = [...(game.user?.targets ?? [])][0];
-  if (!actorToken || !targetToken) return;
-
-  // Prüfe ob es ein Fernkampf-Angriff ist (basierend auf Distanz)
-  const dist = Math.hypot(
-    actorToken.center.x - targetToken.center.x,
-    actorToken.center.y - targetToken.center.y
-  );
-  const gridSize = canvas.grid?.size ?? 100;
-
-  // Wenn Token weiter als 2 Felder entfernt → Fernkampf-Projektil
-  if (dist > gridSize * 2.5) {
-    // Pfeil-Projektil (nutzt flammenpfeil als Basis, aber ohne Feuer)
-    // TODO: Eigenes Pfeil-Sprite hinzufügen
-    DSAPixelTokens.spawnProjectile(actorToken, targetToken, "flammenpfeil", "schadenflash");
+  const style = {
+    ".bntChatParry":  { border: "2px solid #4a90d9", color: "#4a90d9" },
+    ".bntChatDamage": { border: "2px solid #e94560", color: "#e94560" },
+    ".bntChatDogde":  { border: "2px solid #4ad94a", color: "#4ad94a" },
+  };
+  for (const [sel, css] of Object.entries(style)) {
+    html.find(sel).addClass("dsa-pixel-enhanced").css({
+      "font-family": "'VT323', monospace",
+      "background":  "#16213e",
+      "cursor":      "pointer",
+      ...css,
+    });
   }
 }
 
 // ─── Hook Registration ──────────────────────────────────────────────────────
 
 export function registerDiceHooks() {
-  // Alle neuen Chat-Nachrichten abfangen
-  Hooks.on("renderChatMessage", (message, html, data) => {
-    // Nur gdsa-Nachrichten verarbeiten (nicht unsere eigenen)
+  Hooks.on("renderChatMessage", (message, html, _data) => {
+    // Eigene Nachrichten nicht doppelt verarbeiten
     if (message.flags?.[MODULE_ID]) return;
 
     const result = analyzeGDSAChatMessage(message, html);
 
-    // VFX triggern
     if (result.type || result.fumble || result.critical) {
       triggerVFX(result);
     }
 
-    // Fernkampf-Projektile
-    handleRangedAttack(result);
-
-    // Chat-Buttons aufhübschen
     enhanceChatButtons(html);
   });
 

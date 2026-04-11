@@ -7,7 +7,7 @@
       <input class="char-name" name="name" type="text" value="{{actor.name}}" placeholder="Heldenname" />
       <div class="char-info">
         <span title="Rasse">{{system.race}}</span> &middot;
-        <span title="Kultur">{{system.culture}}</span> &middot;
+        <span title="Kultur">{{system.kulture}}</span> &middot;
         <span title="Profession">{{system.profession}}</span>
       </div>
       <div class="char-info">
@@ -45,7 +45,7 @@
       </div>
       <div class="derived-stat">
         <div class="stat-label">AW</div>
-        <div class="stat-value">{{system.Dodge}}</div>
+        <div class="stat-value">{{system.Dogde}}</div>
       </div>
     </div>
   </header>
@@ -56,7 +56,13 @@
       <div class="bar-label">LeP</div>
       <div class="bar-track">
         <div class="bar-fill" style="width: {{percent system.LeP.value system.LeP.max}}%"></div>
-        <div class="bar-text">{{system.LeP.value}} / {{system.LeP.max}}</div>
+        <div class="bar-text clickable-bar" data-res="lep" data-path="system.LeP.value" data-max="{{system.LeP.max}}" title="Klick: bearbeiten">
+          {{system.LeP.value}} / {{system.LeP.max}}
+        </div>
+      </div>
+      <div class="bar-btns">
+        <button class="res-btn res-minus" data-res="lep" data-path="system.LeP.value" data-max="{{system.LeP.max}}" title="-1 LeP">−</button>
+        <button class="res-btn res-plus"  data-res="lep" data-path="system.LeP.value" data-max="{{system.LeP.max}}" title="+1 LeP">+</button>
       </div>
     </div>
     {{#if system.AsP.max}}
@@ -64,7 +70,28 @@
       <div class="bar-label">AsP</div>
       <div class="bar-track">
         <div class="bar-fill" style="width: {{percent system.AsP.value system.AsP.max}}%"></div>
-        <div class="bar-text">{{system.AsP.value}} / {{system.AsP.max}}</div>
+        <div class="bar-text clickable-bar" data-res="asp" data-path="system.AsP.value" data-max="{{system.AsP.max}}" title="Klick: bearbeiten">
+          {{system.AsP.value}} / {{system.AsP.max}}
+        </div>
+      </div>
+      <div class="bar-btns">
+        <button class="res-btn res-minus" data-res="asp" data-path="system.AsP.value" data-max="{{system.AsP.max}}" title="-1 AsP">−</button>
+        <button class="res-btn res-plus"  data-res="asp" data-path="system.AsP.value" data-max="{{system.AsP.max}}" title="+1 AsP">+</button>
+      </div>
+    </div>
+    {{/if}}
+    {{#if system.KaP.max}}
+    <div class="resource-bar kap">
+      <div class="bar-label">KaP</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width: {{percent system.KaP.value system.KaP.max}}%"></div>
+        <div class="bar-text clickable-bar" data-res="kap" data-path="system.KaP.value" data-max="{{system.KaP.max}}" title="Klick: bearbeiten">
+          {{system.KaP.value}} / {{system.KaP.max}}
+        </div>
+      </div>
+      <div class="bar-btns">
+        <button class="res-btn res-minus" data-res="kap" data-path="system.KaP.value" data-max="{{system.KaP.max}}" title="-1 KaP">−</button>
+        <button class="res-btn res-plus"  data-res="kap" data-path="system.KaP.value" data-max="{{system.KaP.max}}" title="+1 KaP">+</button>
       </div>
     </div>
     {{/if}}
@@ -72,8 +99,21 @@
       <div class="bar-label">AuP</div>
       <div class="bar-track">
         <div class="bar-fill" style="width: {{percent system.AuP.value system.AuP.max}}%"></div>
-        <div class="bar-text">{{system.AuP.value}} / {{system.AuP.max}}</div>
+        <div class="bar-text clickable-bar" data-res="aup" data-path="system.AuP.value" data-max="{{system.AuP.max}}" title="Klick: bearbeiten">
+          {{system.AuP.value}} / {{system.AuP.max}}
+        </div>
       </div>
+      <div class="bar-btns">
+        <button class="res-btn res-minus" data-res="aup" data-path="system.AuP.value" data-max="{{system.AuP.max}}" title="-1 AuP">−</button>
+        <button class="res-btn res-plus"  data-res="aup" data-path="system.AuP.value" data-max="{{system.AuP.max}}" title="+1 AuP">+</button>
+      </div>
+    </div>
+    {{!-- Regenerations-Buttons --}}
+    <div class="regen-row">
+      <button class="regen-btn" data-action="regen-rast" title="Kurze Rast (10 min): +1W6 AuP">⏸ Rast</button>
+      <button class="regen-btn regen-med" data-action="regen-meditation" title="Große Meditation (1h): Reg I/II/III Probe → +W6 AsP">🧘 Med.</button>
+      <button class="regen-btn" data-action="regen-nacht" title="Nachtschlaf: volle AuP + 1W6+Astr.Reg AsP">🌙 Nacht</button>
+      <button class="regen-btn regen-full" data-action="regen-voll" title="Vollständige Regeneration">★ Voll</button>
     </div>
   </div>
 
@@ -190,13 +230,18 @@
         <tbody>
           {{#each combatTalents}}
           <tr>
-            <td class="talent-name">{{this.name}}</td>
-            <td class="rollable" data-roll="attack" data-talent="{{this.name}}"
-                data-at="{{this.at}}" title="Angriff würfeln">
+            <td class="talent-name rollable" data-roll="attack" data-talent="{{this.name}}"
+                data-at="{{this.at}}" data-pa="{{this.pa}}" data-taw="{{this.taw}}"
+                title="Angriff mit {{this.name}} würfeln">
+              {{this.name}}
+            </td>
+            <td class="rollable combat-at" data-roll="attack" data-talent="{{this.name}}"
+                data-at="{{this.at}}" data-pa="{{this.pa}}" data-taw="{{this.taw}}"
+                title="Angriff würfeln (AT {{this.at}})">
               {{this.at}}
             </td>
-            <td class="rollable" data-roll="parry" data-talent="{{this.name}}"
-                data-pa="{{this.pa}}" title="Parade würfeln">
+            <td class="rollable combat-pa" data-roll="parry" data-talent="{{this.name}}"
+                data-pa="{{this.pa}}" title="Parade würfeln (PA {{this.pa}})">
               {{this.pa}}
             </td>
             <td class="talent-taw">{{this.taw}}</td>
@@ -297,19 +342,19 @@
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center">
           <div>
             <div class="stat-label">Dukaten</div>
-            <input type="number" name="system.money.dukaten" value="{{system.money.dukaten}}" min="0" />
+            <input type="number" name="system.money.gold" value="{{system.money.gold}}" min="0" />
           </div>
           <div>
             <div class="stat-label">Silber</div>
-            <input type="number" name="system.money.silber" value="{{system.money.silber}}" min="0" />
+            <input type="number" name="system.money.silver" value="{{system.money.silver}}" min="0" />
           </div>
           <div>
             <div class="stat-label">Heller</div>
-            <input type="number" name="system.money.heller" value="{{system.money.heller}}" min="0" />
+            <input type="number" name="system.money.copper" value="{{system.money.copper}}" min="0" />
           </div>
           <div>
             <div class="stat-label">Kreuzer</div>
-            <input type="number" name="system.money.kreuzer" value="{{system.money.kreuzer}}" min="0" />
+            <input type="number" name="system.money.nickel" value="{{system.money.nickel}}" min="0" />
           </div>
         </div>
       </div>
@@ -321,7 +366,7 @@
 
       <div class="section-title">Hintergrund</div>
       <div class="panel">
-        {{editor content=system.notes target="system.notes" button=true editable=true}}
+        <textarea name="system.notes" class="notes-area" placeholder="Hintergrund, Notizen, Geschichte...">{{system.notes}}</textarea>
       </div>
 
     </div>

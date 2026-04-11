@@ -606,6 +606,7 @@ const EFFECT_PRESETS = {
   schatten:     { src: "modules/dsa-pixel-tokens/assets/fx_schatten.png",     frames: 8,  fps: 10, scale: 2.0,    sound: "modules/dsa-pixel-tokens/assets/sounds/spell.wav",   type: "target"                         },
   wasser:       { src: "modules/dsa-pixel-tokens/assets/fx_wasser.png",       frames: 8,  fps: 10, scale: 2.0,    sound: "modules/dsa-pixel-tokens/assets/sounds/random1.wav", type: "target"                         },
   // ── DSA-Zauber Welle 1 ────────────────────────────────────────────────────
+  pfeil:        { src: "modules/dsa-pixel-tokens/assets/fx_pfeil.png",        frames: 5,  fps: 16, scale: 2.0,    sound: null,                                                 type: "projectile", impact: "schadenflash" },
   flammenpfeil: { src: "modules/dsa-pixel-tokens/assets/fx_flammenpfeil.png", frames: 7,  fps: 14, scale: 2.0,    sound: "modules/dsa-pixel-tokens/assets/sounds/spell.wav",   type: "projectile", impact: "feuerball" },
   donnerkeil:   { src: "modules/dsa-pixel-tokens/assets/fx_donnerkeil.png",   frames: 10, fps: 14, scaleGrid: 3,  sound: "modules/dsa-pixel-tokens/assets/sounds/random2.wav", type: "projectile", impact: "explosion" },
   armatrutz:    { src: "modules/dsa-pixel-tokens/assets/fx_armatrutz.png",    frames: 10, fps: 8,  scaleGrid: 2,  sound: "modules/dsa-pixel-tokens/assets/sounds/bubble.wav",  type: "aura",       duration: 2000      },
@@ -784,7 +785,7 @@ async function spawnProjectile(fromToken, toToken, projectile = "feuerball", imp
         canvas.app.ticker.remove(onTick);
         layer.removeChild(sprite);
         sprite.destroy({ children: true });
-        spawnEffect(endX, endY, impact);
+        if (impact) spawnEffect(endX, endY, impact);
       }
     } catch(e) {
       done = true;
@@ -915,40 +916,75 @@ function _getTokensInTemplate(templateDoc) {
  * @param {number} [color=0xff3333]  PIXI hex color (red for LeP, blue for AsP)
  */
 function _showDamageNumber(token, amount, color = 0xff3333) {
-  const style = new PIXI.TextStyle({
-    fontFamily: "monospace",
-    fontSize: 22,
+  // Hauptzahl — groß, weiß wie im FF-Screenshot
+  const mainStyle = new PIXI.TextStyle({
+    fontFamily: "'Press Start 2P', monospace",
+    fontSize: 36,
+    fontWeight: "bold",
+    fill: ["#ffffff"],
+    stroke: color,
+    strokeThickness: 5,
+    dropShadow: true,
+    dropShadowBlur: 8,
+    dropShadowColor: 0x000000,
+    dropShadowAlpha: 0.8,
+    dropShadowDistance: 2,
+    dropShadowAngle: Math.PI / 4,
+  });
+
+  // Schatten-Kopie leicht versetzt (gibt Tiefe wie im Screenshot)
+  const shadowStyle = new PIXI.TextStyle({
+    fontFamily: "'Press Start 2P', monospace",
+    fontSize: 36,
     fontWeight: "bold",
     fill: [color],
     stroke: 0x000000,
-    strokeThickness: 4,
-    dropShadow: true,
-    dropShadowBlur: 6,
-    dropShadowColor: 0x000000,
-    dropShadowDistance: 1,
+    strokeThickness: 3,
+    alpha: 0.5,
   });
 
-  const text = new PIXI.Text(`-${amount}`, style);
-  text.anchor.set(0.5, 1.0);
-  text.x = token.center.x;
-  text.y = token.center.y - canvas.grid.size * 0.5;
+  const cx = token.center.x;
+  const cy = token.center.y - canvas.grid.size * 0.6;
 
   const layer = canvas.interface ?? canvas.controls;
+
+  const shadow = new PIXI.Text(`${amount}`, shadowStyle);
+  shadow.anchor.set(0.5, 1.0);
+  shadow.x = cx + 3;
+  shadow.y = cy + 3;
+  layer.addChild(shadow);
+
+  const text = new PIXI.Text(`${amount}`, mainStyle);
+  text.anchor.set(0.5, 1.0);
+  text.x = cx;
+  text.y = cy;
   layer.addChild(text);
 
   let tick = 0;
-  const total = 70;
-  const startY = text.y;
-  const drift = canvas.grid.size * 0.7;
+  const total = 80;
+  const startY = cy;
+  const drift = canvas.grid.size * 0.9;
 
   const onTick = () => {
     tick++;
     const t = tick / total;
-    text.y = startY - drift * t;
-    text.alpha = 1 - Math.pow(t, 1.5);
+    // Zuerst schnell nach oben, dann langsamer (ease-out)
+    const eased = 1 - Math.pow(1 - t, 2);
+    text.y = startY - drift * eased;
+    shadow.y = text.y + 3;
+    shadow.x = text.x + 3;
+    // Erst nach 60% einblenden statt sofort
+    text.alpha = t < 0.6 ? 1 : 1 - ((t - 0.6) / 0.4) * 1;
+    shadow.alpha = text.alpha * 0.5;
+    // Leicht wachsen und dann schrumpfen
+    const scale = t < 0.15 ? 1 + t * 1.5 : 1.22 - (t - 0.15) * 0.3;
+    text.scale.set(Math.max(0.8, scale));
+    shadow.scale.set(text.scale.x);
+
     if (tick >= total) {
       canvas.app.ticker.remove(onTick);
-      if (!text.destroyed) { layer.removeChild(text); text.destroy(); }
+      if (!text.destroyed)   { layer.removeChild(text);   text.destroy(); }
+      if (!shadow.destroyed) { layer.removeChild(shadow); shadow.destroy(); }
     }
   };
   canvas.app.ticker.add(onTick);
@@ -1193,6 +1229,20 @@ Hooks.on("renderTokenHUD", (hud, html, _data) => {
     bar.append(btn);
   }
 
+  // "Alle Effekte"-Button ganz unten als letzter Button
+  const allBtn = $(`<div class="control-icon sf-hud-btn" title="Alle Effekte…" style="
+    width:36px; height:36px; padding:2px; cursor:pointer;
+    background:rgba(10,20,60,0.85); border-radius:4px;
+    border:1px solid #4a90d9;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; color:#4a90d9; font-weight:bold;
+  ">⚡</div>`);
+  allBtn.on("click", (e) => {
+    e.preventDefault(); e.stopPropagation();
+    showEffectPicker();
+  });
+  bar.append(allBtn);
+
   html.append(bar);
 });
 
@@ -1232,6 +1282,351 @@ Hooks.on("renderMeasuredTemplateConfig", (app, html, data) => {
   html.find("footer").before(btn);
 });
 
+// ─── Effekt-Vorschau-Dialog ───────────────────────────────────────────────────
+
+/**
+ * Öffnet einen visuellen Effekt-Picker mit allen EFFECT_PRESETS als Icon-Grid.
+ * Klick = Effekt direkt an ausgewähltem Token / anvisiertem Ziel abspielen.
+ */
+function showEffectPicker() {
+  // Nach Typ gruppieren
+  const groups = {
+    "🎯 Ziel-Effekte":   [],
+    "✨ Auren & Buffs":  [],
+    "🏹 Projektile":     [],
+    "⬡ Zonen":           [],
+    "⚡ Kampf-Reaktionen": [],
+  };
+
+  for (const [name, preset] of Object.entries(EFFECT_PRESETS)) {
+    const iconSrc = `modules/${MODULE_ID}/assets/icons/${name}_icon.png`;
+    const btn = { name, preset, iconSrc };
+    if (name === "schadenflash" || name === "tod_animation") {
+      groups["⚡ Kampf-Reaktionen"].push(btn);
+    } else if (preset.type === "target")     groups["🎯 Ziel-Effekte"].push(btn);
+    else if (preset.type === "aura")         groups["✨ Auren & Buffs"].push(btn);
+    else if (preset.type === "projectile")   groups["🏹 Projektile"].push(btn);
+    else if (preset.type === "zone")         groups["⬡ Zonen"].push(btn);
+  }
+
+  const groupsHtml = Object.entries(groups).map(([label, effects]) => {
+    if (!effects.length) return "";
+    const btns = effects.map(({ name, iconSrc }) => `
+      <button type="button" class="dsa-fx-btn" data-effect="${name}" title="${name}"
+        style="width:80px;height:80px;padding:4px;display:flex;flex-direction:column;
+               align-items:center;justify-content:center;gap:3px;cursor:pointer;
+               background:rgba(0,0,0,0.45);border:2px solid #2a2a4e;border-radius:3px;
+               transition:border-color 0.1s">
+        <img src="${iconSrc}" width="44" height="44"
+          style="image-rendering:pixelated;border-radius:2px"
+          onerror="this.src='icons/svg/mystery-man.svg'">
+        <span style="font-size:8px;font-family:'VT323',monospace;color:#aaa;
+                     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+                     max-width:74px;text-align:center">${name}</span>
+      </button>
+    `).join("");
+    return `
+      <div style="margin-bottom:10px">
+        <div style="font-family:'Press Start 2P',cursive;font-size:8px;color:#4a90d9;
+                    margin-bottom:6px;border-bottom:1px solid #2a2a4e;padding-bottom:3px">
+          ${label}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">${btns}</div>
+      </div>
+    `;
+  }).join("");
+
+  new Dialog({
+    title: "DSA Pixel-Art — Effekte",
+    content: `
+      <style>
+        .dsa-fx-btn:hover { border-color:#4a90d9 !important; background:rgba(74,144,217,0.12) !important; }
+        .dsa-fx-btn.active { border-color:#ffd700 !important; background:rgba(255,215,0,0.10) !important; }
+      </style>
+      <div style="padding:4px;max-height:65vh;overflow-y:auto">
+        <div style="font-size:12px;color:#666;margin-bottom:8px">
+          Token auswählen / Ziel mit <kbd>T</kbd> anvisieren, dann Effekt klicken
+        </div>
+        ${groupsHtml}
+      </div>
+    `,
+    buttons: {
+      macros: {
+        icon: '<i class="fas fa-scroll"></i>',
+        label: "Makros neu erstellen",
+        callback: () => {
+          game.settings.set(MODULE_ID, "macrosCreated", false);
+          ui.notifications.info("Makros werden beim nächsten Reload neu erstellt.");
+        },
+      },
+      close: { label: "Schließen" },
+    },
+    default: "close",
+    render: (html) => {
+      html.find(".dsa-fx-btn").on("click", (e) => {
+        const name    = e.currentTarget.dataset.effect;
+        const preset  = EFFECT_PRESETS[name];
+        if (!preset) return;
+
+        const srcToken = canvas.tokens.controlled[0];
+        const tgtToken = [...(game.user?.targets ?? [])][0];
+        const pos = tgtToken?.center ?? srcToken?.center;
+
+        if (!pos) {
+          ui.notifications.warn("Token auswählen oder mit T anvisieren!");
+          return;
+        }
+
+        if (preset.type === "projectile" && srcToken && tgtToken && srcToken !== tgtToken) {
+          spawnProjectile(srcToken, tgtToken, name, preset.impact ?? name);
+        } else if (preset.type === "aura" && srcToken) {
+          spawnEffect(srcToken.center.x, srcToken.center.y, name);
+        } else {
+          spawnEffect(pos.x, pos.y, name);
+        }
+
+        // Visuelles Feedback
+        html.find(".dsa-fx-btn").removeClass("active");
+        $(e.currentTarget).addClass("active");
+        setTimeout(() => $(e.currentTarget).removeClass("active"), 800);
+      });
+    },
+  }).render(true);
+}
+
+// ─── Pixel-Würfel Animation ───────────────────────────────────────────────────
+
+/**
+ * Zeigt eine animierte Pixel-Art Würfel-Animation auf dem Canvas.
+ * Kein externes Sprite-Sheet nötig — wird per PIXI.Graphics gezeichnet.
+ *
+ * @param {number} x         Canvas X
+ * @param {number} y         Canvas Y
+ * @param {number} result    Würfelergebnis
+ * @param {string} [dieType] "d20" | "d6"
+ */
+function showDiceAnimation(x, y, result, dieType = "d20") {
+  if (!canvas?.interface) return;
+  const gs      = canvas.grid?.size ?? 100;
+  const size    = Math.round(gs * 0.65);
+  const isD20   = dieType !== "d6";
+  const layer   = canvas.interface ?? canvas.controls;
+
+  // Farbe je nach Ergebnis
+  const borderColor = result === 1      ? 0xe94560
+    : (isD20 ? result === 20 : result === 6) ? 0x00ff88
+    : 0x4a90d9;
+
+  const container = new PIXI.Container();
+  container.x = x;
+  container.y = y;
+  layer.addChild(container);
+
+  // ── Würfelkörper zeichnen ──
+  const body = new PIXI.Graphics();
+  container.addChild(body);
+
+  function drawBody(color) {
+    body.clear();
+    body.lineStyle(2, color, 1);
+    body.beginFill(0x0d1117, 0.88);
+    if (isD20) {
+      // D20: Hexagon
+      const r = size * 0.46;
+      const pts = [];
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i - Math.PI / 6;
+        pts.push(Math.cos(a) * r, Math.sin(a) * r);
+      }
+      body.drawPolygon(pts);
+    } else {
+      // D6: Abgerundetes Rechteck
+      const hw = size * 0.38;
+      body.drawRoundedRect(-hw, -hw, hw * 2, hw * 2, size * 0.08);
+    }
+    body.endFill();
+    // Label (D20 / D6) ganz klein
+    body.lineStyle(0);
+    body.beginFill(color, 0.25);
+    body.drawCircle(size * 0.28, -size * 0.28, size * 0.12);
+    body.endFill();
+  }
+
+  drawBody(0x4a90d9);
+
+  // ── Ergebnis-Text ──
+  const makeLabelStyle = (col) => new PIXI.TextStyle({
+    fontFamily: "'Press Start 2P', 'VT323', monospace",
+    fontSize:   size * (isD20 ? 0.30 : 0.38),
+    fontWeight: "bold",
+    fill:       col,
+    stroke:     "#000000",
+    strokeThickness: 3,
+    dropShadow: true,
+    dropShadowBlur: 4,
+    dropShadowColor: 0x000000,
+    dropShadowAlpha: 0.7,
+    dropShadowDistance: 1,
+  });
+
+  const label = new PIXI.Text("?", makeLabelStyle("#aaaaaa"));
+  label.anchor.set(0.5, 0.5);
+  container.addChild(label);
+
+  // ── Zufalls-Faces für Roll-Animation ──
+  const faces = Array.from({ length: 12 }, () =>
+    isD20 ? 1 + Math.floor(Math.random() * 20) : 1 + Math.floor(Math.random() * 6)
+  );
+
+  // ── Ticker ──
+  let tick = 0;
+  const ROLL_TICKS    = 45;   // Würfel-Phase
+  const SETTLE_TICKS  = 30;   // Einrasten + Vergrößern
+  const FADE_TICKS    = 30;   // Ausblenden
+  const TOTAL         = ROLL_TICKS + SETTLE_TICKS + FADE_TICKS;
+
+  const onTick = () => {
+    tick++;
+
+    if (tick <= ROLL_TICKS) {
+      // Rotierende Zufallszahlen (werden langsamer)
+      const speed  = Math.max(1, Math.floor((ROLL_TICKS - tick) / 6) + 1);
+      if (tick % speed === 0) {
+        const f = faces[tick % faces.length];
+        label.text  = String(f);
+        label.style = makeLabelStyle("#cccccc");
+      }
+      container.rotation = Math.sin(tick * 0.35) * 0.25 * (1 - tick / ROLL_TICKS);
+      const bounce = 1 + Math.sin(tick * 0.6) * 0.05;
+      container.scale.set(bounce);
+
+    } else if (tick === ROLL_TICKS + 1) {
+      // Ergebnis einblenden — kurzer Pop
+      const col = result === 1 ? "#ff3333" : borderColor === 0x00ff88 ? "#00ff88" : "#ffffff";
+      label.text  = String(result);
+      label.style = makeLabelStyle(col);
+      drawBody(borderColor);
+      container.rotation = 0;
+      container.scale.set(1.3);
+
+    } else if (tick <= ROLL_TICKS + SETTLE_TICKS) {
+      // Settle: Scale zurück auf 1.0
+      const t = (tick - ROLL_TICKS) / SETTLE_TICKS;
+      container.scale.set(1.3 - t * 0.3);
+      // Leicht nach oben driften
+      container.y = y - t * gs * 0.18;
+
+    } else {
+      // Ausblenden + weiter nach oben driften
+      const t = (tick - ROLL_TICKS - SETTLE_TICKS) / FADE_TICKS;
+      container.alpha = 1 - t;
+      container.y     = (y - gs * 0.18) - t * gs * 0.35;
+    }
+
+    if (tick >= TOTAL) {
+      canvas.app.ticker.remove(onTick);
+      if (!container.destroyed) {
+        layer.removeChild(container);
+        container.destroy({ children: true });
+      }
+    }
+  };
+
+  canvas.app.ticker.add(onTick);
+}
+
+// ─── Würfel-Hook: Animation bei Chat-Würfelwürfen ─────────────────────────────
+
+Hooks.on("createChatMessage", (message) => {
+  // Nur Würfelwürfe mit echten Ergebnissen
+  if (!message.isRoll) return;
+  if (!canvas?.tokens) return;
+
+  // Nur W20 und W6 visualisieren
+  const rolls = message.rolls ?? [];
+  for (const roll of rolls) {
+    for (const term of roll.terms ?? []) {
+      if (!term.results?.length) continue;
+      const faces = term.faces;
+      if (faces !== 20 && faces !== 6) continue;
+
+      // Token des Würfelnden finden
+      const token = canvas.tokens.controlled[0]
+        ?? canvas.tokens.placeables.find(t => t.actor?.id === message.speaker?.actor)
+        ?? canvas.tokens.placeables.find(t => t.actor?.id === message.speaker?.token);
+      if (!token) return;
+
+      const { x, y } = token.center;
+      const dieType  = `d${faces}`;
+      const results  = term.results.slice(0, 3); // Max 3 Würfel anzeigen
+
+      for (let i = 0; i < results.length; i++) {
+        const value   = results[i].result;
+        const count   = results.length;
+        // Horizontal versetzt wenn mehrere Würfel
+        const offsetX = (i - (count - 1) / 2) * (canvas.grid?.size ?? 100) * 0.75;
+        setTimeout(() => {
+          showDiceAnimation(x + offsetX, y - (canvas.grid?.size ?? 100) * 0.5, value, dieType);
+        }, i * 120);
+      }
+      break; // Pro Roll nur den ersten Dice-Term visualisieren
+    }
+  }
+});
+
+// ─── Größere Kreaturen: Token-Config Tab ──────────────────────────────────────
+
+// Preset-Größen für LPC-Sprites
+const TOKEN_SIZE_PRESETS = {
+  "1×1 Standard (64px)":  { frameWidth: 64,  frameHeight: 64,  framesPerDir: 9 },
+  "1×1 Groß (128px)":     { frameWidth: 128, frameHeight: 128, framesPerDir: 9 },
+  "2×2 Kreatur (64px)":   { frameWidth: 64,  frameHeight: 64,  framesPerDir: 9 },
+  "2×2 Kreatur (128px)":  { frameWidth: 128, frameHeight: 128, framesPerDir: 9 },
+  "3×3 Boss (128px)":     { frameWidth: 128, frameHeight: 128, framesPerDir: 9 },
+  "4×4 Riese (256px)":    { frameWidth: 256, frameHeight: 256, framesPerDir: 9 },
+};
+
+// Den bestehenden renderTokenConfig-Hook ergänzen (nach dem ersten Hook)
+Hooks.on("renderTokenConfig", (app, html, _data) => {
+  // Preset-Dropdown in den bestehenden Pixel-Art Tab einbauen
+  const pixelTab = html.find('.tab[data-tab="pixel-art"]');
+  if (!pixelTab.length) return;
+
+  const presetsHtml = Object.keys(TOKEN_SIZE_PRESETS)
+    .map(k => `<option value="${k}">${k}</option>`)
+    .join("");
+
+  const presetWidget = $(`
+    <div class="form-group" style="margin-bottom:8px">
+      <label>Größen-Preset</label>
+      <div class="form-fields">
+        <select id="dsa-pixel-size-preset" style="flex:1">
+          <option value="">— Manuell konfigurieren —</option>
+          ${presetsHtml}
+        </select>
+        <button type="button" id="dsa-pixel-apply-preset" style="flex:0 0 auto">
+          Anwenden
+        </button>
+      </div>
+      <p class="hint">Füllt Frame-Größe und Frames/Richtung automatisch aus.</p>
+    </div>
+  `);
+
+  // Vor das erste form-group in den Pixel-Art Tab einfügen
+  pixelTab.find(".dsa-pixel-settings .form-group").first().before(presetWidget);
+
+  // Preset anwenden
+  html.find("#dsa-pixel-apply-preset").on("click", () => {
+    const key    = html.find("#dsa-pixel-size-preset").val();
+    const preset = TOKEN_SIZE_PRESETS[key];
+    if (!preset) return;
+    html.find(`input[name="flags.${MODULE_ID}.spriteConfig.frameWidth"]`).val(preset.frameWidth);
+    html.find(`input[name="flags.${MODULE_ID}.spriteConfig.frameHeight"]`).val(preset.frameHeight);
+    html.find(`input[name="flags.${MODULE_ID}.spriteConfig.framesPerDir"]`).val(preset.framesPerDir);
+    ui.notifications.info(`Preset "${key}" angewendet — Speichern nicht vergessen!`);
+  });
+});
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 globalThis.DSAPixelTokens = {
@@ -1246,7 +1641,9 @@ globalThis.DSAPixelTokens = {
   effects: EFFECT_PRESETS,
   spawnZoneEffect,
   showZonePicker,
+  showEffectPicker,
   clearZoneSprites,
   applyZoneDamage,
+  showDiceAnimation,
   ZONE_PRESETS,
 };

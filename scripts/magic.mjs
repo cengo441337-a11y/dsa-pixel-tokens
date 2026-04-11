@@ -3,7 +3,7 @@
  * Zauberprobe mit Spontanmodifikationen, AsP-Berechnung, Zone-Markierung
  */
 
-import { MODULE_ID, SPELL_MODIFICATIONS, SPELL_EFFECT_MAP, resolveProbe, checkCritical, PROBE_SOUNDS, calculateModifications, REPRESENTATIONS } from "./config.mjs";
+import { MODULE_ID, SPELL_MODIFICATIONS, SPELL_EFFECT_MAP, resolveProbe, checkCritical, PROBE_SOUNDS, calculateModifications, REPRESENTATIONS, guessSpellEffect } from "./config.mjs";
 
 // ─── Zauberprobe-Dialog mit Spontanmodifikationen ───────────────────────────
 
@@ -217,10 +217,15 @@ export async function castSpell(actor, spellData) {
     "system.AsP.value": Math.max(0, currentAsP - actualCost),
   });
 
-  // 7. Modifikations-Zusammenfassung
-  const modSummary = Object.entries(mods)
-    .filter(([, m]) => m.probeMod !== 0 || m.aspMult !== 1.0)
-    .map(([key, m]) => `${SPELL_MODIFICATIONS[key]?.label}: ${m.label}`)
+  // 7. Modifikations-Zusammenfassung (selections = { modKey: optionIndex })
+  const modSummary = Object.entries(selections ?? {})
+    .filter(([, idx]) => idx > 0)
+    .map(([key, idx]) => {
+      const mod = SPELL_MODIFICATIONS[key];
+      const opt = mod?.options?.[idx];
+      return opt ? `${mod.label}: ${opt.label}` : null;
+    })
+    .filter(Boolean)
     .join(", ");
 
   // 8. Chat
@@ -252,10 +257,10 @@ export async function castSpell(actor, spellData) {
     flavor,
   });
 
-  // 9. VFX auto-trigger
+  // 9. VFX auto-trigger (SPELL_EFFECT_MAP → Keyword-Fallback)
   if (success && typeof DSAPixelTokens !== "undefined") {
-    const mapping = SPELL_EFFECT_MAP[spellData.name];
-    if (mapping) {
+    const mapping = SPELL_EFFECT_MAP[spellData.name] ?? guessSpellEffect(spellData.name);
+    if (mapping && !mapping.enchantArrow) {
       _triggerSpellEffect(actor, mapping, spellData);
     }
   }

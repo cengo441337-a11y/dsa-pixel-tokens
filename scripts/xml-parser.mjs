@@ -44,8 +44,22 @@ export function showImportDialog() {
           const text = await file.text();
           try {
             const heroData = parseHeldenXML(text);
-            await createActorFromImport(heroData, html.find("#xml-update").is(":checked"));
-            ui.notifications.info(`✓ ${heroData.name} erfolgreich importiert!`);
+            const update   = html.find("#xml-update").is(":checked");
+
+            ui.notifications.info(`⏳ Importiere ${heroData.name}…`);
+            const actor = await createActorFromImport(heroData, update);
+
+            const summary = [
+              `✓ <b>${heroData.name}</b> ${update ? "aktualisiert" : "erstellt"}`,
+              `${Object.keys(heroData.attributes).length} Eigenschaften`,
+              `${heroData.combatTalents.length} Kampftalente`,
+              `${heroData.talents.length} Talente`,
+              `${heroData.spells.length} Zauber`,
+              `${heroData.advantages.length} Vorteile / ${heroData.disadvantages.length} Nachteile`,
+              `${heroData.specialAbilities.length} SF`,
+            ].join(" · ");
+            ui.notifications.info(summary, { permanent: false });
+            actor.sheet.render(true);
           } catch (e) {
             console.error(`[${MODULE_ID}] XML Import Error:`, e);
             ui.notifications.error(`Import fehlgeschlagen: ${e.message}`);
@@ -108,10 +122,10 @@ export function parseHeldenXML(xmlString) {
   if (!held) throw new Error("Kein <held> Element gefunden");
 
   const result = {
-    name: _getText(held, "name") || held.getAttribute("name") || "Unbekannt",
-    race: _getText(held, "rasse") || _getAttr(held, "rasse", "string") || "",
-    culture: _getText(held, "kultur") || _getAttr(held, "kultur", "string") || "",
-    profession: _getText(held, "profession") || _getAttr(held, "ausbildung", "string") || "",
+    name: held.getAttribute("name") || _getText(held, "name") || "Unbekannt",
+    race:       _deJavaName(held.querySelector("basis > rasse, rasse")?.getAttribute("name")) || "",
+    culture:    _deJavaName(held.querySelector("basis > kultur, kultur")?.getAttribute("name")) || "",
+    profession: _deJavaName(held.querySelector("basis ausbildung[art='Hauptprofession'], ausbildung")?.getAttribute("name")) || "",
     attributes: {},
     derivedValues: {},
     talents: [],
@@ -154,86 +168,81 @@ export function parseHeldenXML(xmlString) {
   return result;
 }
 
+// ─── Helden-Software Eigenschafts-Namen → DSA Kürzel ───────────────────────
+
+const EIGENSCHAFT_MAP = {
+  "Mut": "MU", "Klugheit": "KL", "Intuition": "IN", "Charisma": "CH",
+  "Fingerfertigkeit": "FF", "Gewandtheit": "GE", "Konstitution": "KO",
+  "Körperkraft": "KK", "Koerperkraft": "KK",
+  // abgeleitete
+  "Lebensenergie": "_LeP", "Ausdauer": "_AuP",
+  "Astralenergie": "_AsP", "Karmaenergie": "_KaP",
+  "Magieresistenz": "_MR", "ini": "_INI",
+  "at": "_AT", "pa": "_PA", "fk": "_FK",
+};
+
 // ─── Eigenschafts-Parser ────────────────────────────────────────────────────
 
 function _parseAttributes(held, result) {
-  // Format 1: <eigenschaft name="MU" value="13" mod="0" />
-  const eigenschaftEls = held.querySelectorAll("eigenschaft, Eigenschaft");
+  const eigenschaftEls = held.querySelectorAll("eigenschaft");
   for (const el of eigenschaftEls) {
-    const name = el.getAttribute("name");
-    if (name && name in ATTRIBUTES) {
-      const value = parseInt(el.getAttribute("value") ?? el.getAttribute("akt")) || 0;
-      const mod = parseInt(el.getAttribute("mod")) || 0;
-      result.attributes[name] = value + mod;
-    }
-  }
+    const rawName = el.getAttribute("name");
+    if (!rawName) continue;
+    const mapped = EIGENSCHAFT_MAP[rawName];
+    if (!mapped) continue;
 
-  // Format 2: <eigenschaften><MU>13</MU>...
-  if (Object.keys(result.attributes).length === 0) {
-    for (const attr of Object.keys(ATTRIBUTES)) {
-      const el = held.querySelector(attr);
-      if (el) {
-        result.attributes[attr] = parseInt(el.textContent) || 0;
-      }
-    }
-  }
+    const value     = parseInt(el.getAttribute("value"))     || 0;
+    const mod       = parseInt(el.getAttribute("mod"))       || 0;
+    const permanent = parseInt(el.getAttribute("permanent")) || 0;
 
-  // Format 3: Direkte Attribute am held-Element
-  if (Object.keys(result.attributes).length === 0) {
-    for (const attr of Object.keys(ATTRIBUTES)) {
-      const val = held.getAttribute(attr.toLowerCase());
-      if (val) result.attributes[attr] = parseInt(val) || 0;
+    if (mapped.startsWith("_")) {
+      // Abgeleitete Werte in Helden-Software XML:
+      //   value     = aktuell verbleibender Wert (0 = nicht getrackt oder leer)
+      //   mod       = gekaufter Bonus (erhöht Max)
+      //   permanent = permanent verbrauchte Punkte, z.B. durch Rituale (negativ → reduziert Max)
+      const key = mapped.slice(1);
+      result.derivedValues[key] = { value, mod, permanent };
+    } else {
+      // Eigenschaft: value = aktueller Gesamtwert
+      result.attributes[mapped] = value;
     }
   }
 }
 
 // ─── Abgeleitete Werte ──────────────────────────────────────────────────────
 
-function _parseDerivedValues(held, result) {
-  const fields = {
-    "LeP":   ["grundwerte lep", "lp", "lebenspunkte"],
-    "AsP":   ["grundwerte asp", "ae", "astralpunkte"],
-    "AuP":   ["grundwerte aup", "au", "ausdauer"],
-    "MR":    ["grundwerte mr", "magieresistenz"],
-    "INI":   ["grundwerte ini", "initiative"],
-  };
-
-  for (const [key, selectors] of Object.entries(fields)) {
-    for (const sel of selectors) {
-      const el = held.querySelector(sel.replace(/ /g, " > "));
-      if (el) {
-        result.derivedValues[key] = {
-          value: parseInt(el.getAttribute("akt") ?? el.getAttribute("value") ?? el.textContent) || 0,
-          max: parseInt(el.getAttribute("max") ?? el.getAttribute("grundwert")) || 0,
-        };
-        break;
-      }
-    }
-  }
+function _parseDerivedValues(_held, _result) {
+  // Alles bereits in _parseAttributes über EIGENSCHAFT_MAP abgedeckt
 }
 
 // ─── Talente ────────────────────────────────────────────────────────────────
 
 function _parseTalents(held, result) {
-  // <talent name="Klettern" value="5" probe="MU/GE/KK" />
-  const talentEls = held.querySelectorAll("talent, Talent");
-  for (const el of talentEls) {
+  // Kampftalent-Namen aus <kampf> sammeln, um sie zu trennen
+  const kampfNamen = new Set();
+  for (const kw of held.querySelectorAll("kampf > kampfwerte")) {
+    kampfNamen.add(kw.getAttribute("name"));
+  }
+
+  // Alle Talente aus <talentliste>
+  for (const el of held.querySelectorAll("talentliste > talent")) {
     const name = el.getAttribute("name");
     if (!name) continue;
 
-    // Kampftalente separat behandeln
-    const lehrmeister = el.getAttribute("lehrmeister");
-    if (lehrmeister === "kampf" || el.getAttribute("typ") === "kampf") continue;
+    // Probe: " (GE/FF/KK)" → ["GE","FF","KK"]
+    const probeRaw = el.getAttribute("probe") || "";
+    const probe = probeRaw.replace(/[()]/g, "").trim().split("/").map(s => s.trim()).filter(Boolean);
+    const taw = parseInt(el.getAttribute("value")) || 0;
 
-    const probe = el.getAttribute("probe") || "";
-    const taw = parseInt(el.getAttribute("value") ?? el.getAttribute("taw")) || 0;
-
-    result.talents.push({
-      name,
-      probe: probe.split("/").map(s => s.trim()),
-      taw,
-      category: _guessTalentCategory(name),
-    });
+    if (kampfNamen.has(name)) {
+      // Kampftalent — AT/PA aus <kampf>
+      const kw = held.querySelector(`kampf > kampfwerte[name="${name}"]`);
+      const at = parseInt(kw?.querySelector("attacke")?.getAttribute("value")) || 0;
+      const pa = parseInt(kw?.querySelector("parade")?.getAttribute("value")) || 0;
+      result.combatTalents.push({ name, at, pa, taw, probe });
+    } else {
+      result.talents.push({ name, probe, taw, category: _guessTalentCategory(name) });
+    }
   }
 }
 
@@ -258,53 +267,36 @@ function _guessTalentCategory(name) {
 
 // ─── Kampftalente ───────────────────────────────────────────────────────────
 
-function _parseCombatTalents(held, result) {
-  const els = held.querySelectorAll("kampftalent, Kampftalent");
-  for (const el of els) {
-    result.combatTalents.push({
-      name: el.getAttribute("name") || "",
-      at: parseInt(el.getAttribute("at") ?? el.getAttribute("atk")) || 0,
-      pa: parseInt(el.getAttribute("pa") ?? el.getAttribute("def")) || 0,
-      taw: parseInt(el.getAttribute("value") ?? el.getAttribute("taw")) || 0,
-    });
-  }
-
-  // Fallback: Talente mit typ="kampf"
-  if (result.combatTalents.length === 0) {
-    const talentEls = held.querySelectorAll("talent[typ='kampf'], talent[lehrmeister='kampf']");
-    for (const el of talentEls) {
-      result.combatTalents.push({
-        name: el.getAttribute("name") || "",
-        at: parseInt(el.getAttribute("at")) || 0,
-        pa: parseInt(el.getAttribute("pa")) || 0,
-        taw: parseInt(el.getAttribute("value")) || 0,
-      });
-    }
-  }
+function _parseCombatTalents(_held, _result) {
+  // Bereits in _parseTalents verarbeitet
 }
 
 // ─── Zauber ─────────────────────────────────────────────────────────────────
 
 function _parseSpells(held, result) {
-  const els = held.querySelectorAll("zauber, Zauber, spell");
-  for (const el of els) {
-    const name = el.getAttribute("name") || el.textContent?.trim();
+  // Doppelte vermeiden (Helden-Software hat manchmal mehrere Varianten)
+  const seen = new Set();
+  for (const el of held.querySelectorAll("zauberliste > zauber")) {
+    const name = el.getAttribute("name");
     if (!name) continue;
 
-    const probe = el.getAttribute("probe") || "";
-    const zfw = parseInt(el.getAttribute("value") ?? el.getAttribute("zfw")) || 0;
-    const kosten = el.getAttribute("kosten") || el.getAttribute("asp") || "";
-    const rep = el.getAttribute("repraesentation") ?? el.getAttribute("rep") ?? "";
+    // Probe: " (KL/KL/FF)" → ["KL","KL","FF"]
+    const probeRaw = el.getAttribute("probe") || "";
+    const probe = probeRaw.replace(/[()]/g, "").trim().split("/").map(s => s.trim()).filter(Boolean);
+    const zfw = parseInt(el.getAttribute("value")) || 0;
+    const rep = el.getAttribute("repraesentation") || "";
+    const variante = el.getAttribute("variante") || "";
+    const key = `${name}|${variante}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
 
     result.spells.push({
-      name,
-      probe: probe.split("/").map(s => s.trim()),
+      name: variante ? `${name} (${variante})` : name,
+      probe,
       zfw,
-      kosten,
+      kosten: el.getAttribute("kosten") || "",
       repraesentation: rep,
-      reichweite: el.getAttribute("reichweite") || "",
-      zauberdauer: el.getAttribute("zauberdauer") || "",
-      wirkungsdauer: el.getAttribute("wirkungsdauer") || "",
+      hauszauber: el.getAttribute("hauszauber") === "true",
     });
   }
 }
@@ -312,16 +304,15 @@ function _parseSpells(held, result) {
 // ─── Vorteile / Nachteile ───────────────────────────────────────────────────
 
 function _parseAdvantages(held, result) {
-  // <vorteil name="Gutaussehend" value="1" />
-  for (const el of held.querySelectorAll("vorteil, Vorteil")) {
+  for (const el of held.querySelectorAll("vt > vorteil")) {
     result.advantages.push({
-      name: el.getAttribute("name") || el.textContent?.trim() || "",
+      name: el.getAttribute("name") || "",
       value: el.getAttribute("value") || null,
     });
   }
-  for (const el of held.querySelectorAll("nachteil, Nachteil")) {
+  for (const el of held.querySelectorAll("vt > nachteil")) {
     result.disadvantages.push({
-      name: el.getAttribute("name") || el.textContent?.trim() || "",
+      name: el.getAttribute("name") || "",
       value: el.getAttribute("value") || null,
     });
   }
@@ -330,10 +321,9 @@ function _parseAdvantages(held, result) {
 // ─── Sonderfertigkeiten ─────────────────────────────────────────────────────
 
 function _parseSpecialAbilities(held, result) {
-  const els = held.querySelectorAll("sonderfertigkeit, Sonderfertigkeit, sf");
-  for (const el of els) {
+  for (const el of held.querySelectorAll("sf > sonderfertigkeit")) {
     result.specialAbilities.push({
-      name: el.getAttribute("name") || el.textContent?.trim() || "",
+      name: el.getAttribute("name") || "",
     });
   }
 }
@@ -341,11 +331,13 @@ function _parseSpecialAbilities(held, result) {
 // ─── Ausrüstung ─────────────────────────────────────────────────────────────
 
 function _parseEquipment(held, result) {
-  for (const el of held.querySelectorAll("gegenstand, Gegenstand, ausruestung > *")) {
+  for (const el of held.querySelectorAll("gegenstaende > gegenstand, ausruestungen gegenstand")) {
+    const name = el.getAttribute("name");
+    if (!name) continue;
     result.equipment.push({
-      name: el.getAttribute("name") || el.textContent?.trim() || "",
-      quantity: parseInt(el.getAttribute("anzahl") ?? el.getAttribute("quantity")) || 1,
-      weight: parseFloat(el.getAttribute("gewicht") ?? el.getAttribute("weight")) || 0,
+      name,
+      quantity: parseInt(el.getAttribute("anzahl")) || 1,
+      weight: parseFloat(el.getAttribute("gewicht")) || 0,
     });
   }
 }
@@ -353,10 +345,11 @@ function _parseEquipment(held, result) {
 // ─── AP ─────────────────────────────────────────────────────────────────────
 
 function _parseAP(held, result) {
-  const apEl = held.querySelector("abenteuerpunkte, ap, AP");
+  const apEl = held.querySelector("basis > abenteuerpunkte");
+  const freeEl = held.querySelector("basis > freieabenteuerpunkte");
   if (apEl) {
-    result.ap.total = parseInt(apEl.getAttribute("value") ?? apEl.getAttribute("gesamt") ?? apEl.textContent) || 0;
-    result.ap.free = parseInt(apEl.getAttribute("frei") ?? apEl.getAttribute("free")) || 0;
+    result.ap.total = parseInt(apEl.getAttribute("value")) || 0;
+    result.ap.free  = parseInt(freeEl?.getAttribute("value")) || 0;
     result.ap.spent = result.ap.total - result.ap.free;
   }
 }
@@ -373,120 +366,159 @@ function _getAttr(el, tagName, attrName) {
   return child?.getAttribute(attrName) ?? null;
 }
 
+/**
+ * Bereinigt Helden-Software Java-Klassennamen zu lesbaren deutschen Namen.
+ * "helden.model.rasse.Mittellaender" → "Mittelländer"
+ * "helden.model.kultur.Mittelreich"  → "Mittelreich"
+ */
+function _deJavaName(str) {
+  if (!str) return str;
+  // Kein Java-Klassenname → unverändert zurück
+  if (!str.includes(".")) return str;
+  // Letztes Segment extrahieren
+  let name = str.split(".").pop();
+  // ASCII-Umlaute → echte Umlaute
+  name = name
+    .replace(/Ae([a-z])/g, "Ä$1").replace(/Oe([a-z])/g, "Ö$1").replace(/Ue([a-z])/g, "Ü$1")
+    .replace(/ae/g, "ä").replace(/oe/g, "ö").replace(/ue/g, "ü")
+    .replace(/sz/g, "ß");
+  // CamelCase → Leerzeichen
+  name = name.replace(/([a-zäöüß])([A-ZÄÖÜ])/g, "$1 $2");
+  return name;
+}
+
 // ─── Actor erstellen / aktualisieren ────────────────────────────────────────
 
 /**
  * Erstellt einen neuen Actor oder aktualisiert einen bestehenden aus geparsten XML-Daten.
+ * Schreibt alle Daten in die korrekten gdsa-Systempfade.
  */
 export async function createActorFromImport(heroData, updateExisting = false) {
   let actor = null;
 
   if (updateExisting) {
     actor = game.actors.find(a => a.name === heroData.name);
-    if (!actor) {
-      ui.notifications.warn(`Held "${heroData.name}" nicht gefunden — erstelle neu.`);
-    }
+    if (!actor) ui.notifications.warn(`Held "${heroData.name}" nicht gefunden — erstelle neu.`);
   }
 
-  // Basis-Actor-Daten für gdsa
-  const actorData = {
-    name: heroData.name,
-    type: "PlayerCharakter",
-    system: {},
-  };
+  const dv  = heroData.derivedValues;
+  const sys = {};
 
-  // Eigenschaften setzen
-  for (const [attr, value] of Object.entries(heroData.attributes)) {
-    actorData.system[attr] = { value };
+  // ── 1. Eigenschaften (MU, KL, IN, ...) ──────────────────────────────────
+  for (const [attr, val] of Object.entries(heroData.attributes)) {
+    sys[attr] = { value: val, mod: 0 };
   }
 
-  // Abgeleitete Werte
-  if (heroData.derivedValues.LeP) {
-    actorData.system.LeP = heroData.derivedValues.LeP;
-  }
-  if (heroData.derivedValues.AsP) {
-    actorData.system.AsP = heroData.derivedValues.AsP;
-  }
-  if (heroData.derivedValues.AuP) {
-    actorData.system.AuP = heroData.derivedValues.AuP;
-  }
+  // ── 2. Abgeleitete Werte ─────────────────────────────────────────────────
+  const attr = heroData.attributes;  // Kurzreferenz
+  // Helden-Software XML:
+  //   mod       = gekaufter Bonus (erhöht Max)
+  //   permanent = permanent verbrauchte Punkte, z.B. Ritualobjekte (negativ → reduziert Max)
+  //   value     = aktuell verbleibender Wert (0 = komplett aufgebraucht, nicht "kein Bonus")
+  const lepBonus = dv.LeP?.mod ?? 0;
+  const aspBonus = (dv.AsP?.mod ?? 0) + (dv.AsP?.permanent ?? 0);
+  const aupBonus = dv.AuP?.mod ?? 0;
+  const lepMax = (attr.KO ?? 10) * 2 + Math.ceil((attr.KK ?? 10) / 2) + lepBonus;
+  // AsP: abhängig vom Charaktertyp
+  // Vollzauberer/Magier: MU+IN+CH; Elfen: IN+MR+CH; Sonstige: IN + Astralmacht*10
+  const astralmacht   = heroData.advantages.find(a => a.name === "Astralmacht");
+  const istVollzauber = heroData.advantages.some(a => a.name === "Vollzauberer")
+    || heroData.advantages.some(a => a.name?.includes("Akademische Ausbildung"))
+    || heroData.specialAbilities.some(s => s.name?.includes("Akademische Ausbildung"));
+  const istElf = heroData.race?.toLowerCase().includes("elf")
+    || heroData.race?.toLowerCase().includes("elfe");
+  const aspMax = istVollzauber ? (attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10) + aspBonus
+    : istElf        ? (attr.IN ?? 10) + (attr.MR ?? 10) + (attr.CH ?? 10) + aspBonus
+    : astralmacht   ? (attr.IN ?? 10) + (parseInt(astralmacht.value) || 0) * 10 + aspBonus
+    : aspBonus > 0  ? aspBonus : 0;
+  // AuP: GE + KO + KK/2 (rund) + Bonus
+  const aupMax = (attr.GE ?? 10) + (attr.KO ?? 10) + Math.ceil((attr.KK ?? 10) / 2) + aupBonus;
+  // Aktueller Wert: XML-Wert wenn > 0, sonst Max (0 = aufgebraucht oder nicht getrackt)
+  const lepCurrent = (dv.LeP?.value > 0) ? dv.LeP.value : lepMax;
+  const aspCurrent = (dv.AsP?.value > 0) ? dv.AsP.value : aspMax;
+  const aupCurrent = (dv.AuP?.value > 0) ? dv.AuP.value : aupMax;
+  sys.LeP = { value: lepCurrent, max: lepMax };
+  sys.AsP = { value: aspCurrent, max: aspMax };
+  sys.AuP = { value: aupCurrent, max: aupMax };
+  if (dv.MR)  sys.MR  = { value: dv.MR.value,  tempmodi: 0 };
+  if (dv.INI) sys.INI = { value: dv.INI.value,  tempmodi: 0 };
+  // Kampf-Basiswerte (ATBasis, PABasis, FKBasis)
+  if (dv.AT)  sys.ATBasis = { value: dv.AT.value,  tempmodi: 0 };
+  if (dv.PA)  sys.PABasis = { value: dv.PA.value,  tempmodi: 0 };
+  if (dv.FK)  sys.FKBasis = { value: dv.FK.value,  tempmodi: 0 };
 
-  // Kampftalente direkt im System-Objekt (gdsa-Format)
+  // ── 3. Kampftalente → system.skill ──────────────────────────────────────
+  sys.skill = {};
   for (const ct of heroData.combatTalents) {
-    actorData.system[ct.name] = {
-      value: ct.taw,
-      atk: ct.at,
-      def: ct.pa,
-    };
+    sys.skill[ct.name] = { value: ct.taw, atk: ct.at || "", def: ct.pa || "" };
   }
 
-  // Meta-Daten
-  actorData.system.race = heroData.race;
-  actorData.system.culture = heroData.culture;
-  actorData.system.profession = heroData.profession;
-  actorData.system.AP = {
-    value: heroData.ap.total,
-    free: heroData.ap.free,
-    spent: heroData.ap.spent,
+  // ── 4. Talente → system.talente ──────────────────────────────────────────
+  sys.talente = {};
+  for (const t of heroData.talents) {
+    sys.talente[t.name] = { value: t.taw, probe: t.probe, cat: t.category };
+  }
+
+  // ── 5. Vorteile / Nachteile → system.vorteile / nachteile ───────────────
+  sys.vorteile  = {};
+  sys.nachteile = {};
+  for (const adv of heroData.advantages) {
+    sys.vorteile[adv.name]  = adv.value != null ? (parseInt(adv.value) || adv.value) : null;
+  }
+  for (const dis of heroData.disadvantages) {
+    sys.nachteile[dis.name] = dis.value != null ? (parseInt(dis.value) || dis.value) : null;
+  }
+
+  // ── 6. Sonderfertigkeiten → system.sf (String-Array) ────────────────────
+  sys.sf = heroData.specialAbilities.map(s => s.name);
+
+  // ── 7. Regen-Werte aus SF/Vorteilen ableiten ─────────────────────────────
+  const sfNames = sys.sf;
+  const regStufe = sfNames.includes("Meisterliche Regeneration") ? 3
+    : sfNames.includes("Regeneration II")                        ? 2
+    : sfNames.includes("Regeneration I")                         ? 1 : 0;
+  const astraleRegVorteil = heroData.advantages.find(a => a.name === "Astrale Regeneration");
+  sys.regen = {
+    regStufe,
+    astraleReg: astraleRegVorteil ? (parseInt(astraleRegVorteil.value) || 0) : 0,
+    hasMeditation: sfNames.some(s => s.toLowerCase().includes("meditation")),
   };
 
+  // ── 8. Meta ──────────────────────────────────────────────────────────────
+  sys.race       = heroData.race;    // gdsa-Feld heißt 'race', nicht 'rasse'
+  sys.kulture    = heroData.culture;
+  sys.profession = heroData.profession;
+  sys.AP         = { value: heroData.ap.total, free: heroData.ap.free, spent: heroData.ap.spent };
+
+  // ── Actor erstellen / aktualisieren ──────────────────────────────────────
+  const actorData = { name: heroData.name, type: "PlayerCharakter", system: sys };
   if (actor) {
-    // Update
     await actor.update(actorData);
+    // Alte Spell-Items löschen vor Re-Import
+    const oldSpells = actor.items.filter(i => i.type === "spell");
+    if (oldSpells.length) await actor.deleteEmbeddedDocuments("Item", oldSpells.map(i => i.id));
   } else {
-    // Create
     actor = await Actor.create(actorData);
   }
 
-  // Items erstellen: Talente, Zauber, V/N/SF
-  const items = [];
+  // ── 9. Zauber als spell-Items ────────────────────────────────────────────
+  // gdsa: type="spell", system.att1/att2/att3, system.costs (nicht kosten), system.value
+  const spellItems = heroData.spells.map(spell => ({
+    name: spell.name,
+    type: "spell",
+    system: {
+      att1:            spell.probe[0] || "",
+      att2:            spell.probe[1] || "",
+      att3:            spell.probe[2] || "",
+      value:           spell.zfw,        // ZfW
+      costs:           spell.kosten,     // gdsa nutzt 'costs', nicht 'kosten'
+      repraesentation: spell.repraesentation || "",
+      hauszauber:      spell.hauszauber ?? false,
+    },
+  }));
 
-  for (const talent of heroData.talents) {
-    items.push({
-      name: talent.name,
-      type: "talent",
-      system: {
-        probe: talent.probe.join("/"),
-        value: talent.taw,
-        taw: talent.taw,
-        category: talent.category,
-      },
-    });
-  }
-
-  for (const spell of heroData.spells) {
-    items.push({
-      name: spell.name,
-      type: "spell",
-      system: {
-        att1: spell.probe[0] || "",
-        att2: spell.probe[1] || "",
-        att3: spell.probe[2] || "",
-        zfw: spell.zfw,
-        kosten: spell.kosten,
-        reichweite: spell.reichweite,
-        zauberdauer: spell.zauberdauer,
-        wirkungsdauer: spell.wirkungsdauer,
-        repraesentation: spell.repraesentation,
-      },
-    });
-  }
-
-  for (const adv of heroData.advantages) {
-    items.push({ name: adv.name, type: "vorteil", system: { value: adv.value } });
-  }
-
-  for (const dis of heroData.disadvantages) {
-    items.push({ name: dis.name, type: "nachteil", system: { value: dis.value } });
-  }
-
-  for (const sf of heroData.specialAbilities) {
-    items.push({ name: sf.name, type: "sonderfertigkeit", system: {} });
-  }
-
-  // Items bulk-create
-  if (items.length > 0) {
-    await actor.createEmbeddedDocuments("Item", items);
+  if (spellItems.length > 0) {
+    await actor.createEmbeddedDocuments("Item", spellItems);
   }
 
   return actor;
@@ -495,15 +527,33 @@ export async function createActorFromImport(heroData, updateExisting = false) {
 // ─── Registrierung ──────────────────────────────────────────────────────────
 
 export function registerXMLImporter() {
-  // Button in den Foundry Settings-Bereich injizieren
-  Hooks.on("renderSettings", (app, html) => {
+  // ── Button im Actors-Panel (Sidebar) ──────────────────────────────────────
+  Hooks.on("renderActorDirectory", (_app, html) => {
+    if (html.find("#dsa-xml-import-btn").length) return; // nicht doppelt einfügen
     const btn = $(`
-      <button type="button" style="margin:4px 0;width:100%" id="dsa-pixel-import">
-        <i class="fas fa-file-import"></i> Helden-Software Import (Pixel-Art)
+      <button type="button" id="dsa-xml-import-btn"
+        style="width:100%;margin:4px 0;font-size:11px;padding:4px 8px;
+               background:#16213e;border:1px solid #3a5e8a;color:#88ccff;cursor:pointer;border-radius:2px">
+        <i class="fas fa-file-import"></i> Helden-Software XML importieren
       </button>
     `);
     btn.on("click", showImportDialog);
-    html.find("#settings-game").append(btn);
+    // Vor der Actor-Liste einfügen
+    const header = html.find(".directory-header, .directory-list").first();
+    header.before(btn);
+  });
+
+  // ── Button in den Settings ────────────────────────────────────────────────
+  Hooks.on("renderSettings", (_app, html) => {
+    if (html.find("#dsa-pixel-import").length) return;
+    const btn = $(`
+      <button type="button" id="dsa-pixel-import" style="margin:4px 0;width:100%">
+        <i class="fas fa-file-import"></i> Helden-Software Import (DSA Pixel-Art)
+      </button>
+    `);
+    btn.on("click", showImportDialog);
+    const target = html.find("#settings-game, .settings-list, section").last();
+    target.append(btn);
   });
 
   console.log(`[${MODULE_ID}] ✓ XML-Importer registriert`);

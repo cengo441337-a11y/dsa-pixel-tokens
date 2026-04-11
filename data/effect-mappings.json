@@ -1,1 +1,1790 @@
-{}
+{
+  "Abvenenum Reine Speise": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Accuratum Zaubernadel": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Adamantium Erzstruktur": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Adlerauge Luchsenohr": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Adlerschwinge Wolfsgestalt": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Aeoiltus Windgebraus": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Aerofugo Vakuum": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Aerogelo Atemqual": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Aeropulvis Sanfter Fall": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Alpgestalt": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Analys Arkanstruktur": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Ängste Lindern": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Animatio Stummer Diener": {
+    "effect": "telekinese",
+    "type": "target",
+    "color": "#ffff44",
+    "sound": "spell"
+  },
+  "Applicatus Zauberspeicher": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Aquaqueris Wasserfluch": {
+    "effect": "wasser",
+    "type": "zone",
+    "color": "#4488ff",
+    "sound": "bubble"
+  },
+  "Arachnea Krabbeltier": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Arcanovi Artefakt": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Armatrutz": {
+    "effect": "schutz",
+    "type": "aura",
+    "color": "#aa8844",
+    "sound": "random1"
+  },
+  "Atemnot": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Attributo": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Aufgeblasen Abgehoben": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Auge des Limbus": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#aaaaff",
+    "sound": "random2"
+  },
+  "Aureolus Güldenglanz": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Auris Nasus Oculus": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Axxeleratus Blitzgeschwind": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Balsam Salabunde": {
+    "effect": "heilung",
+    "type": "target",
+    "color": "#44ff88",
+    "sound": "bubble"
+  },
+  "Band und Fessel": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Bannbaladin": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Bärenruhe Winterschlaf": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Beherrschung Brechen": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Beschwörung Vereiteln": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Bewegung Stören": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Blendwerk": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Blick Aufs Wesen": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Blick Durch Fremde Augen": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Blick In Die Gedanken": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Blick in die Vergangenheit": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Blitz Dich Find": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Böser Blick": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Brenne, Toter Stoff!": {
+    "effect": "feuer",
+    "type": "none",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Caldofrigo Heiß und Kalt": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Chamaelioni Mimikry": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Chimaeroform Hybridgestalt": {
+    "effect": "daemonologie",
+    "type": "summon",
+    "color": "#440044",
+    "sound": "random2"
+  },
+  "Chronoklassis Urfossil": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Chrononautos Zeitenfahrt": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ccccff",
+    "sound": "bubble"
+  },
+  "Claudius Clavistibor": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Corpofesso Gliederschmerz": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Corpofrigo Kälteschock": {
+    "effect": "wasser",
+    "type": "aura",
+    "color": "#aaddff",
+    "sound": "bubble"
+  },
+  "Cryptographo Zauberschrift": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Custodosigil Diebesbann": {
+    "effect": "feuer",
+    "type": "none",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Dämonenbann": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Delicioso Gaumenschmaus": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Desintegratus Pulverstaub": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Destructibo Arcanitas": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Dichter und Denker": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc44cc",
+    "sound": "spell"
+  },
+  "Dschinnenruf": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#aa8844",
+    "sound": "random1"
+  },
+  "Dunkelheit": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Duplicatus Doppelbild": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Ecliptifactus Schattenkraft": {
+    "effect": "daemonologie",
+    "type": "summon",
+    "color": "#440044",
+    "sound": "random2"
+  },
+  "Eigenschaft Wiederherstellen": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Eigne Ängste Quälen Dich!": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Einfluss Bannen": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Eins Mit Der Natur": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Eisenrost und Patina": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Eiseskälte Kämpferherz": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Elementarbann": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Elementarer Diener": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#aa8844",
+    "sound": "random1"
+  },
+  "Elfenstimme Flötenton": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Entfeseelung des Getiers": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Erinnerung Verlasse Dich!": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc44cc",
+    "sound": "spell"
+  },
+  "Exposami Lebenskraft": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Falkenauge Meisterschuss": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Favilludo Funkentanz": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Fesselranken": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#667744",
+    "sound": "random1"
+  },
+  "Feuermähne Flammenruf": {
+    "effect": "feuer",
+    "type": "projectile",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Firnlauf": {
+    "effect": "wasser",
+    "type": "zone",
+    "color": "#aaddff",
+    "sound": "bubble"
+  },
+  "Flim Flam Funkel": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Fluch der Pestilenz": {
+    "effect": "daemonologie",
+    "type": "summon",
+    "color": "#440044",
+    "sound": "random2"
+  },
+  "Foramen Foraminor": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Fortifex Arkane Wand": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#aa8844",
+    "sound": "random1"
+  },
+  "Fulminictus Donnerkeil": {
+    "effect": "kampfzauber",
+    "type": "projectile",
+    "color": "#ff4444",
+    "sound": "magic1"
+  },
+  "Gardianum Zauberschild": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Gebieter der Tiefe": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Gedankenbilder Elfenruf": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Gefäß der Jahre": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Gefunden!": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Geisterbann": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Geisterruf": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Geschoss der Niederhöllen": {
+    "effect": "daemonologie",
+    "type": "summon",
+    "color": "#440044",
+    "sound": "random2"
+  },
+  "Glacoflumen Fluss aus Eis": {
+    "effect": "wasser",
+    "type": "zone",
+    "color": "#aaddff",
+    "sound": "bubble"
+  },
+  "Granit und Marmor": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Grolmenseele": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Große Gier": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Große Verwirrung": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Halluzination": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc44cc",
+    "sound": "spell"
+  },
+  "Harmlose Gestalt": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Hartes Schmelze!": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Haselbusch und Ginsterkraut": {
+    "effect": "erde",
+    "type": "aura",
+    "color": "#667744",
+    "sound": "random1"
+  },
+  "Heilkraft Bannen": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Hellsicht Trüben": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Herbeirufung Vereiteln": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Herr über das Tierreich": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc44cc",
+    "sound": "spell"
+  },
+  "Herzschlag Ruhe!": {
+    "effect": "daemonologie",
+    "type": "summon",
+    "color": "#440044",
+    "sound": "random2"
+  },
+  "Hexagramma Dschinnenbann": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Hexenblick": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Hexengalle": {
+    "effect": "kampfzauber",
+    "type": "projectile",
+    "color": "#ff4444",
+    "sound": "magic1"
+  },
+  "Hexenholz": {
+    "effect": "telekinese",
+    "type": "target",
+    "color": "#ffff44",
+    "sound": "spell"
+  },
+  "Hexenknoten": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Hexenkrallen": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Hexenspeichel": {
+    "effect": "heilung",
+    "type": "target",
+    "color": "#44ff88",
+    "sound": "bubble"
+  },
+  "Hilfreiche Tatze, Rettende Schwinge": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Höllenpein Zerreiße Dich!": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Holterdipolter": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Horriphobus Schreckgestalt": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Ignifaxius Flammenstrahl": {
+    "effect": "feuer",
+    "type": "projectile",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Igniflumen Flammenspur": {
+    "effect": "feuer",
+    "type": "projectile",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Ignifugo Feuerbann": {
+    "effect": "feuer",
+    "type": "projectile",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Ignimorpho Feuerform": {
+    "effect": "feuer",
+    "type": "projectile",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Igniplano Flächenbrand (Mag)": {
+    "effect": "feuer",
+    "type": "projectile",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Igniplano Flächenbrand (Gil)": {
+    "effect": "feuer",
+    "type": "projectile",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Igniqueris Feuerkragen": {
+    "effect": "feuer",
+    "type": "projectile",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Ignisphaero Feuerball": {
+    "effect": "feuer",
+    "type": "projectile",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Ignorantia Ungesehn": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Illusion Auflösen": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Immortalis Lebenszeit": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Imperavi Handlungszwang": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc44cc",
+    "sound": "spell"
+  },
+  "Impersona Maskenbild": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Infinitum Immerdar": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Invercano Spiegeltrick": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Invocatio Maior": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Invocatio Minor": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Iribaars Hand": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Juckreiz, Dämlicher!": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Karnifilo Raserei": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Katzenaugen": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Klarum Purum": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Klickeradomms": {
+    "effect": "telekinese",
+    "type": "target",
+    "color": "#ffff44",
+    "sound": "spell"
+  },
+  "Koboldgeschenk": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc44cc",
+    "sound": "spell"
+  },
+  "Koboldovision": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Komm Kobold Komm": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Körperlose Reise": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#aaaaff",
+    "sound": "random2"
+  },
+  "Krabbelnder Schrecken": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Kraft des Erzes": {
+    "effect": "erde",
+    "type": "target",
+    "color": "#aa8844",
+    "sound": "random1"
+  },
+  "Kraft des Humus": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#667744",
+    "sound": "random1"
+  },
+  "Krähenruf": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Krötensprung": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Kulminatio Kugelblitz": {
+    "effect": "kampfzauber",
+    "type": "projectile",
+    "color": "#ff4444",
+    "sound": "magic1"
+  },
+  "Kusch!": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Lach Dich Gesund": {
+    "effect": "heilung",
+    "type": "target",
+    "color": "#44ff88",
+    "sound": "bubble"
+  },
+  "Lachkrampf": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Langer Lulatsch": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Last des Alters": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ccccff",
+    "sound": "bubble"
+  },
+  "Leib aus Tausend Fliegen": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Leib der Erde": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Leib der Wogen": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Leib des Eises": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Leib des Erzes": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Leib des Feuers": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Leib des Windes": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Leidensbund": {
+    "effect": "heilung",
+    "type": "target",
+    "color": "#44ff88",
+    "sound": "bubble"
+  },
+  "Levthans Feuer": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Limbus Versiegeln": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Lockruf und Feenfüße": {
+    "effect": "telekinese",
+    "type": "target",
+    "color": "#ffff44",
+    "sound": "spell"
+  },
+  "Lunge des Leviatan": {
+    "effect": "heilung",
+    "type": "target",
+    "color": "#44ff88",
+    "sound": "bubble"
+  },
+  "Madas Spiegel": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Magischer Raub": {
+    "effect": "kampfzauber",
+    "type": "aura",
+    "color": "#ffdd44",
+    "sound": "magic1"
+  },
+  "Mahlstrom": {
+    "effect": "wasser",
+    "type": "zone",
+    "color": "#4488ff",
+    "sound": "bubble"
+  },
+  "Manifesto Element": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#aa8844",
+    "sound": "random1"
+  },
+  "Meister der Elemente": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#aa8844",
+    "sound": "random1"
+  },
+  "Meister Minderer Geister": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Memorabia Falsifir": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc44cc",
+    "sound": "spell"
+  },
+  "Memorans Gedächtniskraft": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Menetekel Flammenschrift": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Metamagie Neutralisieren": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Metamorpho Gletscherform": {
+    "effect": "wasser",
+    "type": "zone",
+    "color": "#aaddff",
+    "sound": "bubble"
+  },
+  "Minimus Reductibus": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Motoricus Geisteshand": {
+    "effect": "telekinese",
+    "type": "target",
+    "color": "#ffff44",
+    "sound": "spell"
+  },
+  "Movimento Dauerlauf": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Murks und Patz": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Nackedei": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Nebelleib": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Nebelwand und Morgendunst": {
+    "effect": "wasser",
+    "type": "zone",
+    "color": "#4488ff",
+    "sound": "bubble"
+  },
+  "Nekropathia Seelenreise": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Nihilogravo Schwerelos": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Nuntiovolo Botenvogel": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Objecto Obscuro": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Objectofixo": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Objectovoco": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Objekt Entzaubern": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Oculus Astralis": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Odem Arcanum": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Pandaemonium": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Panik Überkomme Euch!": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Papperlapapp": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Paralysis Starr wie Stein": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Pectetondo Zauberhaar": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Penetrizzel Tiefenblick": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Pentragramma Sphärenbann": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Pestilenz Erspüren": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Pfeil des (Elements)": {
+    "effect": "feuer",
+    "type": "projectile",
+    "color": "#ff8800",
+    "sound": "magic1"
+  },
+  "Planastrale Anderwelt": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#aaaaff",
+    "sound": "random2"
+  },
+  "Plumbumbarum Schwerer Arm": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Projektimago Ebenbild": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Protectionis Kontrabann": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Psychostabilis": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Radau": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Reflectimago Spiegelschein": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Reptilea Natternnest": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Respondami Wahrheitszwang": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc44cc",
+    "sound": "spell"
+  },
+  "Reversalis Revidum": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Ruhe Körper, Ruhe Geist": {
+    "effect": "heilung",
+    "type": "target",
+    "color": "#44ff88",
+    "sound": "bubble"
+  },
+  "Salander Mutander": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Sanftmut": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Sapefacta Zauberschwamm": {
+    "effect": "telekinese",
+    "type": "target",
+    "color": "#ffff44",
+    "sound": "spell"
+  },
+  "Satuarias Herrlichkeit": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Schabernack": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Schadenszauber Bannen": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Schelmenkleister": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Schelmenlaune": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Schelmenmaske": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Schelmenrausch": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Schleier der Unwissenheit": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Schwarz und Rot": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Schwarzer Schrecken": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Seelenfeuer Lichterloh": {
+    "effect": "feuer",
+    "type": "projectile",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Seelentier Erkennen": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Seelenwanderung": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Seidenweich Schuppengleich": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Seidenzunge Elfenwort": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Sensattacco Meisterstreich": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Sensibar Empathicus": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Serpentialis Schlangenleib": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Silentium Schweigekreis": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Sinesigil Unerkannt": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Skelettarius Totenherr": {
+    "effect": "daemonologie",
+    "type": "summon",
+    "color": "#440044",
+    "sound": "random2"
+  },
+  "Solidirid Weg aus Licht": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Somnigravis Tiefer Schlaf": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Sphaerovisio Schreckensbild": {
+    "effect": "daemonologie",
+    "type": "summon",
+    "color": "#440044",
+    "sound": "random2"
+  },
+  "Spinnenlauf": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Spinnennetz": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Spurlos Trittlos": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Standfest Katzengleich": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Staub Wandle!": {
+    "effect": "erde",
+    "type": "target",
+    "color": "#aa8844",
+    "sound": "random1"
+  },
+  "Stein Wandle!": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Stillstand": {
+    "effect": "wasser",
+    "type": "zone",
+    "color": "#aaddff",
+    "sound": "bubble"
+  },
+  "Stimmen des Windes": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Sumpfstrudel": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#667744",
+    "sound": "random1"
+  },
+  "Sumus Elixiere": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#667744",
+    "sound": "random1"
+  },
+  "Tanz der Erlösung": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Tauschrausch": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#aaaaff",
+    "sound": "random2"
+  },
+  "Tempus Stasis": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ccccff",
+    "sound": "bubble"
+  },
+  "Tiere Besprechen": {
+    "effect": "heilung",
+    "type": "target",
+    "color": "#44ff88",
+    "sound": "bubble"
+  },
+  "Tiergedanken": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Tlalucs Odem Pestgestank": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Totes Handle!": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Transformatio Formgestalt": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Transmutare Körperform": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Transversalis Teleport": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#aaaaff",
+    "sound": "random2"
+  },
+  "Traumgestalt": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Umbraporta Schattentür": {
+    "effect": "daemonologie",
+    "type": "summon",
+    "color": "#440044",
+    "sound": "random2"
+  },
+  "Unberührt von Satinav": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Unitatio Geistesbund": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Unsichtbare Glut": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Unsichtbarer Jäger": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Veränderung Aufheben": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Verschwindibus": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#aaaaff",
+    "sound": "random2"
+  },
+  "Verständigung Stören": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Verwandlung Beenden": {
+    "effect": "antimagie",
+    "type": "aura",
+    "color": "#ffffff",
+    "sound": "magic1"
+  },
+  "Vipernblick": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Visibili Vanitar": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Vocolimbo Hohler Klang": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Vogelzwitschern Glockenspiel": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Wand aus (Element)": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#aa8844",
+    "sound": "random1"
+  },
+  "Wand aus Dornen": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#667744",
+    "sound": "random1"
+  },
+  "Warmes Blut": {
+    "effect": "feuer",
+    "type": "aura",
+    "color": "#ff6600",
+    "sound": "magic1"
+  },
+  "Warmes Gefriere": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Wasseratem": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Weiches Erstarre!": {
+    "effect": "erde",
+    "type": "target",
+    "color": "#aa8844",
+    "sound": "random1"
+  },
+  "Weihrauchwolke Wohlgeruch": {
+    "effect": "illusion",
+    "type": "aura",
+    "color": "#ffaaff",
+    "sound": "bubble"
+  },
+  "Weisheit der Bäume": {
+    "effect": "verwandlung",
+    "type": "transform",
+    "color": "#88ff88",
+    "sound": "random1"
+  },
+  "Weiße Mähn' und Gold'ner Huf": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Wellenlauf": {
+    "effect": "wasser",
+    "type": "zone",
+    "color": "#4488ff",
+    "sound": "bubble"
+  },
+  "Wettermeisterschaft": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Widerwille Ungemach": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Windgeflüster": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Windhose": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Windstille": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Wipfellauf": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#667744",
+    "sound": "random1"
+  },
+  "Xenographus Schriftenkunde": {
+    "effect": "hellsicht",
+    "type": "divination",
+    "color": "#aaaaff",
+    "sound": "bubble"
+  },
+  "Zagibu Ubigaz": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Zappenduster": {
+    "effect": "wind",
+    "type": "zone",
+    "color": "#88ccff",
+    "sound": "random1"
+  },
+  "Zauberklinge Geisterspeer": {
+    "effect": "objekt",
+    "type": "none",
+    "color": "#cccccc",
+    "sound": "bubble"
+  },
+  "Zaubernahrung Hungerbann": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Zauberwesen der Natur": {
+    "effect": "beschwörung",
+    "type": "summon",
+    "color": "#884488",
+    "sound": "random2"
+  },
+  "Zauberzwang": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc44cc",
+    "sound": "spell"
+  },
+  "Zorn der Elemente": {
+    "effect": "erde",
+    "type": "zone",
+    "color": "#aa8844",
+    "sound": "random1"
+  },
+  "Zunge Lähmen": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc88ff",
+    "sound": "spell"
+  },
+  "Zwingtanz": {
+    "effect": "einfluss",
+    "type": "target",
+    "color": "#cc44cc",
+    "sound": "spell"
+  }
+}
