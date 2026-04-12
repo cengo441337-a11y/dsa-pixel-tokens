@@ -1,28 +1,34 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   DSA Pixel-Art Tokens — Dialog & Chat Styles
+   DSA Pixel-Art Tokens — Dialog & Chat Styles  (Dark Fantasy Redesign)
+   Nutzt --fx-* Variablen aus sheet.css (global im selben Foundry-Scope)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ─── Probe Dialog ─────────────────────────────────────────────────── */
+/* ─── Gemeinsame Dialog-Basis ───────────────────────────────────────── */
 
-.dsa-pixel-probe-dialog {
-  font-family: 'VT323', monospace;
+.dsa-pixel-probe-dialog,
+.dsa-pixel-spell-dialog,
+.dsa-pixel-attack-dialog {
+  font-family: var(--fx-font);
   font-size: 16px;
-  color: #e0e0e0;
+  color: var(--fx-text);
+  background: var(--fx-bg);
 }
+
+/* ─── Probe Dialog ──────────────────────────────────────────────────── */
 
 .dsa-pixel-probe-dialog .probe-header {
   text-align: center;
   padding: 8px 0;
-  border-bottom: 2px solid #3a3a5e;
-  margin-bottom: 8px;
+  border-bottom: 1px solid var(--fx-border-lit);
+  margin-bottom: 10px;
 }
 
 .dsa-pixel-probe-dialog .probe-title {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 11px;
-  color: #ffd700;
+  font-family: var(--fx-font-title);
+  font-size: 13px;
+  color: var(--fx-gold-bright);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 .dsa-pixel-probe-dialog .probe-attrs {
@@ -34,23 +40,25 @@
 
 .dsa-pixel-probe-dialog .probe-attr {
   text-align: center;
-  background: #16213e;
-  border: 2px solid #3a3a5e;
+  background: var(--fx-panel);
+  border: 1px solid var(--fx-border);
   padding: 6px 10px;
-  border-radius: 2px;
+  border-radius: var(--fx-radius);
   min-width: 60px;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.5);
 }
 
 .dsa-pixel-probe-dialog .probe-attr .attr-name {
   font-size: 11px;
-  color: #888;
+  color: var(--fx-text-dim);
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .dsa-pixel-probe-dialog .probe-attr .attr-val {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: bold;
-  color: #ffd700;
+  color: var(--fx-gold-bright);
 }
 
 .dsa-pixel-probe-dialog .probe-taw {
@@ -60,13 +68,13 @@
 
 .dsa-pixel-probe-dialog .probe-taw .taw-label {
   font-size: 13px;
-  color: #888;
+  color: var(--fx-text-mid);
 }
 
 .dsa-pixel-probe-dialog .probe-taw .taw-val {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
-  color: #e94560;
+  color: var(--fx-accent-red);
 }
 
 .dsa-pixel-probe-dialog .probe-mod {
@@ -79,101 +87,110 @@
 
 .dsa-pixel-probe-dialog .probe-mod label {
   font-size: 14px;
-  color: #bbb;
+  color: var(--fx-text-mid);
 }
 
 .dsa-pixel-probe-dialog .probe-mod input {
   width: 60px;
   text-align: center;
   font-size: 18px;
-  background: rgba(0,0,0,0.4);
-  border: 2px solid #3a3a5e;
-  color: #e0e0e0;
-  font-family: 'VT323', monospace;
+  background: var(--fx-panel-deep);
+  border: 1px solid var(--fx-border-lit);
+  color: var(--fx-text);
+  font-family: var(--fx-font);
+  border-radius: var(--fx-radius);
 }
 
-/* ─── Spell Modification Dialog ────────────────────────────────────── */
-
-.dsa-pixel-spell-dialog {
-  font-family: 'VT323', monospace;
-  font-size: 16px;
+.dsa-pixel-probe-dialog .probe-mod input:focus {
+  outline: none;
+  border-color: var(--fx-gold);
+  box-shadow: 0 0 6px var(--fx-gold-dim);
 }
+
+/* ─── Spell Modification Dialog ─────────────────────────────────────── */
 
 .dsa-pixel-spell-dialog .spell-info {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-bottom: 10px;
-  padding: 6px;
-  background: #16213e;
-  border: 2px solid #3a3a5e;
-  border-radius: 2px;
+  padding: 8px;
+  background: var(--fx-panel);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius);
 }
 
 .dsa-pixel-spell-dialog .spell-info .info-label {
-  font-size: 12px;
-  color: #888;
+  font-size: 11px;
+  color: var(--fx-text-dim);
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .dsa-pixel-spell-dialog .spell-info .info-value {
   font-size: 15px;
-  color: #4a90d9;
+  color: var(--fx-asp);
 }
 
 .dsa-pixel-spell-dialog .mod-section {
   margin: 6px 0;
-  padding: 6px;
-  background: rgba(0,0,0,0.2);
-  border-left: 3px solid #4a90d9;
+  padding: 8px;
+  background: rgba(0,0,0,0.25);
+  border-left: 3px solid var(--fx-asp);
+  border-radius: 0 var(--fx-radius) var(--fx-radius) 0;
 }
 
 .dsa-pixel-spell-dialog .mod-section .mod-label {
   font-size: 13px;
-  color: #aaa;
+  color: var(--fx-text-mid);
   margin-bottom: 4px;
 }
 
 .dsa-pixel-spell-dialog .mod-section select {
   width: 100%;
-  background: rgba(0,0,0,0.4);
-  color: #e0e0e0;
-  border: 2px solid #3a3a5e;
-  font-family: 'VT323', monospace;
+  background: var(--fx-panel-deep);
+  color: var(--fx-text);
+  border: 1px solid var(--fx-border);
+  font-family: var(--fx-font);
   font-size: 15px;
-  padding: 3px;
+  padding: 4px;
+  border-radius: var(--fx-radius);
+}
+
+.dsa-pixel-spell-dialog .mod-section select:focus {
+  outline: none;
+  border-color: var(--fx-asp);
 }
 
 .dsa-pixel-spell-dialog .cost-summary {
   display: flex;
   justify-content: space-between;
-  padding: 8px;
+  align-items: center;
+  padding: 8px 12px;
   margin-top: 10px;
-  background: #0f3460;
-  border: 2px solid #4a90d9;
-  border-radius: 2px;
+  background: var(--fx-panel);
+  border: 1px solid var(--fx-asp);
+  border-radius: var(--fx-radius);
+  box-shadow: 0 0 10px rgba(68, 136, 255, 0.12);
 }
 
 .dsa-pixel-spell-dialog .cost-summary .total-label {
-  color: #888;
+  color: var(--fx-text-mid);
+  font-size: 13px;
 }
 
 .dsa-pixel-spell-dialog .cost-summary .total-value {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
-  color: #4a90d9;
+  color: var(--fx-asp);
 }
 
 .dsa-pixel-spell-dialog .cost-summary .probe-mod-display {
   font-size: 16px;
-  color: #e94560;
+  color: var(--fx-accent-red);
 }
 
-/* ─── Attack Dialog ────────────────────────────────────────────────── */
-
-.dsa-pixel-attack-dialog {
-  font-family: 'VT323', monospace;
-}
+/* ─── Attack Dialog ─────────────────────────────────────────────────── */
 
 .dsa-pixel-attack-dialog .maneuver-list {
   display: flex;
@@ -186,124 +203,131 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 10px;
-  background: #16213e;
-  border: 2px solid #3a3a5e;
+  padding: 7px 12px;
+  background: var(--fx-panel);
+  border: 1px solid var(--fx-border);
   cursor: pointer;
-  transition: all 0.15s;
-  border-radius: 2px;
-  color: #e0e0e0;
-  font-family: 'VT323', monospace;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  border-radius: var(--fx-radius);
+  color: var(--fx-text);
+  font-family: var(--fx-font);
   font-size: 15px;
 }
 
 .dsa-pixel-attack-dialog .maneuver-btn:hover {
-  border-color: #e94560;
-  background: rgba(233,69,96,0.1);
+  border-color: var(--fx-accent-red);
+  background: rgba(200, 48, 64, 0.12);
+  box-shadow: 0 0 8px rgba(200, 48, 64, 0.2);
 }
 
 .dsa-pixel-attack-dialog .maneuver-btn.selected {
-  border-color: #ffd700;
-  background: rgba(255,215,0,0.1);
+  border-color: var(--fx-gold);
+  background: rgba(200, 151, 42, 0.12);
+  box-shadow: 0 0 8px var(--fx-gold-dim);
 }
 
 .dsa-pixel-attack-dialog .maneuver-mods {
   font-size: 13px;
-  color: #888;
+  color: var(--fx-text-dim);
 }
 
-/* ─── Chat Results ─────────────────────────────────────────────────── */
+/* ─── Chat Results ──────────────────────────────────────────────────── */
 
 .dsa-pixel-chat {
-  font-family: 'VT323', monospace;
-  background: #1a1a2e;
-  border: 2px solid #3a3a5e;
-  border-radius: 2px;
-  padding: 8px;
-  color: #e0e0e0;
+  font-family: var(--fx-font);
+  background: var(--fx-panel);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius);
+  padding: 10px;
+  color: var(--fx-text);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.5);
 }
 
 .dsa-pixel-chat .chat-title {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 9px;
-  color: #ffd700;
+  font-family: var(--fx-font-title);
+  font-size: 11px;
+  color: var(--fx-gold-bright);
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--fx-border);
 }
 
 .dsa-pixel-chat .dice-row {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin: 8px 0;
+  margin: 10px 0;
 }
 
 .dsa-pixel-chat .die {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
-  border: 2px solid #3a3a5e;
-  border-radius: 2px;
-  background: #16213e;
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius);
+  background: var(--fx-panel-deep);
+  transition: box-shadow 0.2s;
 }
 
 .dsa-pixel-chat .die.success {
-  border-color: #4ad94a;
-  color: #4ad94a;
+  border-color: var(--fx-success);
+  color: var(--fx-success);
 }
 
 .dsa-pixel-chat .die.fail {
-  border-color: #d94a4a;
-  color: #d94a4a;
+  border-color: var(--fx-fail);
+  color: var(--fx-fail);
 }
 
 .dsa-pixel-chat .die.crit {
-  border-color: #ffd700;
-  color: #ffd700;
-  box-shadow: 0 0 8px rgba(255,215,0,0.4);
+  border-color: var(--fx-gold-bright);
+  color: var(--fx-gold-bright);
+  box-shadow: 0 0 10px var(--fx-gold-dim);
 }
 
 .dsa-pixel-chat .die.fumble {
-  border-color: #ff3333;
-  color: #ff3333;
-  box-shadow: 0 0 8px rgba(255,0,0,0.4);
+  border-color: var(--fx-fumble);
+  color: var(--fx-fumble);
+  box-shadow: 0 0 10px rgba(255, 51, 51, 0.35);
 }
 
 .dsa-pixel-chat .result-line {
   text-align: center;
   margin: 6px 0;
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .dsa-pixel-chat .result-success {
-  color: #4ad94a;
+  color: var(--fx-success);
   font-weight: bold;
 }
 
 .dsa-pixel-chat .result-fail {
-  color: #d94a4a;
+  color: var(--fx-fail);
   font-weight: bold;
 }
 
 .dsa-pixel-chat .result-crit {
-  color: #ffd700;
+  color: var(--fx-gold-bright);
   font-weight: bold;
-  text-shadow: 0 0 8px rgba(255,215,0,0.4);
+  text-shadow: 0 0 10px var(--fx-gold-dim);
 }
 
 .dsa-pixel-chat .tap-star {
   text-align: center;
   font-size: 14px;
-  color: #888;
+  color: var(--fx-text-mid);
+  margin-top: 4px;
 }
 
 .dsa-pixel-chat .tap-star span {
-  color: #e94560;
+  color: var(--fx-accent-red);
   font-weight: bold;
   font-size: 18px;
 }
@@ -311,33 +335,37 @@
 .dsa-pixel-chat .chat-buttons {
   display: flex;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 10px;
   justify-content: center;
 }
 
 .dsa-pixel-chat .chat-btn {
-  background: #0f3460;
-  color: #e0e0e0;
-  border: 2px solid #3a3a5e;
-  padding: 4px 10px;
-  font-family: 'VT323', monospace;
+  background: var(--fx-panel-deep);
+  color: var(--fx-text-mid);
+  border: 1px solid var(--fx-border);
+  padding: 4px 12px;
+  font-family: var(--fx-font);
   font-size: 14px;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: var(--fx-radius);
   text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
 }
 
 .dsa-pixel-chat .chat-btn:hover {
-  border-color: #ffd700;
-  color: #ffd700;
+  border-color: var(--fx-gold);
+  color: var(--fx-gold-bright);
+  box-shadow: 0 0 6px var(--fx-gold-dim);
 }
 
 .dsa-pixel-chat .chat-btn.damage {
-  border-color: #e94560;
-  color: #e94560;
+  border-color: var(--fx-accent-red);
+  color: var(--fx-accent-red);
 }
 
 .dsa-pixel-chat .chat-btn.damage:hover {
-  background: #e94560;
-  color: white;
+  background: var(--fx-accent-red);
+  color: var(--fx-bg);
+  box-shadow: 0 0 8px rgba(200, 48, 64, 0.4);
 }
