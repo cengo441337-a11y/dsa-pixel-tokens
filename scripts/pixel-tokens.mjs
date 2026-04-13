@@ -1746,13 +1746,14 @@ async function spawnCreature(name) {
   if (!game.user.isGM) { ui.notifications.warn("Nur GMs können Kreaturen spawnen."); return; }
 
   // Existiert der Aktor schon?
-  // gdsa system uses "NonPlayer", fallback to first non-PC type
-  const npcType = game.system.documentTypes?.Actor?.find(t => t !== "PlayerCharakter" && t !== "LootActor") ?? "NonPlayer";
-  let actor = game.actors.find(a => a.name === name && a.type === npcType);
+  // gdsa system uses "NonPlayer" — documentTypes.Actor is an object, use Object.keys()
+  const npcType = Object.keys(game.system.documentTypes?.Actor ?? {}).find(t => t !== "PlayerCharakter" && t !== "LootActor") ?? "NonPlayer";
+  const actorType = preset.group === "Helden" ? "PlayerCharakter" : npcType;
+  let actor = game.actors.find(a => a.name === name && a.type === actorType);
   if (!actor) {
     actor = await Actor.create({
       name,
-      type: npcType,
+      type: actorType,
       img: preset.img,
       system: { LeP: { value: preset.hp, max: preset.hp } },
       prototypeToken: {
