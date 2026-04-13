@@ -1758,7 +1758,7 @@ async function spawnCreature(name) {
       system: { LeP: { value: preset.hp, max: preset.hp } },
       prototypeToken: {
         name,
-        img: preset.img,
+        texture: { src: preset.img },
         width: preset.tokenSize,
         height: preset.tokenSize,
         displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
@@ -1776,7 +1776,7 @@ async function spawnCreature(name) {
   await scene.createEmbeddedDocuments("Token", [{
     name,
     actorId: actor.id,
-    img: preset.img,
+    texture: { src: preset.img },
     x: cx,
     y: cy,
     width: preset.tokenSize,
