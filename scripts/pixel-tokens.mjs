@@ -1898,6 +1898,14 @@ async function spawnCreature(name) {
         displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
       },
     });
+  } else {
+    // Bild immer aktualisieren, damit Token-Bild-Updates sofort wirken
+    await actor.update({
+      img: preset.img,
+      "prototypeToken.texture.src": preset.img,
+      "prototypeToken.width": preset.tokenSize,
+      "prototypeToken.height": preset.tokenSize,
+    });
   }
 
   // Token auf aktive Szene droppen
