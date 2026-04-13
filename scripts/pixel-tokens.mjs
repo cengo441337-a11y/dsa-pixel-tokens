@@ -248,9 +248,19 @@ Hooks.on("updateToken", async (tokenDoc, changes, _options, _userId) => {
 
   // Re-apply sprite if our config flags changed
   if (changes.flags?.[MODULE_ID]) {
-    // Clear cache for this token's old sheet so fresh textures load
     await applySprite(token);
     return;
+  }
+
+  // Wenn texture.src im Appearance-Tab geändert wird → Sprite Sheet synchronisieren
+  const newSrc = changes.texture?.src;
+  if (newSrc) {
+    const cfg = getTokenConfig(token);
+    if (cfg.enabled) {
+      // Sprite Sheet auf neues Bild setzen und sofort neu laden
+      await tokenDoc.setFlag(MODULE_ID, "spriteConfig", { ...cfg, spriteSheet: newSrc });
+      return; // setFlag triggert erneut updateToken → applySprite wird dann gerufen
+    }
   }
 
   // Handle movement animation
