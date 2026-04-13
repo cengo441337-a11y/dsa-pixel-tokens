@@ -1954,14 +1954,14 @@ function showCreaturePicker() {
       const p = CREATURE_PRESETS[name];
       return `
         <button class="dsa-creature-btn" data-creature="${name}"
-          style="width:80px;height:90px;padding:4px;background:rgba(0,0,0,0.4);
+          style="width:90px;min-height:100px;padding:4px 3px;background:rgba(0,0,0,0.4);
                  border:1px solid #3a3a5e;border-radius:3px;cursor:pointer;
-                 display:flex;flex-direction:column;align-items:center;gap:3px">
-          <img src="${p.img}" style="width:56px;height:56px;image-rendering:pixelated;object-fit:contain" onerror="this.style.opacity='0.3'">
-          <span style="font-size:8px;font-family:'VT323',monospace;color:#ccc;
-                       white-space:normal;overflow:hidden;text-overflow:ellipsis;
-                       max-width:74px;text-align:center;line-height:1.1">${name}</span>
-          <span style="font-size:7px;color:#888">LP: ${p.hp}</span>
+                 display:flex;flex-direction:column;align-items:center;gap:2px">
+          <img src="${p.img}" style="width:52px;height:52px;image-rendering:pixelated;object-fit:contain;flex-shrink:0" onerror="this.style.opacity='0.3'">
+          <span style="font-size:10px;font-family:'VT323',monospace;color:#e0d0a0;
+                       white-space:normal;word-break:break-word;
+                       width:84px;text-align:center;line-height:1.15;flex:1">${name}</span>
+          <span style="font-size:9px;font-family:'VT323',monospace;color:#777;flex-shrink:0">LP ${p.hp}</span>
         </button>
       `;
     }).join("");
