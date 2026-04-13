@@ -802,13 +802,12 @@ async function spawnProjectile(fromToken, toToken, projectile = "feuerball", imp
     return;
   }
 
+  if (!preset) return;
+
   const startX = fromToken.center.x;
   const startY = fromToken.center.y;
   const endX   = toToken.center.x;
   const endY   = toToken.center.y;
-
-  const preset = EFFECT_PRESETS[projectile];
-  if (!preset) return;
 
   const baseTexture = await loadTexture(preset.src);
   if (!baseTexture?.baseTexture) return;
