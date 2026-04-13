@@ -296,6 +296,7 @@ function _getActorHP(actor) {
 }
 
 Hooks.on("preUpdateActor", (actor, changes) => {
+  // ── LeP (HP) change ───────────────────────────────────────────────────────
   const newHP =
     changes.system?.LeP?.value         ??
     changes.system?.base?.LeP          ??
@@ -304,18 +305,42 @@ Hooks.on("preUpdateActor", (actor, changes) => {
     changes.system?.hp?.value          ??
     null;
 
-  if (newHP === null) return;
+  if (newHP !== null) {
+    const oldHP = _getActorHP(actor);
+    if (oldHP !== null && newHP < oldHP) {
+      const diff = newHP - oldHP;
+      const tokens = actor.getActiveTokens?.() ?? [];
+      for (const token of tokens) {
+        const { x, y } = token.center;
+        setTimeout(() => {
+          spawnEffect(x, y, "schadenflash");
+          _showDamageNumber(token, diff, 0xff3333, "SP");
+        }, 50);
+        if (newHP <= 0 && oldHP > 0) {
+          setTimeout(() => spawnEffect(x, y, "tod_animation"), 150);
+        }
+      }
+    }
+  }
 
-  const oldHP = _getActorHP(actor);
-  if (oldHP === null || newHP >= oldHP) return;
+  // ── AsP change ────────────────────────────────────────────────────────────
+  const newAsP =
+    changes.system?.AsP?.value                    ??
+    changes.system?.status?.astralenergie?.value  ??
+    changes.system?.base?.astralenergie?.value    ??
+    changes.system?.status?.AsP                  ??
+    changes.system?.base?.AsP                    ??
+    changes.system?.mana?.value                  ??
+    null;
 
-  const tokens = actor.getActiveTokens?.() ?? [];
-  for (const token of tokens) {
-    const { x, y } = token.center;
-    // Kurzer Delay damit das HP-Update schon gesetzt ist
-    setTimeout(() => spawnEffect(x, y, "schadenflash"), 50);
-    if (newHP <= 0 && oldHP > 0) {
-      setTimeout(() => spawnEffect(x, y, "tod_animation"), 150);
+  if (newAsP !== null) {
+    const oldAsP = _getActorAsP(actor)?.val;
+    if (oldAsP !== null && oldAsP !== undefined && newAsP < oldAsP) {
+      const diff = newAsP - oldAsP;
+      const tokens = actor.getActiveTokens?.() ?? [];
+      for (const token of tokens) {
+        setTimeout(() => _showDamageNumber(token, diff, 0x33aaff, "AsP"), 80);
+      }
     }
   }
 });
@@ -932,50 +957,59 @@ function _getTokensInTemplate(templateDoc) {
  * @param {number} amount
  * @param {number} [color=0xff3333]  PIXI hex color (red for LeP, blue for AsP)
  */
-function _showDamageNumber(token, amount, color = 0xff3333) {
-  // Hauptzahl — groß, weiß wie im FF-Screenshot
+function _showDamageNumber(token, amount, color = 0xff3333, label = "SP") {
+  const isHeal   = amount > 0 && color !== 0x33aaff;
+  const sign     = isHeal ? "+" : (amount < 0 ? "" : "-");
+  const absAmt   = Math.abs(amount);
+  const hexColor = "#" + color.toString(16).padStart(6, "0");
+
   const mainStyle = new PIXI.TextStyle({
-    fontFamily: "'Press Start 2P', monospace",
-    fontSize: 36,
+    fontFamily: "'Cinzel', 'Georgia', serif",
+    fontSize: 38,
     fontWeight: "bold",
-    fill: ["#ffffff"],
-    stroke: color,
-    strokeThickness: 5,
+    fill: [hexColor, "#ffffff"],
+    fillGradientStops: [0, 1],
+    fillGradientType: 0,
+    stroke: "#000000",
+    strokeThickness: 6,
     dropShadow: true,
-    dropShadowBlur: 8,
-    dropShadowColor: 0x000000,
-    dropShadowAlpha: 0.8,
-    dropShadowDistance: 2,
-    dropShadowAngle: Math.PI / 4,
+    dropShadowBlur: 14,
+    dropShadowColor: hexColor,
+    dropShadowAlpha: 0.9,
+    dropShadowDistance: 0,
+    dropShadowAngle: 0,
   });
 
-  // Schatten-Kopie leicht versetzt (gibt Tiefe wie im Screenshot)
-  const shadowStyle = new PIXI.TextStyle({
-    fontFamily: "'Press Start 2P', monospace",
-    fontSize: 36,
+  const labelStyle = new PIXI.TextStyle({
+    fontFamily: "'Cinzel', 'Georgia', serif",
+    fontSize: 20,
     fontWeight: "bold",
-    fill: [color],
-    stroke: 0x000000,
-    strokeThickness: 3,
-    alpha: 0.5,
+    fill: hexColor,
+    stroke: "#000000",
+    strokeThickness: 4,
+    dropShadow: true,
+    dropShadowBlur: 8,
+    dropShadowColor: "#000000",
+    dropShadowAlpha: 0.8,
+    dropShadowDistance: 1,
   });
 
   const cx = token.center.x;
-  const cy = token.center.y - canvas.grid.size * 0.6;
-
+  const cy = token.center.y - canvas.grid.size * 0.5;
   const layer = canvas.interface ?? canvas.controls;
 
-  const shadow = new PIXI.Text(`${amount}`, shadowStyle);
-  shadow.anchor.set(0.5, 1.0);
-  shadow.x = cx + 3;
-  shadow.y = cy + 3;
-  layer.addChild(shadow);
-
-  const text = new PIXI.Text(`${amount}`, mainStyle);
+  const numStr   = `${sign}${absAmt}`;
+  const text     = new PIXI.Text(numStr, mainStyle);
   text.anchor.set(0.5, 1.0);
   text.x = cx;
   text.y = cy;
   layer.addChild(text);
+
+  const labelText = new PIXI.Text(label, labelStyle);
+  labelText.anchor.set(0.5, 0.0);
+  labelText.x = cx;
+  labelText.y = cy - text.height * 0.05;
+  layer.addChild(labelText);
 
   let tick = 0;
   const total = 80;
@@ -988,20 +1022,23 @@ function _showDamageNumber(token, amount, color = 0xff3333) {
     // Zuerst schnell nach oben, dann langsamer (ease-out)
     const eased = 1 - Math.pow(1 - t, 2);
     text.y = startY - drift * eased;
-    shadow.y = text.y + 3;
-    shadow.x = text.x + 3;
-    // Erst nach 60% einblenden statt sofort
-    text.alpha = t < 0.6 ? 1 : 1 - ((t - 0.6) / 0.4) * 1;
-    shadow.alpha = text.alpha * 0.5;
-    // Leicht wachsen und dann schrumpfen
-    const scale = t < 0.15 ? 1 + t * 1.5 : 1.22 - (t - 0.15) * 0.3;
-    text.scale.set(Math.max(0.8, scale));
-    shadow.scale.set(text.scale.x);
+    // Scale-Punch beim Erscheinen, dann langsam schrumpfen
+    const scale = t < 0.12 ? 1 + t * 2.5 : 1.3 - (t - 0.12) * 0.4;
+    text.scale.set(Math.max(0.7, scale));
+    labelText.scale.set(Math.max(0.7, scale));
+
+    // Fade-out in der zweiten Hälfte
+    const alpha = t < 0.55 ? 1 : 1 - ((t - 0.55) / 0.45);
+    text.alpha      = alpha;
+    labelText.alpha = alpha * 0.9;
+
+    // Label folgt der Zahl
+    labelText.y = text.y - text.height * text.scale.y * 0.85;
 
     if (tick >= total) {
       canvas.app.ticker.remove(onTick);
-      if (!text.destroyed)   { layer.removeChild(text);   text.destroy(); }
-      if (!shadow.destroyed) { layer.removeChild(shadow); shadow.destroy(); }
+      if (!text.destroyed)      { layer.removeChild(text);      text.destroy(); }
+      if (!labelText.destroyed) { layer.removeChild(labelText); labelText.destroy(); }
     }
   };
   canvas.app.ticker.add(onTick);
@@ -1021,15 +1058,18 @@ function _getActorLeP(actor) {
 }
 
 /**
- * Helper: reads an actor's AsP value regardless of system.
+ * Helper: reads an actor's AsP value regardless of system (mirrors resolveActorAsP in config.mjs).
  */
 function _getActorAsP(actor) {
-  const s = actor.system;
-  if (s?.AsP?.value !== undefined)             return { path: "system.AsP.value",             val: s.AsP.value };
-  if (s?.base?.AsP !== undefined)              return { path: "system.base.AsP",              val: s.base.AsP };
-  if (s?.status?.AsP !== undefined)            return { path: "system.status.AsP",            val: s.status.AsP };
-  if (s?.mana?.value !== undefined)            return { path: "system.mana.value",             val: s.mana.value };
-  if (s?.attributes?.mana?.value !== undefined)return { path: "system.attributes.mana.value", val: s.attributes.mana.value };
+  const s = actor?.system;
+  if (!s) return null;
+  if (s.AsP?.value !== undefined)                   return { path: "system.AsP.value",                   val: s.AsP.value };
+  if (s.status?.astralenergie?.value !== undefined) return { path: "system.status.astralenergie.value",  val: s.status.astralenergie.value };
+  if (s.base?.astralenergie?.value !== undefined)   return { path: "system.base.astralenergie.value",    val: s.base.astralenergie.value };
+  if (s.status?.AsP !== undefined)                  return { path: "system.status.AsP",                  val: s.status.AsP };
+  if (s.base?.AsP !== undefined)                    return { path: "system.base.AsP",                    val: s.base.AsP };
+  if (s.mana?.value !== undefined)                  return { path: "system.mana.value",                  val: s.mana.value };
+  if (s.attributes?.mana?.value !== undefined)      return { path: "system.attributes.mana.value",       val: s.attributes.mana.value };
   return null;
 }
 
@@ -1056,7 +1096,7 @@ async function applyZoneDamage(templateDoc, lepDamage = 0, aspCost = 0, casterTo
       if (!hp) continue;
       const newVal = Math.max(0, hp.val - lepDamage);
       await actor.update({ [hp.path]: newVal });
-      _showDamageNumber(token, lepDamage, 0xff3333);
+      _showDamageNumber(token, -lepDamage, 0xff3333, "SP");
       hit++;
     }
     if (hit > 0) ui.notifications.info(`Zone-Schaden: ${hit} Token × ${lepDamage} LeP`);
@@ -1067,7 +1107,7 @@ async function applyZoneDamage(templateDoc, lepDamage = 0, aspCost = 0, casterTo
     const asp = _getActorAsP(actor);
     if (asp) {
       await actor.update({ [asp.path]: Math.max(0, asp.val - aspCost) });
-      _showDamageNumber(casterToken, aspCost, 0x33aaff);
+      // _showDamageNumber fires automatically via preUpdateActor hook
       ui.notifications.info(`AsP -${aspCost} (${casterToken.name})`);
     }
   }
@@ -1246,7 +1286,7 @@ Hooks.on("renderTokenHUD", (hud, html, _data) => {
     bar.append(btn);
   }
 
-  // "Alle Effekte"-Button ganz unten als letzter Button
+  // "Alle Effekte"-Button
   const allBtn = $(`<div class="control-icon sf-hud-btn" title="Alle Effekte…" style="
     width:36px; height:36px; padding:2px; cursor:pointer;
     background:rgba(10,20,60,0.85); border-radius:4px;
@@ -1259,6 +1299,22 @@ Hooks.on("renderTokenHUD", (hud, html, _data) => {
     showEffectPicker();
   });
   bar.append(allBtn);
+
+  // "Kreaturen spawnen"-Button (nur für GM)
+  if (game.user.isGM) {
+    const creatureBtn = $(`<div class="control-icon sf-hud-btn" title="Kreaturen spawnen…" style="
+      width:36px; height:36px; padding:2px; cursor:pointer;
+      background:rgba(20,10,40,0.85); border-radius:4px;
+      border:1px solid #c09040;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; color:#c09040; font-weight:bold;
+    ">👾</div>`);
+    creatureBtn.on("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      showCreaturePicker();
+    });
+    bar.append(creatureBtn);
+  }
 
   html.append(bar);
 });
@@ -1644,6 +1700,152 @@ Hooks.on("renderTokenConfig", (app, html, _data) => {
   });
 });
 
+// ─── Creature Presets ─────────────────────────────────────────────────────────
+
+const CREATURE_PRESETS = {
+  // Elementargeister — Stufe 1
+  "Elementargeist Feuer":  { img: "modules/dsa-pixel-tokens/assets/monsters/elementargeist_feuer_token.png",  tokenSize: 1, hp: 12, group: "Elementargeister" },
+  "Elementargeist Wasser": { img: "modules/dsa-pixel-tokens/assets/monsters/elementargeist_wasser_token.png", tokenSize: 1, hp: 12, group: "Elementargeister" },
+  "Elementargeist Eis":    { img: "modules/dsa-pixel-tokens/assets/monsters/elementargeist_eis_token.png",    tokenSize: 1, hp: 10, group: "Elementargeister" },
+  "Elementargeist Luft":   { img: "modules/dsa-pixel-tokens/assets/monsters/elementargeist_luft_token.png",   tokenSize: 1, hp: 10, group: "Elementargeister" },
+  "Elementargeist Humus":  { img: "modules/dsa-pixel-tokens/assets/monsters/elementargeist_humus_token.png",  tokenSize: 1, hp: 14, group: "Elementargeister" },
+  "Elementargeist Erz":    { img: "modules/dsa-pixel-tokens/assets/monsters/elementargeist_erz_token.png",    tokenSize: 1, hp: 16, group: "Elementargeister" },
+  // Dschinne — Stufe 2
+  "Dschinn Feuer":         { img: "modules/dsa-pixel-tokens/assets/monsters/dschinn_feuer_token.png",         tokenSize: 1, hp: 30, group: "Dschinne" },
+  "Dschinn Wasser":        { img: "modules/dsa-pixel-tokens/assets/monsters/dschinn_wasser_token.png",        tokenSize: 1, hp: 28, group: "Dschinne" },
+  "Dschinn Eis":           { img: "modules/dsa-pixel-tokens/assets/monsters/dschinn_eis_token.png",           tokenSize: 1, hp: 26, group: "Dschinne" },
+  "Dschinn Luft":          { img: "modules/dsa-pixel-tokens/assets/monsters/dschinn_luft_token.png",          tokenSize: 1, hp: 24, group: "Dschinne" },
+  "Dschinn Humus":         { img: "modules/dsa-pixel-tokens/assets/monsters/dschinn_humus_token.png",         tokenSize: 1, hp: 32, group: "Dschinne" },
+  "Dschinn Erz":           { img: "modules/dsa-pixel-tokens/assets/monsters/dschinn_erz_token.png",           tokenSize: 1, hp: 35, group: "Dschinne" },
+  // Meister-Dschinne — Stufe 3
+  "Meister-Dschinn Feuer":  { img: "modules/dsa-pixel-tokens/assets/monsters/meisterdschinn_feuer_token.png",  tokenSize: 2, hp: 60, group: "Meister-Dschinne" },
+  "Meister-Dschinn Wasser": { img: "modules/dsa-pixel-tokens/assets/monsters/meisterdschinn_wasser_token.png", tokenSize: 2, hp: 55, group: "Meister-Dschinne" },
+  "Meister-Dschinn Eis":    { img: "modules/dsa-pixel-tokens/assets/monsters/meisterdschinn_eis_token.png",    tokenSize: 2, hp: 52, group: "Meister-Dschinne" },
+  "Meister-Dschinn Luft":   { img: "modules/dsa-pixel-tokens/assets/monsters/meisterdschinn_luft_token.png",   tokenSize: 2, hp: 48, group: "Meister-Dschinne" },
+  "Meister-Dschinn Humus":  { img: "modules/dsa-pixel-tokens/assets/monsters/meisterdschinn_humus_token.png",  tokenSize: 2, hp: 65, group: "Meister-Dschinne" },
+  "Meister-Dschinn Erz":    { img: "modules/dsa-pixel-tokens/assets/monsters/meisterdschinn_erz_token.png",    tokenSize: 2, hp: 70, group: "Meister-Dschinne" },
+  // Klassische Monster
+  "Goblin":        { img: "modules/dsa-pixel-tokens/assets/monsters/goblin.png",        tokenSize: 1, hp: 15, group: "Monster" },
+  "Ork":           { img: "modules/dsa-pixel-tokens/assets/monsters/ork.png",           tokenSize: 1, hp: 30, group: "Monster" },
+  "Skelettkrieger":{ img: "modules/dsa-pixel-tokens/assets/monsters/skelettkrieger.png",tokenSize: 1, hp: 20, group: "Monster" },
+  "Troll":         { img: "modules/dsa-pixel-tokens/assets/monsters/troll.png",         tokenSize: 2, hp: 50, group: "Monster" },
+  "Oger":          { img: "modules/dsa-pixel-tokens/assets/monsters/oger.png",          tokenSize: 2, hp: 60, group: "Monster" },
+  // Magier / NSC
+  "Schwarzmagier": { img: "modules/dsa-pixel-tokens/assets/monsters/schwarzmagier_token.png", tokenSize: 1, hp: 22, group: "NSC" },
+  "Hexe":          { img: "modules/dsa-pixel-tokens/assets/monsters/hexe_token.png",          tokenSize: 1, hp: 18, group: "NSC" },
+  "Kultist":       { img: "modules/dsa-pixel-tokens/assets/monsters/kultist_token.png",        tokenSize: 1, hp: 16, group: "NSC" },
+  // Besondere Kreaturen
+  "Pfütze":        { img: "modules/dsa-pixel-tokens/assets/monsters/pfuetze_token.png",        tokenSize: 1, hp: 8,  group: "Monster" },
+};
+
+async function spawnCreature(name) {
+  const preset = CREATURE_PRESETS[name];
+  if (!preset) return;
+  if (!game.user.isGM) { ui.notifications.warn("Nur GMs können Kreaturen spawnen."); return; }
+
+  // Existiert der Aktor schon?
+  let actor = game.actors.find(a => a.name === name && a.type === "NPC");
+  if (!actor) {
+    actor = await Actor.create({
+      name,
+      type: "NPC",
+      img: preset.img,
+      system: { LeP: { value: preset.hp, max: preset.hp } },
+      prototypeToken: {
+        name,
+        img: preset.img,
+        width: preset.tokenSize,
+        height: preset.tokenSize,
+        displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
+      },
+    });
+  }
+
+  // Token auf aktive Szene droppen
+  const scene = game.scenes.active;
+  if (!scene) { ui.notifications.warn("Keine aktive Szene gefunden."); return; }
+  const gridSize = scene.grid.size ?? 100;
+  const cx = Math.floor(scene.width / 2 / gridSize) * gridSize;
+  const cy = Math.floor(scene.height / 2 / gridSize) * gridSize;
+
+  await scene.createEmbeddedDocuments("Token", [{
+    name,
+    actorId: actor.id,
+    img: preset.img,
+    x: cx,
+    y: cy,
+    width: preset.tokenSize,
+    height: preset.tokenSize,
+  }]);
+  ui.notifications.info(`${name} gespawnt!`);
+}
+
+function showCreaturePicker() {
+  const groups = {};
+  for (const [name, p] of Object.entries(CREATURE_PRESETS)) {
+    if (!groups[p.group]) groups[p.group] = [];
+    groups[p.group].push(name);
+  }
+
+  const groupIcons = {
+    "Elementargeister": "🌿",
+    "Dschinne":         "🔮",
+    "Meister-Dschinne": "👑",
+    "Monster":          "💀",
+    "NSC":              "🧙",
+  };
+
+  const groupsHtml = Object.entries(groups).map(([label, names]) => {
+    const btns = names.map(name => {
+      const p = CREATURE_PRESETS[name];
+      return `
+        <button class="dsa-creature-btn" data-creature="${name}"
+          style="width:80px;height:90px;padding:4px;background:rgba(0,0,0,0.4);
+                 border:1px solid #3a3a5e;border-radius:3px;cursor:pointer;
+                 display:flex;flex-direction:column;align-items:center;gap:3px">
+          <img src="${p.img}" style="width:56px;height:56px;image-rendering:pixelated;object-fit:contain" onerror="this.style.opacity='0.3'">
+          <span style="font-size:8px;font-family:'VT323',monospace;color:#ccc;
+                       white-space:normal;overflow:hidden;text-overflow:ellipsis;
+                       max-width:74px;text-align:center;line-height:1.1">${name}</span>
+          <span style="font-size:7px;color:#888">LP: ${p.hp}</span>
+        </button>
+      `;
+    }).join("");
+    return `
+      <div style="margin-bottom:10px">
+        <div style="font-family:'Press Start 2P',cursive;font-size:8px;color:#c09040;
+                    margin-bottom:6px;border-bottom:1px solid #3a3a5e;padding-bottom:3px">
+          ${groupIcons[label] ?? "⚔️"} ${label}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">${btns}</div>
+      </div>
+    `;
+  }).join("");
+
+  new Dialog({
+    title: "DSA — Kreaturen & NSC spawnen",
+    content: `
+      <style>
+        .dsa-creature-btn:hover { border-color:#c09040 !important; background:rgba(192,144,64,0.15) !important; }
+      </style>
+      <div style="padding:4px;max-height:70vh;overflow-y:auto">
+        <div style="font-size:11px;color:#888;margin-bottom:8px">
+          Klick = Kreatur als NPC-Aktor anlegen + in aktiver Szene spawnen
+        </div>
+        ${groupsHtml}
+      </div>
+    `,
+    buttons: { close: { label: "Schließen" } },
+    default: "close",
+    render: (html) => {
+      html.find(".dsa-creature-btn").on("click", async (e) => {
+        const name = e.currentTarget.dataset.creature;
+        await spawnCreature(name);
+      });
+    },
+  }).render(true);
+}
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 globalThis.DSAPixelTokens = {
@@ -1654,6 +1856,7 @@ globalThis.DSAPixelTokens = {
   clearCache: () => _sheetCache.clear(),
   spawnEffect,
   spawnProjectile,
+  hasProjectileVFX,
   refreshStatusIcons,
   effects: EFFECT_PRESETS,
   spawnZoneEffect,
@@ -1663,4 +1866,7 @@ globalThis.DSAPixelTokens = {
   applyZoneDamage,
   showDiceAnimation,
   ZONE_PRESETS,
+  showCreaturePicker,
+  spawnCreature,
+  CREATURE_PRESETS,
 };

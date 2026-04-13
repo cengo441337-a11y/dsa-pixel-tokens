@@ -6,7 +6,7 @@
 import { MODULE_ID } from "./config.mjs";
 import { PixelArtCharacterSheet } from "./sheet.mjs";
 import { registerDiceHooks } from "./dice-hooks.mjs";
-import { registerCombatHooks } from "./combat.mjs";
+import { registerCombatHooks, rollPassierschlag } from "./combat.mjs";
 import { registerMagicHooks } from "./magic.mjs";
 import { registerXMLImporter, showImportDialog } from "./xml-parser.mjs";
 
@@ -144,6 +144,7 @@ Hooks.once("init", () => {
   console.log(`[${MODULE_ID}] ═══════════════════════════════════════════`);
 
   registerHelpers();
+  registerSheetOverride(); // Actors.registerSheet() muss in init laufen
 });
 
 // ─── Ready Hook ─────────────────────────────────────────────────────────────
@@ -154,16 +155,17 @@ Hooks.once("ready", async () => {
   await registerPartials();
   await loadDataFiles();
 
-  registerSheetOverride();
   registerDiceHooks();
   registerCombatHooks();
   registerMagicHooks();
   registerXMLImporter();
 
   // Globale Shortcuts für Makros / Konsole
-  globalThis.DSAPixelData   = DATA;
-  globalThis.DSAHeldImport  = showImportDialog;                             // DSAHeldImport()
-  globalThis.DSAEffekte     = () => DSAPixelTokens?.showEffectPicker?.();  // DSAEffekte()
+  globalThis.DSAPixelData       = DATA;
+  globalThis.DSAHeldImport      = showImportDialog;                               // DSAHeldImport()
+  globalThis.DSAEffekte         = () => DSAPixelTokens?.showEffectPicker?.();    // DSAEffekte()
+  globalThis.DSAKreaturen       = () => DSAPixelTokens?.showCreaturePicker?.();  // DSAKreaturen()
+  globalThis.DSAPassierschlag   = rollPassierschlag;                             // DSAPassierschlag(actor)
 
   // Effekt-Picker in den Settings integrieren
   Hooks.on("renderSettings", (_app, html) => {
@@ -174,8 +176,15 @@ Hooks.once("ready", async () => {
       </button>
     `);
     btn.on("click", () => DSAPixelTokens?.showEffectPicker?.());
+    const creatureBtn = $(`
+      <button type="button" id="dsa-pixel-creature-picker" style="margin:4px 0;width:100%">
+        <i class="fas fa-dragon"></i> Kreaturen spawnen (Dschinne, Monster, NSC)
+      </button>
+    `);
+    creatureBtn.on("click", () => DSAPixelTokens?.showCreaturePicker?.());
     const target = html.find("#settings-game, .settings-list, section").last();
     target.append(btn);
+    target.append(creatureBtn);
   });
 
   console.log(`[${MODULE_ID}] ✓ Fully loaded`);
