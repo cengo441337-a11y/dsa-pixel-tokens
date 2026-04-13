@@ -624,7 +624,6 @@ Hooks.on("renderTokenConfig", (app, html, _data) => {
 
 const EFFECT_PRESETS = {
   // ── Bestehende ────────────────────────────────────────────────────────────
-  feuerball:    { src: "modules/dsa-pixel-tokens/assets/fx_feuerball.png",    frames: 8,  fps: 12, scale: 2.0,    sound: "modules/dsa-pixel-tokens/assets/sounds/spell.wav",   type: "target"                         },
   explosion:    { src: "modules/dsa-pixel-tokens/assets/fx_explosion.png",    frames: 10, fps: 12, scaleGrid: 5,  sound: "modules/dsa-pixel-tokens/assets/sounds/magic1.wav",  type: "zone"                           },
   eis:          { src: "modules/dsa-pixel-tokens/assets/fx_eis.png",          frames: 8,  fps: 10, scale: 2.0,    sound: "modules/dsa-pixel-tokens/assets/sounds/random1.wav", type: "target"                         },
   blitz:        { src: "modules/dsa-pixel-tokens/assets/fx_blitz.png",        frames: 6,  fps: 14, scale: 2.5,    sound: "modules/dsa-pixel-tokens/assets/sounds/random2.wav", type: "target"                         },
@@ -661,6 +660,20 @@ const EFFECT_PRESETS = {
   respondami:   { src: "modules/dsa-pixel-tokens/assets/fx_respondami.png",   frames: 8,  fps: 10, scaleGrid: 2, sound: "modules/dsa-pixel-tokens/assets/sounds/random1.wav", type: "target"                             },
   aquafaxius:   { src: "modules/dsa-pixel-tokens/assets/fx_aquafaxius.png",   frames: 9,  fps: 12, scale: 2.5,   sound: "modules/dsa-pixel-tokens/assets/sounds/random1.wav", type: "projectile", impact: "wasser"       },
   fulminictus:  { src: "modules/dsa-pixel-tokens/assets/fx_fulminictus.png",  frames: 8,  fps: 14, scaleGrid: 2, sound: "modules/dsa-pixel-tokens/assets/sounds/random2.wav", type: "target"                             },
+  // ── Elementar-Bälle (Projektil → AOE Explosion, 5 Grid Radius) ────────────
+  feuerball:    { src: "modules/dsa-pixel-tokens/assets/fx_feuerball.png",    frames: 8,  fps: 12, scale: 2.0,   sound: "modules/dsa-pixel-tokens/assets/sounds/spell.wav",   type: "projectile", impact: "feuerball",  impactRadius: 5 },
+  eisball:      { src: "modules/dsa-pixel-tokens/assets/fx_eis.png",          frames: 8,  fps: 12, scale: 2.0,   sound: "modules/dsa-pixel-tokens/assets/sounds/random1.wav", type: "projectile", impact: "eis",        impactRadius: 5 },
+  blitzball:    { src: "modules/dsa-pixel-tokens/assets/fx_blitz.png",        frames: 6,  fps: 14, scale: 2.0,   sound: "modules/dsa-pixel-tokens/assets/sounds/random2.wav", type: "projectile", impact: "blitz",      impactRadius: 5 },
+  giftball:     { src: "modules/dsa-pixel-tokens/assets/fx_gift.png",         frames: 8,  fps: 12, scale: 2.0,   sound: "modules/dsa-pixel-tokens/assets/sounds/bubble.wav",  type: "projectile", impact: "gift",       impactRadius: 5 },
+  wasserball:   { src: "modules/dsa-pixel-tokens/assets/fx_wasser.png",       frames: 8,  fps: 12, scale: 2.0,   sound: "modules/dsa-pixel-tokens/assets/sounds/random1.wav", type: "projectile", impact: "wasser",     impactRadius: 5 },
+  schattenball: { src: "modules/dsa-pixel-tokens/assets/fx_schatten.png",     frames: 8,  fps: 12, scale: 2.0,   sound: "modules/dsa-pixel-tokens/assets/sounds/spell.wav",   type: "projectile", impact: "schatten",   impactRadius: 5 },
+  // ── Elementar-Pfeile / Pfeil des Elements (DSA 4.1) ───────────────────────
+  pfeil_feuer:  { src: "modules/dsa-pixel-tokens/assets/fx_flammenpfeil.png", frames: 7,  fps: 14, scale: 1.5,   sound: "modules/dsa-pixel-tokens/assets/sounds/spell.wav",   type: "projectile", impact: "feuerball"       },
+  pfeil_eis:    { src: "modules/dsa-pixel-tokens/assets/fx_eis.png",          frames: 8,  fps: 14, scale: 1.5,   sound: "modules/dsa-pixel-tokens/assets/sounds/random1.wav", type: "projectile", impact: "eis"             },
+  pfeil_erz:    { src: "modules/dsa-pixel-tokens/assets/fx_blitz.png",        frames: 6,  fps: 16, scale: 1.5,   sound: "modules/dsa-pixel-tokens/assets/sounds/random2.wav", type: "projectile", impact: "schadenflash"    },
+  pfeil_humus:  { src: "modules/dsa-pixel-tokens/assets/fx_gift.png",         frames: 8,  fps: 14, scale: 1.5,   sound: "modules/dsa-pixel-tokens/assets/sounds/bubble.wav",  type: "projectile", impact: "gift"            },
+  pfeil_luft:   { src: "modules/dsa-pixel-tokens/assets/fx_wind.png",         frames: 8,  fps: 14, scale: 1.5,   sound: "modules/dsa-pixel-tokens/assets/sounds/random1.wav", type: "projectile", impact: "wind"            },
+  pfeil_wasser: { src: "modules/dsa-pixel-tokens/assets/fx_wasser.png",       frames: 8,  fps: 14, scale: 1.5,   sound: "modules/dsa-pixel-tokens/assets/sounds/random1.wav", type: "projectile", impact: "wasser"          },
   // ── Kampf-Reaktionen (automatisch via Hook) ──────────────────────────────
   schadenflash: { src: "modules/dsa-pixel-tokens/assets/fx_schadenflash.png", frames: 6,  fps: 18, scaleGrid: 2, sound: null,                                                 type: "target"                             },
   tod_animation:{ src: "modules/dsa-pixel-tokens/assets/fx_tod_animation.png",frames: 12, fps: 10, scaleGrid: 2, sound: "modules/dsa-pixel-tokens/assets/sounds/magic1.wav",  type: "target"                             },
@@ -766,9 +779,26 @@ async function spawnEffect(x, y, effect, opts = {}) {
  * @param {string} [impact]   - Effect preset for impact (e.g. "explosion")
  */
 async function spawnProjectile(fromToken, toToken, projectile = "feuerball", impact = "explosion") {
+  const preset = EFFECT_PRESETS[projectile];
+
   // ── Dynamic VFX first ───────────────────────────────────────────────────────
   if (hasProjectileVFX(projectile)) {
     await spawnProjectileVFX(fromToken, toToken, projectile, impact);
+    // AOE: Impact-Effekt auf alle Tokens im Radius spawnen
+    if (preset?.impactRadius && impact) {
+      const tx = toToken.center?.x ?? toToken.x;
+      const ty = toToken.center?.y ?? toToken.y;
+      const radiusPx = preset.impactRadius * canvas.grid.size;
+      for (const t of canvas.tokens.placeables) {
+        if (t.id === fromToken.id) continue;
+        if (t.id === toToken.id) continue; // Impact am Ziel kommt schon von spawnProjectileVFX
+        const dx = (t.center?.x ?? t.x) - tx;
+        const dy = (t.center?.y ?? t.y) - ty;
+        if (Math.hypot(dx, dy) <= radiusPx) {
+          spawnEffect(t.center?.x ?? t.x, t.center?.y ?? t.y, impact);
+        }
+      }
+    }
     return;
   }
 
@@ -1731,13 +1761,118 @@ const CREATURE_PRESETS = {
   "Troll":         { img: "modules/dsa-pixel-tokens/assets/monsters/troll.png",         tokenSize: 2, hp: 50, group: "Monster" },
   "Oger":          { img: "modules/dsa-pixel-tokens/assets/monsters/oger.png",          tokenSize: 2, hp: 60, group: "Monster" },
   // Magier / NSC
-  "Tamir ibn Malakor": { img: "modules/dsa-pixel-tokens/assets/monsters/schwarzmagier_token.png", tokenSize: 1, hp: 37, group: "Helden" },
+  "Tamir ibn Malakor": { img: "modules/dsa-pixel-tokens/assets/monsters/tamir_token.png", tokenSize: 1, hp: 37, group: "Helden" },
   "Hexe":          { img: "modules/dsa-pixel-tokens/assets/monsters/hexe_token.png",          tokenSize: 1, hp: 18, group: "NSC" },
   "Kultist":       { img: "modules/dsa-pixel-tokens/assets/monsters/kultist_token.png",        tokenSize: 1, hp: 16, group: "NSC" },
   // Besondere Kreaturen
   "Pfütze":        { img: "modules/dsa-pixel-tokens/assets/monsters/pfuetze_token.png",  tokenSize: 1, hp: 8,  group: "Monster" },
   "Edo die Eiche": { img: "modules/dsa-pixel-tokens/assets/monsters/druide_token.png",   tokenSize: 1, hp: 55, group: "Helden" },
   "Oboro":         { img: "modules/dsa-pixel-tokens/assets/monsters/oboro_token.png",    tokenSize: 1, hp: 37, group: "Helden" },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DÄMONEN — Tractatus Contra Daemones + Wege der Zauberei
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // ─── Blakharaz-Diener ────────────────────────────────────────────────────
+  "Gotongi":        { img: "modules/dsa-pixel-tokens/assets/monsters/gotongi_token.png",        tokenSize: 1, hp: 15,  group: "Blakharaz" },
+  "Heshthot":       { img: "modules/dsa-pixel-tokens/assets/monsters/heshthot_token.png",       tokenSize: 1, hp: 35,  group: "Blakharaz" },
+  "Asqarath":       { img: "modules/dsa-pixel-tokens/assets/monsters/asqarath_token.png",       tokenSize: 1, hp: 50,  group: "Blakharaz" },
+  "Irhiadhzal":     { img: "modules/dsa-pixel-tokens/assets/monsters/irhiadhzal_token.png",     tokenSize: 1, hp: 60,  group: "Blakharaz" },
+
+  // ─── Lolgramoth-Diener ───────────────────────────────────────────────────
+  "Dharai":         { img: "modules/dsa-pixel-tokens/assets/monsters/dharai_token.png",         tokenSize: 2, hp: 180, group: "Lolgramoth" },
+  "Chuchathabomek": { img: "modules/dsa-pixel-tokens/assets/monsters/chuchathabomek_token.png", tokenSize: 2, hp: 80,  group: "Lolgramoth" },
+  "Difar":          { img: "modules/dsa-pixel-tokens/assets/monsters/difar_token.png",          tokenSize: 1, hp: 20,  group: "Lolgramoth" },
+  "Karakil":        { img: "modules/dsa-pixel-tokens/assets/monsters/karakil_token.png",        tokenSize: 1, hp: 110, group: "Lolgramoth" },
+  "Je-Chrizlayk-Ura": { img: "modules/dsa-pixel-tokens/assets/monsters/je_chrizlayk_ura_token.png", tokenSize: 2, hp: 150, group: "Lolgramoth" },
+  "Yel'Arizel":     { img: "modules/dsa-pixel-tokens/assets/monsters/usuzoreel_token.png",      tokenSize: 1, hp: 12,  group: "Lolgramoth" },
+
+  // ─── Thargunitoth-Diener ─────────────────────────────────────────────────
+  "Nirraven":       { img: "modules/dsa-pixel-tokens/assets/monsters/nirraven_token.png",       tokenSize: 1, hp: 50,  group: "Thargunitoth" },
+  "Braggu":         { img: "modules/dsa-pixel-tokens/assets/monsters/braggu_token.png",         tokenSize: 1, hp: 20,  group: "Thargunitoth" },
+  "Nephazz":        { img: "modules/dsa-pixel-tokens/assets/monsters/azamir_token.png",         tokenSize: 1, hp: 20,  group: "Thargunitoth" },
+
+  // ─── Tasfarelel-Diener ───────────────────────────────────────────────────
+  "Tasfarelel":     { img: "modules/dsa-pixel-tokens/assets/monsters/tasfarelel_token.png",     tokenSize: 2, hp: 200, group: "Tasfarelel" },
+  "Nurumbaal":      { img: "modules/dsa-pixel-tokens/assets/monsters/nurumbaal_token.png",      tokenSize: 1, hp: 30,  group: "Tasfarelel" },
+  "Khidma'kha'bulim": { img: "modules/dsa-pixel-tokens/assets/monsters/khidmakhabulim_token.png", tokenSize: 1, hp: 15, group: "Tasfarelel" },
+  "Nishkakat":      { img: "modules/dsa-pixel-tokens/assets/monsters/nishkakat_token.png",      tokenSize: 1, hp: 18,  group: "Tasfarelel" },
+  "Uridabash":      { img: "modules/dsa-pixel-tokens/assets/monsters/uridabash_token.png",      tokenSize: 1, hp: 25,  group: "Tasfarelel" },
+  "Haqoum":         { img: "modules/dsa-pixel-tokens/assets/monsters/haqoum_token.png",         tokenSize: 1, hp: 30,  group: "Tasfarelel" },
+  "Uttara'Vha":     { img: "modules/dsa-pixel-tokens/assets/monsters/karunga_token.png",        tokenSize: 1, hp: 10,  group: "Tasfarelel" },
+  "Qasaar":         { img: "modules/dsa-pixel-tokens/assets/monsters/qasaar_token.png",         tokenSize: 1, hp: 12,  group: "Tasfarelel" },
+
+  // ─── Charyptoroth-Diener ─────────────────────────────────────────────────
+  "Elymelusinias":  { img: "modules/dsa-pixel-tokens/assets/monsters/elymelusinias_token.png",  tokenSize: 1, hp: 45,  group: "Charyptoroth" },
+  "Ulchuchu":       { img: "modules/dsa-pixel-tokens/assets/monsters/ulchuchu_token.png",       tokenSize: 1, hp: 55,  group: "Charyptoroth" },
+  "Yo'Nahoh":       { img: "modules/dsa-pixel-tokens/assets/monsters/yo_nahoh_token.png",       tokenSize: 2, hp: 180, group: "Charyptoroth" },
+  "Amrychoth":      { img: "modules/dsa-pixel-tokens/assets/monsters/amrychoth_token.png",      tokenSize: 2, hp: 90,  group: "Charyptoroth" },
+
+  // ─── Calijnaar-Diener ────────────────────────────────────────────────────
+  "Cthllanogog":    { img: "modules/dsa-pixel-tokens/assets/monsters/cthllanogog_token.png",    tokenSize: 1, hp: 30,  group: "Calijnaar" },
+  "Trachrhabaar":   { img: "modules/dsa-pixel-tokens/assets/monsters/trachrhabaar_token.png",   tokenSize: 1, hp: 25,  group: "Calijnaar" },
+
+  // ─── Dar-Klajid-Diener ───────────────────────────────────────────────────
+  "Laraan":         { img: "modules/dsa-pixel-tokens/assets/monsters/laraan_token.png",         tokenSize: 1, hp: 40,  group: "Dar-Klajid" },
+  "Fajlaraan":      { img: "modules/dsa-pixel-tokens/assets/monsters/laraan_token.png",         tokenSize: 1, hp: 40,  group: "Dar-Klajid" },
+  "Khelevathan":    { img: "modules/dsa-pixel-tokens/assets/monsters/khelevathan_token.png",    tokenSize: 1, hp: 20,  group: "Dar-Klajid" },
+  "Hanaestil":      { img: "modules/dsa-pixel-tokens/assets/monsters/hanaestil_token.png",      tokenSize: 1, hp: 80,  group: "Dar-Klajid" },
+
+  // ─── Mishkhara-Diener ────────────────────────────────────────────────────
+  "Bhurkhesch":     { img: "modules/dsa-pixel-tokens/assets/monsters/bhurkhesch_token.png",     tokenSize: 1, hp: 40,  group: "Mishkhara" },
+  "Duglum":         { img: "modules/dsa-pixel-tokens/assets/monsters/duglum_token.png",         tokenSize: 1, hp: 25,  group: "Mishkhara" },
+  "Tlaluc":         { img: "modules/dsa-pixel-tokens/assets/monsters/tlaluc_token.png",         tokenSize: 1, hp: 30,  group: "Mishkhara" },
+  "Khuralthu":      { img: "modules/dsa-pixel-tokens/assets/monsters/khuralthu_token.png",      tokenSize: 2, hp: 50,  group: "Mishkhara" },
+  "Hirr'Nirat":     { img: "modules/dsa-pixel-tokens/assets/monsters/hirr_nirat_token.png",     tokenSize: 1, hp: 15,  group: "Mishkhara" },
+  "Eugalp":         { img: "modules/dsa-pixel-tokens/assets/monsters/eugalp_token.png",         tokenSize: 1, hp: 80,  group: "Mishkhara" },
+
+  // ─── Agrimoth-Diener ─────────────────────────────────────────────────────
+  "Arjunoor":       { img: "modules/dsa-pixel-tokens/assets/monsters/arjunoor_token.png",       tokenSize: 2, hp: 250, group: "Agrimoth" },
+  "Arkhobal":       { img: "modules/dsa-pixel-tokens/assets/monsters/arkhobal_token.png",       tokenSize: 2, hp: 80,  group: "Agrimoth" },
+  "Kah-Thurak-Arfai": { img: "modules/dsa-pixel-tokens/assets/monsters/kah_thurak_arfai_token.png", tokenSize: 2, hp: 200, group: "Agrimoth" },
+  "Gna-Rishaj-Tumar": { img: "modules/dsa-pixel-tokens/assets/monsters/gna_rishaj_tumar_token.png", tokenSize: 2, hp: 100, group: "Agrimoth" },
+  "Glaathoyub":     { img: "modules/dsa-pixel-tokens/assets/monsters/glaathoyub_token.png",     tokenSize: 1, hp: 60,  group: "Agrimoth" },
+  "Amrifas":        { img: "modules/dsa-pixel-tokens/assets/monsters/amrifas_token.png",        tokenSize: 2, hp: 100, group: "Agrimoth" },
+
+  // ─── Belkelel/Aphasmayra-Diener ──────────────────────────────────────────
+  "Aphasmayra":     { img: "modules/dsa-pixel-tokens/assets/monsters/aphasmayra_token.png",     tokenSize: 2, hp: 120, group: "Belkelel" },
+  "Chamuyan":       { img: "modules/dsa-pixel-tokens/assets/monsters/chamuyan_token.png",       tokenSize: 1, hp: 65,  group: "Belkelel" },
+  "Karmanath":      { img: "modules/dsa-pixel-tokens/assets/monsters/karmanath_token.png",      tokenSize: 1, hp: 25,  group: "Belkelel" },
+  "Thaz-Laraanji":  { img: "modules/dsa-pixel-tokens/assets/monsters/thaz_laraanji_token.png",  tokenSize: 1, hp: 25,  group: "Belkelel" },
+  "Muwallaraan":    { img: "modules/dsa-pixel-tokens/assets/monsters/muwallaraan_token.png",    tokenSize: 2, hp: 80,  group: "Belkelel" },
+  "May'hay'tam":    { img: "modules/dsa-pixel-tokens/assets/monsters/may_hay_tam_token.png",    tokenSize: 2, hp: 150, group: "Belkelel" },
+
+  // ─── Belshirash-Diener ───────────────────────────────────────────────────
+  "Pershirash":     { img: "modules/dsa-pixel-tokens/assets/monsters/pershirash_token.png",     tokenSize: 1, hp: 35,  group: "Belshirash" },
+  "Umdoreel":       { img: "modules/dsa-pixel-tokens/assets/monsters/umdoreel_token.png",       tokenSize: 2, hp: 70,  group: "Belshirash" },
+  "Usuzoreel":      { img: "modules/dsa-pixel-tokens/assets/monsters/usuzoreel_token.png",      tokenSize: 1, hp: 40,  group: "Belshirash" },
+  "Thalon":         { img: "modules/dsa-pixel-tokens/assets/monsters/thalon_token.png",         tokenSize: 1, hp: 12,  group: "Belshirash" },
+
+  // ─── Belhalhar-Diener ────────────────────────────────────────────────────
+  "Zant":           { img: "modules/dsa-pixel-tokens/assets/monsters/zant_token.png",           tokenSize: 1, hp: 30,  group: "Belhalhar" },
+  "Sharbazz":       { img: "modules/dsa-pixel-tokens/assets/monsters/sharbazz_token.png",       tokenSize: 1, hp: 60,  group: "Belhalhar" },
+  "Shruuf":         { img: "modules/dsa-pixel-tokens/assets/monsters/shruuf_token.png",         tokenSize: 1, hp: 50,  group: "Belhalhar" },
+  "Karmoth":        { img: "modules/dsa-pixel-tokens/assets/monsters/karmoth_token.png",        tokenSize: 2, hp: 400, group: "Belhalhar" },
+  "Iltapeth/Istapher": { img: "modules/dsa-pixel-tokens/assets/monsters/iltapeth_istapher_token.png", tokenSize: 1, hp: 35, group: "Belhalhar" },
+
+  // ─── Amazeroth-Diener ────────────────────────────────────────────────────
+  "Xamanoth":       { img: "modules/dsa-pixel-tokens/assets/monsters/xamanoth_token.png",       tokenSize: 1, hp: 50,  group: "Amazeroth" },
+  "Karunga":        { img: "modules/dsa-pixel-tokens/assets/monsters/karunga_token.png",        tokenSize: 1, hp: 15,  group: "Amazeroth" },
+  "Qok'Maloth":     { img: "modules/dsa-pixel-tokens/assets/monsters/qok_maloth_token.png",     tokenSize: 1, hp: 30,  group: "Amazeroth" },
+  "Quitslinga":     { img: "modules/dsa-pixel-tokens/assets/monsters/quitslinga_token.png",     tokenSize: 1, hp: 60,  group: "Amazeroth" },
+  "Mactans":        { img: "modules/dsa-pixel-tokens/assets/monsters/mactans_token.png",        tokenSize: 1, hp: 70,  group: "Amazeroth" },
+  "Isyahadin":      { img: "modules/dsa-pixel-tokens/assets/monsters/isyahadin_rahastes_token.png", tokenSize: 1, hp: 30, group: "Amazeroth" },
+  "Rahastes":       { img: "modules/dsa-pixel-tokens/assets/monsters/isyahadin_rahastes_token.png", tokenSize: 1, hp: 30, group: "Amazeroth" },
+
+  // ─── Unabhängige / Sonstige Dämonen ──────────────────────────────────────
+  "Aphestadil":     { img: "modules/dsa-pixel-tokens/assets/monsters/aphestadil_token.png",     tokenSize: 1, hp: 80,  group: "Unabhängige" },
+  "Shihayazad":     { img: "modules/dsa-pixel-tokens/assets/monsters/shihayazad_token.png",     tokenSize: 2, hp: 200, group: "Unabhängige" },
+  "Azamir":         { img: "modules/dsa-pixel-tokens/assets/monsters/azamir_token.png",         tokenSize: 1, hp: 50,  group: "Unabhängige" },
+  "Ivash":          { img: "modules/dsa-pixel-tokens/assets/monsters/ivash_token.png",          tokenSize: 1, hp: 30,  group: "Unabhängige" },
+  "Yo'ugghatugythot": { img: "modules/dsa-pixel-tokens/assets/monsters/yo_ugghatugythot_token.png", tokenSize: 1, hp: 60, group: "Unabhängige" },
+  "Yst-Phogorthu":  { img: "modules/dsa-pixel-tokens/assets/monsters/yst_phogorthu_token.png",  tokenSize: 1, hp: 40,  group: "Unabhängige" },
+  "Zazamotl'gnakhyaa": { img: "modules/dsa-pixel-tokens/assets/monsters/zazamotl_gnakhyaa_token.png", tokenSize: 1, hp: 70, group: "Unabhängige" },
+  "Yish'Azrhi":     { img: "modules/dsa-pixel-tokens/assets/monsters/yish_azrhi_token.png",     tokenSize: 1, hp: 50,  group: "Unabhängige" },
 };
 
 async function spawnCreature(name) {
@@ -1799,6 +1934,20 @@ function showCreaturePicker() {
     "Meister-Dschinne": "👑",
     "Monster":          "💀",
     "NSC":              "🧙",
+    "Blakharaz":        "👿",
+    "Lolgramoth":       "👿",
+    "Thargunitoth":     "👿",
+    "Tasfarelel":       "👿",
+    "Charyptoroth":     "👿",
+    "Calijnaar":        "👿",
+    "Dar-Klajid":       "👿",
+    "Mishkhara":        "👿",
+    "Agrimoth":         "👿",
+    "Belkelel":         "👿",
+    "Belshirash":       "👿",
+    "Belhalhar":        "👿",
+    "Amazeroth":        "👿",
+    "Unabhängige":      "👿",
   };
 
   const groupsHtml = Object.entries(groups).map(([label, names]) => {
