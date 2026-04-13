@@ -3,7 +3,7 @@
  * Importiert DSA 4.1 Charaktere aus Helden-Software XML-Exports
  */
 
-import { MODULE_ID, ATTRIBUTES } from "./config.mjs";
+import { MODULE_ID } from "./config.mjs";
 
 // ─── XML Import Dialog ──────────────────────────────────────────────────────
 
@@ -78,12 +78,13 @@ export function showImportDialog() {
         try {
           const data = parseHeldenXML(text);
           const preview = html.find("#xml-preview");
+          const esc = s => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
           preview.show().html(`
-            <div style="color:#ffd700;font-weight:bold">${data.name}</div>
-            <div style="color:#888">${data.race ?? "?"} / ${data.culture ?? "?"} / ${data.profession ?? "?"}</div>
+            <div style="color:#ffd700;font-weight:bold">${esc(data.name)}</div>
+            <div style="color:#888">${esc(data.race ?? "?")} / ${esc(data.culture ?? "?")} / ${esc(data.profession ?? "?")}</div>
             <div style="margin-top:4px">
               ${Object.entries(data.attributes).map(([k, v]) =>
-                `<span style="color:#4a90d9">${k}:${v}</span>`
+                `<span style="color:#4a90d9">${esc(k)}:${esc(v)}</span>`
               ).join(" ")}
             </div>
             <div style="color:#4ad94a;margin-top:4px">
@@ -141,14 +142,8 @@ export function parseHeldenXML(xmlString) {
   // ── Eigenschaften ──
   _parseAttributes(held, result);
 
-  // ── Abgeleitete Werte ──
-  _parseDerivedValues(held, result);
-
   // ── Talente ──
   _parseTalents(held, result);
-
-  // ── Kampftalente ──
-  _parseCombatTalents(held, result);
 
   // ── Zauber ──
   _parseSpells(held, result);
@@ -209,12 +204,6 @@ function _parseAttributes(held, result) {
   }
 }
 
-// ─── Abgeleitete Werte ──────────────────────────────────────────────────────
-
-function _parseDerivedValues(_held, _result) {
-  // Alles bereits in _parseAttributes über EIGENSCHAFT_MAP abgedeckt
-}
-
 // ─── Talente ────────────────────────────────────────────────────────────────
 
 function _parseTalents(held, result) {
@@ -236,7 +225,7 @@ function _parseTalents(held, result) {
 
     if (kampfNamen.has(name)) {
       // Kampftalent — AT/PA aus <kampf>
-      const kw = held.querySelector(`kampf > kampfwerte[name="${name}"]`);
+      const kw = held.querySelector(`kampf > kampfwerte[name="${CSS.escape(name)}"]`);
       const at = parseInt(kw?.querySelector("attacke")?.getAttribute("value")) || 0;
       const pa = parseInt(kw?.querySelector("parade")?.getAttribute("value")) || 0;
       result.combatTalents.push({ name, at, pa, taw, probe });
@@ -263,12 +252,6 @@ function _guessTalentCategory(name) {
   if (natur.some(k => lower.includes(k))) return "natur";
   if (wissen.some(k => lower.includes(k))) return "wissen";
   return "handwerk";
-}
-
-// ─── Kampftalente ───────────────────────────────────────────────────────────
-
-function _parseCombatTalents(_held, _result) {
-  // Bereits in _parseTalents verarbeitet
 }
 
 // ─── Zauber ─────────────────────────────────────────────────────────────────
@@ -361,11 +344,6 @@ function _getText(el, tagName) {
   return child?.textContent?.trim() ?? null;
 }
 
-function _getAttr(el, tagName, attrName) {
-  const child = el.querySelector(tagName);
-  return child?.getAttribute(attrName) ?? null;
-}
-
 /**
  * Bereinigt Helden-Software Java-Klassennamen zu lesbaren deutschen Namen.
  * "helden.model.rasse.Mittellaender" → "Mittelländer"
@@ -385,6 +363,217 @@ function _deJavaName(str) {
   // CamelCase → Leerzeichen
   name = name.replace(/([a-zäöüß])([A-ZÄÖÜ])/g, "$1 $2");
   return name;
+}
+
+// ─── Token / Portrait Zuweisung ─────────────────────────────────────────────
+
+const BASE = `modules/${MODULE_ID}/assets`;
+
+/** Bekannte Helden → eigene Token-Art (Name → Datei in assets/monsters/) */
+const HERO_TOKEN_MAP = {
+  oboro:                     `${BASE}/monsters/oboro_token.png`,
+  tamir:                     `${BASE}/monsters/tamir_token.png`,
+  "edo die eiche":           `${BASE}/monsters/edo_token.png`,
+  edo:                       `${BASE}/monsters/edo_token.png`,
+  "alrik von bärenstein":    `${BASE}/monsters/alrik_token.png`,
+  alrik:                     `${BASE}/monsters/alrik_token.png`,
+  "brand thorboldson":       `${BASE}/monsters/brand_token.png`,
+  brand:                     `${BASE}/monsters/brand_token.png`,
+  aytan:                     `${BASE}/monsters/aytan_token.png`,
+  dunya:                     `${BASE}/monsters/dunya_token.png`,
+};
+
+/** Dämonen aus dem Tractatus Contra Daemones → Token-Art */
+const DEMON_TOKEN_MAP = {
+  // Blakharaz-Gefolgschaft
+  gotongi:                   `${BASE}/monsters/gotongi_token.png`,
+  heshthot:                  `${BASE}/monsters/heshthot_token.png`,
+  asqarath:                  `${BASE}/monsters/asqarath_token.png`,
+  asqarathi:                 `${BASE}/monsters/asqarath_token.png`,
+  irhiadhzal:                `${BASE}/monsters/irhiadhzal_token.png`,
+  // Lolgramoth-Gefolgschaft
+  dharai:                    `${BASE}/monsters/dharai_token.png`,
+  dharayim:                  `${BASE}/monsters/dharai_token.png`,
+  chuchathabomek:            `${BASE}/monsters/chuchathabomek_token.png`,
+  difar:                     `${BASE}/monsters/difar_token.png`,
+  // Thargunitoth-Gefolgschaft
+  nirraven:                  `${BASE}/monsters/nirraven_token.png`,
+  braggu:                    `${BASE}/monsters/braggu_token.png`,
+  // Tasfarelel-Gefolgschaft
+  tasfarelel:                `${BASE}/monsters/tasfarelel_token.png`,
+  nurumbaal:                 `${BASE}/monsters/nurumbaal_token.png`,
+  nurumbaalim:               `${BASE}/monsters/nurumbaal_token.png`,
+  "balkha'bul":              `${BASE}/monsters/nurumbaal_token.png`,
+  "khidma'kha'bul":          `${BASE}/monsters/khidmakhabulim_token.png`,
+  khidmakhabulim:            `${BASE}/monsters/khidmakhabulim_token.png`,
+  // Charyptoroth-Gefolgschaft
+  elymelusinias:             `${BASE}/monsters/elymelusinias_token.png`,
+  ulchuchu:                  `${BASE}/monsters/ulchuchu_token.png`,
+  "yo'nahoh":                `${BASE}/monsters/yo_nahoh_token.png`,
+  yo_nahoh:                  `${BASE}/monsters/yo_nahoh_token.png`,
+  // Calijnaar-Gefolgschaft
+  cthllanogog:               `${BASE}/monsters/cthllanogog_token.png`,
+  trachrhabaar:              `${BASE}/monsters/trachrhabaar_token.png`,
+  // Dar-Klajid-Gefolgschaft
+  laraan:                    `${BASE}/monsters/laraan_token.png`,
+  fajlaraan:                 `${BASE}/monsters/laraan_token.png`,
+  khelevathan:               `${BASE}/monsters/khelevathan_token.png`,
+  nishkakat:                 `${BASE}/monsters/nishkakat_token.png`,
+  uridabash:                 `${BASE}/monsters/uridabash_token.png`,
+  // Mishkara-Gefolgschaft
+  bhurkhesch:                `${BASE}/monsters/bhurkhesch_token.png`,
+  duglum:                    `${BASE}/monsters/duglum_token.png`,
+  tlaluc:                    `${BASE}/monsters/tlaluc_token.png`,
+  tlalucya:                  `${BASE}/monsters/tlaluc_token.png`,
+  khuralthu:                 `${BASE}/monsters/khuralthu_token.png`,
+  khuralthi:                 `${BASE}/monsters/khuralthu_token.png`,
+  // Agrimoth-Gefolgschaft
+  arjunoor:                  `${BASE}/monsters/arjunoor_token.png`,
+  arkhobal:                  `${BASE}/monsters/arkhobal_token.png`,
+  arkhobalim:                `${BASE}/monsters/arkhobal_token.png`,
+  "kah-thurak-arfai":        `${BASE}/monsters/kah_thurak_arfai_token.png`,
+  "gna-rishaj-tumar":        `${BASE}/monsters/gna_rishaj_tumar_token.png`,
+  "glaa-tho-yub":            `${BASE}/monsters/glaathoyub_token.png`,
+  glaathoyub:                `${BASE}/monsters/glaathoyub_token.png`,
+  // Belkelel/Aphasmayra-Gefolgschaft
+  chamuyan:                  `${BASE}/monsters/chamuyan_token.png`,
+  aphasmayra:                `${BASE}/monsters/aphasmayra_token.png`,
+  "aphasmayras atem":        `${BASE}/monsters/aphasmayra_token.png`,
+  // Widharcal-Gefolgschaft
+  karmanath:                 `${BASE}/monsters/karmanath_token.png`,
+  karmanathi:                `${BASE}/monsters/karmanath_token.png`,
+  umdoreel:                  `${BASE}/monsters/umdoreel_token.png`,
+  // Belshirash-Gefolgschaft
+  pershirash:                `${BASE}/monsters/pershirash_token.png`,
+  pershirashi:               `${BASE}/monsters/pershirash_token.png`,
+  // Belhalhar-Gefolgschaft
+  zant:                      `${BASE}/monsters/zant_token.png`,
+  zantim:                    `${BASE}/monsters/zant_token.png`,
+  sharbazz:                  `${BASE}/monsters/sharbazz_token.png`,
+  shruuf:                    `${BASE}/monsters/shruuf_token.png`,
+  shruufya:                  `${BASE}/monsters/shruuf_token.png`,
+  // Amazeroth-Gefolgschaft
+  xamanoth:                  `${BASE}/monsters/xamanoth_token.png`,
+  // Unabhängige Dämonen
+  "yo'ugghatugythot":        `${BASE}/monsters/yo_ugghatugythot_token.png`,
+  yo_ugghatugythot:          `${BASE}/monsters/yo_ugghatugythot_token.png`,
+  "glaa-tho-yub":            `${BASE}/monsters/glaathoyub_token.png`,
+  // Yst-Phogorthu (Dämonenpferde)
+  "yst-phogorthu":           `${BASE}/monsters/yst_phogorthu_token.png`,
+  yst_phogorthu:             `${BASE}/monsters/yst_phogorthu_token.png`,
+  nachtmähre:                `${BASE}/monsters/yst_phogorthu_token.png`,
+  // Zazamotl'gnakhyaa (Dämonenjäger)
+  "zazamotl'gnakhyaa":       `${BASE}/monsters/zazamotl_gnakhyaa_token.png`,
+  zazamotl_gnakhyaa:         `${BASE}/monsters/zazamotl_gnakhyaa_token.png`,
+  zazamotl:                  `${BASE}/monsters/zazamotl_gnakhyaa_token.png`,
+  // Yish'Azrhi
+  "yish'azrhi":              `${BASE}/monsters/yish_azrhi_token.png`,
+  yish_azrhi:                `${BASE}/monsters/yish_azrhi_token.png`,
+  // ─── Wege der Zauberei Dämonen ───────────────────────────────────────────
+  // Aphestadil (Schlaf/Trägheit-Dämonin)
+  aphestadil:                `${BASE}/monsters/aphestadil_token.png`,
+  // Eugalp (Seuchendämon, Mishkhara-Gefolge)
+  eugalp:                    `${BASE}/monsters/eugalp_token.png`,
+  // Hanaestil (Verführerin, Dar-Klajid)
+  hanaestil:                 `${BASE}/monsters/hanaestil_token.png`,
+  // Hirr'Nirat (dämonische Rattenfürsten, Mishkhara)
+  "hirr'nirat":              `${BASE}/monsters/hirr_nirat_token.png`,
+  "hirr'niratim":            `${BASE}/monsters/hirr_nirat_token.png`,
+  hirr_nirat:                `${BASE}/monsters/hirr_nirat_token.png`,
+  // Ivash (Feuerzunge, Dienst des Namenlosen)
+  ivash:                     `${BASE}/monsters/ivash_token.png`,
+  ivashim:                   `${BASE}/monsters/ivash_token.png`,
+  // May'hay'tam (Pflanzendämon)
+  "may'hay'tam":             `${BASE}/monsters/may_hay_tam_token.png`,
+  may_hay_tam:               `${BASE}/monsters/may_hay_tam_token.png`,
+  "ma'hay'tam":              `${BASE}/monsters/may_hay_tam_token.png`,
+  // Qok'Maloth (verkrüppelter Geier, Amazeroth)
+  "qok'maloth":              `${BASE}/monsters/qok_maloth_token.png`,
+  qok_maloth:                `${BASE}/monsters/qok_maloth_token.png`,
+  // Quitslinga (viergehörnter Gestaltwandler, Amazeroth)
+  quitslinga:                `${BASE}/monsters/quitslinga_token.png`,
+  // Shihayazad (7-gehörnter Sphärenspalter)
+  shihayazad:                `${BASE}/monsters/shihayazad_token.png`,
+  // Thaz-Laraanji (Traumbesucher, Belkelel)
+  "thaz-laraanji":           `${BASE}/monsters/thaz_laraanji_token.png`,
+  "thaz-laraanjinim":        `${BASE}/monsters/thaz_laraanji_token.png`,
+  thaz_laraanji:             `${BASE}/monsters/thaz_laraanji_token.png`,
+  // Thalon (schwarzes Wiesel, Belshirash)
+  thalon:                    `${BASE}/monsters/thalon_token.png`,
+  thalone:                   `${BASE}/monsters/thalon_token.png`,
+  // Amrychoth (Dunkelrochen, Charyptoroth)
+  amrychoth:                 `${BASE}/monsters/amrychoth_token.png`,
+  amrychothim:               `${BASE}/monsters/amrychoth_token.png`,
+  // Amrifas (Erderschütterer, Agrimoth)
+  amrifas:                   `${BASE}/monsters/amrifas_token.png`,
+  // Haqoum (Tasfarelel/Amazeroth)
+  haqoum:                    `${BASE}/monsters/haqoum_token.png`,
+  heqoumi:                   `${BASE}/monsters/haqoum_token.png`,
+  // Qasaar / Cha'Shahr (Aphasmayra-Kätzchen)
+  qasaar:                    `${BASE}/monsters/qasaar_token.png`,
+  qasaarim:                  `${BASE}/monsters/qasaar_token.png`,
+  "cha'shahr":               `${BASE}/monsters/qasaar_token.png`,
+  // Je-Chrizlayk-Ura (Schleimklumpen, Agrimoth/Lolgramoth)
+  "je-chrizlayk-ura":        `${BASE}/monsters/je_chrizlayk_ura_token.png`,
+  "je-chrizlayk-uraya":      `${BASE}/monsters/je_chrizlayk_ura_token.png`,
+  je_chrizlayk_ura:          `${BASE}/monsters/je_chrizlayk_ura_token.png`,
+  // Mactans (Spinnen-Tentakel-Dämon)
+  mactans:                   `${BASE}/monsters/mactans_token.png`,
+  // Iltapeth und Istapher (siamesische Zwillings-Dämonen, Aphestadil)
+  iltapeth:                  `${BASE}/monsters/iltapeth_istapher_token.png`,
+  istapher:                  `${BASE}/monsters/iltapeth_istapher_token.png`,
+  // Muwallaraan (Höllenpferd, Belkelel)
+  muwallaraan:               `${BASE}/monsters/muwallaraan_token.png`,
+  muwallaraanim:             `${BASE}/monsters/muwallaraan_token.png`,
+  // Karunga (grünes Etwas, Amazeroth)
+  karunga:                   `${BASE}/monsters/karunga_token.png`,
+  karungai:                  `${BASE}/monsters/karunga_token.png`,
+  // Karmoth der Vernichter (Belhalhar-Warlord)
+  karmoth:                   `${BASE}/monsters/karmoth_token.png`,
+  // Usuzoreel (Wild Hunt Treiber, Belshirash)
+  usuzoreel:                 `${BASE}/monsters/usuzoreel_token.png`,
+  usuzoreelya:               `${BASE}/monsters/usuzoreel_token.png`,
+  // Azamir (unerbittlicher Verfolger, 7-gehörnt)
+  azamir:                    `${BASE}/monsters/azamir_token.png`,
+  // Isyahadin & Rahastes (Zwillings-Nebel-Dämonen)
+  isyahadin:                 `${BASE}/monsters/isyahadin_rahastes_token.png`,
+  rahastes:                  `${BASE}/monsters/isyahadin_rahastes_token.png`,
+};
+
+/** Rasse/Profession-basierte Fallbacks (Keyword → Datei in token-art/) */
+const TOKEN_FALLBACKS = [
+  { keywords: ["elf", "elfe"],                   file: `${BASE}/../token-art/waldelfe_bogenschuetze.png` },
+  { keywords: ["magier", "akademie", "zauberer"], file: `${BASE}/../token-art/mensch_magier.png` },
+  { keywords: ["krieger", "söldner", "ritter"],   file: `${BASE}/../token-art/mensch_kriegerin.png` },
+  { keywords: ["zwerg"],                          file: `${BASE}/../token-art/zwerg_krieger.png` },
+  { keywords: ["thorwal"],                        file: `${BASE}/../token-art/thorwaler.png` },
+  { keywords: ["druide"],                         file: `${BASE}/../token-art/mensch_magier.png` },
+  { keywords: ["hexe"],                           file: `${BASE}/../token-art/mensch_magier.png` },
+  { keywords: ["ork"],                            file: `${BASE}/../token-art/ork_krieger.png` },
+  { keywords: ["goblin"],                         file: `${BASE}/../token-art/goblin_schurke.png` },
+];
+
+/**
+ * Ermittelt das passende Token-Bild für einen importierten Helden.
+ * 1. Exakter Name-Match (Oboro, Tamir, …)
+ * 2. Keyword-Match auf Rasse + Profession
+ * 3. Fallback: Standard mystery-man
+ */
+function _resolveTokenImage(heroData) {
+  const nameLower = heroData.name.toLowerCase();
+  if (HERO_TOKEN_MAP[nameLower]) return HERO_TOKEN_MAP[nameLower];
+  if (DEMON_TOKEN_MAP[nameLower]) return DEMON_TOKEN_MAP[nameLower];
+
+  // Partial name match for demons (e.g. "Asqarath der Feurige" → asqarath)
+  for (const [key, path] of Object.entries(DEMON_TOKEN_MAP)) {
+    if (nameLower.includes(key)) return path;
+  }
+
+  const haystack = `${heroData.race} ${heroData.profession} ${heroData.culture}`.toLowerCase();
+  for (const fb of TOKEN_FALLBACKS) {
+    if (fb.keywords.some(kw => haystack.includes(kw))) return fb.file;
+  }
+  return "icons/svg/mystery-man.svg";
 }
 
 // ─── Actor erstellen / aktualisieren ────────────────────────────────────────
@@ -472,6 +661,34 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   // ── 6. Sonderfertigkeiten → system.sf (String-Array) ────────────────────
   sys.sf = heroData.specialAbilities.map(s => s.name);
 
+  // ── 6b. Repräsentationen → system.Reps (Boolean-Flags für gdsa) ──────────
+  const REP_MAP = {
+    gildenmagisch: "mag", mag: "mag",
+    elfisch: "elf", elf: "elf",
+    hexisch: "hex", hex: "hex",
+    druidisch: "dru", dru: "dru",
+    schelmisch: "sch", sch: "sch",
+    borbaradianisch: "bor", bor: "bor",
+    geoden: "geo", geo: "geo",
+    kristallomant: "kri", kri: "kri",
+    scharlatanisch: "sha",
+  };
+  const repsFlags = { mag: false, elf: false, hex: false, dru: false, sch: false, bor: false, geo: false, kri: false };
+  // Aus Zaubern ableiten
+  for (const spell of heroData.spells) {
+    const key = REP_MAP[spell.repraesentation?.toLowerCase()];
+    if (key) repsFlags[key] = true;
+  }
+  // Auch aus SF ableiten (z.B. "Repräsentation: Elfisch", "Repräsentation (Elfisch)")
+  for (const sf of heroData.specialAbilities) {
+    const m = sf.name.match(/Repr.sentation[:\s(]+(\w+)/i);
+    if (m) {
+      const key = REP_MAP[m[1].toLowerCase()];
+      if (key) repsFlags[key] = true;
+    }
+  }
+  sys.Reps = repsFlags;
+
   // ── 7. Regen-Werte aus SF/Vorteilen ableiten ─────────────────────────────
   const sfNames = sys.sf;
   const regStufe = sfNames.includes("Meisterliche Regeneration") ? 3
@@ -486,12 +703,23 @@ export async function createActorFromImport(heroData, updateExisting = false) {
 
   // ── 8. Meta ──────────────────────────────────────────────────────────────
   sys.race       = heroData.race;    // gdsa-Feld heißt 'race', nicht 'rasse'
-  sys.kulture    = heroData.culture;
+  sys.kultur     = heroData.culture;
   sys.profession = heroData.profession;
   sys.AP         = { value: heroData.ap.total, free: heroData.ap.free, spent: heroData.ap.spent };
 
   // ── Actor erstellen / aktualisieren ──────────────────────────────────────
-  const actorData = { name: heroData.name, type: "PlayerCharakter", system: sys };
+  const tokenImg = _resolveTokenImage(heroData);
+  const actorData = {
+    name: heroData.name,
+    type: "PlayerCharakter",
+    system: sys,
+    img: tokenImg,
+    prototypeToken: {
+      texture: { src: tokenImg },
+      name: heroData.name,
+      displayName: 20,  // OWNER
+    },
+  };
   if (actor) {
     await actor.update(actorData);
     // Alte Spell-Items löschen vor Re-Import
