@@ -1731,11 +1731,13 @@ const CREATURE_PRESETS = {
   "Troll":         { img: "modules/dsa-pixel-tokens/assets/monsters/troll.png",         tokenSize: 2, hp: 50, group: "Monster" },
   "Oger":          { img: "modules/dsa-pixel-tokens/assets/monsters/oger.png",          tokenSize: 2, hp: 60, group: "Monster" },
   // Magier / NSC
-  "Schwarzmagier": { img: "modules/dsa-pixel-tokens/assets/monsters/schwarzmagier_token.png", tokenSize: 1, hp: 22, group: "NSC" },
+  "Tamir ibn Malakor": { img: "modules/dsa-pixel-tokens/assets/monsters/schwarzmagier_token.png", tokenSize: 1, hp: 37, group: "Helden" },
   "Hexe":          { img: "modules/dsa-pixel-tokens/assets/monsters/hexe_token.png",          tokenSize: 1, hp: 18, group: "NSC" },
   "Kultist":       { img: "modules/dsa-pixel-tokens/assets/monsters/kultist_token.png",        tokenSize: 1, hp: 16, group: "NSC" },
   // Besondere Kreaturen
-  "Pfütze":        { img: "modules/dsa-pixel-tokens/assets/monsters/pfuetze_token.png",        tokenSize: 1, hp: 8,  group: "Monster" },
+  "Pfütze":        { img: "modules/dsa-pixel-tokens/assets/monsters/pfuetze_token.png",  tokenSize: 1, hp: 8,  group: "Monster" },
+  "Edo die Eiche": { img: "modules/dsa-pixel-tokens/assets/monsters/druide_token.png",   tokenSize: 1, hp: 55, group: "Helden" },
+  "Oboro":         { img: "modules/dsa-pixel-tokens/assets/monsters/oboro_token.png",    tokenSize: 1, hp: 37, group: "Helden" },
 };
 
 async function spawnCreature(name) {
@@ -1744,11 +1746,13 @@ async function spawnCreature(name) {
   if (!game.user.isGM) { ui.notifications.warn("Nur GMs können Kreaturen spawnen."); return; }
 
   // Existiert der Aktor schon?
-  let actor = game.actors.find(a => a.name === name && a.type === "NPC");
+  // gdsa system uses "NonPlayer", fallback to first non-PC type
+  const npcType = game.system.documentTypes?.Actor?.find(t => t !== "PlayerCharakter" && t !== "LootActor") ?? "NonPlayer";
+  let actor = game.actors.find(a => a.name === name && a.type === npcType);
   if (!actor) {
     actor = await Actor.create({
       name,
-      type: "NPC",
+      type: npcType,
       img: preset.img,
       system: { LeP: { value: preset.hp, max: preset.hp } },
       prototypeToken: {
@@ -1788,6 +1792,7 @@ function showCreaturePicker() {
   }
 
   const groupIcons = {
+    "Helden":           "⚔️",
     "Elementargeister": "🌿",
     "Dschinne":         "🔮",
     "Meister-Dschinne": "👑",
