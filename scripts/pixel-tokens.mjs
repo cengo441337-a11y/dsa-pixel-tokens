@@ -109,6 +109,18 @@ async function applySprite(token) {
   // Remove stale sprite first
   removeSprite(token);
 
+  // Cache-Bust: alle Cache-Einträge für dieses Sheet löschen
+  for (const key of _sheetCache.keys()) {
+    if (key.startsWith(cfg.spriteSheet + "|")) _sheetCache.delete(key);
+  }
+  // Foundry/PIXI Textur-Cache ebenfalls invalidieren damit Datei-Änderungen wirken
+  const cached = PIXI.utils.TextureCache[cfg.spriteSheet];
+  if (cached) {
+    cached.destroy(true);
+    delete PIXI.utils.TextureCache[cfg.spriteSheet];
+    delete PIXI.utils.BaseTextureCache[cfg.spriteSheet];
+  }
+
   const sheet = await getSheetTextures(cfg.spriteSheet, cfg);
   if (!sheet) {
     console.warn(`[${MODULE_ID}] Could not load sheet for token ${token.document?.name}`);
