@@ -538,6 +538,10 @@ const DEMON_TOKEN_MAP = {
   // Isyahadin & Rahastes (Zwillings-Nebel-Dämonen)
   isyahadin:                 `${BASE}/monsters/isyahadin_rahastes_token.png`,
   rahastes:                  `${BASE}/monsters/isyahadin_rahastes_token.png`,
+  // Karakil (geflügelte Schlange, Lolgramoth)
+  karakil:                   `${BASE}/monsters/karakil_token.png`,
+  karakile:                  `${BASE}/monsters/karakil_token.png`,
+  karakilim:                 `${BASE}/monsters/karakil_token.png`,
 };
 
 /** Rasse/Profession-basierte Fallbacks (Keyword → Datei in token-art/) */
