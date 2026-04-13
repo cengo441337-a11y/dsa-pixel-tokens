@@ -1915,14 +1915,12 @@ async function spawnCreature(name) {
   const cx = Math.floor(scene.width / 2 / gridSize) * gridSize;
   const cy = Math.floor(scene.height / 2 / gridSize) * gridSize;
 
+  // Kein texture/width/height überschreiben — alles aus prototypeToken des Actors übernehmen
   await scene.createEmbeddedDocuments("Token", [{
     name,
     actorId: actor.id,
-    texture: { src: preset.img },
     x: cx,
     y: cy,
-    width: preset.tokenSize,
-    height: preset.tokenSize,
   }]);
   ui.notifications.info(`${name} gespawnt!`);
 }
