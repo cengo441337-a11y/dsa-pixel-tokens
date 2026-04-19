@@ -4,3 +4,9 @@ assets/status/*.png
 assets/fx_*.png
 __pycache__/
 *.pyc
+
+# Environment / secrets — never commit
+.env
+.env.local
+.env.*.local
+token-art/.env
