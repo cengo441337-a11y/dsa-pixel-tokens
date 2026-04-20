@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "7a529095-fc66-44a9-a34c-f043c277db69",
+    "name": "Dunya",
+    "prompt": "Young female human warrior in her early twenties with long wavy dirty-blonde hair, freckled face, determined green eyes. Wears a dark blue leather battle outfit with golden diamond-patterned skirt, brown leather bracers and belt, and a blue cape. Wears a blue gemstone amulet. Agile, brave, athletic adventurer.",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-04-18T13:21:59.660075+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-04-18T13:23:00.524453"
+}

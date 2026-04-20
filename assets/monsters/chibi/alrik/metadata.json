@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "e1156511-1db2-46e4-880c-661398357d97",
+    "name": "Alrik",
+    "prompt": "Young male human knight in his mid-twenties with short blonde hair, blue eyes, clean-shaven face. Wears polished steel plate armor, flowing red cape, heraldic shield with bear crest. Wields longsword. Noble heroic chivalrous paladin warrior.",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-04-18T13:23:44.37018+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-04-18T13:24:41.369402"
+}

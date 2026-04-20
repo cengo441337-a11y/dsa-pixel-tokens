@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "5d0568c5-5065-49ff-bccf-053cba5d2bdf",
+    "name": "Brandt",
+    "prompt": "warrior with red hair holding torch",
+    "size": {
+      "width": 68,
+      "height": 68
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-04-18T16:09:19.030468+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-04-18T16:10:38.473215"
+}

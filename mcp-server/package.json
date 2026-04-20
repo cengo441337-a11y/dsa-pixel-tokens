@@ -1,0 +1,13 @@
+{
+  "name": "foundry-local-mcp",
+  "version": "1.0.0",
+  "description": "Local MCP server for FoundryVTT — replaces foundry-mcp.com with a local WebSocket relay",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

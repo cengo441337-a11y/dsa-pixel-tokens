@@ -10,3 +10,32 @@ __pycache__/
 .env.local
 .env.*.local
 token-art/.env
+
+# Dev-workflow artifacts
+.claude/
+
+# MCP server deps (huge, users install via npm install)
+mcp-server/node_modules/
+mcp-server/package-lock.json
+
+# Backups / temp
+*.bak
+*.tmp
+*.log.old
+
+# Chibi-Junctions zu lokalen Expedition-Ordnern (nicht portabel)
+assets/monsters/chibi/crew/
+assets/monsters/chibi/tsd/
+
+# Zufällige Upload-Artefakte (UUID-Dateinamen im assets-Root)
+assets/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]-*.*
+
+# Dev-Scripts, nicht Teil des Releases
+data/fix_*.js
+data/gen.js
+data/gen_missing.js
+data/update_*.js
+scripts/fix_*.py
+scripts/update_*.py
+scripts/extract_*.py
+generate_missing_tokens.py

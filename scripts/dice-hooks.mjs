@@ -4,7 +4,7 @@
  * Injiziert auch Parade/Schaden-Buttons mit Pixel-Art Styling.
  */
 
-import { MODULE_ID, SPELL_EFFECT_MAP, PROBE_SOUNDS, guessSpellEffect } from "./config.mjs";
+import { MODULE_ID, SPELL_EFFECT_MAP, PROBE_SOUNDS, lookupSpellEffect } from "./config.mjs";
 
 // ─── Sound Helper ───────────────────────────────────────────────────────────
 
@@ -28,15 +28,12 @@ async function playSound(soundPath) {
 function extractSpellName(html) {
   const content = html[0] ?? html;
 
-  // Unser Format: <div class="chat-title">⚡ ZauberName</div>
+  // Unser Format: <div class="chat-title">⚡ ZauberName (Variante)</div>
+  // → return full name so lookupSpellEffect can handle the variant
   const ownTitle = content.querySelector?.(".chat-title");
   if (ownTitle) {
     const text = ownTitle.textContent.replace(/[⚡✨🌟⬡⚔⚗🔮]/g, "").trim();
-    if (SPELL_EFFECT_MAP[text]) return text;
-    // Teilübereinstimmung
-    for (const name of Object.keys(SPELL_EFFECT_MAP)) {
-      if (text.includes(name)) return name;
-    }
+    if (text) return text;
   }
 
   // gdsa / Foundry Standard: Überschriften und Hervorhebungen
@@ -46,9 +43,11 @@ function extractSpellName(html) {
     const els = content.querySelectorAll?.(sel) ?? [];
     for (const el of els) {
       const text = el.textContent.trim();
+      // Exact match → return full text (may include variant)
       if (SPELL_EFFECT_MAP[text]) return text;
+      // Partial match → return full text so variant info is preserved
       for (const name of Object.keys(SPELL_EFFECT_MAP)) {
-        if (text.includes(name)) return name;
+        if (text.includes(name)) return text;
       }
     }
   }
@@ -150,8 +149,13 @@ function _triggerMappedEffect(casterToken, targetToken, mapping) {
       }
       break;
     case "target": {
-      const pos = (targetToken ?? casterToken).center;
-      DSAPixelTokens.spawnEffect(pos.x, pos.y, mapping.effect);
+      // If a travel VFX exists for this effect and we have a distinct target, shoot it as a ray
+      if (targetToken && targetToken !== casterToken && DSAPixelTokens.hasProjectileVFX?.(mapping.effect)) {
+        DSAPixelTokens.spawnProjectile(casterToken, targetToken, mapping.effect, mapping.impact ?? null);
+      } else {
+        const pos = (targetToken ?? casterToken).center;
+        DSAPixelTokens.spawnEffect(pos.x, pos.y, mapping.effect);
+      }
       break;
     }
     case "aura":
@@ -215,7 +219,7 @@ function triggerVFX(result) {
     case "spell": {
       // Zaubername → SPELL_EFFECT_MAP → ggf. Keyword-Fallback → VFX
       const mapping = result.spellName
-        ? (SPELL_EFFECT_MAP[result.spellName] ?? guessSpellEffect(result.spellName))
+        ? lookupSpellEffect(result.spellName)
         : null;
 
       if (result.success) {

@@ -5,10 +5,13 @@
 [![FoundryVTT](https://img.shields.io/badge/FoundryVTT-v12-orange?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgo=)](https://foundryvtt.com/)
 [![Version](https://img.shields.io/badge/Version-0.3.0-brightgreen?style=for-the-badge)]()
 [![DSA](https://img.shields.io/badge/System-DSA%204.1%20%2F%20gdsa-blueviolet?style=for-the-badge)]()
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)]()
+[![Code-Lizenz](https://img.shields.io/badge/Code-MIT-blue?style=for-the-badge)]()
+[![Regeldaten](https://img.shields.io/badge/Regeldaten-ELF%20Ulisses-orange?style=for-the-badge)](https://ulisses-spiele.de/fan-pakete/)
 [![Spells](https://img.shields.io/badge/Zauber-298-purple?style=for-the-badge)]()
 [![Weapons](https://img.shields.io/badge/Waffen-167-red?style=for-the-badge)]()
 [![Tokens](https://img.shields.io/badge/Tokens-700%2B-ff69b4?style=for-the-badge)]()
+
+> ⚠️ **Fan-Projekt / Nicht offiziell** — *Das Schwarze Auge* und *DSA* sind eingetragene Marken der **Ulisses Spiele GmbH**. Dieses Modul steht in keiner Verbindung zum Verlag und ist kein offizielles Produkt. Die enthaltenen Regeldaten (Zauber-Mechaniken, Kreatur-Stats, Waffen-TP, Sonderfertigkeiten) werden unter der **[ELF-Fan-Lizenz](https://ulisses-spiele.de/fan-pakete/)** von Ulisses Spiele genutzt. Der Modul-Code selbst (JavaScript, Sprites, VFX, Logik) steht unter MIT-Lizenz.
 
 > Komplettes Pixel-Art DSA 4.1 Erweiterungsmodul: Animierte Tokens, automatische Zauber- und Kampfeffekte, Pixel-Art Heldenbogen, Proben-Engine, Zonenzauber mit Schaden und 961 Regelbuch-Eintraege.
 
@@ -244,13 +247,30 @@ python assets/build_monsters.py
 
 ---
 
-## Credits
+## Credits & Lizenz
 
+### Modul-Code
+- Entwickelt von **Deniz Ceylan** ([dc-infosec.de](https://dc-infosec.de))
+- Lizenz: **MIT** (siehe `LICENSE`) — betrifft ausschliesslich den JavaScript-Code, die prozedural erzeugten Sprites/VFX und die Modul-Architektur
+
+### Assets
 - Sprite-Design: Prozedural (Python/Pillow) — inspiriert vom [LPC Spritesheet Standard](https://lpc.opengameart.org/)
-- Sounds: RPG Sound Pack (OpenGameArt)
-- Regeldaten: DSA 4.1 Regelbuecher (Ulisses Spiele)
-- Entwickelt von **Deniz Ceylan** (dc-infosec.de)
+- Chibi-Charaktere: [PixelLab AI](https://pixellab.ai) (Nutzungsbedingungen des Dienstes)
+- Sounds: RPG Sound Pack (OpenGameArt, CC0/CC-BY)
+
+### Regeldaten & DSA-Inhalte
+Die in `data/creatures.json`, `data/spells.json` und den Kampf-/Talent-/Sonderfertigkeits-Definitionen
+enthaltenen DSA 4.1 Regelwerte (Zauber-Mechaniken, Kreatur-Stats, Waffen-TP, Eigenschaften,
+Fluff-Zitate) stammen aus den offiziellen **DSA 4.1 Regelwerken** (Liber Cantiones, Wege der
+Helden, Wege des Schwertes, Wege der Zauberei, Wege der Alchimie, Von Toten und Untoten,
+Elementare Gewalten, Tractatus contra Daemones) der **Ulisses Spiele GmbH** und werden unter der
+offiziellen **[ELF-Fan-Lizenz](https://ulisses-spiele.de/fan-pakete/)** genutzt.
+
+**„Das Schwarze Auge", „DSA", „Aventurien"** sind Marken der Ulisses Spiele GmbH. Dieses Projekt
+ist **nicht offiziell**, **nicht von Ulisses autorisiert ueber den Rahmen der ELF hinaus**, und
+steht in keiner kommerziellen Verbindung zum Verlag. Nutzung setzt ein gueltiges DSA-Regelwerk
+und eine gueltige FoundryVTT-Lizenz voraus.
 
 ---
 
-*Nur fuer den privaten Einsatz mit lizenziertem FoundryVTT und DSA-Regelwerk.*
+*Fuer den privaten Einsatz mit lizenziertem FoundryVTT und DSA-Regelwerk. Keine kommerzielle Nutzung.*

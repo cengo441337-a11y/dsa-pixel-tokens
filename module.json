@@ -5,7 +5,8 @@
   "version": "0.3.0",
   "compatibility": {
     "minimum": "12",
-    "verified": "12"
+    "verified": "12",
+    "maximum": "12"
   },
   "authors": [
     {
@@ -26,7 +27,31 @@
         "id": "socketlib",
         "type": "module",
         "compatibility": {}
+      },
+      {
+        "id": "lib-wrapper",
+        "type": "module",
+        "compatibility": {}
       }
+    ],
+    "recommends": [
+      { "id": "actor-link-indicator",            "type": "module", "reason": "Zeigt ob Actor linked/unlinked — Pandaemonium-Cluster sind unlinked, da ist die Anzeige hilfreich" },
+      { "id": "autocomplete-inline-properties",  "type": "module", "reason": "Bessere Journal-Bedienung" },
+      { "id": "color-picker",                    "type": "module", "reason": "UI-Helper fuer Farbauswahl" },
+      { "id": "combat-tracker-effect-tooltips",  "type": "module", "reason": "Bessere Uebersicht ueber Status-Effekte (unsere Wunden/Grapple-Flags werden lesbar)" },
+      { "id": "compendium-folders",              "type": "module", "reason": "Verschachtelte Compendien fuer bessere Kreaturen-Organisation" },
+      { "id": "dice-calculator",                 "type": "module", "reason": "Dice Tray — schnelle Wuerfe ohne Chat" },
+      { "id": "fasar-stadtplan",                 "type": "module", "reason": "DSA-Stadtplaene (Fasar)" },
+      { "id": "de-de-translation",               "type": "module", "reason": "Deutsche Foundry-Uebersetzung" },
+      { "id": "grid-scaler",                     "type": "module", "reason": "Token-Groessen skalieren" },
+      { "id": "journal-whiteboard",              "type": "module", "reason": "Zeichnen in Journals (fuer Taktik/Karten)" },
+      { "id": "multi-token-status",              "type": "module", "reason": "Mehrere Status-Icons pro Token — passt zu unseren Wunden/Grapple-Flags" },
+      { "id": "multilevel-tokens",               "type": "module", "reason": "Mehrstufige Karten (z.B. Taverne mit Kellerebene)" },
+      { "id": "ownership-viewer",                "type": "module", "reason": "Zeigt wer was besitzt" },
+      { "id": "pdf-pager",                       "type": "module", "reason": "PDFs (Regelbuecher, LCR) direkt in Foundry" },
+      { "id": "popout",                          "type": "module", "reason": "Reisst unser Pandaemonium-Panel in eigenes Fenster — sehr empfohlen" },
+      { "id": "simple-dice-roller",              "type": "module", "reason": "Schnelle Probe-Wuerfe" },
+      { "id": "vtta-tokenizer",                  "type": "module", "reason": "Token-Avatar-Bau aus Portrait" }
     ]
   },
   "esmodules": [
@@ -45,7 +70,10 @@
       "path": "lang/de.json"
     }
   ],
-  "manifest": "https://git.dc-infosec.de/admin/dsa-pixel-tokens/raw/branch/main/module.json",
-  "download": "https://git.dc-infosec.de/admin/dsa-pixel-tokens/archive/main.zip",
+  "url": "https://github.com/cengo441337-a11y/dsa-pixel-tokens",
+  "manifest": "https://raw.githubusercontent.com/cengo441337-a11y/dsa-pixel-tokens/main/module.json",
+  "download": "https://github.com/cengo441337-a11y/dsa-pixel-tokens/archive/refs/heads/main.zip",
+  "readme": "https://github.com/cengo441337-a11y/dsa-pixel-tokens/blob/main/README.md",
+  "bugs": "https://github.com/cengo441337-a11y/dsa-pixel-tokens/issues",
   "flags": {}
 }

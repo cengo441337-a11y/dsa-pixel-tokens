@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "f9968156-5808-4247-81a5-253c436c2280",
+    "name": "Tamir",
+    "prompt": "Male human sorcerer in his mid-twenties with long raven-black hair covering one eye, pale angular face, dark piercing eyes. Wears a long black embroidered mage robe with silver accents and a high collar. Carries a small rolled parchment map and a glowing purple crystal staff. Brooding, mysterious, scholarly aura.",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-04-18T13:21:56.365109+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-04-18T13:23:00.095177"
+}

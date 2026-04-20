@@ -1,0 +1,1126 @@
+{{!-- ════════════════════════════════════════════════════════════════════════
+     DSA Pixel-Art Tokens — Database Browser Dialog
+     getData() provides: tab, weapons, armor, spells, alchemika
+     ════════════════════════════════════════════════════════════════════════ --}}
+
+<div class="dsa-db-browser">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   DSA Database Browser — Inline Styles
+   Colour palette matches sheet.css variables; hardcoded here so the
+   dialog stays self-contained even if the sheet stylesheet isn't loaded.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.dsa-db-browser {
+  --db-bg:          #07070e;
+  --db-panel:       #0e0e18;
+  --db-panel-alt:   #13131f;
+  --db-panel-deep:  #090912;
+  --db-gold:        #c8972a;
+  --db-gold-bright: #e8b84a;
+  --db-gold-dim:    rgba(180,130,40,0.30);
+  --db-text:        #c8b4a0;
+  --db-text-dim:    #5a5668;
+  --db-text-mid:    #8a7c72;
+  --db-border:      rgba(160,120,40,0.28);
+  --db-border-lit:  rgba(200,151,42,0.55);
+  --db-accent-red:  #c83040;
+  --db-accent-blue: #4488ff;
+  --db-asp:         #4488ff;
+  --db-radius:      3px;
+  --db-font:        'VT323', monospace;
+  --db-font-title:  'Cinzel', serif;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 520px;
+  background: var(--db-bg);
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(30,20,60,0.5) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 30% at 85% 100%, rgba(60,20,10,0.18) 0%, transparent 60%);
+  color: var(--db-text);
+  font-family: var(--db-font);
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.dsa-db-browser *,
+.dsa-db-browser *::before,
+.dsa-db-browser *::after {
+  box-sizing: border-box;
+}
+
+/* ─── Tab Bar ────────────────────────────────────────────────────────── */
+
+.dsa-db-browser .db-tab-bar {
+  display: flex;
+  gap: 1px;
+  background: rgba(0,0,0,0.5);
+  padding: 6px 6px 0;
+  border-bottom: 1px solid var(--db-border-lit);
+  flex-shrink: 0;
+}
+
+.dsa-db-browser .db-tab-btn {
+  background: var(--db-panel-deep);
+  color: var(--db-text-dim);
+  border: 1px solid var(--db-border);
+  border-bottom: none;
+  padding: 5px 18px;
+  font-family: var(--db-font-title);
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  border-radius: var(--db-radius) var(--db-radius) 0 0;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.dsa-db-browser .db-tab-btn:hover {
+  color: var(--db-gold-bright);
+  background: var(--db-panel-alt);
+  border-color: var(--db-border-lit);
+}
+
+.dsa-db-browser .db-tab-btn.active {
+  color: var(--db-gold-bright);
+  background: var(--db-panel);
+  border-color: var(--db-gold);
+  text-shadow: 0 0 8px rgba(200,151,42,0.5);
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Toolbar (search + filter) ─────────────────────────────────────── */
+
+.dsa-db-browser .db-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  background: var(--db-panel-alt);
+  border-bottom: 1px solid var(--db-border);
+  flex-shrink: 0;
+}
+
+.dsa-db-browser .db-search-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.dsa-db-browser .db-search-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: var(--db-text-dim);
+  pointer-events: none;
+  line-height: 1;
+}
+
+.dsa-db-browser .db-search {
+  width: 100%;
+  background: var(--db-panel-deep);
+  color: var(--db-text);
+  border: 1px solid var(--db-border);
+  font-family: var(--db-font);
+  font-size: 16px;
+  padding: 4px 8px 4px 28px;
+  border-radius: var(--db-radius);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.dsa-db-browser .db-search::placeholder {
+  color: var(--db-text-dim);
+}
+
+.dsa-db-browser .db-search:focus {
+  outline: none;
+  border-color: var(--db-gold);
+  box-shadow: 0 0 6px var(--db-gold-dim);
+}
+
+.dsa-db-browser .db-filter {
+  background: var(--db-panel-deep);
+  color: var(--db-text);
+  border: 1px solid var(--db-border);
+  font-family: var(--db-font);
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: var(--db-radius);
+  min-width: 140px;
+  cursor: pointer;
+  color-scheme: dark;
+  transition: border-color 0.15s;
+}
+
+.dsa-db-browser .db-filter option {
+  background: var(--db-panel-deep);
+  color: var(--db-text);
+}
+
+.dsa-db-browser .db-filter:focus {
+  outline: none;
+  border-color: var(--db-gold);
+}
+
+/* ─── Body: table + detail split ────────────────────────────────────── */
+
+.dsa-db-browser .db-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ─── Table Panel (65%) ──────────────────────────────────────────────── */
+
+.dsa-db-browser .db-table-panel {
+  width: 65%;
+  overflow-y: auto;
+  border-right: 1px solid var(--db-border-lit);
+  scrollbar-width: thin;
+  scrollbar-color: var(--db-gold) var(--db-panel-deep);
+}
+
+.dsa-db-browser .db-table-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dsa-db-browser .db-table-panel::-webkit-scrollbar-track {
+  background: var(--db-panel-deep);
+}
+
+.dsa-db-browser .db-table-panel::-webkit-scrollbar-thumb {
+  background: var(--db-gold);
+  border-radius: 3px;
+}
+
+.dsa-db-browser .db-tab-content {
+  width: 100%;
+}
+
+.dsa-db-browser .db-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.dsa-db-browser .db-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.dsa-db-browser .db-table thead th {
+  background: var(--db-panel-deep);
+  color: var(--db-gold-bright);
+  font-family: var(--db-font-title);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--db-border-lit);
+  white-space: nowrap;
+}
+
+.dsa-db-browser .db-table thead th:first-child {
+  padding-left: 12px;
+}
+
+.dsa-db-browser .db-row {
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.1s;
+}
+
+.dsa-db-browser .db-row:hover {
+  background: rgba(200,151,42,0.07);
+}
+
+.dsa-db-browser .db-row.selected {
+  background: rgba(200,151,42,0.16);
+  border-left: 3px solid var(--db-gold);
+}
+
+.dsa-db-browser .db-row:not(.selected) {
+  border-left: 3px solid transparent;
+}
+
+.dsa-db-browser .db-row td {
+  padding: 5px 10px;
+  color: var(--db-text);
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.dsa-db-browser .db-row td:first-child {
+  padding-left: 10px;
+  font-family: var(--db-font);
+  color: var(--db-gold-bright);
+  max-width: 200px;
+}
+
+.dsa-db-browser .db-row.selected td:first-child {
+  color: #ffd700;
+  text-shadow: 0 0 6px rgba(255,215,0,0.4);
+}
+
+.dsa-db-browser .db-cell-dim {
+  color: var(--db-text-dim);
+  font-size: 14px;
+}
+
+.dsa-db-browser .db-cell-gold {
+  color: var(--db-gold);
+}
+
+.dsa-db-browser .db-cell-badge {
+  display: inline-block;
+  background: rgba(68,136,255,0.18);
+  color: var(--db-asp);
+  border: 1px solid rgba(68,136,255,0.35);
+  border-radius: var(--db-radius);
+  padding: 0 5px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.dsa-db-browser .db-empty-row td {
+  text-align: center;
+  color: var(--db-text-dim);
+  padding: 24px;
+  font-size: 15px;
+  cursor: default;
+}
+
+/* ─── Detail Panel (35%) ─────────────────────────────────────────────── */
+
+.dsa-db-browser .db-detail-panel {
+  width: 35%;
+  overflow-y: auto;
+  padding: 12px 14px;
+  background: var(--db-panel);
+  scrollbar-width: thin;
+  scrollbar-color: var(--db-gold) var(--db-panel-deep);
+}
+
+.dsa-db-browser .db-detail-panel::-webkit-scrollbar {
+  width: 5px;
+}
+
+.dsa-db-browser .db-detail-panel::-webkit-scrollbar-track {
+  background: var(--db-panel-deep);
+}
+
+.dsa-db-browser .db-detail-panel::-webkit-scrollbar-thumb {
+  background: var(--db-gold);
+  border-radius: 3px;
+}
+
+.dsa-db-browser .db-detail-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 120px;
+  color: var(--db-text-dim);
+  font-size: 14px;
+  text-align: center;
+  gap: 8px;
+}
+
+.dsa-db-browser .db-detail-empty .db-detail-empty-icon {
+  font-size: 28px;
+  opacity: 0.35;
+}
+
+.dsa-db-browser .db-detail-title {
+  font-family: var(--db-font-title);
+  font-size: 13px;
+  color: var(--db-gold-bright);
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--db-border-lit);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+  text-shadow: 0 0 8px rgba(200,151,42,0.4);
+}
+
+.dsa-db-browser .db-detail-section {
+  margin-bottom: 10px;
+}
+
+.dsa-db-browser .db-detail-label {
+  font-size: 11px;
+  color: var(--db-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: var(--db-font-title);
+  margin-bottom: 2px;
+}
+
+.dsa-db-browser .db-detail-value {
+  font-size: 16px;
+  color: var(--db-text);
+  line-height: 1.4;
+}
+
+.dsa-db-browser .db-detail-value.highlight {
+  color: var(--db-gold-bright);
+  font-size: 18px;
+}
+
+.dsa-db-browser .db-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dsa-db-browser .db-detail-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.dsa-db-browser .db-stat-box {
+  background: var(--db-panel-deep);
+  border: 1px solid var(--db-border);
+  border-radius: var(--db-radius);
+  padding: 5px 8px;
+  text-align: center;
+}
+
+.dsa-db-browser .db-stat-box .db-stat-label {
+  font-size: 10px;
+  color: var(--db-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  font-family: var(--db-font-title);
+}
+
+.dsa-db-browser .db-stat-box .db-stat-val {
+  font-size: 20px;
+  color: var(--db-gold-bright);
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+/* Probe attribute badges in spell detail */
+.dsa-db-browser .db-probe-badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.dsa-db-browser .db-probe-badge {
+  background: rgba(68,136,255,0.18);
+  border: 1px solid rgba(68,136,255,0.45);
+  color: var(--db-asp);
+  border-radius: var(--db-radius);
+  padding: 2px 10px;
+  font-size: 17px;
+  font-family: var(--db-font);
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Zone grid for armor */
+.dsa-db-browser .db-zone-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.dsa-db-browser .db-zone-cell {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--db-border);
+  border-radius: var(--db-radius);
+  padding: 3px 5px;
+  text-align: center;
+}
+
+.dsa-db-browser .db-zone-cell .db-zone-label {
+  font-size: 10px;
+  color: var(--db-text-dim);
+  font-family: var(--db-font-title);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dsa-db-browser .db-zone-cell .db-zone-val {
+  font-size: 16px;
+  color: var(--db-gold);
+}
+
+/* Spell variants sub-list */
+.dsa-db-browser .db-variants-list {
+  border-top: 1px solid var(--db-border);
+  margin-top: 6px;
+  padding-top: 6px;
+}
+
+.dsa-db-browser .db-variant-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 15px;
+}
+
+.dsa-db-browser .db-variant-item:last-child {
+  border-bottom: none;
+}
+
+.dsa-db-browser .db-variant-name {
+  color: var(--db-text);
+  flex: 1;
+  padding-right: 8px;
+}
+
+.dsa-db-browser .db-variant-cost {
+  color: var(--db-asp);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.dsa-db-browser .db-wirkung-text {
+  font-size: 14px;
+  color: var(--db-text-mid);
+  line-height: 1.45;
+  background: rgba(0,0,0,0.25);
+  border-left: 2px solid var(--db-border-lit);
+  padding: 5px 8px;
+  border-radius: 0 var(--db-radius) var(--db-radius) 0;
+  margin-top: 4px;
+}
+
+.dsa-db-browser .db-verbreitung-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.dsa-db-browser .db-verbreitung-tag {
+  background: rgba(200,151,42,0.12);
+  border: 1px solid var(--db-border);
+  color: var(--db-text-mid);
+  border-radius: var(--db-radius);
+  padding: 0 6px;
+  font-size: 13px;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────── */
+
+.dsa-db-browser .db-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--db-border-lit);
+  background: var(--db-panel-deep);
+  flex-shrink: 0;
+}
+
+.dsa-db-browser .db-btn {
+  font-family: var(--db-font-title);
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 7px 20px;
+  border-radius: var(--db-radius);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  line-height: 1;
+}
+
+.dsa-db-browser .db-btn-primary {
+  background: rgba(200,151,42,0.2);
+  border-color: var(--db-gold);
+  color: var(--db-gold-bright);
+  box-shadow: 0 0 8px var(--db-gold-dim);
+}
+
+.dsa-db-browser .db-btn-primary:hover {
+  background: rgba(200,151,42,0.35);
+  box-shadow: 0 0 14px rgba(200,151,42,0.45);
+}
+
+.dsa-db-browser .db-btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.dsa-db-browser .db-btn-secondary {
+  background: transparent;
+  border-color: var(--db-border-lit);
+  color: var(--db-text-mid);
+}
+
+.dsa-db-browser .db-btn-secondary:hover {
+  border-color: var(--db-text-mid);
+  color: var(--db-text);
+}
+</style>
+
+{{!-- ═══ TAB BAR ═══ --}}
+<nav class="db-tab-bar">
+  <button class="db-tab-btn{{#if (eq tab 'waffen')}} active{{/if}}"
+          data-tab="waffen" type="button">
+    &#9876; Waffen
+  </button>
+  <button class="db-tab-btn{{#if (eq tab 'ruestungen')}} active{{/if}}"
+          data-tab="ruestungen" type="button">
+    &#128737; R&uuml;stungen
+  </button>
+  <button class="db-tab-btn{{#if (eq tab 'zauber')}} active{{/if}}"
+          data-tab="zauber" type="button">
+    &#10024; Zauber
+  </button>
+  <button class="db-tab-btn{{#if (eq tab 'alchemika')}} active{{/if}}"
+          data-tab="alchemika" type="button">
+    &#9879; Alchemika
+  </button>
+</nav>
+
+{{!-- ═══ TOOLBAR ═══ --}}
+<div class="db-toolbar">
+  <div class="db-search-wrap">
+    <span class="db-search-icon">&#128269;</span>
+    <input class="db-search"
+           type="text"
+           id="db-search-input"
+           placeholder="Suchen&hellip;"
+           autocomplete="off" />
+  </div>
+
+  {{!-- Category filter: options are tab-specific, populated via JS on tab switch --}}
+  <select class="db-filter" id="db-category-filter">
+    {{!-- Waffen filter --}}
+    {{#if (eq tab 'waffen')}}
+    <option value="">Alle Typen</option>
+    <option value="nahkampf">Nahkampf</option>
+    <option value="fernkampf">Fernkampf</option>
+    <option value="schild">Schild</option>
+    <option value="sonstige">Sonstige</option>
+    {{/if}}
+    {{!-- Rüstungen filter --}}
+    {{#if (eq tab 'ruestungen')}}
+    <option value="">Alle</option>
+    <option value="kopf">Kopf</option>
+    <option value="koerper">K&ouml;rper</option>
+    <option value="arme">Arme</option>
+    <option value="beine">Beine</option>
+    {{/if}}
+    {{!-- Zauber filter --}}
+    {{#if (eq tab 'zauber')}}
+    <option value="">Alle Merkmale</option>
+    <option value="antimagie">Antimagie</option>
+    <option value="beherrschung">Beherrschung</option>
+    <option value="bewegung">Bewegung</option>
+    <option value="daemonisch">D&auml;monisch</option>
+    <option value="einfluss">Einfluss</option>
+    <option value="elementar">Elementar</option>
+    <option value="heilung">Heilung</option>
+    <option value="hellsicht">Hellsicht</option>
+    <option value="illusion">Illusion</option>
+    <option value="kraft">Kraft</option>
+    <option value="limbus">Limbus</option>
+    <option value="objekt">Objekt</option>
+    <option value="schaden">Schaden</option>
+    <option value="temporis">Temporis</option>
+    <option value="veraenderung">Ver&auml;nderung</option>
+    {{/if}}
+    {{!-- Alchemika filter --}}
+    {{#if (eq tab 'alchemika')}}
+    <option value="">Alle Kategorien</option>
+    <option value="trank">Trank</option>
+    <option value="gift">Gift</option>
+    <option value="elixier">Elixier</option>
+    <option value="reaktiv">Reaktiv</option>
+    <option value="sonstige">Sonstige</option>
+    {{/if}}
+  </select>
+</div>
+
+{{!-- ═══ BODY ═══ --}}
+<div class="db-body">
+
+  {{!-- ─── TABLE PANEL ─── --}}
+  <div class="db-table-panel">
+
+    {{!-- ── WAFFEN ────────────────────────────────────── --}}
+    <div class="db-tab-content"
+         data-tab-id="waffen"
+         {{#unless (eq tab 'waffen')}}style="display:none"{{/unless}}>
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>TP</th>
+            <th>Talent</th>
+            <th>KK</th>
+            <th>BF</th>
+            <th>Typ</th>
+          </tr>
+        </thead>
+        <tbody id="db-tbody-waffen">
+          {{#each weapons}}
+          <tr class="db-row"
+              data-tab="waffen"
+              data-item-index="{{@index}}"
+              data-name="{{this.name}}"
+              data-typ="{{this.typ}}">
+            <td title="{{this.name}}">{{this.name}}</td>
+            <td class="db-cell-gold">{{#if this.tp}}{{this.tp}}{{else}}<span class="db-cell-dim">&mdash;</span>{{/if}}</td>
+            <td class="db-cell-dim">{{#if this.talent}}{{this.talent}}{{else}}&mdash;{{/if}}</td>
+            <td>{{#if this.kkSchwelle}}{{this.kkSchwelle}}{{else}}<span class="db-cell-dim">&mdash;</span>{{/if}}</td>
+            <td>{{#if this.bf}}{{this.bf}}{{else}}<span class="db-cell-dim">&mdash;</span>{{/if}}</td>
+            <td class="db-cell-dim">{{#if this.typ}}{{this.typ}}{{else}}&mdash;{{/if}}</td>
+          </tr>
+          {{else}}
+          <tr class="db-empty-row">
+            <td colspan="6">Keine Waffen in der Datenbank.</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+
+    {{!-- ── RÜSTUNGEN ─────────────────────────────────── --}}
+    <div class="db-tab-content"
+         data-tab-id="ruestungen"
+         {{#unless (eq tab 'ruestungen')}}style="display:none"{{/unless}}>
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>RS</th>
+            <th>BE</th>
+            <th>Gewicht</th>
+            <th>Preis</th>
+          </tr>
+        </thead>
+        <tbody id="db-tbody-ruestungen">
+          {{#each armor}}
+          <tr class="db-row"
+              data-tab="ruestungen"
+              data-item-index="{{@index}}"
+              data-name="{{this.name}}">
+            <td title="{{this.name}}">{{this.name}}</td>
+            <td class="db-cell-gold">{{#if this.rs}}{{this.rs}}{{else}}<span class="db-cell-dim">0</span>{{/if}}</td>
+            <td>{{#if this.be}}{{this.be}}{{else}}<span class="db-cell-dim">0</span>{{/if}}</td>
+            <td class="db-cell-dim">{{#if this.gewicht}}{{this.gewicht}} Stn{{else}}&mdash;{{/if}}</td>
+            <td class="db-cell-dim">{{#if this.preis}}{{this.preis}} S{{else}}&mdash;{{/if}}</td>
+          </tr>
+          {{else}}
+          <tr class="db-empty-row">
+            <td colspan="5">Keine R&uuml;stungen in der Datenbank.</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+
+    {{!-- ── ZAUBER ────────────────────────────────────── --}}
+    <div class="db-tab-content"
+         data-tab-id="zauber"
+         {{#unless (eq tab 'zauber')}}style="display:none"{{/unless}}>
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Probe</th>
+            <th>Kosten</th>
+            <th>Komplexit&auml;t</th>
+            <th>Merkmal</th>
+          </tr>
+        </thead>
+        <tbody id="db-tbody-zauber">
+          {{#each spells}}
+          <tr class="db-row"
+              data-tab="zauber"
+              data-item-index="{{@index}}"
+              data-name="{{this.name}}"
+              data-merkmal="{{this.merkmal}}">
+            <td title="{{this.name}}">{{this.name}}</td>
+            <td>
+              {{#if this.probeDisplay}}
+              <span class="db-cell-badge">{{this.probeDisplay}}</span>
+              {{else}}
+              <span class="db-cell-dim">&mdash;</span>
+              {{/if}}
+            </td>
+            <td class="db-cell-dim">{{#if this.kosten}}{{this.kosten}}{{else}}&mdash;{{/if}}</td>
+            <td class="db-cell-dim">{{#if this.komplexitaet}}{{this.komplexitaet}}{{else}}&mdash;{{/if}}</td>
+            <td class="db-cell-dim">{{#if this.merkmal}}{{this.merkmal}}{{else}}&mdash;{{/if}}</td>
+          </tr>
+          {{else}}
+          <tr class="db-empty-row">
+            <td colspan="5">Keine Zauber in der Datenbank.</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+
+    {{!-- ── ALCHEMIKA ─────────────────────────────────── --}}
+    <div class="db-tab-content"
+         data-tab-id="alchemika"
+         {{#unless (eq tab 'alchemika')}}style="display:none"{{/unless}}>
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Typ</th>
+            <th>Stufe</th>
+            <th>Preis</th>
+            <th>Gewicht</th>
+          </tr>
+        </thead>
+        <tbody id="db-tbody-alchemika">
+          {{#each alchemika}}
+          <tr class="db-row"
+              data-tab="alchemika"
+              data-item-index="{{@index}}"
+              data-name="{{this.name}}"
+              data-kategorie="{{this.kategorie}}">
+            <td title="{{this.name}}">{{this.name}}</td>
+            <td class="db-cell-dim">{{#if this.typ}}{{this.typ}}{{else}}&mdash;{{/if}}</td>
+            <td>{{#if this.stufe}}{{this.stufe}}{{else}}<span class="db-cell-dim">&mdash;</span>{{/if}}</td>
+            <td class="db-cell-dim">{{#if this.preis}}{{this.preis}} S{{else}}&mdash;{{/if}}</td>
+            <td class="db-cell-dim">{{#if this.gewicht}}{{this.gewicht}} Stn{{else}}&mdash;{{/if}}</td>
+          </tr>
+          {{else}}
+          <tr class="db-empty-row">
+            <td colspan="5">Keine Alchemika in der Datenbank.</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+
+  </div>{{!-- /.db-table-panel --}}
+
+  {{!-- ─── DETAIL PANEL ─── --}}
+  <div class="db-detail-panel" id="db-detail-panel">
+
+    {{!-- Default empty state (hidden once a row is selected via JS) --}}
+    <div class="db-detail-empty" id="db-detail-empty">
+      <div class="db-detail-empty-icon">&#128269;</div>
+      <div>Eintrag ausw&auml;hlen<br>f&uuml;r Details</div>
+    </div>
+
+    {{!-- ══ WAFFEN detail ══════════════════════════════════════════ --}}
+    {{#each weapons}}
+    <div class="db-detail-content"
+         data-detail-tab="waffen"
+         data-detail-index="{{@index}}"
+         style="display:none">
+
+      <div class="db-detail-title">{{this.name}}</div>
+
+      {{!-- Typ + Talent --}}
+      <div class="db-detail-grid">
+        <div class="db-detail-section">
+          <div class="db-detail-label">Typ</div>
+          <div class="db-detail-value">{{#if this.typ}}{{this.typ}}{{else}}&mdash;{{/if}}</div>
+        </div>
+        <div class="db-detail-section">
+          <div class="db-detail-label">Talent</div>
+          <div class="db-detail-value">{{#if this.talent}}{{this.talent}}{{else}}&mdash;{{/if}}</div>
+        </div>
+      </div>
+
+      {{!-- Core combat stats --}}
+      <div class="db-detail-grid-3">
+        <div class="db-stat-box">
+          <div class="db-stat-label">TP</div>
+          <div class="db-stat-val">{{#if this.tp}}{{this.tp}}{{else}}&mdash;{{/if}}</div>
+        </div>
+        <div class="db-stat-box">
+          <div class="db-stat-label">AT</div>
+          <div class="db-stat-val">{{#if this.atMod}}{{this.atMod}}{{else}}0{{/if}}</div>
+        </div>
+        <div class="db-stat-box">
+          <div class="db-stat-label">PA</div>
+          <div class="db-stat-val">{{#if this.paMod}}{{this.paMod}}{{else}}0{{/if}}</div>
+        </div>
+        <div class="db-stat-box">
+          <div class="db-stat-label">BF</div>
+          <div class="db-stat-val">{{#if this.bf}}{{this.bf}}{{else}}&mdash;{{/if}}</div>
+        </div>
+        <div class="db-stat-box">
+          <div class="db-stat-label">KK</div>
+          <div class="db-stat-val">{{#if this.kkSchwelle}}{{this.kkSchwelle}}{{else}}&mdash;{{/if}}</div>
+        </div>
+        <div class="db-stat-box">
+          <div class="db-stat-label">RW</div>
+          <div class="db-stat-val" style="font-size:15px">{{#if this.reichweite}}{{this.reichweite}}{{else}}&mdash;{{/if}}</div>
+        </div>
+      </div>
+
+      {{!-- Weight --}}
+      <div class="db-detail-section">
+        <div class="db-detail-label">Gewicht</div>
+        <div class="db-detail-value">{{#if this.gewicht}}{{this.gewicht}} Stein{{else}}&mdash;{{/if}}</div>
+      </div>
+
+    </div>
+    {{/each}}
+
+    {{!-- ══ RÜSTUNGEN detail ═══════════════════════════════════════ --}}
+    {{#each armor}}
+    <div class="db-detail-content"
+         data-detail-tab="ruestungen"
+         data-detail-index="{{@index}}"
+         style="display:none">
+
+      <div class="db-detail-title">{{this.name}}</div>
+
+      {{!-- RS / BE / Weight / Price --}}
+      <div class="db-detail-grid">
+        <div class="db-stat-box">
+          <div class="db-stat-label">RS</div>
+          <div class="db-stat-val">{{#if this.rs}}{{this.rs}}{{else}}0{{/if}}</div>
+        </div>
+        <div class="db-stat-box">
+          <div class="db-stat-label">BE</div>
+          <div class="db-stat-val">{{#if this.be}}{{this.be}}{{else}}0{{/if}}</div>
+        </div>
+      </div>
+
+      <div class="db-detail-grid">
+        <div class="db-detail-section">
+          <div class="db-detail-label">Gewicht</div>
+          <div class="db-detail-value">{{#if this.gewicht}}{{this.gewicht}} Stn{{else}}&mdash;{{/if}}</div>
+        </div>
+        <div class="db-detail-section">
+          <div class="db-detail-label">Preis</div>
+          <div class="db-detail-value">{{#if this.preis}}{{this.preis}} S{{else}}&mdash;{{/if}}</div>
+        </div>
+      </div>
+
+      {{!-- Zone RS --}}
+      {{#if this.zones}}
+      <div class="db-detail-section">
+        <div class="db-detail-label">Trefferzonen RS</div>
+        <div class="db-zone-grid">
+          {{#if this.zones.kopf}}
+          <div class="db-zone-cell">
+            <div class="db-zone-label">Kopf</div>
+            <div class="db-zone-val">{{this.zones.kopf}}</div>
+          </div>
+          {{/if}}
+          {{#if this.zones.brust}}
+          <div class="db-zone-cell">
+            <div class="db-zone-label">Brust</div>
+            <div class="db-zone-val">{{this.zones.brust}}</div>
+          </div>
+          {{/if}}
+          {{#if this.zones.ruecken}}
+          <div class="db-zone-cell">
+            <div class="db-zone-label">R&uuml;cken</div>
+            <div class="db-zone-val">{{this.zones.ruecken}}</div>
+          </div>
+          {{/if}}
+          {{#if this.zones.bauch}}
+          <div class="db-zone-cell">
+            <div class="db-zone-label">Bauch</div>
+            <div class="db-zone-val">{{this.zones.bauch}}</div>
+          </div>
+          {{/if}}
+          {{#if this.zones.linksarm}}
+          <div class="db-zone-cell">
+            <div class="db-zone-label">L.Arm</div>
+            <div class="db-zone-val">{{this.zones.linksarm}}</div>
+          </div>
+          {{/if}}
+          {{#if this.zones.rechtsarm}}
+          <div class="db-zone-cell">
+            <div class="db-zone-label">R.Arm</div>
+            <div class="db-zone-val">{{this.zones.rechtsarm}}</div>
+          </div>
+          {{/if}}
+          {{#if this.zones.linksbein}}
+          <div class="db-zone-cell">
+            <div class="db-zone-label">L.Bein</div>
+            <div class="db-zone-val">{{this.zones.linksbein}}</div>
+          </div>
+          {{/if}}
+          {{#if this.zones.rechtsbein}}
+          <div class="db-zone-cell">
+            <div class="db-zone-label">R.Bein</div>
+            <div class="db-zone-val">{{this.zones.rechtsbein}}</div>
+          </div>
+          {{/if}}
+        </div>
+      </div>
+      {{/if}}
+
+    </div>
+    {{/each}}
+
+    {{!-- ══ ZAUBER detail ══════════════════════════════════════════ --}}
+    {{#each spells}}
+    <div class="db-detail-content"
+         data-detail-tab="zauber"
+         data-detail-index="{{@index}}"
+         style="display:none">
+
+      <div class="db-detail-title">{{this.name}}</div>
+
+      {{!-- Probe as attribute badges --}}
+      <div class="db-detail-section">
+        <div class="db-detail-label">Probe</div>
+        {{#if this.probe}}
+        <div class="db-probe-badges">
+          {{#each this.probe}}
+          <span class="db-probe-badge">{{this}}</span>
+          {{/each}}
+        </div>
+        {{else}}
+        <div class="db-detail-value">&mdash;</div>
+        {{/if}}
+      </div>
+
+      {{!-- Cost + Complexity + Merkmal --}}
+      <div class="db-detail-grid-3">
+        <div class="db-stat-box">
+          <div class="db-stat-label">Kosten</div>
+          <div class="db-stat-val" style="font-size:16px">{{#if this.kosten}}{{this.kosten}}{{else}}&mdash;{{/if}}</div>
+        </div>
+        <div class="db-stat-box">
+          <div class="db-stat-label">Kompl.</div>
+          <div class="db-stat-val" style="font-size:16px">{{#if this.komplexitaet}}{{this.komplexitaet}}{{else}}&mdash;{{/if}}</div>
+        </div>
+        <div class="db-stat-box">
+          <div class="db-stat-label">Merkmal</div>
+          <div class="db-stat-val" style="font-size:13px;padding-top:2px">{{#if this.merkmal}}{{this.merkmal}}{{else}}&mdash;{{/if}}</div>
+        </div>
+      </div>
+
+      {{!-- Verbreitung --}}
+      {{#if this.verbreitung}}
+      <div class="db-detail-section">
+        <div class="db-detail-label">Verbreitung</div>
+        <div class="db-verbreitung-list">
+          {{#each this.verbreitung}}
+          <span class="db-verbreitung-tag">{{this}}</span>
+          {{/each}}
+        </div>
+      </div>
+      {{/if}}
+
+      {{!-- Wirkung --}}
+      {{#if this.wirkung}}
+      <div class="db-detail-section">
+        <div class="db-detail-label">Wirkung</div>
+        <div class="db-wirkung-text">{{this.wirkung}}</div>
+      </div>
+      {{/if}}
+
+      {{!-- Variants sub-list --}}
+      {{#if this.varianten}}
+      <div class="db-detail-section">
+        <div class="db-detail-label">Varianten</div>
+        <div class="db-variants-list">
+          {{#each this.varianten}}
+          <div class="db-variant-item">
+            <span class="db-variant-name">{{this.name}}</span>
+            {{#if this.zfpKosten}}
+            <span class="db-variant-cost">{{this.zfpKosten}} ZfP*</span>
+            {{/if}}
+          </div>
+          {{/each}}
+        </div>
+      </div>
+      {{/if}}
+
+    </div>
+    {{/each}}
+
+    {{!-- ══ ALCHEMIKA detail ═══════════════════════════════════════ --}}
+    {{#each alchemika}}
+    <div class="db-detail-content"
+         data-detail-tab="alchemika"
+         data-detail-index="{{@index}}"
+         style="display:none">
+
+      <div class="db-detail-title">{{this.name}}</div>
+
+      <div class="db-detail-grid">
+        <div class="db-detail-section">
+          <div class="db-detail-label">Typ</div>
+          <div class="db-detail-value">{{#if this.typ}}{{this.typ}}{{else}}&mdash;{{/if}}</div>
+        </div>
+        <div class="db-detail-section">
+          <div class="db-detail-label">Kategorie</div>
+          <div class="db-detail-value">{{#if this.kategorie}}{{this.kategorie}}{{else}}&mdash;{{/if}}</div>
+        </div>
+      </div>
+
+      <div class="db-detail-grid-3">
+        <div class="db-stat-box">
+          <div class="db-stat-label">Stufe</div>
+          <div class="db-stat-val">{{#if this.stufe}}{{this.stufe}}{{else}}&mdash;{{/if}}</div>
+        </div>
+        <div class="db-stat-box">
+          <div class="db-stat-label">Preis</div>
+          <div class="db-stat-val" style="font-size:15px">{{#if this.preis}}{{this.preis}}{{else}}&mdash;{{/if}}</div>
+        </div>
+        <div class="db-stat-box">
+          <div class="db-stat-label">Gewicht</div>
+          <div class="db-stat-val" style="font-size:15px">{{#if this.gewicht}}{{this.gewicht}}{{else}}&mdash;{{/if}}</div>
+        </div>
+      </div>
+
+      {{#if this.wirkung}}
+      <div class="db-detail-section">
+        <div class="db-detail-label">Wirkung</div>
+        <div class="db-wirkung-text">{{this.wirkung}}</div>
+      </div>
+      {{/if}}
+
+    </div>
+    {{/each}}
+
+  </div>{{!-- /.db-detail-panel --}}
+
+</div>{{!-- /.db-body --}}
+
+{{!-- ═══ FOOTER ═══ --}}
+<footer class="db-footer">
+  <button class="db-btn db-btn-secondary"
+          type="button"
+          data-action="close">
+    Schlie&szlig;en
+  </button>
+  <button class="db-btn db-btn-primary"
+          type="button"
+          data-action="add-to-char"
+          id="db-add-btn"
+          disabled>
+    Zum Charakter hinzuf&uuml;gen
+  </button>
+</footer>
+
+</div>{{!-- /.dsa-db-browser --}}

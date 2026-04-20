@@ -5,6 +5,7 @@
  */
 
 import { hasVFX, hasProjectileVFX, spawnVFX, spawnProjectileVFX } from "./vfx.mjs";
+import { moveActorToCategoryFolder } from "./actor-folders.mjs";
 
 const MODULE_ID = "dsa-pixel-tokens";
 const SPRITE_NAME = `${MODULE_ID}-sprite`;
@@ -33,10 +34,30 @@ const DEFAULTS = {
 // Direction constants
 const DIR = { DOWN: "down", LEFT: "left", RIGHT: "right", UP: "up" };
 
+// ─── Creature Data Cache ──────────────────────────────────────────────────────
+
+/** @type {Record<string, object> | null} */
+let _creatureData = null;
+
+async function getCreatureData() {
+  if (_creatureData) return _creatureData;
+  try {
+    const resp = await fetch(`/modules/${MODULE_ID}/data/creatures.json`);
+    if (resp.ok) _creatureData = await resp.json();
+    else _creatureData = {};
+  } catch {
+    _creatureData = {};
+  }
+  return _creatureData;
+}
+
 // ─── Texture Cache ────────────────────────────────────────────────────────────
 
 /** @type {Map<string, { textures: Map<string, PIXI.Texture[]>, width: number, height: number }>} */
 const _sheetCache = new Map();
+
+/** Verhindert gleichzeitige applySprite-Aufrufe auf demselben Token */
+const _applyInProgress = new Set();
 
 async function getSheetTextures(src, cfg) {
   const key = `${src}|${cfg.frameWidth}|${cfg.frameHeight}|${cfg.framesPerDir}`;
@@ -61,12 +82,38 @@ async function getSheetTextures(src, cfg) {
     [DIR.UP]:    cfg.rowUp,
   };
 
+  const imgW = bt.width;
+  const imgH = bt.height;
+
+  // Statischer Modus: framesPerDir=1 → ganzes Bild als ein Frame (alle Richtungen gleich)
+  if (fpd <= 1) {
+    const fullTex = new PIXI.Texture(bt, new PIXI.Rectangle(0, 0, imgW, imgH));
+    const single  = [fullTex];
+    const textures = new Map([
+      [DIR.DOWN,  single],
+      [DIR.LEFT,  single],
+      [DIR.RIGHT, single],
+      [DIR.UP,    single],
+    ]);
+    const result = { textures, width: imgW, height: imgH };
+    _sheetCache.set(key, result);
+    return result;
+  }
+
   const textures = new Map();
   for (const [dir, row] of Object.entries(rowMap)) {
     const frames = [];
     for (let col = 0; col < fpd; col++) {
-      const rect = new PIXI.Rectangle(col * fw, row * fh, fw, fh);
+      const x = col * fw;
+      const y = row * fh;
+      // Überspringe Frames die außerhalb des Bildes liegen
+      if (x + fw > imgW || y + fh > imgH) break;
+      const rect = new PIXI.Rectangle(x, y, fw, fh);
       frames.push(new PIXI.Texture(bt, rect));
+    }
+    // Fallback: wenn keine Frames passen, ganzes Bild als ein Frame
+    if (!frames.length) {
+      frames.push(new PIXI.Texture(bt, new PIXI.Rectangle(0, 0, imgW, imgH)));
     }
     textures.set(dir, frames);
   }
@@ -99,7 +146,19 @@ function removeSprite(token) {
   if (token.mesh) token.mesh.visible = true;
 }
 
-async function applySprite(token) {
+async function applySprite(token, { bustCache = false } = {}) {
+  const tokenId = token.document?.id;
+  if (tokenId && _applyInProgress.has(tokenId)) return;
+  if (tokenId) _applyInProgress.add(tokenId);
+
+  try {
+    await _doApplySprite(token, bustCache);
+  } finally {
+    if (tokenId) _applyInProgress.delete(tokenId);
+  }
+}
+
+async function _doApplySprite(token, bustCache) {
   const cfg = getTokenConfig(token);
   if (!cfg.enabled || !cfg.spriteSheet) {
     removeSprite(token);
@@ -109,16 +168,17 @@ async function applySprite(token) {
   // Remove stale sprite first
   removeSprite(token);
 
-  // Cache-Bust: alle Cache-Einträge für dieses Sheet löschen
-  for (const key of _sheetCache.keys()) {
-    if (key.startsWith(cfg.spriteSheet + "|")) _sheetCache.delete(key);
-  }
-  // Foundry/PIXI Textur-Cache ebenfalls invalidieren damit Datei-Änderungen wirken
-  const cached = PIXI.utils.TextureCache[cfg.spriteSheet];
-  if (cached) {
-    cached.destroy(true);
-    delete PIXI.utils.TextureCache[cfg.spriteSheet];
-    delete PIXI.utils.BaseTextureCache[cfg.spriteSheet];
+  // Cache-Bust: nur wenn explizit angefordert (z.B. "Sprite anwenden"-Button)
+  if (bustCache) {
+    for (const key of _sheetCache.keys()) {
+      if (key.startsWith(cfg.spriteSheet + "|")) _sheetCache.delete(key);
+    }
+    const cached = PIXI.utils.TextureCache[cfg.spriteSheet];
+    if (cached) {
+      cached.destroy(true);
+      delete PIXI.utils.TextureCache[cfg.spriteSheet];
+      delete PIXI.utils.BaseTextureCache[cfg.spriteSheet];
+    }
   }
 
   const sheet = await getSheetTextures(cfg.spriteSheet, cfg);
@@ -156,10 +216,9 @@ async function applySprite(token) {
   // Pixel-perfect rendering
   sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
-  // Hide default token image mesh
-  if (token.mesh) token.mesh.visible = false;
-
+  // ERST Sprite zur Stage adden, DANN Mesh verstecken — verhindert "leerer Token" wenn addChild fehlschlägt
   token.addChild(sprite);
+  if (token.mesh) token.mesh.visible = false;
 
   // Store runtime state on the sprite itself (avoids polluting the Token object)
   sprite._pixelMeta = {
@@ -235,10 +294,21 @@ Hooks.on("drawToken", async (token) => {
 
 // Called when token properties are refreshed (selection, visibility, etc.)
 Hooks.on("refreshToken", (token) => {
+  const cfg = getTokenConfig(token);
+  if (!cfg.enabled || !cfg.spriteSheet) {
+    // Kein Pixel-Art aktiv → Mesh IMMER sichtbar (Safety-Net gegen Invisibility-Bug)
+    if (token.mesh && !token.mesh.visible) token.mesh.visible = true;
+    return;
+  }
+
+  // Mesh nur verstecken wenn wirklich ein Sprite da ist — sonst bleibt der Token unsichtbar
   const sprite = getSprite(token);
-  if (!sprite) return;
-  // Keep mesh hidden if we have a sprite
-  if (token.mesh) token.mesh.visible = false;
+  if (token.mesh) token.mesh.visible = !sprite;
+
+  // Sprite fehlt (z.B. nach Token-Bewegung weggeräumt oder Szenenwechsel) → neu aufbauen
+  if (!sprite) {
+    setTimeout(() => applySprite(token), 0);
+  }
 });
 
 // Called when token document is updated (movement, flag changes, etc.)
@@ -250,17 +320,6 @@ Hooks.on("updateToken", async (tokenDoc, changes, _options, _userId) => {
   if (changes.flags?.[MODULE_ID]) {
     await applySprite(token);
     return;
-  }
-
-  // Wenn texture.src im Appearance-Tab geändert wird → Sprite Sheet synchronisieren
-  const newSrc = changes.texture?.src;
-  if (newSrc) {
-    const cfg = getTokenConfig(token);
-    if (cfg.enabled) {
-      // Sprite Sheet auf neues Bild setzen und sofort neu laden
-      await tokenDoc.setFlag(MODULE_ID, "spriteConfig", { ...cfg, spriteSheet: newSrc });
-      return; // setFlag triggert erneut updateToken → applySprite wird dann gerufen
-    }
   }
 
   // Handle movement animation
@@ -497,6 +556,9 @@ Hooks.on("renderTokenConfig", (app, html, _data) => {
             LPC-Format: 4 Reihen, je N Frames pro Richtung.<br>
             Gratis Sheets: <strong>opengameart.org</strong> → LPC Spritesheet
           </p>
+          <button type="button" class="dsa-sprite-apply" style="margin-top:4px;width:100%;background:#2a1a0a;border:1px solid rgba(160,120,40,0.5);color:#e0c060;padding:4px 8px;cursor:pointer">
+            <i class="fas fa-sync-alt"></i> Sprite anwenden
+          </button>
         </div>
 
         <div class="form-group two-col">
@@ -627,6 +689,55 @@ Hooks.on("renderTokenConfig", (app, html, _data) => {
         if (input) input.value = path;
       },
     }).browse("modules/dsa-pixel-tokens/assets/");
+  });
+
+  // "Sprite anwenden" button — reads DOM directly, bypasses form submission
+  html.find(".dsa-sprite-apply").on("click", async function (ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    console.log("[DSA] Sprite anwenden: button clicked");
+    try {
+      // Use native DOM — navigate up to the form element from the button
+      const form = this.closest("form") ?? this.closest(".app") ?? document.body;
+      const q = (name) => form.querySelector(`[name="flags.${MODULE_ID}.spriteConfig.${name}"]`);
+      const strVal  = (n) => q(n)?.value ?? "";
+      const intVal  = (n, def) => { const v = parseInt(q(n)?.value); return isNaN(v) ? def : v; };
+      const floatVal = (n, def) => { const v = parseFloat(q(n)?.value); return isNaN(v) ? def : v; };
+      const boolVal = (n) => !!(q(n)?.checked);
+
+      const newCfg = {
+        enabled:      boolVal("enabled"),
+        spriteSheet:  strVal("spriteSheet"),
+        frameWidth:   intVal("frameWidth",   DEFAULTS.frameWidth),
+        frameHeight:  intVal("frameHeight",  DEFAULTS.frameHeight),
+        framesPerDir: intVal("framesPerDir", DEFAULTS.framesPerDir),
+        fps:          intVal("fps",          DEFAULTS.fps),
+        scale:        floatVal("scale",      DEFAULTS.scale),
+        offsetX:      intVal("offsetX",      0),
+        offsetY:      intVal("offsetY",      0),
+        idleFrame:    intVal("idleFrame",    0),
+        rowDown:      intVal("rowDown",      DEFAULTS.rowDown),
+        rowLeft:      intVal("rowLeft",      DEFAULTS.rowLeft),
+        rowRight:     intVal("rowRight",     DEFAULTS.rowRight),
+        rowUp:        intVal("rowUp",        DEFAULTS.rowUp),
+      };
+      console.log("[DSA] Sprite anwenden: newCfg =", newCfg);
+
+      await tokenDoc.setFlag(MODULE_ID, "spriteConfig", newCfg);
+      console.log("[DSA] Sprite anwenden: flag saved");
+
+      const token = tokenDoc.object;
+      if (token) {
+        await applySprite(token, { bustCache: true });
+        console.log("[DSA] Sprite anwenden: applySprite done");
+      } else {
+        console.warn("[DSA] Sprite anwenden: tokenDoc.object is null — token not on canvas?");
+      }
+      ui.notifications.info("[DSA] Sprite angewendet ✓");
+    } catch (err) {
+      console.error("[DSA] Sprite anwenden ERROR:", err);
+      ui.notifications.error("[DSA] Fehler beim Anwenden: " + err.message);
+    }
   });
 
   // Re-init tabs to pick up new entry
@@ -1702,12 +1813,15 @@ Hooks.on("createChatMessage", (message) => {
 
 // Preset-Größen für LPC-Sprites
 const TOKEN_SIZE_PRESETS = {
-  "1×1 Standard (64px)":  { frameWidth: 64,  frameHeight: 64,  framesPerDir: 9 },
-  "1×1 Groß (128px)":     { frameWidth: 128, frameHeight: 128, framesPerDir: 9 },
-  "2×2 Kreatur (64px)":   { frameWidth: 64,  frameHeight: 64,  framesPerDir: 9 },
-  "2×2 Kreatur (128px)":  { frameWidth: 128, frameHeight: 128, framesPerDir: 9 },
-  "3×3 Boss (128px)":     { frameWidth: 128, frameHeight: 128, framesPerDir: 9 },
-  "4×4 Riese (256px)":    { frameWidth: 256, frameHeight: 256, framesPerDir: 9 },
+  // Statisches Einzel-PNG (chibi tokens, generierte Bilder usw.)
+  "Chibi Token (256×256, statisch)": { frameWidth: 256, frameHeight: 256, framesPerDir: 1, rowDown: 0, rowLeft: 0, rowRight: 0, rowUp: 0 },
+  "Chibi Token (128×128, statisch)": { frameWidth: 128, frameHeight: 128, framesPerDir: 1, rowDown: 0, rowLeft: 0, rowRight: 0, rowUp: 0 },
+  // LPC-Spritesheets (animiert, 4 Richtungen)
+  "LPC 1×1 Standard (64px)":  { frameWidth: 64,  frameHeight: 64,  framesPerDir: 9, rowDown: 2, rowLeft: 1, rowRight: 3, rowUp: 0 },
+  "LPC 1×1 Groß (128px)":     { frameWidth: 128, frameHeight: 128, framesPerDir: 9, rowDown: 2, rowLeft: 1, rowRight: 3, rowUp: 0 },
+  "LPC 2×2 Kreatur (64px)":   { frameWidth: 64,  frameHeight: 64,  framesPerDir: 9, rowDown: 2, rowLeft: 1, rowRight: 3, rowUp: 0 },
+  "LPC 2×2 Kreatur (128px)":  { frameWidth: 128, frameHeight: 128, framesPerDir: 9, rowDown: 2, rowLeft: 1, rowRight: 3, rowUp: 0 },
+  "LPC 3×3 Boss (128px)":     { frameWidth: 128, frameHeight: 128, framesPerDir: 9, rowDown: 2, rowLeft: 1, rowRight: 3, rowUp: 0 },
 };
 
 // Den bestehenden renderTokenConfig-Hook ergänzen (nach dem ersten Hook)
@@ -1744,10 +1858,18 @@ Hooks.on("renderTokenConfig", (app, html, _data) => {
     const key    = html.find("#dsa-pixel-size-preset").val();
     const preset = TOKEN_SIZE_PRESETS[key];
     if (!preset) return;
-    html.find(`input[name="flags.${MODULE_ID}.spriteConfig.frameWidth"]`).val(preset.frameWidth);
-    html.find(`input[name="flags.${MODULE_ID}.spriteConfig.frameHeight"]`).val(preset.frameHeight);
-    html.find(`input[name="flags.${MODULE_ID}.spriteConfig.framesPerDir"]`).val(preset.framesPerDir);
-    ui.notifications.info(`Preset "${key}" angewendet — Speichern nicht vergessen!`);
+    const set = (field, val) => {
+      if (val === undefined) return;
+      html.find(`input[name="flags.${MODULE_ID}.spriteConfig.${field}"]`).val(val);
+    };
+    set("frameWidth",   preset.frameWidth);
+    set("frameHeight",  preset.frameHeight);
+    set("framesPerDir", preset.framesPerDir);
+    set("rowDown",      preset.rowDown);
+    set("rowLeft",      preset.rowLeft);
+    set("rowRight",     preset.rowRight);
+    set("rowUp",        preset.rowUp);
+    ui.notifications.info(`Preset "${key}" angewendet — jetzt "Sprite anwenden" klicken!`);
   });
 });
 
@@ -1789,6 +1911,71 @@ const CREATURE_PRESETS = {
   "Pfütze":        { img: "modules/dsa-pixel-tokens/assets/monsters/pfuetze_token.png",  tokenSize: 1, hp: 8,  group: "Monster" },
   "Edo die Eiche": { img: "modules/dsa-pixel-tokens/assets/monsters/druide_token.png",   tokenSize: 1, hp: 55, group: "Helden" },
   "Oboro":         { img: "modules/dsa-pixel-tokens/assets/monsters/oboro_token.png",    tokenSize: 1, hp: 37, group: "Helden" },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ELEMENTARE — Benannte Elementare (Liber Cantiones + Elementare Gewalten)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // ── Elementar Feuer ──
+  "Feuerdrache": { img: "modules/dsa-pixel-tokens/assets/creatures/feuerdrache.png", tokenSize: 2, hp: 200, group: "Elementar Feuer" },
+  "Firy Sija": { img: "modules/dsa-pixel-tokens/assets/creatures/firy_sija.png", tokenSize: 1, hp: 22, group: "Elementar Feuer" },
+  "Feuermähre": { img: "modules/dsa-pixel-tokens/assets/creatures/feuermaehre.png", tokenSize: 2, hp: 42, group: "Elementar Feuer" },
+  // ── Elementar Wasser ──
+  "Mepharasch": { img: "modules/dsa-pixel-tokens/assets/creatures/mepharasch.png", tokenSize: 1, hp: 25, group: "Elementar Wasser" },
+  "Regenbringer": { img: "modules/dsa-pixel-tokens/assets/creatures/regenbringer.png", tokenSize: 1, hp: 34, group: "Elementar Wasser" },
+  "Gischtsirene": { img: "modules/dsa-pixel-tokens/assets/creatures/gischtsirene.png", tokenSize: 1, hp: 25, group: "Elementar Wasser" },
+  "Kapitän Dieros Nehqal": { img: "modules/dsa-pixel-tokens/assets/creatures/kapitaen_dieros_nehqal.png", tokenSize: 1, hp: 30, group: "Elementar Wasser" },
+  // ── Elementar Eis ──
+  "Eisdrache": { img: "modules/dsa-pixel-tokens/assets/creatures/eisdrache.png", tokenSize: 2, hp: 110, group: "Elementar Eis" },
+  "Frostfee": { img: "modules/dsa-pixel-tokens/assets/creatures/frostfee.png", tokenSize: 1, hp: 20, group: "Elementar Eis" },
+  "Blizzantil": { img: "modules/dsa-pixel-tokens/assets/creatures/blizzantil.png", tokenSize: 1, hp: 30, group: "Elementar Eis" },
+  "Gagolschwinge": { img: "modules/dsa-pixel-tokens/assets/creatures/gagolschwinge.png", tokenSize: 1, hp: 40, group: "Elementar Eis" },
+  // ── Elementar Luft ──
+  "Tornado": { img: "modules/dsa-pixel-tokens/assets/creatures/tornado.png", tokenSize: 2, hp: 35, group: "Elementar Luft" },
+  "Windfeger": { img: "modules/dsa-pixel-tokens/assets/creatures/windfeger.png", tokenSize: 1, hp: 36, group: "Elementar Luft" },
+  "Drachenfliege": { img: "modules/dsa-pixel-tokens/assets/creatures/drachenfliege.png", tokenSize: 1, hp: 16, group: "Elementar Luft" },
+  "Himmelsgazelle": { img: "modules/dsa-pixel-tokens/assets/creatures/himmelsgazelle.png", tokenSize: 1, hp: 12, group: "Elementar Luft" },
+  // ── Elementar Humus ──
+  "Blätterwirbel": { img: "modules/dsa-pixel-tokens/assets/creatures/blaetterwirbel.png", tokenSize: 2, hp: 40, group: "Elementar Humus" },
+  "Rosendschinn": { img: "modules/dsa-pixel-tokens/assets/creatures/rosendschinn.png", tokenSize: 1, hp: 24, group: "Elementar Humus" },
+  "Truncus": { img: "modules/dsa-pixel-tokens/assets/creatures/truncus.png", tokenSize: 1, hp: 35, group: "Elementar Humus" },
+  "Dornenwolf": { img: "modules/dsa-pixel-tokens/assets/creatures/dornenwolf.png", tokenSize: 1, hp: 20, group: "Elementar Humus" },
+  "Lebender Baum": { img: "modules/dsa-pixel-tokens/assets/creatures/lebender_baum.png", tokenSize: 2, hp: 80, group: "Elementar Humus" },
+  // ── Elementar Erz ──
+  "Alagrimm": { img: "modules/dsa-pixel-tokens/assets/creatures/alagrimm.png", tokenSize: 2, hp: 70, group: "Elementar Erz" },
+  "Doryphoros": { img: "modules/dsa-pixel-tokens/assets/creatures/doryphoros.png", tokenSize: 2, hp: 55, group: "Elementar Erz" },
+  "Abu al Hamam": { img: "modules/dsa-pixel-tokens/assets/creatures/abu_al_hamam.png", tokenSize: 1, hp: 32, group: "Elementar Erz" },
+  "Al Jallahir": { img: "modules/dsa-pixel-tokens/assets/creatures/al_jallahir.png", tokenSize: 1, hp: 25, group: "Elementar Erz" },
+  "Al Serak": { img: "modules/dsa-pixel-tokens/assets/creatures/al_serak.png", tokenSize: 1, hp: 34, group: "Elementar Erz" },
+  "Al Shafeif": { img: "modules/dsa-pixel-tokens/assets/creatures/al_shafeif.png", tokenSize: 2, hp: 45, group: "Elementar Erz" },
+  "Krystall": { img: "modules/dsa-pixel-tokens/assets/creatures/krystall.png", tokenSize: 1, hp: 30, group: "Elementar Erz" },
+  "Sholgothar": { img: "modules/dsa-pixel-tokens/assets/creatures/sholgothar.png", tokenSize: 1, hp: 40, group: "Elementar Erz" },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // UNTOTE — Wege der Vergessenen + Von Toten und Untoten
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  "Skelett": { img: "modules/dsa-pixel-tokens/assets/creatures/skelett.png", tokenSize: 1, hp: 25, group: "Untote" },
+  "Zombie": { img: "modules/dsa-pixel-tokens/assets/creatures/zombie.png", tokenSize: 1, hp: 25, group: "Untote" },
+  "Knochengarde": { img: "modules/dsa-pixel-tokens/assets/creatures/knochengarde.png", tokenSize: 1, hp: 30, group: "Untote" },
+  "Mumie": { img: "modules/dsa-pixel-tokens/assets/creatures/mumie.png", tokenSize: 1, hp: 40, group: "Untote" },
+  "Kriegermumie": { img: "modules/dsa-pixel-tokens/assets/creatures/kriegermumie.png", tokenSize: 1, hp: 45, group: "Untote" },
+  "Ghul (Sammler)": { img: "modules/dsa-pixel-tokens/assets/creatures/ghul.png", tokenSize: 1, hp: 30, group: "Untote" },
+  "Ghulkönig": { img: "modules/dsa-pixel-tokens/assets/creatures/ghulkoenig.png", tokenSize: 2, hp: 55, group: "Untote" },
+  "Blutbestie": { img: "modules/dsa-pixel-tokens/assets/creatures/blutbestie.png", tokenSize: 1, hp: 45, group: "Untote" },
+  "Brandleiche": { img: "modules/dsa-pixel-tokens/assets/creatures/brandleiche.png", tokenSize: 1, hp: 30, group: "Untote" },
+  "Eisleiche": { img: "modules/dsa-pixel-tokens/assets/creatures/eisleiche.png", tokenSize: 1, hp: 24, group: "Untote" },
+  "Wasserleiche (Ertrunkener)": { img: "modules/dsa-pixel-tokens/assets/creatures/wasserleiche.png", tokenSize: 1, hp: 40, group: "Untote" },
+  "Oger-Skelett": { img: "modules/dsa-pixel-tokens/assets/creatures/ogerskelett.png", tokenSize: 2, hp: 50, group: "Untote" },
+  "Untoter Troll": { img: "modules/dsa-pixel-tokens/assets/creatures/untotertroll.png", tokenSize: 2, hp: 60, group: "Untote" },
+  "Knochenritter": { img: "modules/dsa-pixel-tokens/assets/creatures/knochenritter.png", tokenSize: 2, hp: 40, group: "Untote" },
+  "Skelettfürst": { img: "modules/dsa-pixel-tokens/assets/creatures/skelettfuerst.png", tokenSize: 1, hp: 60, group: "Untote" },
+  "Brandbock": { img: "modules/dsa-pixel-tokens/assets/monsters/skelettkrieger.png", tokenSize: 1, hp: 25, group: "Untote" },
+  "Priestermumie": { img: "modules/dsa-pixel-tokens/assets/creatures/mumie.png", tokenSize: 1, hp: 40, group: "Untote" },
+  "Ghul (Würger)": { img: "modules/dsa-pixel-tokens/assets/creatures/ghul.png", tokenSize: 1, hp: 42, group: "Untote" },
+  "Ghul (Morokun)": { img: "modules/dsa-pixel-tokens/assets/creatures/ghul.png", tokenSize: 1, hp: 40, group: "Untote" },
+  "Yaq Hai": { img: "modules/dsa-pixel-tokens/assets/creatures/zombie.png", tokenSize: 1, hp: 35, group: "Untote" },
+  "Fleischkoloss": { img: "modules/dsa-pixel-tokens/assets/creatures/zombie.png", tokenSize: 2, hp: 35, group: "Untote" },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // DÄMONEN — Tractatus Contra Daemones + Wege der Zauberei
@@ -1896,16 +2083,160 @@ const CREATURE_PRESETS = {
   "Yish'Azrhi":     { img: "modules/dsa-pixel-tokens/assets/monsters/yish_azrhi_token.png",     tokenSize: 1, hp: 50,  group: "Unabhängige" },
 };
 
+// ─── Dynamic preset builder from creatures.json ───────────────────────────────
+
+function _buildDynamicPresets(db) {
+  const presets = {};
+  for (const [name, c] of Object.entries(db)) {
+    const img = c.img;
+    if (!img) continue;
+    const hp  = c.system?.LeP?.max ?? c.ko ?? 10;
+    const src = c._source ?? "";
+    const cat = c.category ?? "";
+    const sz  = c.size ?? "";
+    const tokenSize = (sz === "riesig") ? 2 : (sz === "gross") ? 2 : 1;
+
+    let group;
+    if      (src.includes("Von Toten") || src.includes("Untoten")) group = "Untote";
+    else if (cat.startsWith("Elementar"))                          group = "Benannte Elementare";
+    else if (src === "Elementare Gewalten") {
+      if (name.includes("Meister"))     group = "Meister-Dschinne";
+      else if (name.includes("Dschinn")) group = "Dschinne";
+      else                               group = "Elementargeister";
+    }
+    else if (src.includes("Tractatus"))  group = CREATURE_PRESETS[name]?.group ?? "Dämonen";
+    else                                 group = "Monster";
+
+    presets[name] = { img, hp, tokenSize, group };
+  }
+  return presets;
+}
+
+let _mergedPresets = null;
+async function _getMergedPresets() {
+  if (_mergedPresets) return _mergedPresets;
+  const db = await getCreatureData();
+  const dyn = _buildDynamicPresets(db);
+  // Static CREATURE_PRESETS win for group info; creatures.json wins for img path
+  _mergedPresets = { ...dyn, ...CREATURE_PRESETS };
+  // Override img with creatures.json path where available (fixes monsters/ → creatures/)
+  for (const [name, c] of Object.entries(db)) {
+    if (c.img && _mergedPresets[name]) {
+      _mergedPresets[name] = { ..._mergedPresets[name], img: c.img };
+    }
+  }
+  return _mergedPresets;
+}
+
+// ── Name-Alias für Preset→DB Lookup (Preset-Name links, creatures.json-Key rechts) ──
+const _CREATURE_NAME_ALIASES = {
+  "Elementargeist Feuer":  "Geist des Feuers",
+  "Elementargeist Wasser": "Geist des Wassers",
+  "Elementargeist Eis":    "Geist des Eises",
+  "Elementargeist Luft":   "Geist der Luft",
+  "Elementargeist Humus":  "Geist des Humus",
+  "Elementargeist Erz":    "Geist des Erzes",
+  "Dschinn Feuer":         "Dschinn des Feuers",
+  "Dschinn Wasser":        "Dschinn des Wassers",
+  "Dschinn Eis":           "Dschinn des Eises",
+  "Dschinn Luft":          "Dschinn der Luft",
+  "Dschinn Humus":         "Dschinn des Humus",
+  "Dschinn Erz":           "Dschinn des Erzes",
+  "Meister-Dschinn Feuer":  "Elementarer Meister des Feuers",
+  "Meister-Dschinn Wasser": "Elementarer Meister des Wassers",
+  "Meister-Dschinn Eis":    "Dschinn des Eises",  // kein eigener Meister-Eintrag → Dschinn-Werte
+  "Meister-Dschinn Luft":   "Dschinn der Luft",
+  "Meister-Dschinn Humus":  "Dschinn des Humus",
+  "Meister-Dschinn Erz":    "Dschinn des Erzes",
+  "Chamuyan":               "Cha'Muyan",
+  "Glaathoyub":             "Glaa-Tho-Yub",
+  "Yo'ugghatugythot":       "Yo'Ugghatugythot",
+  "Skelettkrieger":         "Skelett",
+};
+
+function _fuzzyCreatureLookup(db, name) {
+  // 1. Alias-Map
+  const alias = _CREATURE_NAME_ALIASES[name];
+  if (alias && db[alias]) return db[alias];
+
+  // 2. Case-insensitive match
+  const lower = name.toLowerCase();
+  for (const [key, val] of Object.entries(db)) {
+    if (key.toLowerCase() === lower) return val;
+  }
+
+  // 3. Normalize: strip apostrophes, hyphens, spaces → compare
+  const norm = s => s.toLowerCase().replace(/['\-\s]/g, "");
+  const target = norm(name);
+  for (const [key, val] of Object.entries(db)) {
+    if (norm(key) === target) return val;
+  }
+
+  return null;
+}
+
 async function spawnCreature(name) {
-  const preset = CREATURE_PRESETS[name];
+  const allPresets = await _getMergedPresets();
+  const preset = allPresets[name];
   if (!preset) return;
   if (!game.user.isGM) { ui.notifications.warn("Nur GMs können Kreaturen spawnen."); return; }
 
-  // Existiert der Aktor schon?
-  // gdsa system uses "NonPlayer" — documentTypes.Actor is an object, use Object.keys()
-  const npcType = Object.keys(game.system.documentTypes?.Actor ?? {}).find(t => t !== "PlayerCharakter" && t !== "LootActor") ?? "NonPlayer";
-  const actorType = preset.group === "Helden" ? "PlayerCharakter" : npcType;
+  // Load stats from creatures.json — fuzzy name matching
+  const creatureDb = await getCreatureData();
+  const dbEntry = creatureDb[name] ?? _fuzzyCreatureLookup(creatureDb, name);
+  const sys = dbEntry?.system;
+
+  // ── Flat dot-notation system update (Foundry DataModel strips unknown top-level keys) ──
+  const sysUpdate = {};
+  if (sys) {
+    if (sys.LeP)      { sysUpdate["system.LeP.value"] = sys.LeP.value; sysUpdate["system.LeP.max"] = sys.LeP.max ?? sys.LeP.value; }
+    if (sys.AuP)      { sysUpdate["system.AuP.value"] = sys.AuP.value; sysUpdate["system.AuP.max"] = sys.AuP.max ?? sys.AuP.value; }
+    if (sys.ATBasis)  sysUpdate["system.ATBasis.value"] = sys.ATBasis.value;
+    if (sys.PABasis)  sysUpdate["system.PABasis.value"] = sys.PABasis.value;
+    if (sys.FKBasis)  sysUpdate["system.FKBasis.value"] = sys.FKBasis.value;
+    if (sys.MR)       sysUpdate["system.MR.value"] = sys.MR.value;
+    if (sys.GS)       sysUpdate["system.GS.value"] = sys.GS.value;
+    if (sys.INIBasis) sysUpdate["system.INIBasis.value"] = sys.INIBasis.value;
+    if (sys.INIDice)  sysUpdate["system.INIDice"] = sys.INIDice;
+    if (sys.AsP)      { sysUpdate["system.AsP.value"] = sys.AsP.value; sysUpdate["system.AsP.max"] = sys.AsP.max ?? sys.AsP.value; }
+    if (sys.Dogde != null) sysUpdate["system.Dogde"] = sys.Dogde;
+    // Beschreibung aus creatures.json in Notizen-Feld
+    if (sys.description) sysUpdate["system.notes"] = sys.description;
+    // Custom skill/weapon entries — dot notation so Foundry merges into skill object
+    for (const [wname, wdata] of Object.entries(sys.skill ?? {})) {
+      sysUpdate[`system.skill.${wname}`] = {
+        value:   wdata.value   ?? 0,
+        atk:     wdata.atk     ?? 0,
+        def:     wdata.def     ?? 0,
+        tp:      wdata.tp      ?? "",   // TP/Schaden für Kampftabelle
+        special: wdata.special ?? "",   // Sondereigenschaften
+      };
+    }
+  } else {
+    sysUpdate["system.LeP.value"] = preset.hp;
+    sysUpdate["system.LeP.max"]   = preset.hp;
+  }
+
+  // ── Non-schema creature data → actor flags (bypasses DataModel validation) ──
+  const flagData = {
+    abilities:       sys?.abilities       ?? [],
+    spells:          sys?.spells          ?? [],
+    services:        sys?.services        ?? [],
+    actionsPerRound: sys?.actionsPerRound ?? 1,
+    creatureType:    sys?.creatureType    ?? "",
+    size:            sys?.size ?? dbEntry?.size ?? "",
+    domain:          sys?.domain          ?? "",
+    rs:              sys?.RS              ?? 0,   // Natürlicher Rüstungsschutz
+    weapons: Object.entries(sys?.skill ?? {}).map(([n, d]) => ({
+      name: n, atk: d.atk ?? 0, def: d.def ?? 0, tp: d.tp ?? "", special: d.special ?? "",
+    })),
+  };
+
+  // Immer PlayerCharakter — nur dieser Typ hat ein vollständiges gdsa-Sheet
+  const actorType = "PlayerCharakter";
+  const dbItems = dbEntry?.items ?? [];
   let actor = game.actors.find(a => a.name === name && a.type === actorType);
+
   if (!actor) {
     actor = await Actor.create({
       name,
@@ -1920,14 +2251,28 @@ async function spawnCreature(name) {
         displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
       },
     });
+    await actor.update(sysUpdate);
+    await actor.setFlag("dsa-pixel-tokens", "creature", flagData);
+    if (dbItems.length > 0) await actor.createEmbeddedDocuments("Item", dbItems);
   } else {
-    // Bild immer aktualisieren, damit Token-Bild-Updates sofort wirken
+    // Bild + Stats aktualisieren
     await actor.update({
       img: preset.img,
       "prototypeToken.texture.src": preset.img,
-      "prototypeToken.width": preset.tokenSize,
+      "prototypeToken.width":  preset.tokenSize,
       "prototypeToken.height": preset.tokenSize,
+      ...sysUpdate,
     });
+    await actor.setFlag("dsa-pixel-tokens", "creature", flagData);
+    // Items refresh (alle alten Kreatur-Items entfernen, neue setzen)
+    const oldItems = actor.items.filter(i => i.type === "Gegenstand");
+    if (oldItems.length > 0) await actor.deleteEmbeddedDocuments("Item", oldItems.map(i => i.id));
+    if (dbItems.length > 0) await actor.createEmbeddedDocuments("Item", dbItems);
+  }
+
+  // Auto-Sortierung in thematischen Ordner (Daemonen/Elementare/Untote/Monster)
+  try { await moveActorToCategoryFolder(actor); } catch (err) {
+    console.warn("[DSA Pixel] Folder-Sort fehlgeschlagen:", err);
   }
 
   // Token auf aktive Szene droppen
@@ -1937,49 +2282,184 @@ async function spawnCreature(name) {
   const cx = Math.floor(scene.width / 2 / gridSize) * gridSize;
   const cy = Math.floor(scene.height / 2 / gridSize) * gridSize;
 
-  // Kein texture/width/height überschreiben — alles aus prototypeToken des Actors übernehmen
   await scene.createEmbeddedDocuments("Token", [{
     name,
     actorId: actor.id,
     x: cx,
     y: cy,
+    texture: { src: preset.img },
+    width: preset.tokenSize,
+    height: preset.tokenSize,
   }]);
   ui.notifications.info(`${name} gespawnt!`);
 }
 
-function showCreaturePicker() {
+/**
+ * Erstellt Actor-Einträge für alle bekannten Kreaturen (aus creatures.json + Presets).
+ * Anders als spawnCreature() droppt NICHT auf eine Szene — nur die Actor-Datenbank wird befüllt.
+ * Idempotent: bereits vorhandene Actors werden mit frischen Stats/Items überschrieben.
+ *
+ * @param {Object} [opts]
+ * @param {boolean} [opts.skipExisting=false] - wenn true: vorhandene Actors überspringen statt updaten
+ * @returns {Promise<{created:number, updated:number, failed:number, total:number}>}
+ */
+async function seedAllCreatures({ skipExisting = false } = {}) {
+  if (!game.user.isGM) {
+    ui.notifications.warn("Nur GMs können Kreaturen anlegen.");
+    return { created: 0, updated: 0, failed: 0, total: 0 };
+  }
+
+  const allPresets = await _getMergedPresets();
+  const creatureDb = await getCreatureData();
+  const names = Object.keys(allPresets);
+  const stats = { created: 0, updated: 0, failed: 0, skipped: 0, total: names.length };
+
+  ui.notifications.info(`Lege ${names.length} Kreaturen an...`);
+
+  for (const name of names) {
+    try {
+      const preset = allPresets[name];
+      const dbEntry = creatureDb[name] ?? _fuzzyCreatureLookup(creatureDb, name);
+      const sys = dbEntry?.system;
+
+      const actorType = "PlayerCharakter";
+      const existing = game.actors.find(a => a.name === name && a.type === actorType);
+      if (existing && skipExisting) { stats.skipped++; continue; }
+
+      // Build sys update (flat dot-notation)
+      const sysUpdate = {};
+      if (sys) {
+        if (sys.LeP)      { sysUpdate["system.LeP.value"] = sys.LeP.value; sysUpdate["system.LeP.max"] = sys.LeP.max ?? sys.LeP.value; }
+        if (sys.AuP)      { sysUpdate["system.AuP.value"] = sys.AuP.value; sysUpdate["system.AuP.max"] = sys.AuP.max ?? sys.AuP.value; }
+        if (sys.ATBasis)  sysUpdate["system.ATBasis.value"] = sys.ATBasis.value;
+        if (sys.PABasis)  sysUpdate["system.PABasis.value"] = sys.PABasis.value;
+        if (sys.FKBasis)  sysUpdate["system.FKBasis.value"] = sys.FKBasis.value;
+        if (sys.MR)       sysUpdate["system.MR.value"] = sys.MR.value;
+        if (sys.GS)       sysUpdate["system.GS.value"] = sys.GS.value;
+        if (sys.INIBasis) sysUpdate["system.INIBasis.value"] = sys.INIBasis.value;
+        if (sys.INIDice)  sysUpdate["system.INIDice"] = sys.INIDice;
+        if (sys.AsP)      { sysUpdate["system.AsP.value"] = sys.AsP.value; sysUpdate["system.AsP.max"] = sys.AsP.max ?? sys.AsP.value; }
+        if (sys.Dogde != null) sysUpdate["system.Dogde"] = sys.Dogde;
+        if (sys.description) sysUpdate["system.notes"] = sys.description;
+        for (const [wname, wdata] of Object.entries(sys.skill ?? {})) {
+          sysUpdate[`system.skill.${wname}`] = {
+            value:   wdata.value   ?? 0,
+            atk:     wdata.atk     ?? 0,
+            def:     wdata.def     ?? 0,
+            tp:      wdata.tp      ?? "",
+            special: wdata.special ?? "",
+          };
+        }
+      } else {
+        sysUpdate["system.LeP.value"] = preset.hp;
+        sysUpdate["system.LeP.max"]   = preset.hp;
+      }
+
+      const flagData = {
+        abilities:       sys?.abilities       ?? [],
+        spells:          sys?.spells          ?? [],
+        services:        sys?.services        ?? [],
+        actionsPerRound: sys?.actionsPerRound ?? 1,
+        creatureType:    sys?.creatureType    ?? "",
+        size:            sys?.size ?? dbEntry?.size ?? "",
+        domain:          sys?.domain          ?? "",
+        rs:              sys?.RS              ?? 0,
+        weapons: Object.entries(sys?.skill ?? {}).map(([n, d]) => ({
+          name: n, atk: d.atk ?? 0, def: d.def ?? 0, tp: d.tp ?? "", special: d.special ?? "",
+        })),
+      };
+
+      const dbItems = dbEntry?.items ?? [];
+      let actor = existing;
+
+      if (!actor) {
+        actor = await Actor.create({
+          name,
+          type: actorType,
+          img: preset.img,
+          system: { LeP: { value: preset.hp, max: preset.hp } },
+          prototypeToken: {
+            name,
+            texture: { src: preset.img },
+            width: preset.tokenSize,
+            height: preset.tokenSize,
+            displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
+          },
+        });
+        await actor.update(sysUpdate);
+        await actor.setFlag("dsa-pixel-tokens", "creature", flagData);
+        if (dbItems.length > 0) await actor.createEmbeddedDocuments("Item", dbItems);
+        stats.created++;
+      } else {
+        await actor.update({
+          img: preset.img,
+          "prototypeToken.texture.src": preset.img,
+          "prototypeToken.width":  preset.tokenSize,
+          "prototypeToken.height": preset.tokenSize,
+          ...sysUpdate,
+        });
+        await actor.setFlag("dsa-pixel-tokens", "creature", flagData);
+        const oldItems = actor.items.filter(i => i.type === "Gegenstand");
+        if (oldItems.length > 0) await actor.deleteEmbeddedDocuments("Item", oldItems.map(i => i.id));
+        if (dbItems.length > 0) await actor.createEmbeddedDocuments("Item", dbItems);
+        stats.updated++;
+      }
+
+      try { await moveActorToCategoryFolder(actor); } catch (err) {
+        console.warn(`[DSA Pixel] Folder-Sort für "${name}" fehlgeschlagen:`, err);
+      }
+    } catch (err) {
+      console.error(`[DSA Pixel] Seed für "${name}" fehlgeschlagen:`, err);
+      stats.failed++;
+    }
+  }
+
+  const msg = `Kreaturen-Seed fertig: ${stats.created} neu, ${stats.updated} aktualisiert` +
+              (stats.skipped ? `, ${stats.skipped} übersprungen` : "") +
+              (stats.failed  ? `, ${stats.failed} fehlgeschlagen`  : "");
+  ui.notifications.info(msg);
+  console.log(`[DSA Pixel] ${msg}`, stats);
+  return stats;
+}
+
+async function showCreaturePicker() {
+  const allPresets = await _getMergedPresets();
+
   const groups = {};
-  for (const [name, p] of Object.entries(CREATURE_PRESETS)) {
+  for (const [name, p] of Object.entries(allPresets)) {
     if (!groups[p.group]) groups[p.group] = [];
     groups[p.group].push(name);
   }
 
   const groupIcons = {
-    "Helden":           "⚔️",
-    "Elementargeister": "🌿",
-    "Dschinne":         "🔮",
-    "Meister-Dschinne": "👑",
-    "Monster":          "💀",
-    "NSC":              "🧙",
-    "Blakharaz":        "👿",
-    "Lolgramoth":       "👿",
-    "Thargunitoth":     "👿",
-    "Tasfarelel":       "👿",
-    "Charyptoroth":     "👿",
-    "Calijnaar":        "👿",
-    "Dar-Klajid":       "👿",
-    "Mishkhara":        "👿",
-    "Agrimoth":         "👿",
-    "Belkelel":         "👿",
-    "Belshirash":       "👿",
-    "Belhalhar":        "👿",
-    "Amazeroth":        "👿",
-    "Unabhängige":      "👿",
+    "Helden":               "⚔️",
+    "Elementargeister":     "🌿",
+    "Dschinne":             "🔮",
+    "Meister-Dschinne":     "👑",
+    "Benannte Elementare":  "✨",
+    "Untote":               "💀",
+    "Monster":              "🐉",
+    "NSC":                  "🧙",
+    "Blakharaz":            "👿",
+    "Lolgramoth":           "👿",
+    "Thargunitoth":         "👿",
+    "Tasfarelel":           "👿",
+    "Charyptoroth":         "👿",
+    "Calijnaar":            "👿",
+    "Dar-Klajid":           "👿",
+    "Mishkhara":            "👿",
+    "Agrimoth":             "👿",
+    "Belkelel":             "👿",
+    "Belshirash":           "👿",
+    "Belhalhar":            "👿",
+    "Amazeroth":            "👿",
+    "Unabhängige":          "👿",
+    "Dämonen":              "👿",
   };
 
   const groupsHtml = Object.entries(groups).map(([label, names]) => {
     const btns = names.map(name => {
-      const p = CREATURE_PRESETS[name];
+      const p = allPresets[name];
       return `
         <button class="dsa-creature-btn" data-creature="${name}"
           style="width:90px;min-height:100px;padding:4px 3px;background:rgba(0,0,0,0.4);
@@ -2050,5 +2530,10 @@ globalThis.DSAPixelTokens = {
   ZONE_PRESETS,
   showCreaturePicker,
   spawnCreature,
+  seedAllCreatures,
   CREATURE_PRESETS,
 };
+
+// Globale Helper — direkt in der Foundry-Konsole aufrufbar
+globalThis.DSASeedAll = seedAllCreatures;                                         // DSASeedAll() → alle Kreaturen anlegen
+globalThis.DSAAlleKreaturen = seedAllCreatures;                                   // DSAAlleKreaturen() → deutsch

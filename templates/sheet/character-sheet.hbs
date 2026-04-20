@@ -15,9 +15,9 @@
       </div>
     </div>
     <div class="derived-grid" style="max-width:260px">
-      <div class="derived-stat">
+      <div class="derived-stat" title="{{#if iniPenalty}}Basis {{system.INIBasis.value}}, Rüstung -{{iniPenalty}}{{/if}}">
         <div class="stat-label">INI</div>
-        <div class="stat-value">{{system.INIBasis.value}}</div>
+        <div class="stat-value">{{system.INIBasis.value}}{{#if iniPenalty}}<span style="color:#e94560;font-size:0.7em">-{{iniPenalty}}</span>{{/if}}</div>
       </div>
       <div class="derived-stat">
         <div class="stat-label">MR</div>
@@ -43,7 +43,8 @@
         <div class="stat-label">FK</div>
         <div class="stat-value">{{system.FKBasis.value}}</div>
       </div>
-      <div class="derived-stat">
+      <div class="derived-stat rollable" data-roll="dodge" data-aw="{{system.Dogde}}"
+           title="Ausweichen würfeln (AW {{system.Dogde}})">
         <div class="stat-label">AW</div>
         <div class="stat-value">{{system.Dogde}}</div>
       </div>
@@ -157,22 +158,49 @@
         {{/each}}
       </div>
 
-      <div class="section-title">Vorteile & Nachteile</div>
-      <div class="panel">
-        {{#each advantages}}
-        <div class="advantage-entry">
-          <span class="tag success">V</span>
-          <span>{{this.name}}</span>
-          {{#if this.value}}<span class="dim">({{this.value}})</span>{{/if}}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        {{!-- VORTEILE --}}
+        <div>
+          <div class="section-title" style="color:#4caf50;border-bottom:2px solid #4caf50">
+            ✓ Vorteile
+          </div>
+          <div class="panel" style="background:rgba(76,175,80,0.05);border-left:3px solid #4caf50">
+            {{#if advantages.length}}
+              {{#each advantages}}
+              <div class="advantage-entry" style="color:#c8e6c9">
+                <span class="tag success" style="background:#2e7d32;color:#fff">✓</span>
+                <span>{{this.name}}</span>
+                {{#if this.value}}<span class="dim">({{this.value}})</span>{{/if}}
+              </div>
+              {{/each}}
+            {{else}}
+              <div class="dim" style="padding:6px;font-style:italic">Keine Vorteile</div>
+            {{/if}}
+          </div>
         </div>
-        {{/each}}
-        {{#each disadvantages}}
-        <div class="advantage-entry">
-          <span class="tag fail">N</span>
-          <span>{{this.name}}</span>
-          {{#if this.value}}<span class="dim">({{this.value}})</span>{{/if}}
+
+        {{!-- NACHTEILE --}}
+        <div>
+          <div class="section-title" style="color:#e94560;border-bottom:2px solid #e94560">
+            ✗ Nachteile
+          </div>
+          <div class="panel" style="background:rgba(233,69,96,0.05);border-left:3px solid #e94560">
+            {{#if disadvantages.length}}
+              {{#each disadvantages}}
+              <div class="advantage-entry {{#if this.value}}rollable{{/if}}"
+                   {{#if this.value}}data-roll="disadvantage" data-name="{{this.name}}" data-value="{{this.value}}"
+                   title="Klick: 1W20 vs {{this.value}} — bei Erfolg triggert der Nachteil"{{/if}}
+                   style="color:#ffcdd2;{{#if this.value}}cursor:pointer{{/if}}">
+                <span class="tag fail" style="background:#c62828;color:#fff">✗</span>
+                <span>{{this.name}}</span>
+                {{#if this.value}}<span class="dim" style="color:#ff8a80">({{this.value}}) 🎲</span>{{/if}}
+              </div>
+              {{/each}}
+            {{else}}
+              <div class="dim" style="padding:6px;font-style:italic">Keine Nachteile</div>
+            {{/if}}
+          </div>
         </div>
-        {{/each}}
       </div>
 
       <div class="section-title">Sonderfertigkeiten</div>
@@ -195,17 +223,24 @@
             <th>Talent</th>
             <th>Probe</th>
             <th>TaW</th>
+            {{#if (eq catKey "koerper")}}<th title="BE-Malus">BE</th>{{/if}}
           </tr>
         </thead>
         <tbody>
           {{#each cat.talents}}
           <tr>
             <td class="talent-name rollable" data-roll="talent" data-talent="{{this.name}}"
-                data-probe="{{this.probe}}" data-taw="{{this.taw}}">
+                data-probe="{{this.probe}}" data-taw="{{this.taw}}"
+                {{#if this.bePenalty}}title="BE-Malus: +{{this.bePenalty}} Erschwernis"{{/if}}>
               {{this.name}}
             </td>
             <td class="talent-probe">{{this.probeDisplay}}</td>
             <td class="talent-taw">{{this.taw}}</td>
+            {{#if (eq @../key "koerper")}}
+            <td style="text-align:center;color:{{#if this.bePenalty}}#e94560{{else}}#556{{/if}};font-size:12px">
+              {{#if this.bePenalty}}+{{this.bePenalty}}{{else}}-{{/if}}
+            </td>
+            {{/if}}
           </tr>
           {{/each}}
         </tbody>
@@ -224,7 +259,9 @@
             <th>Waffentalent</th>
             <th>AT</th>
             <th>PA</th>
+            <th>TP</th>
             <th>TaW</th>
+            <th title="effektive Behinderung">eBE</th>
           </tr>
         </thead>
         <tbody>
@@ -232,25 +269,71 @@
           <tr>
             <td class="talent-name rollable" data-roll="attack" data-talent="{{this.name}}"
                 data-at="{{this.at}}" data-pa="{{this.pa}}" data-taw="{{this.taw}}"
-                title="Angriff mit {{this.name}} würfeln">
+                title="{{#if this.special}}{{this.special}}{{else}}Angriff mit {{this.name}} würfeln{{/if}}">
               {{this.name}}
             </td>
             <td class="rollable combat-at" data-roll="attack" data-talent="{{this.name}}"
                 data-at="{{this.at}}" data-pa="{{this.pa}}" data-taw="{{this.taw}}"
-                title="Angriff würfeln (AT {{this.at}})">
+                title="{{#if this.atPenalty}}Basis {{this.atBase}}, BE-Malus -{{this.atPenalty}}{{else}}AT {{this.at}}{{/if}}">
               {{this.at}}
             </td>
             <td class="rollable combat-pa" data-roll="parry" data-talent="{{this.name}}"
-                data-pa="{{this.pa}}" title="Parade würfeln (PA {{this.pa}})">
+                data-pa="{{this.pa}}"
+                title="{{#if this.paPenalty}}Basis {{this.paBase}}, BE-Malus -{{this.paPenalty}}{{else}}PA {{this.pa}}{{/if}}">
               {{this.pa}}
             </td>
+            <td class="talent-tp" style="color:#ffd700;font-size:11px;white-space:nowrap">
+              {{#if this.tp}}{{this.tp}}{{else}}<span style="color:#445">—</span>{{/if}}
+            </td>
             <td class="talent-taw">{{this.taw}}</td>
+            <td class="talent-ebe" style="color:{{#if this.eBE}}#e94560{{else}}#556{{/if}};text-align:center">
+              {{this.eBE}}
+            </td>
           </tr>
           {{/each}}
         </tbody>
       </table>
 
-      <div class="section-title">Waffen</div>
+      {{!-- ── Ausweichen ── --}}
+      <div class="panel" style="margin-bottom:6px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:'VT323',monospace;font-size:13px;color:#888">AW</span>
+            <span style="font-family:'VT323',monospace;font-size:20px;color:#4a90d9;font-weight:bold">{{system.Dogde}}</span>
+            {{#if eBE}}<span style="font-size:11px;color:#e94560;font-family:'VT323',monospace">eBE −{{eBEDisplay}}</span>{{/if}}
+          </div>
+          <div style="display:flex;gap:6px">
+            <button type="button" class="rollable"
+              data-roll="dodge" data-aw="{{system.Dogde}}"
+              data-dodge-mode="normal"
+              style="background:rgba(74,144,217,0.15);border:1px solid rgba(74,144,217,0.6);color:#4a90d9;
+                     border-radius:3px;padding:2px 10px;font-family:'VT323',monospace;font-size:14px;cursor:pointer"
+              title="Normales Ausweichen (Freie Aktion) — 1W20 ≤ AW−½eBE">
+              🏃 Ausweichen
+            </button>
+            <button type="button" class="rollable"
+              data-roll="dodge" data-aw="{{system.Dogde}}"
+              data-dodge-mode="gezielt"
+              style="background:rgba(74,144,217,0.08);border:1px solid rgba(74,144,217,0.35);color:#7eb8ff;
+                     border-radius:3px;padding:2px 10px;font-family:'VT323',monospace;font-size:14px;cursor:pointer"
+              title="Gezieltes Ausweichen (Volle Aktion) — +Ansage, eBE voll">
+              🎯 Gezielt
+            </button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#556;font-family:'VT323',monospace;margin-top:4px;line-height:1.5">
+          Normal: freie Aktion, AW−½eBE · Gezielt: volle Aktion, AW+Ansage−eBE
+          <span style="color:#8a3a4a"> | Sehr große Gegner (GK II+): Parade ohne Schild verboten!</span>
+        </div>
+      </div>
+
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Waffen</span>
+        <button type="button" data-action="open-db" data-db-tab="waffen"
+          style="background:rgba(200,151,42,0.15);border:1px solid rgba(200,151,42,0.5);color:#c8972a;
+                 border-radius:3px;padding:1px 8px;font-size:13px;cursor:pointer;line-height:1.4"
+          title="Waffe aus Datenbank hinzufügen">⚔️ +</button>
+      </div>
       <div class="panel">
         {{#each weapons}}
         <div class="weapon-entry" style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
@@ -265,16 +348,30 @@
         {{/each}}
       </div>
 
-      <div class="section-title">Rüstung</div>
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Rüstung</span>
+        <button type="button" data-action="open-db" data-db-tab="ruestungen"
+          style="background:rgba(200,151,42,0.15);border:1px solid rgba(200,151,42,0.5);color:#c8972a;
+                 border-radius:3px;padding:1px 8px;font-size:13px;cursor:pointer;line-height:1.4"
+          title="Rüstung aus Datenbank hinzufügen">🛡️ +</button>
+      </div>
       <div class="panel">
         <div class="derived-grid">
           <div class="derived-stat">
             <div class="stat-label">RS</div>
             <div class="stat-value">{{totalRS}}</div>
           </div>
-          <div class="derived-stat">
-            <div class="stat-label">BE</div>
-            <div class="stat-value">{{totalBE}}</div>
+          <div class="derived-stat" title="gewichtete BE (gBE) — Rohwert: {{totalBE}}">
+            <div class="stat-label">gBE</div>
+            <div class="stat-value">{{totalGBEDisplay}}</div>
+          </div>
+          <div class="derived-stat" title="effektive BE (nach Rüstungsgewöhnung{{#if rg.level}} {{rg.level}}{{/if}})">
+            <div class="stat-label">eBE</div>
+            <div class="stat-value" style="{{#if eBE}}color:#e94560{{/if}}">{{eBEDisplay}}</div>
+          </div>
+          <div class="derived-stat" title="INI-Malus durch Rüstung">
+            <div class="stat-label">INI-BE</div>
+            <div class="stat-value" style="{{#if iniPenalty}}color:#e94560{{/if}}">-{{iniPenalty}}</div>
           </div>
         </div>
         {{#each armor}}
@@ -282,7 +379,68 @@
           {{this.name}} — RS {{this.rs}}, BE {{this.be}}
         </div>
         {{/each}}
+        {{#each shields}}
+        <div style="font-size:14px;padding:2px 0;color:#7eb8ff;margin-top:2px">
+          🛡 {{this.name}}
+          <span style="color:#e94560;font-size:12px;margin-left:4px">AT {{this.atMod}}</span>
+          <span style="color:#4caf50;font-size:12px;margin-left:6px">PA +{{this.paMod}}</span>
+          {{#if this.ini}}<span style="color:#aaa;font-size:11px;margin-left:4px">INI {{this.ini}}</span>{{/if}}
+        </div>
+        {{/each}}
+        {{#if shields.length}}
+        <div style="font-size:11px;color:#666;margin-top:3px;padding:2px 0 4px;border-top:1px solid rgba(255,255,255,0.06)">
+          Schild: <span style="color:#e94560">AT {{shieldAtMod}}</span>
+          <span style="color:#4caf50;margin-left:6px">PA +{{shieldPaMod}}</span>
+          <span style="color:#555;font-size:10px;margin-left:4px">auf alle Kampftalente</span>
+        </div>
+        {{/if}}
+        {{!-- Natürlicher Rüstungsschutz für Kreaturen (kein Item, aus Flags) --}}
+        {{#if creatureRS}}
+        <div style="font-size:14px;padding:3px 0;color:#c09040;border-bottom:1px solid rgba(255,255,255,0.05)">
+          🐾 Naturpanzer — RS {{creatureRS}} <span style="color:#556;font-size:11px">(alle Zonen)</span>
+        </div>
+        {{/if}}
+        {{#if armor.length}}
+        <div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px">
+          <div style="font-size:12px;color:#888;margin-bottom:4px;font-family:'VT323',monospace">Trefferzonen RS</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-size:13px">
+            {{#each allZones}}
+            <div style="text-align:center;padding:2px 4px;background:rgba(0,0,0,0.3);border-radius:3px" title="RS Zone {{this}}">
+              <div style="font-size:10px;color:#888">{{lookup ../zoneLabels this}}</div>
+              <div style="color:{{#if (lookup ../zoneRS this)}}#ffd700{{else}}#556{{/if}};font-weight:bold">{{lookup ../zoneRS this}}</div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+        {{/if}}
       </div>
+
+      {{!-- ── Wunden-Tracking ── --}}
+      {{#if totalWounds}}
+      <div class="panel" style="margin-top:6px;border:1px solid rgba(255,51,51,0.3);background:rgba(255,51,51,0.05)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-family:'VT323',monospace;font-size:14px;color:#ff4444">
+            💀 Wunden: <strong>{{totalWounds}}</strong> <span style="color:#aaa;font-size:12px">(alle Proben −{{woundPenalty}})</span>
+          </span>
+          <button type="button" class="wound-reset-btn"
+            style="background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.5);color:#4caf50;
+                   border-radius:3px;padding:1px 8px;font-family:'VT323',monospace;font-size:12px;cursor:pointer"
+            title="Alle Wunden heilen (Reset)">✚ Heilen</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-size:12px">
+          {{#each allZones}}
+          <div style="text-align:center;padding:2px 4px;border-radius:3px;
+            background:{{#if (lookup ../wounds this)}}rgba(255,51,51,0.15){{else}}rgba(0,0,0,0.2){{/if}}"
+            title="{{lookup ../zoneLabels this}} — WS: {{../woundThresholds.ws1}}/{{../woundThresholds.ws2}}/{{../woundThresholds.ws3}}">
+            <div style="font-size:10px;color:#888">{{lookup ../zoneLabels this}}</div>
+            <div style="color:{{#if (lookup ../wounds this)}}#ff4444{{else}}#334{{/if}};font-weight:bold;font-size:14px">
+              {{#if (lookup ../wounds this)}}💀×{{lookup ../wounds this}}{{else}}—{{/if}}
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+      {{/if}}
 
     </div>
 
@@ -290,7 +448,13 @@
     {{#if system.AsP.max}}
     <div class="tab" data-tab="magic" data-group="primary">
 
-      <div class="section-title">Zauber</div>
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Zauber</span>
+        <button type="button" data-action="open-db" data-db-tab="zauber"
+          style="background:rgba(200,151,42,0.15);border:1px solid rgba(200,151,42,0.5);color:#c8972a;
+                 border-radius:3px;padding:1px 8px;font-size:13px;cursor:pointer;line-height:1.4"
+          title="Zauber aus Datenbank hinzufügen">✨ +</button>
+      </div>
       {{#each spells}}
       <div class="spell-entry">
         <span class="spell-name rollable" data-roll="spell" data-spell="{{this.name}}"
@@ -326,7 +490,23 @@
     {{!-- ─── TAB: INVENTAR ─── --}}
     <div class="tab" data-tab="equipment" data-group="primary">
 
-      <div class="section-title">Ausrüstung</div>
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Ausrüstung</span>
+        <div style="display:flex;gap:4px">
+          <button type="button" data-action="open-db" data-db-tab="waffen"
+            style="background:rgba(200,151,42,0.15);border:1px solid rgba(200,151,42,0.5);color:#c8972a;
+                   border-radius:3px;padding:1px 7px;font-size:13px;cursor:pointer;line-height:1.4"
+            title="Waffe hinzufügen">⚔️</button>
+          <button type="button" data-action="open-db" data-db-tab="ruestungen"
+            style="background:rgba(200,151,42,0.15);border:1px solid rgba(200,151,42,0.5);color:#c8972a;
+                   border-radius:3px;padding:1px 7px;font-size:13px;cursor:pointer;line-height:1.4"
+            title="Rüstung hinzufügen">🛡️</button>
+          <button type="button" data-action="open-db" data-db-tab="alchemika"
+            style="background:rgba(200,151,42,0.15);border:1px solid rgba(200,151,42,0.5);color:#c8972a;
+                   border-radius:3px;padding:1px 7px;font-size:13px;cursor:pointer;line-height:1.4"
+            title="Alchemikum hinzufügen">⚗️</button>
+        </div>
+      </div>
       <div class="panel">
         {{#each items}}
         <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
@@ -364,7 +544,93 @@
     {{!-- ─── TAB: NOTIZEN ─── --}}
     <div class="tab" data-tab="notes" data-group="primary">
 
-      <div class="section-title">Hintergrund</div>
+      {{!-- Kreatur-Infos (aus Flags — abilities, weapons, spells, services) --}}
+      {{#if creature}}
+
+      <div class="section-title">Kreatur</div>
+      <div class="panel">
+        {{!-- Metadata: immer anzeigen --}}
+        <div style="display:flex;flex-wrap:wrap;gap:8px 16px;margin-bottom:6px;font-size:13px">
+          {{#if creature.actionsPerRound}}
+          <span style="color:#c09040">⚡ Aktionen: <strong>{{creature.actionsPerRound}}</strong></span>
+          {{/if}}
+          {{#if creature.size}}
+          <span style="color:#c09040">📏 Größe: <strong>{{creature.size}}</strong></span>
+          {{/if}}
+          {{#if creature.domain}}
+          <span style="color:#e94560">👿 Domäne: <strong>{{creature.domain}}</strong></span>
+          {{/if}}
+          {{#if creature.rs}}
+          <span style="color:#7eb8ff">🛡 RS: <strong>{{creature.rs}}</strong></span>
+          {{/if}}
+        </div>
+
+        {{!-- Fähigkeiten --}}
+        {{#if creature.abilities.length}}
+        <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:4px;margin-top:4px">
+          <div style="font-size:11px;color:#888;margin-bottom:2px">Fähigkeiten</div>
+          {{#each creature.abilities}}
+          <div style="padding:2px 0;font-size:13px">
+            <span style="color:#ffd700;margin-right:6px">◆</span>{{this}}
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
+      </div>
+
+      {{!-- Waffen / Angriffe --}}
+      {{#if creature.weapons.length}}
+      <div class="section-title">Angriffe</div>
+      <div class="panel">
+        <table style="width:100%;font-size:12px;border-collapse:collapse">
+          <thead><tr style="color:#c09040;border-bottom:1px solid rgba(255,255,255,0.15)">
+            <th style="text-align:left;padding:2px 4px">Waffe</th>
+            <th style="text-align:center;padding:2px 4px">AT</th>
+            <th style="text-align:center;padding:2px 4px">PA</th>
+            <th style="text-align:left;padding:2px 4px">TP</th>
+            <th style="text-align:left;padding:2px 4px">Besonderes</th>
+          </tr></thead>
+          <tbody>
+          {{#each creature.weapons}}
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+            <td style="padding:3px 4px">{{this.name}}</td>
+            <td style="text-align:center;padding:3px 4px;color:#e94560">{{this.atk}}</td>
+            <td style="text-align:center;padding:3px 4px;color:#4caf50">{{#if this.def}}{{this.def}}{{else}}—{{/if}}</td>
+            <td style="padding:3px 4px;color:#ffd700">{{#if this.tp}}{{this.tp}}{{else}}—{{/if}}</td>
+            <td style="padding:3px 4px;color:#aaa;font-size:11px">{{this.special}}</td>
+          </tr>
+          {{/each}}
+          </tbody>
+        </table>
+      </div>
+      {{/if}}
+
+      {{!-- Zauber --}}
+      {{#if creature.spells.length}}
+      <div class="section-title">Kreatur-Zauber</div>
+      <div class="panel">
+        {{#each creature.spells}}
+        <div style="display:flex;justify-content:space-between;padding:2px 0;font-size:13px">
+          <span>{{#if this.name}}{{this.name}}{{else}}{{this}}{{/if}}</span>
+          {{#if this.ZfW}}<span class="dim">ZfW {{this.ZfW}}</span>{{/if}}
+        </div>
+        {{/each}}
+      </div>
+      {{/if}}
+
+      {{!-- Dienste --}}
+      {{#if creature.services.length}}
+      <div class="section-title">Dienste</div>
+      <div class="panel">
+        {{#each creature.services}}
+        <div style="padding:2px 0;font-size:13px">{{this}}</div>
+        {{/each}}
+      </div>
+      {{/if}}
+
+      {{/if}}{{!-- end #if creature --}}
+
+      <div class="section-title">Notizen</div>
       <div class="panel">
         <textarea name="system.notes" class="notes-area" placeholder="Hintergrund, Notizen, Geschichte...">{{system.notes}}</textarea>
       </div>

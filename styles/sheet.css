@@ -564,41 +564,57 @@
   margin: 6px 0;
   flex-wrap: wrap;
 }
+/* W20-Silhouette (Ikosaeder 2D-Projektion) via clip-path — ersetzt W6-Box */
 .dsa-pixel-chat .die {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 3px;
+  width: 40px;
+  height: 40px;
   font-size: 14px;
   font-weight: bold;
-  border: 1px solid;
+  margin: 2px 3px;
+  /* Klassische D20-Silhouette: unregelmaessiges Hexagon mit Punkten oben/unten */
+  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background-clip: padding-box;
+  /* Simulierte Facetten durch gradient */
+  background-image: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.3) 100%);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 0 4px currentColor;
+  border-radius: 0;
+  /* Pseudo-Element fuer Border-Effekt durch Schatten */
+  filter: drop-shadow(0 0 1px currentColor) drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+  border: 0;
+}
+.dsa-pixel-chat .die::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  clip-path: inherit;
+  border: 2px solid currentColor;
+  opacity: 0.6;
+  pointer-events: none;
 }
 .dsa-pixel-chat .die.success {
-  background: rgba(0,30,10,0.7);
-  border-color: #22cc55;
+  background-color: rgba(0,30,10,0.9);
   color: #22cc55;
-  box-shadow: 0 0 7px rgba(34,204,85,0.5);
+  filter: drop-shadow(0 0 3px #22cc55) drop-shadow(0 2px 4px rgba(0,0,0,0.6));
 }
 .dsa-pixel-chat .die.fail {
-  background: rgba(30,5,5,0.7);
-  border-color: #cc2222;
+  background-color: rgba(30,5,5,0.9);
   color: #ff4444;
-  box-shadow: 0 0 7px rgba(200,30,30,0.5);
+  filter: drop-shadow(0 0 3px #cc2222) drop-shadow(0 2px 4px rgba(0,0,0,0.6));
 }
 .dsa-pixel-chat .die.crit {
-  background: rgba(30,20,0,0.7);
-  border-color: var(--fx-gold);
-  color: var(--fx-gold-bright);
-  box-shadow: 0 0 12px rgba(200,151,42,0.7);
+  background-color: rgba(30,20,0,0.9);
+  color: var(--fx-gold-bright, #e8b84a);
+  filter: drop-shadow(0 0 5px var(--fx-gold, #c8972a)) drop-shadow(0 2px 4px rgba(0,0,0,0.6));
   animation: dsa-pulse 0.8s infinite alternate;
 }
 .dsa-pixel-chat .die.fumble {
-  background: rgba(30,0,0,0.7);
-  border-color: #ff2200;
+  background-color: rgba(30,0,0,0.9);
   color: #ff2200;
-  box-shadow: 0 0 12px rgba(255,34,0,0.7);
+  filter: drop-shadow(0 0 5px #ff2200) drop-shadow(0 2px 4px rgba(0,0,0,0.6));
   animation: dsa-pulse 0.8s infinite alternate;
 }
 @keyframes dsa-pulse {

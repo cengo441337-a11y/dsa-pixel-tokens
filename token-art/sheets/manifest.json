@@ -1,0 +1,14 @@
+{
+  "zwerg_krieger": {
+    "sheet": "token-art/sheets/zwerg_krieger_sheet.png",
+    "frameSize": 192,
+    "animations": {
+      "idle": {
+        "row": 0,
+        "frames": 6,
+        "fps": 4,
+        "loop": true
+      }
+    }
+  }
+}

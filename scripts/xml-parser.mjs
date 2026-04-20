@@ -57,6 +57,8 @@ export function showImportDialog() {
               `${heroData.spells.length} Zauber`,
               `${heroData.advantages.length} Vorteile / ${heroData.disadvantages.length} Nachteile`,
               `${heroData.specialAbilities.length} SF`,
+              `${heroData.weapons.length} Waffen`,
+              `${heroData.armor.length} Rüstungen`,
             ].join(" · ");
             ui.notifications.info(summary, { permanent: false });
             actor.sheet.render(true);
@@ -136,6 +138,8 @@ export function parseHeldenXML(xmlString) {
     disadvantages: [],
     specialAbilities: [],
     equipment: [],
+    weapons: [],   // geparste Waffen mit TP/WM/Kampftalent
+    armor: [],     // geparste Rüstungen mit RS/BE/Zonen
     ap: { total: 0, free: 0, spent: 0 },
   };
 
@@ -154,8 +158,8 @@ export function parseHeldenXML(xmlString) {
   // ── Sonderfertigkeiten ──
   _parseSpecialAbilities(held, result);
 
-  // ── Ausrüstung ──
-  _parseEquipment(held, result);
+  // ── Ausrüstung (inkl. Waffen & Rüstungen) ──
+  _parseEquipmentFull(held, result);
 
   // ── AP ──
   _parseAP(held, result);
@@ -225,7 +229,10 @@ function _parseTalents(held, result) {
 
     if (kampfNamen.has(name)) {
       // Kampftalent — AT/PA aus <kampf>
-      const kw = held.querySelector(`kampf > kampfwerte[name="${CSS.escape(name)}"]`);
+      // WICHTIG: CSS.escape() darf hier NICHT verwendet werden, da es Umlaute
+      // und Sonderzeichen in DSA-Namen escapet und den Attribut-Selektor bricht.
+      // Stattdessen: manuell iterieren und per getAttribute vergleichen.
+      const kw = Array.from(held.querySelectorAll("kampf > kampfwerte")).find(el => el.getAttribute("name") === name);
       const at = parseInt(kw?.querySelector("attacke")?.getAttribute("value")) || 0;
       const pa = parseInt(kw?.querySelector("parade")?.getAttribute("value")) || 0;
       result.combatTalents.push({ name, at, pa, taw, probe });
@@ -257,7 +264,8 @@ function _guessTalentCategory(name) {
 // ─── Zauber ─────────────────────────────────────────────────────────────────
 
 function _parseSpells(held, result) {
-  // Doppelte vermeiden (Helden-Software hat manchmal mehrere Varianten)
+  // Doppelte vermeiden. Dedup-Key ist name|repraesentation (NICHT name|variante),
+  // da Varianten nur Anpassungen desselben Zaubers sind und den Namen nicht verändern dürfen.
   const seen = new Set();
   for (const el of held.querySelectorAll("zauberliste > zauber")) {
     const name = el.getAttribute("name");
@@ -268,18 +276,21 @@ function _parseSpells(held, result) {
     const probe = probeRaw.replace(/[()]/g, "").trim().split("/").map(s => s.trim()).filter(Boolean);
     const zfw = parseInt(el.getAttribute("value")) || 0;
     const rep = el.getAttribute("repraesentation") || "";
+    // FIX #3: Variante NIEMALS in den Namen einbauen — sie bricht den spells.json Lookup.
+    // Stattdessen als separate Property speichern.
     const variante = el.getAttribute("variante") || "";
-    const key = `${name}|${variante}`;
+    const key = `${name}|${rep}`;
     if (seen.has(key)) continue;
     seen.add(key);
 
     result.spells.push({
-      name: variante ? `${name} (${variante})` : name,
+      name,           // NUR der Zaubername, keine Variante eingebaut
       probe,
       zfw,
       kosten: el.getAttribute("kosten") || "",
       repraesentation: rep,
       hauszauber: el.getAttribute("hauszauber") === "true",
+      variante,       // Variante als separate Property (leer wenn keine)
     });
   }
 }
@@ -289,40 +300,217 @@ function _parseSpells(held, result) {
 function _parseAdvantages(held, result) {
   for (const el of held.querySelectorAll("vt > vorteil")) {
     result.advantages.push({
-      name: el.getAttribute("name") || "",
-      value: el.getAttribute("value") || null,
+      name:  el.getAttribute("name") || "",
+      value: _parseAdvValue(el.getAttribute("value")),
     });
   }
   for (const el of held.querySelectorAll("vt > nachteil")) {
     result.disadvantages.push({
-      name: el.getAttribute("name") || "",
-      value: el.getAttribute("value") || null,
+      name:  el.getAttribute("name") || "",
+      value: _parseAdvValue(el.getAttribute("value")),
     });
   }
+}
+
+/**
+ * FIX #4: Wertet den value-String eines Vorteils/Nachteils korrekt aus.
+ * Problem: `parseInt("0") || adv.value` = "0" (String statt 0), weil parseInt("0") = 0 → falsy.
+ * Lösung: Explizit auf null prüfen, danach auf "0" als Sonderfall.
+ *
+ * @param {string|null} raw - Rohwert aus dem XML-Attribut
+ * @returns {number|string|null}
+ */
+function _parseAdvValue(raw) {
+  if (raw == null) return null;
+  if (raw === "") return null;
+  // Explizit 0 behandeln bevor parseInt-Fallthrough
+  const asInt = parseInt(raw, 10);
+  if (!isNaN(asInt)) return asInt;
+  // Nicht-numerischer String (z.B. "Nacht", "Feuer") bleibt als String
+  return raw;
 }
 
 // ─── Sonderfertigkeiten ─────────────────────────────────────────────────────
 
+/**
+ * FIX #5: SF-Namen normalisieren.
+ * Helden-Software exportiert z.B. "Regeneration (Stufe I)" oder "Ausweichen (Stufe II)".
+ * Das Sheet prüft jedoch "Regeneration I" / "Ausweichen I" → kein Match ohne Normalisierung.
+ *
+ * Regeln:
+ *   "Regeneration (Stufe I)"    → "Regeneration I"
+ *   "Ausweichen (Stufe II)"     → "Ausweichen II"
+ *   "Rüstungsgewöhnung (BE 1)"  → "Rüstungsgewöhnung I"   (BE 1 = Stufe I)
+ *   "Rüstungsgewöhnung (BE 2)"  → "Rüstungsgewöhnung II"  (BE 2 = Stufe II)
+ *   Alles andere bleibt unverändert.
+ */
+function _normalizeSFName(name) {
+  if (!name) return name;
+
+  // Stufenrömisch-Map für Konvertierung
+  const STUFE_MAP = {
+    "I": "I", "II": "II", "III": "III", "IV": "IV", "V": "V",
+    "VI": "VI", "VII": "VII", "VIII": "VIII",
+  };
+  const BE_TO_STUFE = { "1": "I", "2": "II", "3": "III", "4": "IV", "5": "V" };
+
+  // Muster 1: "Name (Stufe XXXX)" → "Name XXXX"
+  const stufeMatch = name.match(/^(.+?)\s*\(Stufe\s+([IVXLCDM]+)\)\s*$/i);
+  if (stufeMatch) {
+    const base  = stufeMatch[1].trim();
+    const roman = stufeMatch[2].toUpperCase();
+    if (STUFE_MAP[roman]) return `${base} ${STUFE_MAP[roman]}`;
+  }
+
+  // Muster 2: "Name (BE N)" → "Name N-als-Römisch"
+  const beMatch = name.match(/^(.+?)\s*\(BE\s+(\d+)\)\s*$/i);
+  if (beMatch) {
+    const base  = beMatch[1].trim();
+    const roman = BE_TO_STUFE[beMatch[2]];
+    if (roman) return `${base} ${roman}`;
+  }
+
+  return name;
+}
+
 function _parseSpecialAbilities(held, result) {
   for (const el of held.querySelectorAll("sf > sonderfertigkeit")) {
+    const original   = el.getAttribute("name") || "";
+    const normalized = _normalizeSFName(original);
     result.specialAbilities.push({
-      name: el.getAttribute("name") || "",
+      name:           normalized, // normalisierter Name (primär für Sheet-Lookups)
+      nameOriginal:   original,   // Original aus HS (für Anzeige / Debug)
     });
   }
 }
 
-// ─── Ausrüstung ─────────────────────────────────────────────────────────────
+// ─── Ausrüstung (Waffen, Rüstungen, Gegenstände) ────────────────────────────
 
-function _parseEquipment(held, result) {
+/**
+ * Ersetzt _parseEquipment komplett.
+ * Erkennt automatisch ob ein <gegenstand> eine Waffe, Rüstung oder normaler Gegenstand ist.
+ * Unterstützt alle drei HS-XML-Exportvarianten pro Kategorie (A/B/C).
+ *
+ * Waffen  → result.weapons
+ * Rüstungen → result.armor
+ * Rest    → result.equipment
+ *
+ * Waffenvarianten:
+ *   A: <gegenstand name="…"><waffe kampftalent="…" tp="…" wm="…"/></gegenstand>
+ *   B: <waffen><waffe name="…" kampftalent="…" tp="…" wm="…"/></waffen>
+ *   C: <gegenstand name="…" tp="…" kampftalent="…" wm="…"/>
+ *
+ * Rüstungsvarianten:
+ *   A: <gegenstand name="…"><ruestung rs="…" be="…"/></gegenstand>
+ *   B: <gegenstand name="…"><ruestung rs_kopf="…" rs_brust="…" … be="…"/></gegenstand>
+ *   C: <gegenstand name="…" ruestungsschutz="…" be="…"/>
+ *
+ * @param {Element} held - Das <held>-Element
+ * @param {object}  result - Das result-Objekt aus parseHeldenXML
+ */
+function _parseEquipmentFull(held, result) {
+  // ── Variante B: <waffen><waffe …/></waffen> (separates Top-Level-Element) ──
+  for (const el of held.querySelectorAll("waffen > waffe")) {
+    const name = el.getAttribute("name");
+    if (!name) continue;
+    result.weapons.push(_extractWeaponData(name, el, null));
+  }
+
+  // ── Gegenstände (Varianten A + C für Waffen und Rüstungen) ──────────────
+  const seenGegenstands = new Set();
   for (const el of held.querySelectorAll("gegenstaende > gegenstand, ausruestungen gegenstand")) {
     const name = el.getAttribute("name");
     if (!name) continue;
-    result.equipment.push({
-      name,
-      quantity: parseInt(el.getAttribute("anzahl")) || 1,
-      weight: parseFloat(el.getAttribute("gewicht")) || 0,
-    });
+    // Duplikate durch verschiedene Selektoren vermeiden
+    if (seenGegenstands.has(name)) continue;
+    seenGegenstands.add(name);
+
+    const wafeChild    = el.querySelector("waffe");
+    const ruestChild   = el.querySelector("ruestung");
+    const tpAttr       = el.getAttribute("tp");
+    const kampfAttr    = el.getAttribute("kampftalent");
+    const rsAttr       = el.getAttribute("ruestungsschutz");
+    const beAttr       = el.getAttribute("be");
+
+    if (wafeChild) {
+      // Variante A: Kind-Element <waffe>
+      result.weapons.push(_extractWeaponData(name, wafeChild, el));
+    } else if (tpAttr || kampfAttr) {
+      // Variante C: tp/kampftalent direkt auf <gegenstand>
+      result.weapons.push(_extractWeaponData(name, el, null));
+    } else if (ruestChild) {
+      // Variante A/B: Kind-Element <ruestung>
+      result.armor.push(_extractArmorData(name, ruestChild, el));
+    } else if (rsAttr != null || (beAttr != null && el.getAttribute("rs") != null)) {
+      // Variante C: ruestungsschutz direkt auf <gegenstand>
+      result.armor.push(_extractArmorData(name, el, null));
+    } else {
+      // Normaler Gegenstand
+      result.equipment.push({
+        name,
+        quantity: parseInt(el.getAttribute("anzahl")) || 1,
+        weight:   parseFloat(el.getAttribute("gewicht")) || 0,
+      });
+    }
   }
+}
+
+/**
+ * Extrahiert Waffen-Daten aus einem Element.
+ * @param {string}       name      - Name der Waffe
+ * @param {Element}      dataEl    - Element mit tp/wm/kampftalent Attributen
+ * @param {Element|null} parentEl  - Eltern-<gegenstand> für Fallback-Attribute (darf null sein)
+ * @returns {{ name, tp, wmAt, wmPa, kampftalent }}
+ */
+function _extractWeaponData(name, dataEl, parentEl) {
+  const tp          = dataEl.getAttribute("tp") || parentEl?.getAttribute("tp") || "";
+  const kampftalent = dataEl.getAttribute("kampftalent") || parentEl?.getAttribute("kampftalent") || "";
+  // WM-Format: "-1/+1" (AT/PA) oder einzeln als wm_at / wm_pa
+  const wmRaw = dataEl.getAttribute("wm") || parentEl?.getAttribute("wm") || "0/0";
+  let wmAt = 0, wmPa = 0;
+  if (wmRaw.includes("/")) {
+    const parts = wmRaw.split("/");
+    wmAt = parseInt(parts[0], 10) || 0;
+    wmPa = parseInt(parts[1], 10) || 0;
+  } else {
+    // Einzelwert: auf beide anwenden
+    wmAt = parseInt(wmRaw, 10) || 0;
+    wmPa = wmAt;
+  }
+  return { name, tp, wmAt, wmPa, kampftalent };
+}
+
+/**
+ * Extrahiert Rüstungs-Daten aus einem Element.
+ * @param {string}       name      - Name der Rüstung
+ * @param {Element}      dataEl    - Element mit rs/be/rs_* Attributen
+ * @param {Element|null} parentEl  - Eltern-<gegenstand> für Fallback-Attribute (darf null sein)
+ * @returns {{ name, rs, be, zones }}
+ */
+function _extractArmorData(name, dataEl, parentEl) {
+  // Gesamt-RS: rs-Attribut, oder Summe aus Zonen als Fallback nicht berechnen (HS hat eigene Summe)
+  const rs = parseInt(dataEl.getAttribute("rs") || dataEl.getAttribute("ruestungsschutz")
+    || parentEl?.getAttribute("ruestungsschutz") || "0", 10) || 0;
+  const be = parseInt(dataEl.getAttribute("be") || parentEl?.getAttribute("be") || "0", 10) || 0;
+
+  // Zonenrüstung (Variante B): rs_kopf, rs_brust, etc.
+  const zoneKeys = ["kopf", "brust", "ruecken", "bauch", "lArm", "rArm", "lBein", "rBein"];
+  const zones = {};
+  let hasZones = false;
+  for (const zone of zoneKeys) {
+    const val = dataEl.getAttribute(`rs_${zone}`);
+    if (val != null) {
+      zones[zone] = parseInt(val, 10) || 0;
+      hasZones = true;
+    }
+  }
+
+  return {
+    name,
+    rs,
+    be,
+    zones: hasZones ? zones : null,
+  };
 }
 
 // ─── AP ─────────────────────────────────────────────────────────────────────
@@ -646,6 +834,26 @@ export async function createActorFromImport(heroData, updateExisting = false) {
     sys.skill[ct.name] = { value: ct.taw, atk: ct.at || "", def: ct.pa || "" };
   }
 
+  // FIX Waffen: TP und WM in das zugehörige Kampftalent-Skill eintragen
+  for (const w of heroData.weapons) {
+    const talent = w.kampftalent;
+    if (talent && sys.skill[talent]) {
+      sys.skill[talent].tp    = w.tp;       // z.B. "1W+4"
+      sys.skill[talent].wmAt  = w.wmAt;     // AT-Modifikator als Integer
+      sys.skill[talent].wmPa  = w.wmPa;     // PA-Modifikator als Integer
+      // Waffe selbst auch als Referenz hinterlegen
+      sys.skill[talent].weapon = w.name;
+    }
+  }
+
+  // Rüstungsdaten in system.armorZones schreiben
+  sys.armorZones = heroData.armor.map(a => ({
+    name: a.name,
+    gRS:  a.rs,
+    gBE:  a.be,
+    ...(a.zones ?? {}),  // kopf, brust, ruecken, bauch, lArm, rArm, lBein, rBein (falls Zonendaten)
+  }));
+
   // ── 4. Talente → system.talente ──────────────────────────────────────────
   sys.talente = {};
   for (const t of heroData.talents) {
@@ -655,15 +863,19 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   // ── 5. Vorteile / Nachteile → system.vorteile / nachteile ───────────────
   sys.vorteile  = {};
   sys.nachteile = {};
+  // FIX #4: adv.value ist bereits durch _parseAdvValue korrekt als number/string/null gesetzt
   for (const adv of heroData.advantages) {
-    sys.vorteile[adv.name]  = adv.value != null ? (parseInt(adv.value) || adv.value) : null;
+    sys.vorteile[adv.name]  = adv.value;
   }
   for (const dis of heroData.disadvantages) {
-    sys.nachteile[dis.name] = dis.value != null ? (parseInt(dis.value) || dis.value) : null;
+    sys.nachteile[dis.name] = dis.value;
   }
 
   // ── 6. Sonderfertigkeiten → system.sf (String-Array) ────────────────────
-  sys.sf = heroData.specialAbilities.map(s => s.name);
+  // FIX #5: normalisierte Namen verwenden (z.B. "Regeneration I" statt "Regeneration (Stufe I)")
+  sys.sf         = heroData.specialAbilities.map(s => s.name);
+  // Originalbezeichnungen zusätzlich für Anzeige / Debugging
+  sys.sfOriginal = heroData.specialAbilities.map(s => s.nameOriginal);
 
   // ── 6b. Repräsentationen → system.Reps (Boolean-Flags für gdsa) ──────────
   const REP_MAP = {
@@ -734,18 +946,32 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   }
 
   // ── 9. Zauber als spell-Items ────────────────────────────────────────────
-  // gdsa: type="spell", system.att1/att2/att3, system.costs (nicht kosten), system.value
+  // gdsa template.json: type="spell", Felder: att1/att2/att3, zfw, rep, cost (nicht costs),
+  //                     isMR, lcdPage, trait1-4, technic, casttime, forced, cost, range,
+  //                     duration, vMag/vDru/vBor/vSrl/vHex/vElf (Verbreitungen)
+  // FIX #3: spell.name enthält keine Variante mehr — variante wird als eigene Property übergeben
+  // FIX #5: zfw statt value, cost statt costs, rep statt repraesentation (sonst strippt gdsa)
   const spellItems = heroData.spells.map(spell => ({
     name: spell.name,
     type: "spell",
     system: {
-      att1:            spell.probe[0] || "",
-      att2:            spell.probe[1] || "",
-      att3:            spell.probe[2] || "",
-      value:           spell.zfw,        // ZfW
-      costs:           spell.kosten,     // gdsa nutzt 'costs', nicht 'kosten'
-      repraesentation: spell.repraesentation || "",
-      hauszauber:      spell.hauszauber ?? false,
+      att1:       spell.probe[0] || "",
+      att2:       spell.probe[1] || "",
+      att3:       spell.probe[2] || "",
+      zfw:        spell.zfw,                        // gdsa-Schema: zfw (nicht value!)
+      cost:       spell.kosten || "",               // gdsa-Schema: cost (nicht costs!)
+      rep:        spell.repraesentation || "",      // gdsa-Schema: rep (nicht repraesentation!)
+      // Hauszauber und Variante als unser eigenes Feld — gdsa strippt eh fremde Felder,
+      // aber wir koennen sie fuer Display / VFX im Sheet nutzen ueber Fallbacks
+      hauszauber: spell.hauszauber ?? false,
+      variante:   spell.variante || "",
+      // Verbreitungs-Flags (gdsa)
+      vMag: spell.repraesentation === "Magier"         ? 1 : 0,
+      vDru: spell.repraesentation === "Druiden"        ? 1 : 0,
+      vBor: spell.repraesentation === "Borbaradianer"  ? 1 : 0,
+      vSrl: spell.repraesentation === "Scharlatan"     ? 1 : 0,
+      vHex: spell.repraesentation === "Hexen"          ? 1 : 0,
+      vElf: spell.repraesentation === "Elfen"          ? 1 : 0,
     },
   }));
 
@@ -759,20 +985,31 @@ export async function createActorFromImport(heroData, updateExisting = false) {
 // ─── Registrierung ──────────────────────────────────────────────────────────
 
 export function registerXMLImporter() {
-  // ── Button im Actors-Panel (Sidebar) ──────────────────────────────────────
+  // ── Kompakter Button im Directory-Footer (neben Create-Buttons) ──────────
   Hooks.on("renderActorDirectory", (_app, html) => {
-    if (html.find("#dsa-xml-import-btn").length) return; // nicht doppelt einfügen
+    const root = html instanceof jQuery ? html : $(html);
+    if (root.find("#dsa-xml-import-btn").length) return;
     const btn = $(`
-      <button type="button" id="dsa-xml-import-btn"
-        style="width:100%;margin:4px 0;font-size:11px;padding:4px 8px;
-               background:#16213e;border:1px solid #3a5e8a;color:#88ccff;cursor:pointer;border-radius:2px">
-        <i class="fas fa-file-import"></i> Helden-Software XML importieren
+      <button type="button" id="dsa-xml-import-btn" title="Helden-Software XML importieren"
+        style="flex:1;font-size:12px;padding:4px 6px;background:#16213e;border:1px solid #3a5e8a;
+               color:#88ccff;cursor:pointer;border-radius:3px;display:flex;align-items:center;
+               justify-content:center;gap:4px;margin:2px 0">
+        <i class="fas fa-file-import"></i> XML Import
       </button>
     `);
-    btn.on("click", showImportDialog);
-    // Vor der Actor-Liste einfügen
-    const header = html.find(".directory-header, .directory-list").first();
-    header.before(btn);
+    btn.on("click", (e) => { e.preventDefault(); showImportDialog(); });
+
+    // Versuche verschiedene Container der Reihe nach
+    const footer = root.find(".directory-footer").first();
+    const header = root.find(".directory-header").first();
+    if (footer.length) {
+      footer.append(btn);
+    } else if (header.length) {
+      header.after(btn);
+    } else {
+      // Letzter Fallback: einfach irgendwo an die Sidebar dranpappen
+      root.prepend(btn);
+    }
   });
 
   // ── Button in den Settings ────────────────────────────────────────────────
