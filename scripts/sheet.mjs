@@ -121,17 +121,25 @@ export class PixelArtCharacterSheet extends ActorSheet {
     };
     // Clone + override so we don't mutate the live actor.system reference.
     const sysClone = foundry.utils.deepClone(system);
-    const useFallback = (obj, key) => !obj?.[key] || obj[key] === 0;
-    // Object-shaped fields (gdsa: { value, mod })
-    for (const key of ["INIBasis", "MR", "ATBasis", "PABasis", "FKBasis", "GS"]) {
+    // Object-shaped fields (gdsa: { value, mod }) — fallback when stored <= 0
+    for (const key of ["INIBasis", "MR", "ATBasis", "PABasis", "FKBasis"]) {
       const existing = sysClone[key]?.value ?? 0;
       if (existing <= 0 && computed[key] > 0) {
         sysClone[key] = { ...(sysClone[key] ?? {}), value: computed[key] };
       }
     }
-    // Scalar fields: WS, Dogde (yes, gdsa misspells "Dodge")
+    // Scalar fields WS / Dogde — gdsa stores these as plain numbers and
+    // misspells "Dodge" as "Dogde".
     if (!sysClone.WS || sysClone.WS <= 0) sysClone.WS = computed.WS;
     if (!sysClone.Dogde || sysClone.Dogde <= 0) sysClone.Dogde = computed.AW;
+    // GS: gdsa always stores 8 (Mensch default) even for non-human races.
+    // Override with the race-specific value whenever the stored GS matches
+    // the default AND the race-lookup disagrees (so GMs who deliberately
+    // hand-edit the field to non-8 keep their override).
+    const storedGS = sysClone.GS?.value ?? 0;
+    if (storedGS <= 0 || (storedGS === 8 && raceGS !== 8)) {
+      sysClone.GS = { ...(sysClone.GS ?? {}), value: raceGS };
+    }
     data.system = sysClone;
     data.derivedComputed = computed; // exposed for debug / tooltip display
 
