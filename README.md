@@ -1,13 +1,44 @@
 # DSA Pixel-Art Tokens
 
+![Banner](docs/media/banner.png)
+
 [![FoundryVTT](https://img.shields.io/badge/FoundryVTT-v12-orange?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgo=)](https://foundryvtt.com/)
 [![Version](https://img.shields.io/badge/Version-0.3.0-brightgreen?style=for-the-badge)]()
 [![DSA](https://img.shields.io/badge/System-DSA%204.1%20%2F%20gdsa-blueviolet?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)]()
 [![Spells](https://img.shields.io/badge/Zauber-298-purple?style=for-the-badge)]()
 [![Weapons](https://img.shields.io/badge/Waffen-167-red?style=for-the-badge)]()
+[![Tokens](https://img.shields.io/badge/Tokens-700%2B-ff69b4?style=for-the-badge)]()
 
 > Komplettes Pixel-Art DSA 4.1 Erweiterungsmodul: Animierte Tokens, automatische Zauber- und Kampfeffekte, Pixel-Art Heldenbogen, Proben-Engine, Zonenzauber mit Schaden und 961 Regelbuch-Eintraege.
+
+---
+
+## Eindruecke
+
+**Live auf der Spieltisch-Szene** — Taverne "Zum schwarzen Eber" mit Waldelfen-Wildnislaeufer, Magier und weiteren NSCs am Lagerfeuer:
+
+![Scene: Taverne](docs/media/scene-taverne.png)
+
+**16 Charakter-Tokens** (von 700+ im Modul):
+
+![Tokens-Grid](docs/media/tokens-grid.png)
+
+**Bestiarium** — 40 zufaellige Kreaturen von 700+:
+
+![Bestiary-Grid](docs/media/bestiary-grid.png)
+
+**Chibi-NSCs** mit 4-Richtungs-Rotation (N / O / S / W):
+
+![Chibi-Showcase](docs/media/chibi-showcase.png)
+
+**Laufanimation** (LPC-Spritesheet-Standard, 9 Frames, 4 Richtungen):
+
+<p align="center">
+  <img src="docs/media/walk-sara.gif" alt="Sara Walk" width="180">
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/media/walk-barbarian.gif" alt="Barbarian Walk" width="180">
+</p>
 
 ---
 
@@ -131,12 +162,14 @@ Alle Daten direkt aus den offiziellen DSA 4.1 Regelbuchern extrahiert:
 
 ## Installation
 
-### Per Manifest URL
+### Per Manifest URL (empfohlen)
 1. FoundryVTT -> **Add-on Module** -> **Install Module**
 2. Manifest URL:
    ```
-   https://git.dc-infosec.de/admin/dsa-pixel-tokens/raw/branch/main/module.json
+   https://raw.githubusercontent.com/cengo441337-a11y/dsa-pixel-tokens/main/module.json
    ```
+
+> *Alter Gitea-Mirror:* `https://git.dc-infosec.de/admin/dsa-pixel-tokens/raw/branch/main/module.json`
 
 ### Lokal (Entwicklung)
 ```bash
