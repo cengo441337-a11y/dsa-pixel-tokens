@@ -3,7 +3,7 @@
 ![Banner](docs/media/banner.png)
 
 [![FoundryVTT](https://img.shields.io/badge/FoundryVTT-v12-orange?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgo=)](https://foundryvtt.com/)
-[![Version](https://img.shields.io/badge/Version-0.3.0-brightgreen?style=for-the-badge)]()
+[![Version](https://img.shields.io/github/v/release/cengo441337-a11y/dsa-pixel-tokens?style=for-the-badge&color=brightgreen)](https://github.com/cengo441337-a11y/dsa-pixel-tokens/releases)
 [![DSA](https://img.shields.io/badge/System-DSA%204.1%20%2F%20gdsa-blueviolet?style=for-the-badge)]()
 [![Code-Lizenz](https://img.shields.io/badge/Code-MIT-blue?style=for-the-badge)]()
 [![Regeldaten](https://img.shields.io/badge/Regeldaten-ORC%20License-orange?style=for-the-badge)](https://paizo.com/orclicense)

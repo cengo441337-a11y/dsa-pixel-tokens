@@ -109,6 +109,11 @@ export class PixelArtCharacterSheet extends ActorSheet {
     };
     // Race-based GS override (Waldelf = 9, Zwerg = 6, etc.)
     const raceGS = RACE_GS[system.race?.trim?.()] ?? RACE_GS[system.rasse?.trim?.()] ?? 8;
+    // SF Ausweichen I/II/III geben +1/+2/+3 auf AW (WdS S.68)
+    const sfList = system.sf ?? [];
+    const awSFBonus = sfList.includes("Ausweichen III") ? 3
+      : sfList.includes("Ausweichen II") ? 2
+      : sfList.includes("Ausweichen I") ? 1 : 0;
     const computed = {
       INIBasis: DERIVED_FORMULAS.INIBasis(rawAttrs),
       MR:       DERIVED_FORMULAS.MR(rawAttrs),
@@ -116,7 +121,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       ATBasis:  DERIVED_FORMULAS.ATBasis(rawAttrs),
       PABasis:  DERIVED_FORMULAS.PABasis(rawAttrs),
       FKBasis:  DERIVED_FORMULAS.FKBasis(rawAttrs),
-      AW:       DERIVED_FORMULAS.AW(rawAttrs),
+      AW:       DERIVED_FORMULAS.AW(rawAttrs) + awSFBonus,
       GS:       raceGS,
     };
     // Clone + override so we don't mutate the live actor.system reference.

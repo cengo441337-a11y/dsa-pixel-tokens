@@ -39,3 +39,7 @@ scripts/fix_*.py
 scripts/update_*.py
 scripts/extract_*.py
 generate_missing_tokens.py
+
+# Private Kommunikation / Briefentwürfe (nicht public)
+email-*.md
+email-*.txt

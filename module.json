@@ -2,7 +2,7 @@
   "id": "dsa-pixel-tokens",
   "title": "DSA Pixel-Art Tokens",
   "description": "Komplettes Pixel-Art DSA 4.1 Erweiterungsmodul für FoundryVTT. Animierte Token-Sprites, automatische Zauber- und Kampfeffekte, Pixel-Art Heldenbogen, Zonenzauber mit Schaden, Proben-Automation und mehr.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "compatibility": {
     "minimum": "12",
     "verified": "12",
@@ -71,9 +71,10 @@
     }
   ],
   "url": "https://github.com/cengo441337-a11y/dsa-pixel-tokens",
-  "manifest": "https://raw.githubusercontent.com/cengo441337-a11y/dsa-pixel-tokens/main/module.json",
-  "download": "https://github.com/cengo441337-a11y/dsa-pixel-tokens/archive/refs/heads/main.zip",
+  "manifest": "https://github.com/cengo441337-a11y/dsa-pixel-tokens/releases/latest/download/module.json",
+  "download": "https://github.com/cengo441337-a11y/dsa-pixel-tokens/releases/latest/download/module.zip",
   "readme": "https://github.com/cengo441337-a11y/dsa-pixel-tokens/blob/main/README.md",
   "bugs": "https://github.com/cengo441337-a11y/dsa-pixel-tokens/issues",
+  "changelog": "https://github.com/cengo441337-a11y/dsa-pixel-tokens/blob/main/CHANGELOG.md",
   "flags": {}
 }
