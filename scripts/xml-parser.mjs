@@ -202,8 +202,8 @@ function _parseAttributes(held, result) {
       const key = mapped.slice(1);
       result.derivedValues[key] = { value, mod, permanent };
     } else {
-      // Eigenschaft: value = aktueller Gesamtwert
-      result.attributes[mapped] = value;
+      // Eigenschaft: value = Basiswert, mod = AP-Steigerungen oder externe Boni → Summe
+      result.attributes[mapped] = value + mod;
     }
   }
 }
@@ -821,12 +821,28 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   sys.LeP = { value: lepCurrent, max: lepMax };
   sys.AsP = { value: aspCurrent, max: aspMax };
   sys.AuP = { value: aupCurrent, max: aupMax };
-  if (dv.MR)  sys.MR  = { value: dv.MR.value,  tempmodi: 0 };
-  if (dv.INI) sys.INI = { value: dv.INI.value,  tempmodi: 0 };
-  // Kampf-Basiswerte (ATBasis, PABasis, FKBasis)
-  if (dv.AT)  sys.ATBasis = { value: dv.AT.value,  tempmodi: 0 };
-  if (dv.PA)  sys.PABasis = { value: dv.PA.value,  tempmodi: 0 };
-  if (dv.FK)  sys.FKBasis = { value: dv.FK.value,  tempmodi: 0 };
+  // MR: immer aus Formel (MU+KL+KO)/5 + gekaufter Bonus (mod), nie rohen XML-value übernehmen
+  {
+    const mrFormula = Math.floor(((attr.MU ?? 10) + (attr.KL ?? 10) + (attr.KO ?? 10)) / 5);
+    sys.MR = { value: mrFormula + (dv.MR?.mod ?? 0), tempmodi: 0 };
+  }
+  // INIBasis: Formel (MU + IN + GE) / 5 gerundet, + gekaufter Bonus wenn vorhanden
+  // ACHTUNG: muss INIBasis sein (nicht INI) — das ist was Sheet + Combat-Engine lesen
+  {
+    const iniFormula = Math.round(((attr.MU ?? 10) + (attr.IN ?? 10) + (attr.GE ?? 10)) / 5);
+    const iniBonus   = dv.INI?.mod ?? 0;
+    const iniVal     = (dv.INI?.value > 0 ? dv.INI.value : iniFormula) + iniBonus;
+    sys.INIBasis = { value: iniVal, tempmodi: 0 };
+    // Legacy-Feld zusaetzlich fuer Abwaerts-Kompatibilitaet
+    if (dv.INI) sys.INI = { value: dv.INI.value, tempmodi: 0 };
+  }
+  // Kampf-Basiswerte (ATBasis, PABasis, FKBasis) — Fallback aus Formel wenn XML leer
+  if (dv.AT && dv.AT.value > 0) sys.ATBasis = { value: dv.AT.value, tempmodi: 0 };
+  else sys.ATBasis = { value: Math.round(((attr.MU ?? 10) + (attr.GE ?? 10) + (attr.KK ?? 10)) / 5), tempmodi: 0 };
+  if (dv.PA && dv.PA.value > 0) sys.PABasis = { value: dv.PA.value, tempmodi: 0 };
+  else sys.PABasis = { value: Math.round(((attr.IN ?? 10) + (attr.GE ?? 10) + (attr.KK ?? 10)) / 5), tempmodi: 0 };
+  if (dv.FK && dv.FK.value > 0) sys.FKBasis = { value: dv.FK.value, tempmodi: 0 };
+  else sys.FKBasis = { value: Math.round(((attr.IN ?? 10) + (attr.FF ?? 10) + (attr.KK ?? 10)) / 5), tempmodi: 0 };
 
   // ── 3. Kampftalente → system.skill ──────────────────────────────────────
   sys.skill = {};
@@ -876,6 +892,17 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   sys.sf         = heroData.specialAbilities.map(s => s.name);
   // Originalbezeichnungen zusätzlich für Anzeige / Debugging
   sys.sfOriginal = heroData.specialAbilities.map(s => s.nameOriginal);
+
+  // ── 6c. Ausweichen (AW/Dogde) — PABasis/2 + SF-Bonus ───────────────────
+  // gdsa schreibt dieses Feld als "Dogde" (Typo, aber API-Vertrag).
+  // SF Ausweichen I/II/III geben +1/+2/+3 auf den Basiswert.
+  {
+    const paFormula = Math.floor(((attr.IN ?? 10) + (attr.GE ?? 10) + (attr.KK ?? 10)) / 5);
+    const awSFBonus = sys.sf.includes("Ausweichen III") ? 3
+      : sys.sf.includes("Ausweichen II") ? 2
+      : sys.sf.includes("Ausweichen I") ? 1 : 0;
+    sys.Dogde = Math.floor(paFormula / 2) + awSFBonus;
+  }
 
   // ── 6b. Repräsentationen → system.Reps (Boolean-Flags für gdsa) ──────────
   const REP_MAP = {

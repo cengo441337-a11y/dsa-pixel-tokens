@@ -6,12 +6,26 @@
 [![Version](https://img.shields.io/badge/Version-0.3.0-brightgreen?style=for-the-badge)]()
 [![DSA](https://img.shields.io/badge/System-DSA%204.1%20%2F%20gdsa-blueviolet?style=for-the-badge)]()
 [![Code-Lizenz](https://img.shields.io/badge/Code-MIT-blue?style=for-the-badge)]()
-[![Regeldaten](https://img.shields.io/badge/Regeldaten-ELF%20Ulisses-orange?style=for-the-badge)](https://ulisses-spiele.de/fan-pakete/)
+[![Regeldaten](https://img.shields.io/badge/Regeldaten-ORC%20License-orange?style=for-the-badge)](https://paizo.com/orclicense)
+[![Rechte](https://img.shields.io/badge/DSA-Genehmigt%20von%20Ulisses-green?style=for-the-badge)](https://ulisses-spiele.de/)
 [![Spells](https://img.shields.io/badge/Zauber-298-purple?style=for-the-badge)]()
 [![Weapons](https://img.shields.io/badge/Waffen-167-red?style=for-the-badge)]()
 [![Tokens](https://img.shields.io/badge/Tokens-700%2B-ff69b4?style=for-the-badge)]()
 
-> ⚠️ **Fan-Projekt / Nicht offiziell** — *Das Schwarze Auge* und *DSA* sind eingetragene Marken der **Ulisses Spiele GmbH**. Dieses Modul steht in keiner Verbindung zum Verlag und ist kein offizielles Produkt. Die enthaltenen Regeldaten (Zauber-Mechaniken, Kreatur-Stats, Waffen-TP, Sonderfertigkeiten) werden unter der **[ELF-Fan-Lizenz](https://ulisses-spiele.de/fan-pakete/)** von Ulisses Spiele genutzt. Der Modul-Code selbst (JavaScript, Sprites, VFX, Logik) steht unter MIT-Lizenz.
+> ⚠️ **Fan-Projekt / Nicht offiziell** — *Das Schwarze Auge* und *DSA* sind eingetragene Marken der **Ulisses Spiele GmbH**. Dieses Modul steht in keiner kommerziellen Verbindung zum Verlag.
+>
+> **Rechteeinräumung:** Ulisses Spiele (Jan Wagner, Head of Digital Games) hat Deniz Ceylan mit
+> Datum 2026‑04‑21 die **zeitlich und räumlich unbeschränkte Nutzung** von Inhalten, Regeln und
+> Namen aus Büchern der DSA 4.1 Edition im Rahmen der **ORC‑Lizenzbestimmungen** für dieses
+> Foundry‑VTT‑Modul eingeräumt. Nicht‑kommerziell. Keine Weitergabe/Sublizenzierung.
+> Widerruflich durch Ulisses Spiele.
+>
+> **Verwendete Regelwerke** (© Ulisses Spiele GmbH):
+> *Wege der Helden*, *Wege des Schwertes*, *Wege der Zauberei*, *Wege der Alchimie*,
+> *Liber Cantiones (Remastered)*, *Von Toten und Untoten*, *Elementare Gewalten*,
+> *Tractatus contra Daemones*.
+>
+> Der Modul‑Code (JavaScript, Sprites, VFX, Logik) steht unter **MIT‑Lizenz**.
 
 > Komplettes Pixel-Art DSA 4.1 Erweiterungsmodul: Animierte Tokens, automatische Zauber- und Kampfeffekte, Pixel-Art Heldenbogen, Proben-Engine, Zonenzauber mit Schaden und 961 Regelbuch-Eintraege.
 
@@ -260,16 +274,27 @@ python assets/build_monsters.py
 
 ### Regeldaten & DSA-Inhalte
 Die in `data/creatures.json`, `data/spells.json` und den Kampf-/Talent-/Sonderfertigkeits-Definitionen
-enthaltenen DSA 4.1 Regelwerte (Zauber-Mechaniken, Kreatur-Stats, Waffen-TP, Eigenschaften,
-Fluff-Zitate) stammen aus den offiziellen **DSA 4.1 Regelwerken** (Liber Cantiones, Wege der
-Helden, Wege des Schwertes, Wege der Zauberei, Wege der Alchimie, Von Toten und Untoten,
-Elementare Gewalten, Tractatus contra Daemones) der **Ulisses Spiele GmbH** und werden unter der
-offiziellen **[ELF-Fan-Lizenz](https://ulisses-spiele.de/fan-pakete/)** genutzt.
+enthaltenen DSA 4.1 Regelwerte (Zauber-Mechaniken, Kreatur-Stats, Waffen-TP, Eigenschaften)
+stammen aus den offiziellen **DSA 4.1 Regelwerken** der **Ulisses Spiele GmbH**:
 
-**„Das Schwarze Auge", „DSA", „Aventurien"** sind Marken der Ulisses Spiele GmbH. Dieses Projekt
-ist **nicht offiziell**, **nicht von Ulisses autorisiert ueber den Rahmen der ELF hinaus**, und
-steht in keiner kommerziellen Verbindung zum Verlag. Nutzung setzt ein gueltiges DSA-Regelwerk
-und eine gueltige FoundryVTT-Lizenz voraus.
+- *Wege der Helden* (Grundregelwerk)
+- *Wege des Schwertes* (Kampfregeln, Waffen)
+- *Wege der Zauberei* (Magieregeln)
+- *Wege der Alchimie* (Alchimie, Tränke)
+- *Liber Cantiones (Remastered)* (Zaubersprüche)
+- *Von Toten und Untoten* (Untoten-Bestiarium)
+- *Elementare Gewalten* (Elementar-Bestiarium)
+- *Tractatus contra Daemones* (Dämonen-Bestiarium)
+
+Die Nutzung erfolgt unter der **ORC‑Lizenz** (Open RPG Creative License) mit **ausdrücklicher
+persönlicher Rechteeinräumung** durch Jan Wagner, Head of Digital Games bei Ulisses Spiele
+(E-Mail vom 2026-04-21). Die Rechteeinräumung ist zeitlich und räumlich unbeschränkt,
+nicht übertragbar, nicht sublizenzierbar und durch Ulisses Spiele einseitig widerruflich.
+
+**„Das Schwarze Auge", „DSA", „Aventurien"** sind Marken der Ulisses Spiele GmbH.
+Dieses Projekt ist **nicht offiziell**, nicht kommerziell, und steht nur im Rahmen der
+gewährten Rechteeinräumung in Verbindung zum Verlag. Nutzung setzt eine gültige
+FoundryVTT-Lizenz voraus.
 
 ---
 
