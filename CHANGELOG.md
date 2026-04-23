@@ -6,6 +6,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.1] — 2026-04-21
+
+### Bugfixes 🐛
+- **XML-Parser**: MR und INI werden jetzt direkt aus dem Helden-Software-`value`
+  übernommen (vorher: eigene Formel überschrieb die Helden-Software-Berechnung).
+  Die Helden-Software berechnet diese Werte bereits inkl. aller Mods
+  (mrmod aus Astralenergie, Rasse-Boni, SF-Boni), deshalb direkt übernehmen.
+  Fallback auf Formel nur wenn XML-Wert fehlt oder 0 ist.
+- **XML-Parser**: **Fernkampf-Talente** werden jetzt erkannt und als
+  `combatTalents` mit `type: "fernkampf"` eingepflegt. Betrifft: Bogen, Armbrust,
+  Blasrohr, Wurfmesser, Wurfbeile, Wurfspeer, Diskus, Schleuder, Lanzenreiten.
+  Vorher landeten die nur in `talents` und waren im Combat-Tab unsichtbar
+  (Tarion Winterklee's Bogen 18 war nicht rollbar).
+- **XML-Parser**: AT/PA/FK-Basis nutzen jetzt XML-Werte direkt + Bonus (mod)
+  statt nur Formel-Fallback.
+
+---
+
 ## [0.4.0] — 2026-04-21
 
 ### Rechtliches / Lizenz 📜
