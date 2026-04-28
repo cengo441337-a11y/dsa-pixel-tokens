@@ -6,6 +6,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.12] — 2026-04-28
+
+### Token-HUD-Spalte: Bounding-Rect-basierter Flip
+- v0.4.11-Heuristik basierte auf PIXI-Canvas-Koordinaten — die stimmten
+  nicht mit DOM-Pixel-Position überein. Resultat: Spalte überlappte
+  weiterhin mit der Sidebar.
+- Jetzt: nach DOM-Append per requestAnimationFrame die echten
+  ``getBoundingClientRect``-Werte der Spalte und der Sidebar messen, dann
+  bei Überlappung nach links flippen. Funktioniert auch bei zoomed/scrolled
+  Canvas und respektiert Sidebar-collapsed-State.
+
+---
+
 ## [0.4.11] — 2026-04-28
 
 ### Token-HUD-Spalte adaptiv positionieren

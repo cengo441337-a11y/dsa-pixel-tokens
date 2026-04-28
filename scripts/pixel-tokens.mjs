@@ -1410,20 +1410,10 @@ Hooks.on("renderTokenHUD", (hud, html, _data) => {
   const token = hud.object;
   if (!token) return;
 
-  // Adaptive Positionierung: wenn der Token nahe am rechten Bildschirmrand
-  // ist (UI-Sidebar von Foundry kollidiert), klappen wir die Spalte LINKS
-  // vom HUD aus. Sonst rechts wie bisher.
-  const sidebarEl = document.querySelector("#sidebar, #ui-right");
-  const sidebarLeft = sidebarEl?.getBoundingClientRect?.().left ?? Infinity;
-  const tokenScreenRight = (token.worldTransform?.tx ?? 0) + (token.w ?? 0);
-  // Heuristik: wenn Token-Pixel-Position + 200px (HUD + unsere 42px Spalte)
-  // die Sidebar-Linke überschreitet, lieber links ausklappen.
-  const flipLeft = (tokenScreenRight + 200) >= sidebarLeft;
-  const positionStyle = flipLeft
-    ? "left:-42px; top:0;"   // links neben dem HUD
-    : "right:-42px; top:0;"; // rechts neben dem HUD (Default)
+  // Effekt-Spalte default rechts, wird nach dem Append per echte DOM-Position
+  // geprüft und bei Sidebar-Kollision links geflippt.
   const bar = $(`<div class="sf-hud-col" style="
-    position:absolute; ${positionStyle}
+    position:absolute; right:-42px; top:0;
     display:flex; flex-direction:column; gap:2px; z-index:100;
   "></div>`);
 
@@ -1490,6 +1480,32 @@ Hooks.on("renderTokenHUD", (hud, html, _data) => {
   }
 
   html.append(bar);
+
+  // ── Adaptive Positionierung mit echten DOM-Koordinaten ──────────────────
+  // Nach dem DOM-Append einen Tick warten, dann Bounding-Rect der Spalte vs.
+  // der Foundry-Sidebar messen. Wenn die Spalte in die Sidebar reinragen würde,
+  // klappen wir nach links.
+  requestAnimationFrame(() => {
+    try {
+      const barEl = bar[0];
+      if (!barEl?.isConnected) return;
+      const barRect = barEl.getBoundingClientRect();
+      // Suche nach Sidebar — Foundry v12 nutzt #sidebar (eventuell collapsed-Class).
+      const sidebar = document.querySelector("#sidebar");
+      if (!sidebar) return;
+      // Wenn Sidebar collapsed ist, nimmt sie wenig Platz — kein Flip nötig
+      const isCollapsed = sidebar.classList.contains("collapsed");
+      if (isCollapsed) return;
+      const sidebarRect = sidebar.getBoundingClientRect();
+      // Spalte ragt in Sidebar wenn: barRect.right > sidebarRect.left
+      // (mit kleiner Toleranz von 4px)
+      if (barRect.right > sidebarRect.left - 4) {
+        bar.css({ right: "auto", left: "-42px" });
+      }
+    } catch (e) {
+      console.warn(`[${MODULE_ID}] HUD-Position-Check fehlgeschlagen:`, e);
+    }
+  });
 });
 
 // Zone: Template angeklickt → Effekt-Picker
