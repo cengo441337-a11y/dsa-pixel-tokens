@@ -6,6 +6,50 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.4] — 2026-04-28
+
+### XML-Parser: Inventar-Komplettüberholung 📦
+- **Inventar-Items werden endlich importiert!** Bisheriger Bug: Helden-Software
+  XML nutzt `<gegenstände>` mit deutschem Umlaut, mein Selector suchte nach
+  `gegenstaende` (ASCII) — keine Treffer. Jetzt via `getElementsByTagName` +
+  Parent-Check, fängt beide Schreibvarianten ab.
+- **Datenbank-Lookup für unbenannte Items**: Helden-Software speichert nur
+  `<gegenstand name="..."/>` ohne TP/RS. Parser sucht jetzt automatisch in
+  `weapons.json`/`armor.json` nach Werten und legt typisierte Foundry-Items an
+  (melee/range/shield/armor/item).
+- **Aliase + Fuzzy-Match**: "Anderthalbhänder" ↔ "Bastardschwert",
+  "Großschild" ↔ "Großschild (Reiterschild)", "Kettenhemd, Lang" ↔
+  "Kettenhemd, langes". Robust gegen Komma-Suffix-Schreibvarianten.
+- **Foundry-Items angelegt**: Nach Import sind Waffen, Rüstungen, Schilde,
+  Equipment als typisierte Gegenstand-Items im Sheet sichtbar.
+
+### Wundschwellen mit SF/Vorteils-Boni 🩸
+- **WS-Berechnung** berücksichtigt jetzt:
+  - Vorteil **Eisern** (+2 auf alle WS)
+  - Nachteil **Glasknochen** (−2 auf alle WS)
+  - SF **Hartgesotten** (+1, Zwergen-Bonus)
+  - SF **Eisenhart** (+2, selten)
+- Wund-Mali bleiben −1/Wunde auf alle Proben (WdS S.61 unverändert).
+
+### Initiative-Würfel 🎲
+- **INI rollbar**: Klick auf INI im Heldenbogen würfelt 1W6 + INIBasis.
+- **Berücksichtigt automatisch**:
+  - SF **Kampfreflexe** (+4 INI)
+  - SF **Kampfgespür** (+2 INI)
+  - Rüstungs-Penalty (gBE/2 abgerundet)
+  - Wund-Mali (−1 pro Wunde)
+- Manueller Modifikator-Dialog vor Wurf.
+
+### Datenbank-Erweiterung 🗡
+- **Anderthalbhänder, Bihänder, Doppelkhunchomer, Khunchomer, Säbel,
+  Sichelschwert, Streitaxt, Stoßspeer, Hellebarde, Magierstab, Robbentöter,
+  Wurmspieß** in nahkampfwaffen ergänzt.
+- **Großschild, Buckler, Rondrakamm** in schilde ergänzt.
+- **Lederrüstung, Schuppenpanzer, Brustplatte, Plattenrüstung, Robe** in
+  armor.json ergänzt.
+
+---
+
 ## [0.4.3] — 2026-04-28
 
 ### Datenbank-Erweiterung 🏹

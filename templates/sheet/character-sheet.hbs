@@ -15,7 +15,7 @@
       </div>
     </div>
     <div class="derived-grid" style="max-width:260px">
-      <div class="derived-stat" title="{{#if iniPenalty}}Basis {{system.INIBasis.value}}, Rüstung -{{iniPenalty}}{{/if}}">
+      <div class="derived-stat rollable" data-roll="initiative" title="Klick: Initiative-Probe würfeln (1W6 + INI{{#if iniPenalty}} − {{iniPenalty}} Rüstung{{/if}}{{#if woundPenalty}} − {{woundPenalty}} Wunden{{/if}})">
         <div class="stat-label">INI</div>
         <div class="stat-value">{{system.INIBasis.value}}{{#if iniPenalty}}<span style="color:#e94560;font-size:0.7em">-{{iniPenalty}}</span>{{/if}}</div>
       </div>

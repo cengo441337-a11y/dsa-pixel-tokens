@@ -1871,6 +1871,62 @@
       "talent": "Handgemenge-Waffen (Raufen)",
       "reichweite": "H",
       "typ": "nahkampf"
+    },
+    {
+      "name": "Anderthalbhänder",
+      "tp": "1W+5",
+      "kkSchwelle": 13,
+      "talent": "Anderthalbhänder",
+      "bf": 3,
+      "reichweite": "N",
+      "gewicht": 2200,
+      "preis": 350,
+      "typ": "nahkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "description": "Hand-und-halb / Bastard"
+    },
+    {
+      "name": "Bihänder",
+      "tp": "2W+4",
+      "kkSchwelle": 15,
+      "talent": "Zweihandschwerter",
+      "bf": 3,
+      "reichweite": "S",
+      "gewicht": 3500,
+      "preis": 500,
+      "typ": "nahkampf",
+      "atMod": -1,
+      "paMod": -2,
+      "description": "Großes Zweihandschwert"
+    },
+    {
+      "name": "Säbel",
+      "tp": "1W+4",
+      "kkSchwelle": 11,
+      "talent": "Säbel",
+      "bf": 3,
+      "reichweite": "N",
+      "gewicht": 1300,
+      "preis": 120,
+      "typ": "nahkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "description": "Standard-Säbel"
+    },
+    {
+      "name": "Sichelschwert",
+      "tp": "1W+5",
+      "kkSchwelle": 12,
+      "talent": "Säbel",
+      "bf": 4,
+      "reichweite": "N",
+      "gewicht": 1700,
+      "preis": 280,
+      "typ": "nahkampf",
+      "atMod": 0,
+      "paMod": -1,
+      "description": "Krummsäbel mit Sichelklinge"
     }
   ],
   "fernkampfwaffen": [
@@ -2391,6 +2447,26 @@
       "paMod": 1,
       "ini": 0,
       "bf": 1
+    },
+    {
+      "name": "Großschild",
+      "atMod": -3,
+      "paMod": 2,
+      "ini": -1,
+      "bf": 4,
+      "gewicht": 4000,
+      "preis": 150,
+      "description": "Großer Holz/Metallschild"
+    },
+    {
+      "name": "Rondrakamm",
+      "atMod": -1,
+      "paMod": 2,
+      "ini": -1,
+      "bf": 5,
+      "gewicht": 3500,
+      "preis": 300,
+      "description": "Mittelreichischer Standardschild"
     }
   ],
   "kampfmanoever": [

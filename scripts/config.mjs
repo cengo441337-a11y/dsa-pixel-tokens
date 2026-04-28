@@ -211,13 +211,47 @@ export const RANGED_MODIFIERS = {
 
 // ─── Wundschwellen ──────────────────────────────────────────────────────────
 
-export function getWoundThresholds(ko) {
+/**
+ * Berechnet Wundschwellen aus KO + Vorteile/Nachteile/SF.
+ *
+ * DSA 4.1 (WdS S.61):
+ *   WS1 = KO/2 (aufgerundet) — 1 Wunde
+ *   WS2 = KO                  — 2 Wunden
+ *   WS3 = KO * 1.5 (aufger.)  — 3 Wunden
+ *
+ * Modifikatoren:
+ *   Vorteil "Eisern":             +2 auf ALLE Wundschwellen
+ *   Vorteil "Hohe Lebenskraft":   kein WS-Bonus (nur LeP-max)
+ *   Nachteil "Glasknochen":       −2 auf ALLE Wundschwellen
+ *   Zwerg "Hartgesotten":         +1 auf alle WS (Rassen-Bonus, oft inkludiert)
+ *   SF "Eisenhart":               +2 WS (selten, Profession Wache)
+ *
+ * @param {number} ko
+ * @param {object} [opts]
+ * @param {boolean} [opts.eisern]
+ * @param {boolean} [opts.glasknochen]
+ * @param {boolean} [opts.hartgesotten]
+ * @param {boolean} [opts.eisenhart]
+ */
+export function getWoundThresholds(ko, opts = {}) {
+  const bonus = (opts.eisern        ? 2 : 0)
+              + (opts.hartgesotten  ? 1 : 0)
+              + (opts.eisenhart     ? 2 : 0)
+              - (opts.glasknochen   ? 2 : 0);
   return {
-    ws1: Math.ceil(ko / 2),   // 1 Wunde
-    ws2: ko,                   // 2 Wunden
-    ws3: Math.ceil(ko * 1.5),  // 3 Wunden
+    ws1: Math.max(1, Math.ceil(ko / 2)   + bonus),
+    ws2: Math.max(2, ko                  + bonus),
+    ws3: Math.max(3, Math.ceil(ko * 1.5) + bonus),
+    bonus,
   };
 }
+
+/** Liste der Vorteile/Nachteile/SF die WS beeinflussen (fuer Sheet-Auswertung). */
+export const WS_MODIFIER_NAMES = {
+  vorteile:   ["Eisern"],
+  nachteile:  ["Glasknochen"],
+  sf:         ["Hartgesotten", "Eisenhart"],
+};
 
 export const WOUND_PENALTIES = {
   1: -1,  // 1 Wunde: -1 auf alle Proben

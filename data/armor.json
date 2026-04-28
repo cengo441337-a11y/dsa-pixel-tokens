@@ -266,5 +266,26 @@
     "be": 5,
     "gewicht": 17000,
     "komplett": true
+  },
+  {
+    "name": "Lederrüstung",
+    "rs": 2,
+    "be": 2,
+    "gewicht": 4000,
+    "preis": 80
+  },
+  {
+    "name": "Plattenrüstung",
+    "rs": 7,
+    "be": 6,
+    "gewicht": 35000,
+    "preis": 3500
+  },
+  {
+    "name": "Robe",
+    "rs": 1,
+    "be": 0,
+    "gewicht": 1200,
+    "preis": 40
   }
 ]

@@ -185,8 +185,17 @@ export class PixelArtCharacterSheet extends ActorSheet {
     data.totalWounds = Object.values(wounds).reduce((s, w) => s + (w || 0), 0);  // Summe aller Wunden
     data.woundPenalty = data.totalWounds;                                          // −1 pro Wunde auf alle Proben
     const ko = system.KO?.value ?? 10;
-    const ws = getWoundThresholds(ko);
-    data.woundThresholds = ws;   // { ws1, ws2, ws3 }
+    // Vorteile/Nachteile/SF die WS beeinflussen (WdS S.61)
+    const vorteileMap   = system.vorteile  ?? {};
+    const nachteileMap  = system.nachteile ?? {};
+    const ws = getWoundThresholds(ko, {
+      eisern:       "Eisern" in vorteileMap,
+      glasknochen:  "Glasknochen" in nachteileMap || "Glasknochen" in vorteileMap,
+      hartgesotten: sfList.some(s => s === "Hartgesotten"),
+      eisenhart:    sfList.some(s => s === "Eisenhart"),
+    });
+    data.woundThresholds = ws;
+    data.wsBonus = ws.bonus;
 
     // ── Talente nach Kategorien gruppieren (mit BE-Penalty für körperliche Talente) ──
     data.talentCategories = this._prepareTalents(data.eBE, data.woundPenalty);
@@ -809,7 +818,52 @@ export class PixelArtCharacterSheet extends ActorSheet {
       case "spell":         return this._rollSpell(el.dataset);
       case "damage":        return this._rollDamage(el.dataset);
       case "disadvantage":  return this._rollDisadvantage(el.dataset);
+      case "initiative":    return this._rollInitiative(el.dataset);
     }
+  }
+
+  // ─── Initiative-Probe (1W6 + INI-Basis) ──────────────────────────────
+  // DSA 4.1 (WdS S.65): INI-Wurf = 1W6 + INI-Basis (mit allen SF-Boni)
+  // SF Kampfgespuer (+2 INI) und Kampfreflexe (+4 INI) sollten bereits in
+  // INIBasis.value drin sein (Helden-Software berechnet sie ein), zusaetzlich:
+  // - INI-Penalty durch Ruestung (data.iniPenalty)
+  // - Wund-Malus −1 pro Wunde
+  // - Schild-INI-Mod (negativ, von Schilden eingerechnet)
+  async _rollInitiative() {
+    const sys      = this.actor.system;
+    const sf       = Array.isArray(sys.sf) ? sys.sf : Object.values(sys.sf ?? {}).map(v => v?.name ?? v);
+    const iniBasis = sys.INIBasis?.value ?? 0;
+    const sfKR     = sf.includes("Kampfreflexe") ? 4 : 0;
+    const sfKG     = sf.includes("Kampfgespür") || sf.includes("Kampfgespuer") ? 2 : 0;
+    // Ruestung-Penalty: aus armorZones (gleiche Logik wie Sheet-Anzeige)
+    let armorIni = 0;
+    for (const a of (sys.armorZones ?? [])) armorIni += Math.floor((a.gBE ?? a.be ?? 0) / 2);
+    const wp = this._getWoundPenalty();
+
+    // Falls INIBasis sehr niedrig ist und SF-Boni fehlen → manuell addieren als Sicherheit
+    // (Hinweis im Tooltip)
+    const finalIni = iniBasis + sfKR + sfKG - armorIni - wp;
+
+    const mod = await this._askModifier(`Initiative-Probe (Basis ${iniBasis}${sfKR ? ` +${sfKR} Kampfreflexe`:""}${sfKG ? ` +${sfKG} Kampfgespür`:""}${armorIni ? ` −${armorIni} Rüstung`:""}${wp ? ` −${wp} Wunden`:""})`);
+    if (mod === null) return;
+
+    const roll = new Roll("1d6");
+    await roll.evaluate();
+    this._animateDice(roll.total, 6);
+    const total = roll.total + finalIni + mod;
+
+    const flavor = `<div class="dsa-pixel-chat">
+      <div class="chat-title">⚔ Initiative-Probe</div>
+      <div class="dice-row"><div class="die success">${roll.total}</div></div>
+      <div style="text-align:center;font-size:11px;color:#888;margin-top:3px">
+        1W6 (${roll.total}) + INI ${finalIni}${mod !== 0 ? ` + Mod ${mod >= 0 ? "+" : ""}${mod}` : ""}
+      </div>
+      <div class="result-line result-success" style="font-size:18px;color:#ffd700">
+        Initiative: ${total}
+      </div>
+    </div>`;
+
+    roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this.actor }), flavor });
   }
 
   // ─── Eigenschaftsprobe (1W20) ─────────────────────────────────────────

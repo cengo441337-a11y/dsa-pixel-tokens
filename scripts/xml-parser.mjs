@@ -425,41 +425,168 @@ function _parseEquipmentFull(held, result) {
   }
 
   // ── Gegenstände (Varianten A + C für Waffen und Rüstungen) ──────────────
+  // WICHTIG: Helden-Software exportiert <gegenstände> (mit deutschem Umlaut)
+  // sowie ASCII-Variante <gegenstaende>. Beide Selektoren probieren.
+  // Analog ausrüstungen / ausruestungen. Tag-Names mit Umlaut funktionieren via
+  // XPath in querySelector — wir umgehen das Problem mit getElementsByTagName.
   const seenGegenstands = new Set();
-  for (const el of held.querySelectorAll("gegenstaende > gegenstand, ausruestungen gegenstand")) {
+  const allGegenstaende = [];
+  // Direkt-Tag-Suche (case-sensitive, unterstützt Umlaute):
+  for (const tag of ["gegenstand"]) {
+    for (const el of held.getElementsByTagName(tag)) {
+      // Nur direkte Kinder von gegenstände/gegenstaende/ausrüstungen/ausruestungen
+      const parentName = el.parentElement?.tagName;
+      if (["gegenstände", "gegenstaende", "ausrüstungen", "ausruestungen"].includes(parentName)) {
+        allGegenstaende.push(el);
+      }
+    }
+  }
+  // Datenbank-Lookup fuer Helden-Software-Items (nur Name → DB-Werte ziehen)
+  const wpDb = globalThis.DSAPixelData?.weapons ?? {};
+  const armorDb = globalThis.DSAPixelData?.armor ?? [];
+
+  // Helden-Software ↔ Waffen-DB Aliase fuer haeufige Schreibvarianten
+  const WEAPON_ALIASES = {
+    "anderthalbhänder": "bastardschwert",
+    "bidenhänder":      "bidenhänder", // kept lowercase
+    "großschild":       "großschild (reiterschild)",
+    "schwerer streitkolben": "streitkolben",
+  };
+  const ARMOR_ALIASES = {
+    "kettenhemd, lang": "kettenhemd, langes",
+    "lederrüstung":     "lederrüstung leicht",
+  };
+
+  const lc = s => (s ?? "").toLowerCase().trim().replace(/[\s,]+$/, "");
+  // Strip trailing parenthesized notes for primary match: "Großschild (Reiterschild)" → "Großschild"
+  const stripParen = s => lc(s).replace(/\s*\([^)]*\)\s*$/, "").trim();
+  // Strip trailing comma-suffix: "Kettenhemd, Lang" → "Kettenhemd"
+  const stripCommaSuffix = s => lc(s).split(",")[0].trim();
+
+  const _matchByName = (cand, query) => {
+    const c = lc(cand), q = lc(query);
+    if (c === q) return true;
+    const cBase = stripParen(cand), qBase = stripParen(query);
+    if (cBase === qBase) return true;
+    const cShort = stripCommaSuffix(cand), qShort = stripCommaSuffix(query);
+    if (cShort === qShort) return true;
+    // Substring: query enthält cand-Basis (Helden-Software-Detail vs DB-generic)
+    if (cBase.length > 4 && qBase.startsWith(cBase)) return true;
+    if (qBase.length > 4 && cBase.startsWith(qBase)) return true;
+    return false;
+  };
+
+  const findWeapon = (name) => {
+    const aliasKey = WEAPON_ALIASES[lc(name)];
+    const queries  = aliasKey ? [aliasKey, name] : [name];
+    const all = [...(wpDb.nahkampfwaffen ?? []), ...(wpDb.fernkampfwaffen ?? [])];
+    for (const q of queries) {
+      const hit = all.find(w => _matchByName(w.name, q));
+      if (hit) return hit;
+    }
+    return null;
+  };
+  const findShield = (name) => {
+    const aliasKey = WEAPON_ALIASES[lc(name)];
+    const queries  = aliasKey ? [aliasKey, name] : [name];
+    for (const q of queries) {
+      const hit = (wpDb.schilde ?? []).find(s => _matchByName(s.name, q));
+      if (hit) return hit;
+    }
+    return null;
+  };
+  const findArmor = (name) => {
+    const aliasKey = ARMOR_ALIASES[lc(name)];
+    const queries  = aliasKey ? [aliasKey, name] : [name];
+    for (const q of queries) {
+      const hit = (armorDb ?? []).find(a => _matchByName(a.name, q));
+      if (hit) return hit;
+    }
+    return null;
+  };
+
+  for (const el of allGegenstaende) {
     const name = el.getAttribute("name");
     if (!name) continue;
-    // Duplikate durch verschiedene Selektoren vermeiden
     if (seenGegenstands.has(name)) continue;
     seenGegenstands.add(name);
 
-    const wafeChild    = el.querySelector("waffe");
-    const ruestChild   = el.querySelector("ruestung");
-    const tpAttr       = el.getAttribute("tp");
-    const kampfAttr    = el.getAttribute("kampftalent");
-    const rsAttr       = el.getAttribute("ruestungsschutz");
-    const beAttr       = el.getAttribute("be");
+    const wafeChild  = el.querySelector("waffe");
+    const ruestChild = el.querySelector("ruestung");
+    const tpAttr     = el.getAttribute("tp");
+    const kampfAttr  = el.getAttribute("kampftalent");
+    const rsAttr     = el.getAttribute("ruestungsschutz");
+    const beAttr     = el.getAttribute("be");
 
+    // 1. Inline-Daten im XML (Variante A/C — falls vorhanden)
     if (wafeChild) {
-      // Variante A: Kind-Element <waffe>
       result.weapons.push(_extractWeaponData(name, wafeChild, el));
-    } else if (tpAttr || kampfAttr) {
-      // Variante C: tp/kampftalent direkt auf <gegenstand>
-      result.weapons.push(_extractWeaponData(name, el, null));
-    } else if (ruestChild) {
-      // Variante A/B: Kind-Element <ruestung>
-      result.armor.push(_extractArmorData(name, ruestChild, el));
-    } else if (rsAttr != null || (beAttr != null && el.getAttribute("rs") != null)) {
-      // Variante C: ruestungsschutz direkt auf <gegenstand>
-      result.armor.push(_extractArmorData(name, el, null));
-    } else {
-      // Normaler Gegenstand
-      result.equipment.push({
-        name,
-        quantity: parseInt(el.getAttribute("anzahl")) || 1,
-        weight:   parseFloat(el.getAttribute("gewicht")) || 0,
-      });
+      continue;
     }
+    if (tpAttr || kampfAttr) {
+      result.weapons.push(_extractWeaponData(name, el, null));
+      continue;
+    }
+    if (ruestChild) {
+      result.armor.push(_extractArmorData(name, ruestChild, el));
+      continue;
+    }
+    if (rsAttr != null || (beAttr != null && el.getAttribute("rs") != null)) {
+      result.armor.push(_extractArmorData(name, el, null));
+      continue;
+    }
+
+    // 2. Helden-Software-Standard: nur Name → DB-Lookup
+    const dbWeapon = findWeapon(name);
+    if (dbWeapon) {
+      result.weapons.push({
+        name,
+        tp: dbWeapon.tp ?? "",
+        wmAt: typeof dbWeapon.atMod === "number" ? dbWeapon.atMod : 0,
+        wmPa: typeof dbWeapon.paMod === "number" ? dbWeapon.paMod : 0,
+        kampftalent: dbWeapon.talent ?? "",
+        kkSchwelle: dbWeapon.kkSchwelle ?? null,
+        bf: dbWeapon.bf ?? null,
+        reichweiten: dbWeapon.reichweiten ?? null,
+        ladezeit: dbWeapon.ladezeit ?? null,
+        typ: dbWeapon.typ ?? "nahkampf",
+      });
+      continue;
+    }
+
+    const dbShield = findShield(name);
+    if (dbShield) {
+      result.weapons.push({
+        name,
+        tp: "",
+        wmAt: dbShield.atMod ?? 0,
+        wmPa: dbShield.paMod ?? 0,
+        kampftalent: "Schilde",
+        bf: dbShield.bf ?? null,
+        ini: dbShield.ini ?? 0,
+        typ: "schild",
+      });
+      continue;
+    }
+
+    const dbArmor = findArmor(name);
+    if (dbArmor) {
+      result.armor.push({
+        name,
+        rs: dbArmor.rs ?? 0,
+        be: dbArmor.be ?? 0,
+        zones: dbArmor.zones ?? null,
+        gewicht: dbArmor.gewicht ?? 0,
+      });
+      continue;
+    }
+
+    // 3. Fallback: normaler Gegenstand
+    result.equipment.push({
+      name,
+      quantity: parseInt(el.getAttribute("anzahl")) || 1,
+      weight:   parseFloat(el.getAttribute("gewicht")) || 0,
+    });
   }
 }
 
@@ -1044,6 +1171,92 @@ export async function createActorFromImport(heroData, updateExisting = false) {
 
   if (spellItems.length > 0) {
     await actor.createEmbeddedDocuments("Item", spellItems);
+  }
+
+  // ── 10. Inventar als Gegenstand-Items ────────────────────────────────────
+  // Alte Gegenstand-Items vom letzten Import entfernen (sonst verdoppeln sich Items)
+  const oldGegenstaende = actor.items.filter(i => i.type === "Gegenstand");
+  if (oldGegenstaende.length) {
+    await actor.deleteEmbeddedDocuments("Item", oldGegenstaende.map(i => i.id));
+  }
+
+  const itemDocs = [];
+
+  // 10a. Waffen → Gegenstand mit system.type "melee" oder "range" oder "shield"
+  for (const w of heroData.weapons) {
+    const isRanged = w.typ === "fernkampf";
+    const isShield = w.typ === "schild";
+    const sysType  = isRanged ? "range" : isShield ? "shield" : "melee";
+    const descParts = [
+      w.tp          ? `TP: ${w.tp}`                                          : null,
+      w.kampftalent ? `Talent: ${w.kampftalent}`                             : null,
+      w.bf != null  ? `BF: ${w.bf}`                                          : null,
+      w.kkSchwelle  ? `KK: ${w.kkSchwelle}`                                  : null,
+      w.wmAt        ? `AT-Mod: ${w.wmAt >= 0 ? "+" : ""}${w.wmAt}`           : null,
+      w.wmPa        ? `PA-Mod: ${w.wmPa >= 0 ? "+" : ""}${w.wmPa}`           : null,
+      w.reichweiten ? `Reichweiten: ${w.reichweiten}`                        : null,
+      w.ladezeit    ? `Ladezeit: ${w.ladezeit} Aktionen`                     : null,
+    ].filter(Boolean).join(" | ");
+    itemDocs.push({
+      name: w.name,
+      type: "Gegenstand",
+      system: {
+        type: sysType,
+        weight: 0,
+        value: 0,
+        quantity: 1,
+        worn: true,
+        description: descParts,
+        weapon: {
+          damage: w.tp ?? "",
+          type:   w.kampftalent ?? "",
+          DK:     "",
+          INI:    w.ini ?? 0,
+        },
+      },
+    });
+  }
+
+  // 10b. Rüstungen → Gegenstand mit system.type "armor"
+  for (const a of heroData.armor) {
+    const desc = [
+      `RS: ${a.rs ?? 0}`,
+      `BE: ${a.be ?? 0}`,
+      a.zones ? `Zonen: ${Object.entries(a.zones).map(([z,v]) => `${z}:${v}`).join(", ")}` : null,
+    ].filter(Boolean).join(" | ");
+    itemDocs.push({
+      name: a.name,
+      type: "Gegenstand",
+      system: {
+        type: "armor",
+        weight: a.gewicht ? a.gewicht / 1000 : 0,  // gewicht in U → kg
+        value: 0,
+        quantity: 1,
+        worn: true,
+        description: desc,
+        armor: { rs: a.rs ?? 0, be: a.be ?? 0 },
+      },
+    });
+  }
+
+  // 10c. Equipment → Gegenstand mit system.type "item"
+  for (const e of heroData.equipment) {
+    itemDocs.push({
+      name: e.name,
+      type: "Gegenstand",
+      system: {
+        type: "item",
+        weight: e.weight ?? 0,
+        value: 0,
+        quantity: e.quantity ?? 1,
+        worn: false,
+        description: "",
+      },
+    });
+  }
+
+  if (itemDocs.length > 0) {
+    await actor.createEmbeddedDocuments("Item", itemDocs);
   }
 
   return actor;
