@@ -723,6 +723,7 @@ const HERO_TOKEN_MAP = {
   brand:                     `${BASE}/monsters/brand_token.png`,
   aytan:                     `${BASE}/monsters/aytan_token.png`,
   dunya:                     `${BASE}/monsters/dunya_token.png`,
+  ming:                      `${BASE}/monsters/chibi/ming/rotations/south.png`,
 };
 
 /** Dämonen aus dem Tractatus Contra Daemones → Token-Art */

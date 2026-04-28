@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "ming",
+    "name": "Ming",
+    "prompt": "Tulamidischer / fern-östlich aussehender Krieger mit breitem Strohhut, dunkler Haut, blauer Hose und rotem Oberteil. Schwert auf dem Rücken getragen. Reisender Schwertkämpfer / Söldner-Charakter.",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-04-28T14:00:00.000000+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-04-28T14:00:00.000000"
+}
