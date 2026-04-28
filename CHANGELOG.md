@@ -6,6 +6,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.3] — 2026-04-28
+
+### Datenbank-Erweiterung 🏹
+- **13 fehlende Fernkampfwaffen** in `weapons.json` ergänzt — die DB hatte
+  bisher nur Wurfwaffen + 2 Armbrüste. Bogenschützen wie Tarion (Bogen TaW 18)
+  fanden im DB-Browser keine passende Waffe.
+- **Neue Bögen** (8): Kurzbogen, Langbogen, Elfenbogen, Kompositbogen,
+  Reflexbogen, Doppelbogen, Hornbogen, Mittellanger Bogen
+- **Neue Armbrüste** (5): Leichte Armbrust, Schwere Armbrust, Hetzarmbrust,
+  Repetierarmbrust, Wallarmbrust
+- Werte nach DSA 4.1 *Wege des Schwertes* S.78ff + Arsenal: TP, Reichweiten,
+  KK-Schwelle, Talent (Bogen/Armbrust), Gewicht, Preis, Ladezeit
+- Fernkampfwaffen-Total jetzt **36** (vorher 23)
+
+---
+
 ## [0.4.2] — 2026-04-28
 
 ### Kritischer XML-Parser Schema-Fix 🐛
