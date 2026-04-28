@@ -1410,11 +1410,13 @@ Hooks.on("renderTokenHUD", (hud, html, _data) => {
   const token = hud.object;
   if (!token) return;
 
-  // Effekt-Spalte default rechts, wird nach dem Append per echte DOM-Position
-  // geprüft und bei Sidebar-Kollision links geflippt.
+  // Effekt-Leiste UNTER dem Token-HUD horizontal — keine Kollision mit der
+  // Foundry-Sidebar (rechts) mehr. Vorher rechts:-42px → kollidierte mit
+  // Sidebar wenn Token am rechten Bildschirmrand stand.
   const bar = $(`<div class="sf-hud-col" style="
-    position:absolute; right:-42px; top:0;
-    display:flex; flex-direction:column; gap:2px; z-index:100;
+    position:absolute; left:0; top:calc(100% + 6px);
+    display:flex; flex-direction:row; gap:3px; z-index:100;
+    flex-wrap:wrap; max-width:200px;
   "></div>`);
 
   for (const name of HUD_EFFECTS) {
@@ -1480,32 +1482,6 @@ Hooks.on("renderTokenHUD", (hud, html, _data) => {
   }
 
   html.append(bar);
-
-  // ── Adaptive Positionierung mit echten DOM-Koordinaten ──────────────────
-  // Nach dem DOM-Append einen Tick warten, dann Bounding-Rect der Spalte vs.
-  // der Foundry-Sidebar messen. Wenn die Spalte in die Sidebar reinragen würde,
-  // klappen wir nach links.
-  requestAnimationFrame(() => {
-    try {
-      const barEl = bar[0];
-      if (!barEl?.isConnected) return;
-      const barRect = barEl.getBoundingClientRect();
-      // Suche nach Sidebar — Foundry v12 nutzt #sidebar (eventuell collapsed-Class).
-      const sidebar = document.querySelector("#sidebar");
-      if (!sidebar) return;
-      // Wenn Sidebar collapsed ist, nimmt sie wenig Platz — kein Flip nötig
-      const isCollapsed = sidebar.classList.contains("collapsed");
-      if (isCollapsed) return;
-      const sidebarRect = sidebar.getBoundingClientRect();
-      // Spalte ragt in Sidebar wenn: barRect.right > sidebarRect.left
-      // (mit kleiner Toleranz von 4px)
-      if (barRect.right > sidebarRect.left - 4) {
-        bar.css({ right: "auto", left: "-42px" });
-      }
-    } catch (e) {
-      console.warn(`[${MODULE_ID}] HUD-Position-Check fehlgeschlagen:`, e);
-    }
-  });
 });
 
 // Zone: Template angeklickt → Effekt-Picker

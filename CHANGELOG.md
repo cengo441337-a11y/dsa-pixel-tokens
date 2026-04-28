@@ -6,6 +6,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.13] — 2026-04-28
+
+### HUD-Effekt-Leiste UNTER den Token-HUD (horizontal)
+- v0.4.11/v0.4.12 hatten adaptive Flip-Logik — funktionierte aber in der
+  User-Foundry nicht zuverlässig, möglicherweise wegen anderer Layout-
+  Konfigurationen.
+- Jetzt pragmatisch: Effekt-Buttons sind unterhalb des Token-HUDs
+  horizontal aufgereiht (mit flex-wrap auf max 200px Breite). Kein Konflikt
+  mehr mit der Foundry-Sidebar, egal wo der Token auf der Karte steht.
+
+---
+
 ## [0.4.12] — 2026-04-28
 
 ### Token-HUD-Spalte: Bounding-Rect-basierter Flip
