@@ -126,6 +126,18 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const awAkrobatikBonus = akrobatikTaW >= 12
       ? 1 + Math.floor((akrobatikTaW - 12) / 3)
       : 0;
+    // Nachteils-Mali auf AW (WdS S.66 + WdH Nachteilseinträge):
+    //   Behäbig            → −1 AW
+    //   Glasknochen        → −1 AW (zusätzlich zu WS-Bonus aus getWoundThresholds)
+    //   Tollpatsch         → −1 AW
+    //   Schlechter Reflexe → −2 AW
+    const _nachteileMap = system.nachteile ?? {};
+    const _nachteileNames = Object.keys(_nachteileMap).map(s => s.toLowerCase());
+    let awNachteilMalus = 0;
+    if (_nachteileNames.some(n => n.startsWith("behäbig") || n.startsWith("behaebig") || n.includes("behäbig"))) awNachteilMalus -= 1;
+    if (_nachteileNames.some(n => n.startsWith("tollpatsch"))) awNachteilMalus -= 1;
+    if (_nachteileNames.some(n => n.startsWith("schlechte reflexe") || n.startsWith("schlechter reflexe"))) awNachteilMalus -= 2;
+    if (_nachteileNames.some(n => n.startsWith("schwerfällig") || n.startsWith("schwerfaellig"))) awNachteilMalus -= 1;
     const computed = {
       INIBasis: DERIVED_FORMULAS.INIBasis(rawAttrs),
       MR:       DERIVED_FORMULAS.MR(rawAttrs),
@@ -133,7 +145,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       ATBasis:  DERIVED_FORMULAS.ATBasis(rawAttrs),
       PABasis:  DERIVED_FORMULAS.PABasis(rawAttrs),
       FKBasis:  DERIVED_FORMULAS.FKBasis(rawAttrs),
-      AW:       DERIVED_FORMULAS.AW(rawAttrs) + awSFBonus + awAkrobatikBonus,
+      AW:       DERIVED_FORMULAS.AW(rawAttrs) + awSFBonus + awAkrobatikBonus + awNachteilMalus,
       GS:       raceGS,
     };
     // Clone + override so we don't mutate the live actor.system reference.

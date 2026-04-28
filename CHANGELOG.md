@@ -6,6 +6,53 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.15] — 2026-04-28
+
+### XML-Parser-Bugs (Aytan/Dunya Re-Import)
+
+**Vor-/Nachteile-Trennung über Datenbank-Lookup**
+Helden-Software exportiert ALLE als `<vorteil>`-Tags (auch Nachteile wie
+*Arroganz*, *Behäbig*, *Schlechte Regeneration*). Parser unterscheidet jetzt
+anhand `disadvantages.json`/`advantages.json` per Namens-Match.
+
+**Inventar-Children-Tags Großschreibung erkannt**
+HS schreibt `<Nahkampfwaffe>` und `<Fernkampfwaffe>` mit Großbuchstaben.
+Parser suchte case-sensitiv `<waffe>` (klein) → fanden Items nicht und
+fielen in falsche Klassifizierung. Jetzt: case-insensitiver Child-Lookup
+inkl. beider Schreibweisen.
+
+**Custom-Item-Details (`<modallgemein>`)**
+HS-Items mit User-Customization (z.B. Amulett namens „Sonnenscheibe" mit
+eigenem Gewicht/Preis) werden jetzt mit ihrem Custom-Anzeigenamen
+importiert + Gewicht/Preis übernommen.
+
+**Inventar-Dedup-Bug**
+`seenGegenstands.has(name)` verlor 2× „Dolch" oder 2× „Dicke Kleidung".
+Jetzt slot-aware Dedup-Key (`name|slot|anzahl`).
+
+**Talent-Kategorisierung über talents.json**
+Vorher hardcoded Kurzliste — fehlende Talente landeten in „Handwerk".
+Jetzt: Lookup gegen vollständige `data/talents.json` (86 Einträge).
+
+**LeP/AsP/AuP immer voll beim Import**
+HS-tracked-states (z.B. Aytan AsP=4/61) wurden 1:1 übernommen — User
+erwartet aber vollständig geheilten Charakter. Jetzt: current = max
+beim Import. GM kann manuell anpassen.
+
+**MR per Formel statt HS-XML-value**
+HS-XML schreibt `value=2` für Aytan obwohl Formel `(MU+KL+KO)/5 + Mods = 5`
+ergibt. Jetzt: Formel mit echter Rundung + HS-mod (z.B. −4 von Astralmacht)
+als Endwert.
+
+**Ausweichen-Nachteile-Mali**
+Sheet liest jetzt Nachteile und subtrahiert AW:
+- Behäbig → −1
+- Tollpatsch → −1
+- Schlechte Reflexe → −2
+- Schwerfällig → −1
+
+---
+
 ## [0.4.14] — 2026-04-28
 
 ### Pass-3-Audit-Fixes

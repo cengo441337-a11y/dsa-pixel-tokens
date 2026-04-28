@@ -270,7 +270,17 @@ function _parseTalents(held, result) {
 }
 
 function _guessTalentCategory(name) {
-  const lower = name.toLowerCase();
+  // Primaer: gegen talents.json matchen (kategorie-Feld definitiv korrekt).
+  // Fallback: hardcoded Heuristik fuer Talente die nicht in der DB sind.
+  const lower = name.toLowerCase().trim();
+  const talentDb = globalThis.DSAPixelData?.talents ?? [];
+  const dbHit = talentDb.find(t => (t.name ?? "").toLowerCase() === lower);
+  if (dbHit?.kategorie) return dbHit.kategorie;
+
+  // Sprachen/Schriften aus dem Namen erkennen (kommen oft mit Suffix)
+  if (/^(sprache|schrift)\b/i.test(name) || /\b(sprache|schrift)\s*\(/i.test(name)) return "sprachen";
+
+  // Hardcoded Fallback (alte Logik)
   const koerper = ["klettern", "schwimmen", "reiten", "schleichen", "sinnenschärfe",
     "körperbeherrschung", "selbstbeherrschung", "zechen", "akrobatik", "athletik",
     "fliegen", "gaukeleien", "tanzen", "taschendiebstahl"];
@@ -279,7 +289,8 @@ function _guessTalentCategory(name) {
   const natur = ["fährtensuchen", "fallenstellen", "fischen", "orientierung",
     "wettervorhersage", "wildnisleben", "tierkunde", "pflanzenkunde"];
   const wissen = ["götter", "sagen", "rechnen", "geografie", "geschichtswissen",
-    "magiekunde", "anatomie", "alchimie", "mechanik", "rechtskunde"];
+    "magiekunde", "anatomie", "alchimie", "mechanik", "rechtskunde",
+    "philosophie", "kriegskunst", "sternkunde", "kryptografie"];
 
   if (koerper.some(k => lower.includes(k))) return "koerper";
   if (gesellschaft.some(k => lower.includes(k))) return "gesellschaft";
@@ -325,17 +336,60 @@ function _parseSpells(held, result) {
 // ─── Vorteile / Nachteile ───────────────────────────────────────────────────
 
 function _parseAdvantages(held, result) {
-  for (const el of held.querySelectorAll("vt > vorteil")) {
-    result.advantages.push({
-      name:  el.getAttribute("name") || "",
-      value: _parseAdvValue(el.getAttribute("value")),
-    });
-  }
-  for (const el of held.querySelectorAll("vt > nachteil")) {
-    result.disadvantages.push({
-      name:  el.getAttribute("name") || "",
-      value: _parseAdvValue(el.getAttribute("value")),
-    });
+  // Helden-Software exportiert ALLE Vor- UND Nachteile als <vorteil>-Tags
+  // (separates <nachteil>-Tag gibt es selten — manchmal als Fallback). Wir
+  // unterscheiden anhand der Namens-Datenbanken advantages.json /
+  // disadvantages.json: ist der Name in disadvantages.json → Nachteil,
+  // sonst Vorteil.
+  const advDb = globalThis.DSAPixelData?.advantages ?? [];
+  const disDb = globalThis.DSAPixelData?.disadvantages ?? [];
+
+  // Normalisierung fuer Lookup: lowercase, "[Stichwort]"-Klammern strippen
+  const _norm = (s) => (s ?? "").toLowerCase()
+    .replace(/\s*\[[^\]]*\]\s*/g, "")  // "[Merkmal]"-Platzhalter raus
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const _isDisadvantage = (name) => {
+    const n = _norm(name);
+    if (!n) return false;
+    // Direkter Match
+    if (disDb.some(d => _norm(d.name) === n)) return true;
+    // Fuzzy: Disadvantage-Eintrag startet mit Name + ", X" (z.B. "Adlig, ...")
+    if (disDb.some(d => _norm(d.name).startsWith(n + ",") || n.startsWith(_norm(d.name) + ","))) return true;
+    // Fuzzy: substring (fuer "Angst vor Dunkelheit" → "Angst vor [...]")
+    if (disDb.some(d => {
+      const dn = _norm(d.name);
+      return dn.length > 4 && (n.startsWith(dn) || dn.startsWith(n));
+    })) return true;
+    return false;
+  };
+
+  // Sammle alle vorteile- UND nachteil-Tags (HS hat manchmal beide)
+  const allEls = [
+    ...held.querySelectorAll("vt > vorteil"),
+    ...held.querySelectorAll("vt > nachteil"),
+    // Auch direkter parent ohne <vt> (manche HS-Versionen):
+    ...Array.from(held.getElementsByTagName("vorteil")).filter(e => e.parentElement?.tagName !== "vt"),
+  ];
+  // Deduplizieren
+  const seen = new Set();
+  for (const el of allEls) {
+    const name = el.getAttribute("name") || "";
+    if (!name) continue;
+    const value = _parseAdvValue(el.getAttribute("value"));
+    const key = `${name}|${value}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    // <nachteil>-Tag → immer Nachteil
+    // <vorteil>-Tag → DB-Lookup
+    const isDis = el.tagName.toLowerCase() === "nachteil" || _isDisadvantage(name);
+    if (isDis) {
+      result.disadvantages.push({ name, value });
+    } else {
+      result.advantages.push({ name, value });
+    }
   }
 }
 
@@ -527,11 +581,42 @@ function _parseEquipmentFull(held, result) {
   for (const el of allGegenstaende) {
     const name = el.getAttribute("name");
     if (!name) continue;
-    if (seenGegenstands.has(name)) continue;
-    seenGegenstands.add(name);
+    // Dedup-Key: name+slot+anzahl statt nur name. So gehen 2× "Dolch" nicht verloren.
+    const slot   = el.getAttribute("slot") ?? "";
+    const anzahl = el.getAttribute("anzahl") ?? "1";
+    const dedupKey = `${name}|${slot}|${anzahl}`;
+    if (seenGegenstands.has(dedupKey)) continue;
+    seenGegenstands.add(dedupKey);
 
-    const wafeChild  = el.querySelector("waffe");
-    const ruestChild = el.querySelector("ruestung");
+    // Children-Tags erkennen — HS nutzt verschiedene Schreibweisen:
+    //   <waffe>            (klein)
+    //   <Nahkampfwaffe>    (groß)
+    //   <Fernkampfwaffe>   (groß)
+    //   <ruestung>
+    //   <modallgemein>     (custom Item-Daten: Gewicht/Preis/Anzeigename)
+    const _findChildCi = (parent, names) => {
+      for (const child of parent.children) {
+        if (names.some(n => n.toLowerCase() === child.tagName.toLowerCase())) return child;
+      }
+      return null;
+    };
+    const wafeChild      = _findChildCi(el, ["waffe"]);
+    const nahkampfChild  = _findChildCi(el, ["nahkampfwaffe", "Nahkampfwaffe"]);
+    const fernkampfChild = _findChildCi(el, ["fernkampfwaffe", "Fernkampfwaffe"]);
+    const ruestChild     = _findChildCi(el, ["ruestung", "rüstung"]);
+    const modAllgemein   = _findChildCi(el, ["modallgemein"]);
+
+    // Custom-Item-Details aus <modallgemein> extrahieren
+    let customDisplayName = null, customWeight = null, customPrice = null;
+    if (modAllgemein) {
+      const _attr = (tag, a = "value") => modAllgemein.querySelector(tag)?.getAttribute(a);
+      customDisplayName = _attr("name");
+      customWeight      = parseFloat(_attr("gewicht")) || null;
+      customPrice       = parseFloat(_attr("preis"))   || null;
+    }
+    // Effektiver Anzeigename: Custom-Name → sonst Original-Name
+    const displayName = customDisplayName || name;
+
     const tpAttr     = el.getAttribute("tp");
     const kampfAttr  = el.getAttribute("kampftalent");
     const rsAttr     = el.getAttribute("ruestungsschutz");
@@ -539,19 +624,69 @@ function _parseEquipmentFull(held, result) {
 
     // 1. Inline-Daten im XML (Variante A/C — falls vorhanden)
     if (wafeChild) {
-      result.weapons.push(_extractWeaponData(name, wafeChild, el));
+      const w = _extractWeaponData(name, wafeChild, el);
+      if (customDisplayName) w.displayName = customDisplayName;
+      result.weapons.push(w);
+      continue;
+    }
+    // <Nahkampfwaffe> Children: Talent + DB-Lookup für Werte
+    if (nahkampfChild) {
+      const talent = nahkampfChild.querySelector("talente")?.getAttribute("kampftalent")
+                   ?? nahkampfChild.getAttribute("kampftalent")
+                   ?? "";
+      // Werte aus DB ziehen wenn HS keine Inline-Daten hat
+      const dbW = findWeapon(name);
+      result.weapons.push({
+        name,
+        displayName: customDisplayName || null,
+        tp: dbW?.tp ?? "",
+        wmAt: dbW?.atMod ?? 0,
+        wmPa: dbW?.paMod ?? 0,
+        kampftalent: talent || dbW?.talent || "",
+        kkSchwelle:  dbW?.kkSchwelle ?? null,
+        bf: dbW?.bf ?? null,
+        reichweiten: dbW?.reichweiten ?? null,
+        typ: "nahkampf",
+      });
+      continue;
+    }
+    // <Fernkampfwaffe> Children
+    if (fernkampfChild) {
+      const talent = fernkampfChild.querySelector("talente")?.getAttribute("kampftalent")
+                   ?? fernkampfChild.getAttribute("kampftalent")
+                   ?? "";
+      const dbW = findWeapon(name);
+      result.weapons.push({
+        name,
+        displayName: customDisplayName || null,
+        tp: dbW?.tp ?? "",
+        wmAt: dbW?.atMod ?? 0,
+        wmPa: dbW?.paMod ?? 0,
+        kampftalent: talent || dbW?.talent || "",
+        kkSchwelle:  dbW?.kkSchwelle ?? null,
+        bf: dbW?.bf ?? null,
+        reichweiten: dbW?.reichweiten ?? null,
+        ladezeit: dbW?.ladezeit ?? null,
+        typ: "fernkampf",
+      });
       continue;
     }
     if (tpAttr || kampfAttr) {
-      result.weapons.push(_extractWeaponData(name, el, null));
+      const w = _extractWeaponData(name, el, null);
+      if (customDisplayName) w.displayName = customDisplayName;
+      result.weapons.push(w);
       continue;
     }
     if (ruestChild) {
-      result.armor.push(_extractArmorData(name, ruestChild, el));
+      const a = _extractArmorData(name, ruestChild, el);
+      if (customDisplayName) a.displayName = customDisplayName;
+      result.armor.push(a);
       continue;
     }
     if (rsAttr != null || (beAttr != null && el.getAttribute("rs") != null)) {
-      result.armor.push(_extractArmorData(name, el, null));
+      const a = _extractArmorData(name, el, null);
+      if (customDisplayName) a.displayName = customDisplayName;
+      result.armor.push(a);
       continue;
     }
 
@@ -600,11 +735,15 @@ function _parseEquipmentFull(held, result) {
       continue;
     }
 
-    // 3. Fallback: normaler Gegenstand
+    // 3. Fallback: normaler Gegenstand. Custom-Details aus <modallgemein>
+    // (Sonnenscheibe-Beispiel: Amulett mit Custom-Name "Sonnenscheibe", Gewicht 2.0, Preis 400).
     result.equipment.push({
       name,
-      quantity: parseInt(el.getAttribute("anzahl")) || 1,
-      weight:   parseFloat(el.getAttribute("gewicht")) || 0,
+      displayName: customDisplayName || null,
+      quantity:    parseInt(el.getAttribute("anzahl")) || 1,
+      weight:      customWeight ?? (parseFloat(el.getAttribute("gewicht")) || 0),
+      price:       customPrice ?? 0,
+      slot,
     });
   }
 }
@@ -989,16 +1128,17 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   // AuP: GE + KO + KK/2 (rund) + Bonus
   const aupMaxFormel = (attr.GE ?? 10) + (attr.KO ?? 10) + Math.ceil((attr.KK ?? 10) / 2) + aupBonus;
   const aupMax = (dv.AuP?._finalMax > 0) ? dv.AuP._finalMax : aupMaxFormel;
-  // Aktueller Wert: XML-Wert wenn > 0, sonst Max (0 = aufgebraucht oder nicht getrackt)
-  const lepCurrent = (dv.LeP?.value > 0) ? dv.LeP.value : lepMax;
-  const aspCurrent = (dv.AsP?.value > 0) ? dv.AsP.value : aspMax;
-  const aupCurrent = (dv.AuP?.value > 0) ? dv.AuP.value : aupMax;
-  // Konsistenz-Check: max muss >= current sein. Helden-Software gibt manchmal
-  // hoehere current-Werte (durch SF/Vorteile wie Eisern, Hohe Lebenskraft) als
-  // unsere Formel berechnet — dann ist der HS-Wert die Wahrheit.
-  sys.LeP = { value: lepCurrent, max: Math.max(lepMax, lepCurrent) };
-  sys.AsP = { value: aspCurrent, max: Math.max(aspMax, aspCurrent) };
-  sys.AuP = { value: aupCurrent, max: Math.max(aupMax, aupCurrent) };
+  // Aktueller Wert: IMMER voll beim Import. Helden-Software trackt manchmal
+  // mid-combat-states (z.B. Aytan AsP=4/61), aber beim Foundry-Import erwartet
+  // der User normalerweise einen vollständigen, geheilten Charakter. Falls
+  // der GM den HS-Combat-State will, kann er die Bars im Sheet manuell
+  // heruntersetzen.
+  const lepCurrent = lepMax;
+  const aspCurrent = aspMax;
+  const aupCurrent = aupMax;
+  sys.LeP = { value: lepCurrent, max: lepMax };
+  sys.AsP = { value: aspCurrent, max: aspMax };
+  sys.AuP = { value: aupCurrent, max: aupMax };
   // ── Derived values mit vollstaendigem gdsa-Schema ──────────────────────
   // gdsa template.json:
   //   MR:       { value, modi, tempmodi, buy }
@@ -1020,14 +1160,16 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   // Sheet-Render mit seiner Formel (wenn die XML-Werte abweichen, kommt dann
   // der gdsa-Wert raus, was DSA-konform ist).
 
-  // MR: aus XML direkt + Helden-Software-Mods (mrmod aus Astralenergie etc.)
+  // MR: per Formel berechnet (DSA 4.1 WdH S.20: (MU+KL+KO)/5 + Mods).
+  // Vorher: HS-XML-value direkt → war oft zu niedrig (Bsp. Aytan: HS=2,
+  // Formel=5, da Astralmacht-Mod schon abgezogen). Jetzt: Formel verwenden
+  // mit echter Rundung, plus HS-mrmod (z.B. -4 von Astralmacht 4) ist schon
+  // im Endwert eingerechnet.
   {
-    const mrFromXml = dv.MR?.value ?? 0;
-    const mrFormula = Math.floor(((attr.MU ?? 10) + (attr.KL ?? 10) + (attr.KO ?? 10)) / 5);
-    const mrFinal   = mrFromXml > 0 ? mrFromXml : (mrFormula + (dv.MR?.mod ?? 0));
-    // gdsa hat MR.value, MR.modi, MR.tempmodi, MR.buy
-    // 'buy' ist der "gekaufte" MR-Bonus; wir packen Helden-Software's mod dorthin
-    sys.MR = { value: mrFinal, modi: 0, tempmodi: 0, buy: (dv.MR?.mod ?? 0) };
+    const mrFormula = Math.round(((attr.MU ?? 10) + (attr.KL ?? 10) + (attr.KO ?? 10)) / 5);
+    const mrMod = dv.MR?.mod ?? 0;          // Astralmacht-Penalty etc.
+    const mrFinal = mrFormula + mrMod;
+    sys.MR = { value: mrFinal, modi: mrMod, tempmodi: 0, buy: 0 };
   }
 
   // INIBasis: schema { value, modi, tempmodi, sysModi }
@@ -1288,7 +1430,7 @@ export async function createActorFromImport(heroData, updateExisting = false) {
         ladezeit: w.ladezeit ?? 0,
       };
     }
-    itemDocs.push({ name: w.name, type: "Gegenstand", system: itemSys });
+    itemDocs.push({ name: w.displayName || w.name, type: "Gegenstand", system: itemSys });
   }
 
   // 10b. Rüstungen → Gegenstand mit system.type "armor"
@@ -1299,7 +1441,7 @@ export async function createActorFromImport(heroData, updateExisting = false) {
       a.zones ? `Zonen: ${Object.entries(a.zones).map(([z,v]) => `${z}:${v}`).join(", ")}` : null,
     ].filter(Boolean).join(" | ");
     itemDocs.push({
-      name: a.name,
+      name: a.displayName || a.name,
       type: "Gegenstand",
       system: {
         type: "armor",
@@ -1314,17 +1456,25 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   }
 
   // 10c. Equipment → Gegenstand mit system.type "item"
+  // displayName (z.B. "Sonnenscheibe") wird als Item-Name verwendet, sonst
+  // der generische Name ("Amulett"). So bleibt die User-Customization aus HS.
   for (const e of heroData.equipment) {
+    const itemName = e.displayName || e.name;
+    const desc = [
+      e.displayName ? `Typ: ${e.name}` : null,
+      e.price ? `Wert: ${e.price} S` : null,
+      e.slot ? `Slot: ${e.slot}` : null,
+    ].filter(Boolean).join(" | ");
     itemDocs.push({
-      name: e.name,
+      name: itemName,
       type: "Gegenstand",
       system: {
         type: "item",
         weight: e.weight ?? 0,
-        value: 0,
+        value: e.price ?? 0,
         quantity: e.quantity ?? 1,
         worn: false,
-        description: "",
+        description: desc,
       },
     });
   }
