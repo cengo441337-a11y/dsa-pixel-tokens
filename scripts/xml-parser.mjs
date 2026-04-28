@@ -1160,16 +1160,20 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   // Sheet-Render mit seiner Formel (wenn die XML-Werte abweichen, kommt dann
   // der gdsa-Wert raus, was DSA-konform ist).
 
-  // MR: per Formel berechnet (DSA 4.1 WdH S.20: (MU+KL+KO)/5 + Mods).
-  // Vorher: HS-XML-value direkt → war oft zu niedrig (Bsp. Aytan: HS=2,
-  // Formel=5, da Astralmacht-Mod schon abgezogen). Jetzt: Formel verwenden
-  // mit echter Rundung, plus HS-mrmod (z.B. -4 von Astralmacht 4) ist schon
-  // im Endwert eingerechnet.
+  // MR: per Formel berechnet (DSA 4.1 WdH S.20: (MU+KL+KO)/5 + value + mod).
+  // HS-XML hat 3 Komponenten:
+  //   formel = (MU+KL+KO)/5  echt gerundet
+  //   value  = gekaufter AP-Bonus (über Steigerungen) — z.B. Dunya: +2
+  //   mod    = Penalty vom Vollzauberer-Vorteil (-1 pro Astralenergie-Kategorie)
+  //            z.B. Dunya: -2, Aytan: -4
+  // Final = formel + value + mod.
+  // Beispiel Dunya: 8 + 2 + (-2) = 8.
   {
     const mrFormula = Math.round(((attr.MU ?? 10) + (attr.KL ?? 10) + (attr.KO ?? 10)) / 5);
-    const mrMod = dv.MR?.mod ?? 0;          // Astralmacht-Penalty etc.
-    const mrFinal = mrFormula + mrMod;
-    sys.MR = { value: mrFinal, modi: mrMod, tempmodi: 0, buy: 0 };
+    const mrBuy   = dv.MR?.value ?? 0;     // gekaufter AP-Bonus
+    const mrMod   = dv.MR?.mod ?? 0;       // Vollzauberer-Penalty
+    const mrFinal = mrFormula + mrBuy + mrMod;
+    sys.MR = { value: mrFinal, modi: mrMod, tempmodi: 0, buy: mrBuy };
   }
 
   // INIBasis: schema { value, modi, tempmodi, sysModi }
