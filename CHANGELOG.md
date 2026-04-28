@@ -8,23 +8,29 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ## [0.4.2] — 2026-04-28
 
-### Bugfixes 🐛
-- **XML-Parser**: Kritischer Fix für Helden mit komplexem gdsa-Schema. Beim
-  initialen `actor.update()` mit dem ganzen `system`-Objekt verwarf das
-  gdsa-System unsere Werte für `INIBasis`, `MR`, `ATBasis`, `PABasis`, `FKBasis`,
-  `Dogde` und Max-Werte (LeP/AsP/AuP), weil deren Schema mehr Felder erwartet
-  (`modi`, `sysModi`, `buy`, etc.). Lösung: Nach dem Haupt-Update werden diese
-  Werte explizit via dot-notation gesetzt. **Tamirs INIBasis bleibt jetzt 11
-  statt 0.**
+### Kritischer XML-Parser Schema-Fix 🐛
+**Wahre Ursache** der INIBasis/MR/AT/PA/FK = 0 Bugs gefunden und sauber
+behoben (kein Workaround mehr):
+
+- **Eigenschaften-Schema:** Parser schrieb `{value, mod}` — das gdsa-Schema
+  erwartet aber `{value, temp, baseAnti}`. Folge: `MU.baseAnti = 0` für alle
+  Helden, und gdsa's `prepareData` rechnete INIBasis/AT/PA/FK aus `baseAnti`
+  und kam auf `0`. Fix: Parser schreibt jetzt schema-konforme
+  `{value, temp: 0, baseAnti: 0}` — gdsa rechnet die abgeleiteten Werte
+  korrekt aus.
+- **Derived-Schema:** Komplette gdsa-Felder bei MR `{value, modi, tempmodi, buy}`,
+  INIBasis `{value, modi, tempmodi, sysModi}`, ATBasis/PABasis/FKBasis
+  `{value, tempmodi}`. Helden-Software-Boni landen jetzt im korrekten Feld
+  (`buy` für MR-Bonus aus AE-Astralenergie etc.).
 - **Edo die Eiche** wurde mit alten Stub-Werten gespeichert (MU 10, KL 11 etc.)
-  statt aus seiner XML korrekt importiert. Nach v0.4.2 + DSAHeldImport: korrekte
+  statt aus seiner XML korrekt importiert. Nach v0.4.2 + Re-Import: korrekte
   Werte (MU 16, KL 16, KO 18, KK 18, 73 Talente, 72 Zauber).
+- **Tamir's INIBasis** bleibt jetzt 11 (aus Helden-Software) statt 0.
 
 ### Audit-Tools 🔍
 - Neues internes Audit-Script (`parser-audit.py`) das jede XML-Datei parst,
   mit Foundry-Actor-Werten via MCP-Bridge vergleicht und feldweise alle
-  Diskrepanzen meldet. Findet Parser-Bugs, falsche Schema-Mappings,
-  überschriebene Werte.
+  Diskrepanzen meldet. Hat den Schema-Bug gefunden.
 
 ---
 

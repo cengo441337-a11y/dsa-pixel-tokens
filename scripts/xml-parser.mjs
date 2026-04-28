@@ -794,8 +794,14 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   const sys = {};
 
   // ── 1. Eigenschaften (MU, KL, IN, ...) ──────────────────────────────────
+  // gdsa-Schema (template.json): { value, temp, baseAnti }
+  // - value:    aktueller Wert inkl. permanenter Mods
+  // - temp:     temporaerer Modifikator (debuffs/buffs)
+  // - baseAnti: Anti-Modifikator-Basis fuer Proben (DSA: meist 0)
+  // gdsa rechnet INIBasis/MR/AT/PA/FK aus diesen Eigenschaften neu, deshalb
+  // muessen sie schema-konform gesetzt sein, sonst rechnet gdsa mit 0.
   for (const [attr, val] of Object.entries(heroData.attributes)) {
-    sys[attr] = { value: val, mod: 0 };
+    sys[attr] = { value: val, temp: 0, baseAnti: 0 };
   }
 
   // ── 2. Abgeleitete Werte ─────────────────────────────────────────────────
@@ -829,31 +835,54 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   sys.LeP = { value: lepCurrent, max: lepMax };
   sys.AsP = { value: aspCurrent, max: aspMax };
   sys.AuP = { value: aupCurrent, max: aupMax };
-  // MR: Helden-Software berechnet den FINALEN Wert bereits in <eigenschaft name="Magieresistenz" value="X">
-  //     inkl. aller Mods (mrmod aus Astralenergie, Rasse-Boni, SF-Boni).
-  //     Wir nehmen den XML-Wert DIREKT und berechnen nicht neu — sonst ueberschreiben wir Helden-Software.
-  //     Fallback: Formel (MU+KL+KO)/5 + mod wenn XML keinen Wert liefert.
+  // ── Derived values mit vollstaendigem gdsa-Schema ──────────────────────
+  // gdsa template.json:
+  //   MR:       { value, modi, tempmodi, buy }
+  //   INIBasis: { value, modi, tempmodi, sysModi }
+  //   ATBasis:  { value, tempmodi }
+  //   PABasis:  { value, tempmodi }
+  //   FKBasis:  { value, tempmodi }
+  //
+  // gdsa-Sheet rechnet INIBasis/AT/PA/FK bei jedem Render NEU aus den Eigenschaften
+  // (siehe gdsa/module/sheets/GDSAPlayerCharakterSheet.js):
+  //   INIBase  = (2*MU + IN + GE)/5   (MU wird zweimal addiert!)
+  //   ATBasis  = (MU + GE + KK)/5
+  //   PABasis  = (IN + GE + KK)/5
+  //   FKBasis  = (IN + FF + KK)/5
+  //
+  // Damit gdsa beim Render zum richtigen Wert kommt, muessen die Eigenschaften
+  // korrekt gesetzt sein (haben wir oben). Wir setzen die derived values
+  // trotzdem als initialen Snapshot — gdsa ueberschreibt sie beim naechsten
+  // Sheet-Render mit seiner Formel (wenn die XML-Werte abweichen, kommt dann
+  // der gdsa-Wert raus, was DSA-konform ist).
+
+  // MR: aus XML direkt + Helden-Software-Mods (mrmod aus Astralenergie etc.)
   {
-    const mrFromXml = dv.MR?.value;
-    const mrFormula = Math.floor(((attr.MU ?? 10) + (attr.KL ?? 10) + (attr.KO ?? 10)) / 5) + (dv.MR?.mod ?? 0);
-    sys.MR = { value: (mrFromXml != null && mrFromXml > 0) ? mrFromXml : mrFormula, tempmodi: 0 };
+    const mrFromXml = dv.MR?.value ?? 0;
+    const mrFormula = Math.floor(((attr.MU ?? 10) + (attr.KL ?? 10) + (attr.KO ?? 10)) / 5);
+    const mrFinal   = mrFromXml > 0 ? mrFromXml : (mrFormula + (dv.MR?.mod ?? 0));
+    // gdsa hat MR.value, MR.modi, MR.tempmodi, MR.buy
+    // 'buy' ist der "gekaufte" MR-Bonus; wir packen Helden-Software's mod dorthin
+    sys.MR = { value: mrFinal, modi: 0, tempmodi: 0, buy: (dv.MR?.mod ?? 0) };
   }
-  // INIBasis: Helden-Software hat den Wert schon berechnet in <eigenschaft name="ini" value="X">.
-  //          Direkt uebernehmen. Fallback: Formel (MU+IN+GE)/5 gerundet.
+
+  // INIBasis: schema { value, modi, tempmodi, sysModi }
+  // Helden-Software-Wert hat Vorrang (inkl. SF "Kampfreflexe" etc.)
   {
-    const iniFromXml = dv.INI?.value;
-    const iniFormula = Math.round(((attr.MU ?? 10) + (attr.IN ?? 10) + (attr.GE ?? 10)) / 5);
-    const iniVal = (iniFromXml != null && iniFromXml > 0) ? iniFromXml : iniFormula;
-    sys.INIBasis = { value: iniVal + (dv.INI?.mod ?? 0), tempmodi: 0 };
+    const iniFromXml = dv.INI?.value ?? 0;
+    const iniFormula = Math.round(((attr.MU ?? 10) * 2 + (attr.IN ?? 10) + (attr.GE ?? 10)) / 5);
+    const iniFinal   = iniFromXml > 0 ? iniFromXml : iniFormula;
+    sys.INIBasis = { value: iniFinal, modi: 0, tempmodi: 0, sysModi: 0 };
     if (dv.INI) sys.INI = { value: dv.INI.value, tempmodi: 0 }; // Legacy
   }
-  // Kampf-Basiswerte aus XML; Fallback aus Formel wenn XML-Wert 0/fehlt
+
+  // ATBasis/PABasis/FKBasis: schema { value, tempmodi }
   const atFormula = Math.round(((attr.MU ?? 10) + (attr.GE ?? 10) + (attr.KK ?? 10)) / 5);
   const paFormula = Math.round(((attr.IN ?? 10) + (attr.GE ?? 10) + (attr.KK ?? 10)) / 5);
   const fkFormula = Math.round(((attr.IN ?? 10) + (attr.FF ?? 10) + (attr.KK ?? 10)) / 5);
-  sys.ATBasis = { value: (dv.AT?.value > 0 ? dv.AT.value : atFormula) + (dv.AT?.mod ?? 0), tempmodi: 0 };
-  sys.PABasis = { value: (dv.PA?.value > 0 ? dv.PA.value : paFormula) + (dv.PA?.mod ?? 0), tempmodi: 0 };
-  sys.FKBasis = { value: (dv.FK?.value > 0 ? dv.FK.value : fkFormula) + (dv.FK?.mod ?? 0), tempmodi: 0 };
+  sys.ATBasis = { value: (dv.AT?.value > 0 ? dv.AT.value : atFormula), tempmodi: 0 };
+  sys.PABasis = { value: (dv.PA?.value > 0 ? dv.PA.value : paFormula), tempmodi: 0 };
+  sys.FKBasis = { value: (dv.FK?.value > 0 ? dv.FK.value : fkFormula), tempmodi: 0 };
 
   // ── 3. Kampftalente → system.skill ──────────────────────────────────────
   sys.skill = {};
@@ -982,24 +1011,6 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   } else {
     actor = await Actor.create(actorData);
   }
-
-  // ── 8b. Force-set kritische Werte via dot-notation ───────────────────────
-  // Das gdsa-Schema hat fuer INIBasis/MR/AT/PA/FK/Dogde komplexe Felder
-  // (modi, sysModi, buy, etc). Wenn wir oben `system: sys` mit nur {value, tempmodi}
-  // schreiben, ueberschreibt das gdsa-System unsere Werte teils zurueck auf 0.
-  // Loesung: nach dem Haupt-Update nochmal explizit nur die value-Felder via
-  // dot-notation setzen (preserved alles andere am Object).
-  const valueFix = {};
-  if (sys.INIBasis?.value != null) valueFix["system.INIBasis.value"] = sys.INIBasis.value;
-  if (sys.MR?.value       != null) valueFix["system.MR.value"]       = sys.MR.value;
-  if (sys.ATBasis?.value  != null) valueFix["system.ATBasis.value"]  = sys.ATBasis.value;
-  if (sys.PABasis?.value  != null) valueFix["system.PABasis.value"]  = sys.PABasis.value;
-  if (sys.FKBasis?.value  != null) valueFix["system.FKBasis.value"]  = sys.FKBasis.value;
-  if (sys.LeP?.max        != null) valueFix["system.LeP.max"]        = sys.LeP.max;
-  if (sys.AsP?.max        != null) valueFix["system.AsP.max"]        = sys.AsP.max;
-  if (sys.AuP?.max        != null) valueFix["system.AuP.max"]        = sys.AuP.max;
-  if (sys.Dogde           != null) valueFix["system.Dogde"]          = sys.Dogde;
-  if (Object.keys(valueFix).length) await actor.update(valueFix);
 
   // ── 9. Zauber als spell-Items ────────────────────────────────────────────
   // gdsa template.json: type="spell", Felder: att1/att2/att3, zfw, rep, cost (nicht costs),
