@@ -959,9 +959,12 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   const lepCurrent = (dv.LeP?.value > 0) ? dv.LeP.value : lepMax;
   const aspCurrent = (dv.AsP?.value > 0) ? dv.AsP.value : aspMax;
   const aupCurrent = (dv.AuP?.value > 0) ? dv.AuP.value : aupMax;
-  sys.LeP = { value: lepCurrent, max: lepMax };
-  sys.AsP = { value: aspCurrent, max: aspMax };
-  sys.AuP = { value: aupCurrent, max: aupMax };
+  // Konsistenz-Check: max muss >= current sein. Helden-Software gibt manchmal
+  // hoehere current-Werte (durch SF/Vorteile wie Eisern, Hohe Lebenskraft) als
+  // unsere Formel berechnet — dann ist der HS-Wert die Wahrheit.
+  sys.LeP = { value: lepCurrent, max: Math.max(lepMax, lepCurrent) };
+  sys.AsP = { value: aspCurrent, max: Math.max(aspMax, aspCurrent) };
+  sys.AuP = { value: aupCurrent, max: Math.max(aupMax, aupCurrent) };
   // ── Derived values mit vollstaendigem gdsa-Schema ──────────────────────
   // gdsa template.json:
   //   MR:       { value, modi, tempmodi, buy }
@@ -1139,6 +1142,25 @@ export async function createActorFromImport(heroData, updateExisting = false) {
     actor = await Actor.create(actorData);
   }
 
+  // ── 8b. Force-set scalar derived values via dot-notation ──────────────────
+  // Bestimmte gdsa-Felder (Dogde als plain number, LeP.max etc.) werden bei
+  // partial system-Updates manchmal nicht persistent. Sicherheitsnetz: nach
+  // dem Haupt-Update nochmal explizit setzen.
+  await actor.update({
+    "system.Dogde":           sys.Dogde,
+    "system.LeP.value":       sys.LeP.value,
+    "system.LeP.max":         sys.LeP.max,
+    "system.AsP.value":       sys.AsP.value,
+    "system.AsP.max":         sys.AsP.max,
+    "system.AuP.value":       sys.AuP.value,
+    "system.AuP.max":         sys.AuP.max,
+    "system.INIBasis.value":  sys.INIBasis.value,
+    "system.MR.value":        sys.MR.value,
+    "system.ATBasis.value":   sys.ATBasis.value,
+    "system.PABasis.value":   sys.PABasis.value,
+    "system.FKBasis.value":   sys.FKBasis.value,
+  });
+
   // ── 9. Zauber als spell-Items ────────────────────────────────────────────
   // gdsa template.json: type="spell", Felder: att1/att2/att3, zfw, rep, cost (nicht costs),
   //                     isMR, lcdPage, trait1-4, technic, casttime, forced, cost, range,
@@ -1182,7 +1204,7 @@ export async function createActorFromImport(heroData, updateExisting = false) {
 
   const itemDocs = [];
 
-  // 10a. Waffen → Gegenstand mit system.type "melee" oder "range" oder "shield"
+  // 10a. Waffen → Gegenstand mit system.type "melee"/"range"/"shield"
   for (const w of heroData.weapons) {
     const isRanged = w.typ === "fernkampf";
     const isShield = w.typ === "schild";
@@ -1197,24 +1219,42 @@ export async function createActorFromImport(heroData, updateExisting = false) {
       w.reichweiten ? `Reichweiten: ${w.reichweiten}`                        : null,
       w.ladezeit    ? `Ladezeit: ${w.ladezeit} Aktionen`                     : null,
     ].filter(Boolean).join(" | ");
-    itemDocs.push({
-      name: w.name,
-      type: "Gegenstand",
-      system: {
-        type: sysType,
-        weight: 0,
-        value: 0,
-        quantity: 1,
-        worn: true,
-        description: descParts,
-        weapon: {
-          damage: w.tp ?? "",
-          type:   w.kampftalent ?? "",
-          DK:     "",
-          INI:    w.ini ?? 0,
-        },
-      },
-    });
+    const itemSys = {
+      type: sysType,
+      weight: 0, value: 0, quantity: 1, worn: true,
+      description: descParts,
+    };
+    if (isShield) {
+      // Sheet liest aus system.shield.{atMod, paMod, ini, bf}
+      itemSys.shield = {
+        atMod: w.wmAt ?? 0,
+        paMod: w.wmPa ?? 0,
+        ini:   w.ini  ?? 0,
+        bf:    w.bf   ?? 0,
+      };
+    } else {
+      // Reichweiten aufsplitten: "5/15/40/50/60" oder "5/10/30/40/50" → range1/2/3 etc.
+      const ranges = (typeof w.reichweiten === "string" && w.reichweiten.includes("/"))
+        ? w.reichweiten.split("/").map(s => s.trim())
+        : [];
+      itemSys.weapon = {
+        damage:  w.tp ?? "",
+        type:    w.kampftalent ?? "",
+        DK:      isRanged ? "Fern" : (w.reichweite ?? "N"),
+        INI:     w.ini ?? 0,
+        atMod:   w.wmAt ?? 0,
+        paMod:   w.wmPa ?? 0,
+        bf:      w.bf ?? 0,
+        kk:      w.kkSchwelle ?? 0,
+        range1:  ranges[0] ?? "",
+        range2:  ranges[1] ?? "",
+        range3:  ranges[2] ?? "",
+        range4:  ranges[3] ?? "",
+        range5:  ranges[4] ?? "",
+        ladezeit: w.ladezeit ?? 0,
+      };
+    }
+    itemDocs.push({ name: w.name, type: "Gegenstand", system: itemSys });
   }
 
   // 10b. Rüstungen → Gegenstand mit system.type "armor"

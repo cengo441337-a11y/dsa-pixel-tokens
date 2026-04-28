@@ -6,6 +6,43 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.5] — 2026-04-28
+
+### XML-Parser: Schild- und Waffen-Schema-Fixes 🛡
+- **Schild AT/PA-Mods werden endlich angezeigt!** Bisheriger Bug: Parser
+  schrieb Schild-Boni in `system.weapon.{atMod, paMod}`, das Sheet liest
+  aber aus `system.shield.{atMod, paMod, ini, bf}` (gdsa-Schema). Resultat:
+  Großschild zeigte nur 0/0 statt +0/+5. Jetzt korrekt nach Type unterschieden.
+- **Reichweiten-Felder gefüllt**: Fernkampfwaffen schreiben jetzt
+  `range1`–`range5` aus dem `<reichweiten>5/15/40/50/60</reichweiten>`-String,
+  statt leer zu lassen. Behebt das `// m`-Anzeige-Problem.
+- **Vollständige Waffen-Felder**: `DK`, `bf` (Bruchfaktor), `kk`-Schwelle,
+  `ladezeit` werden jetzt mit übernommen — vorher nur damage/type/INI.
+
+### Persistenz-Sicherheitsnetz 💾
+- **Force-Set via Dot-Notation**: Manche gdsa-Felder (Dogde als scalar,
+  LeP.max etc.) wurden bei partiellen system-Updates nicht persistent
+  geschrieben. Nach dem Haupt-`Actor.create()` läuft jetzt ein zweiter
+  `actor.update()` mit Dot-Path-Keys, der die kritischen abgeleiteten Werte
+  (Dogde, LeP/AsP/AuP value+max, INIBasis, MR, AT/PA/FKBasis) garantiert
+  setzt.
+
+### LeP/AsP/AuP-Konsistenz 🩹
+- **max ≥ value erzwungen**: Helden-Software liefert manchmal höhere
+  current-Werte (z.B. Alrik LeP 58) als unsere Standard-Formel berechnet
+  (LeP-max = KO + KK + LE/2 = 49). Resultat war LeP 58/49, was im Sheet
+  als „voll überheilt" angezeigt wurde. Jetzt: max wird auf
+  `Math.max(formelMax, hsCurrent)` gesetzt — HS-Wert ist die Wahrheit
+  bei Diskrepanz.
+
+### Audit-Verifikation ✅
+- Alle 6 Test-Helden (Tarion, Tamir, Alrik, Dunya, Aytan, Edo) durchlaufen
+  jetzt den Parser-Audit ohne Findings: LeP/AsP/AuP konsistent, alle
+  abgeleiteten Werte populiert, Waffen mit korrekten AT/PA/FK-Werten,
+  Schilde mit AT-/PA-Mods, Inventar-Items als typisierte Foundry-Items.
+
+---
+
 ## [0.4.4] — 2026-04-28
 
 ### XML-Parser: Inventar-Komplettüberholung 📦
