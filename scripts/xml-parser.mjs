@@ -380,20 +380,56 @@ function _parseAdvantages(held, result) {
   const advDb = globalThis.DSAPixelData?.advantages ?? [];
   const disDb = globalThis.DSAPixelData?.disadvantages ?? [];
 
-  // Normalisierung fuer Lookup: lowercase, "[Stichwort]"-Klammern strippen
+  // Normalisierung fuer Lookup: lowercase, "[...]" UND "(...)"-Klammern strippen,
+  // "bzgl"/"nach"-Suffixe entfernen (HS schreibt z.B. "Weltfremd bzgl" wo
+  // disadvantages.json "Weltfremd (nach Themenkomplex)" hat).
   const _norm = (s) => (s ?? "").toLowerCase()
-    .replace(/\s*\[[^\]]*\]\s*/g, "")  // "[Merkmal]"-Platzhalter raus
+    .replace(/\s*\[[^\]]*\]\s*/g, "")     // [Merkmal]-Platzhalter raus
+    .replace(/\s*\([^)]*\)\s*/g, "")      // (nach Themenkomplex)-Platzhalter raus
+    .replace(/\s+(bzgl|nach|gegen|für|fuer|vor|von)\s*$/i, "")  // trailing prep raus
     .replace(/\s+/g, " ")
     .trim();
+
+  // HARDCODED-Disambiguation: HS-Namen die der Lookup nicht erkennt aber
+  // eindeutig Nachteile sind (oder im DB-Eintrag fehlen). Aus WdH S.252-260.
+  const KNOWN_DISADVANTAGES = new Set([
+    "feind", "feinde",
+    "weltfremd",
+    "schulden",
+    "schlechter ruf", "übler ruf",
+    "verpflichtungen",
+    "speisegebote",
+    "elfische weltsicht",
+    "artefaktgebunden",
+    "körpergebundene kraft", "koerpergebundene kraft",
+    "wahrer name",
+    "raumangst", "platzangst",
+    "höhenangst", "hoehenangst",
+    "kälteempfindlichkeit", "kaelteempfindlichkeit",
+    "hitzeempfindlichkeit",
+    "schlechte regeneration",
+    "unfähigkeit für talentgruppe", "unfähigkeit für talent",
+    "unfaehigkeit fuer talentgruppe", "unfaehigkeit fuer talent",
+    "tollpatsch", "behäbig", "behaebig",
+    "neugier", "spielsucht", "geiz", "arroganz", "eitelkeit", "jähzorn", "jaehzorn",
+    "impulsiv", "autoritätsgläubig", "autoritaetsglaeubig",
+    "feste gewohnheit", "randgruppe", "vorurteile",
+    "prinzipientreue", "sensibler geruchssinn",
+    "angst vor", "phobie",
+  ]);
 
   const _isDisadvantage = (name) => {
     const n = _norm(name);
     if (!n) return false;
-    // Direkter Match
+    // 0. Hardcoded-Liste — definitive Nachteile (fängt "Feind", "Weltfremd bzgl"
+    //    etc. ab, die im DB nicht oder unter anderem Pattern stehen)
+    if (KNOWN_DISADVANTAGES.has(n)) return true;
+    if ([...KNOWN_DISADVANTAGES].some(k => k.length > 4 && (n.startsWith(k) || k.startsWith(n)))) return true;
+    // 1. Direkter Match
     if (disDb.some(d => _norm(d.name) === n)) return true;
-    // Fuzzy: Disadvantage-Eintrag startet mit Name + ", X" (z.B. "Adlig, ...")
+    // 2. Fuzzy: Disadvantage-Eintrag startet mit Name + ", X" (z.B. "Adlig, ...")
     if (disDb.some(d => _norm(d.name).startsWith(n + ",") || n.startsWith(_norm(d.name) + ","))) return true;
-    // Fuzzy: substring (fuer "Angst vor Dunkelheit" → "Angst vor [...]")
+    // 3. Fuzzy: substring (für "Angst vor Dunkelheit" → "Angst vor [...]")
     if (disDb.some(d => {
       const dn = _norm(d.name);
       return dn.length > 4 && (n.startsWith(dn) || dn.startsWith(n));
