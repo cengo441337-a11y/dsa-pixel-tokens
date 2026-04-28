@@ -183,6 +183,16 @@ const EIGENSCHAFT_MAP = {
 // ─── Eigenschafts-Parser ────────────────────────────────────────────────────
 
 function _parseAttributes(held, result) {
+  // Helden-Software exportiert manche Werte DOPPELT:
+  //   1. "Basis-Eintrag" mit `startwert` und/oder `mod`-Attribut: gekaufter Wert.
+  //      Bsp. <eigenschaft mod="0" name="Körperkraft" startwert="14" value="16"/>
+  //   2. "Final-Snapshot" ohne startwert UND ohne mod, nur name+value: Wert nach
+  //      ALLEN temporären/SF/Vorteils-Boni angewendet.
+  //      Bsp. <eigenschaft name="Körperkraft" value="22"/>
+  // Für Eigenschaften wollen wir den Basis-Wert (sonst würde KK 22 / KO 19 statt
+  // 16/15 importiert). Für LeP/AsP/AuP-Max ist der Final-Snapshot dagegen
+  // wertvoll — er enthält den endgültigen Max-Wert nach Vorteilen wie "Hohe
+  // Lebenskraft", den unsere Formel nicht immer trifft.
   const eigenschaftEls = held.querySelectorAll("eigenschaft");
   for (const el of eigenschaftEls) {
     const rawName = el.getAttribute("name");
@@ -193,16 +203,25 @@ function _parseAttributes(held, result) {
     const value     = parseInt(el.getAttribute("value"))     || 0;
     const mod       = parseInt(el.getAttribute("mod"))       || 0;
     const permanent = parseInt(el.getAttribute("permanent")) || 0;
+    const isFinalSnapshot = !el.hasAttribute("startwert") && !el.hasAttribute("mod");
 
     if (mapped.startsWith("_")) {
       // Abgeleitete Werte in Helden-Software XML:
       //   value     = aktuell verbleibender Wert (0 = nicht getrackt oder leer)
       //   mod       = gekaufter Bonus (erhöht Max)
-      //   permanent = permanent verbrauchte Punkte, z.B. durch Rituale (negativ → reduziert Max)
+      //   permanent = permanent verbrauchte Punkte (negativ → reduziert Max)
       const key = mapped.slice(1);
-      result.derivedValues[key] = { value, mod, permanent };
+      if (isFinalSnapshot && result.derivedValues[key]) {
+        // Basis-Eintrag schon da → diesen Snapshot als _finalMax merken
+        // (wird später bei LeP/AsP/AuP-Max-Berechnung als Override genutzt).
+        result.derivedValues[key]._finalMax = value;
+      } else if (!result.derivedValues[key]) {
+        result.derivedValues[key] = { value, mod, permanent };
+      }
     } else {
-      // Eigenschaft: value = Basiswert, mod = AP-Steigerungen oder externe Boni → Summe
+      // Eigenschaften: NUR Basis-Eintrag akzeptieren. Final-Snapshots ignorieren
+      // (sonst landen aufgepushte temp-Boni wie KK 16→22 als value).
+      if (isFinalSnapshot) continue;
       result.attributes[mapped] = value + mod;
     }
   }
@@ -940,7 +959,10 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   const lepBonus = dv.LeP?.mod ?? 0;
   const aspBonus = (dv.AsP?.mod ?? 0) + (dv.AsP?.permanent ?? 0);
   const aupBonus = dv.AuP?.mod ?? 0;
-  const lepMax = (attr.KO ?? 10) * 2 + Math.ceil((attr.KK ?? 10) / 2) + lepBonus;
+  const lepMaxFormel = (attr.KO ?? 10) * 2 + Math.ceil((attr.KK ?? 10) / 2) + lepBonus;
+  // HS-Final-Snapshot (falls vorhanden) hat Vorrang — enthält den endgueltigen
+  // Max nach allen Vorteilen, die unsere Formel nicht abbildet (z.B. Hohe LE).
+  const lepMax = (dv.LeP?._finalMax > 0) ? dv.LeP._finalMax : lepMaxFormel;
   // AsP: abhängig vom Charaktertyp
   // Vollzauberer/Magier: MU+IN+CH; Elfen: IN+MR+CH; Sonstige: IN + Astralmacht*10
   const astralmacht   = heroData.advantages.find(a => a.name === "Astralmacht");
@@ -949,12 +971,14 @@ export async function createActorFromImport(heroData, updateExisting = false) {
     || heroData.specialAbilities.some(s => s.name?.includes("Akademische Ausbildung"));
   const istElf = heroData.race?.toLowerCase().includes("elf")
     || heroData.race?.toLowerCase().includes("elfe");
-  const aspMax = istVollzauber ? (attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10) + aspBonus
+  const aspMaxFormel = istVollzauber ? (attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10) + aspBonus
     : istElf        ? (attr.IN ?? 10) + (attr.MR ?? 10) + (attr.CH ?? 10) + aspBonus
     : astralmacht   ? (attr.IN ?? 10) + (parseInt(astralmacht.value) || 0) * 10 + aspBonus
     : aspBonus > 0  ? aspBonus : 0;
+  const aspMax = (dv.AsP?._finalMax > 0) ? dv.AsP._finalMax : aspMaxFormel;
   // AuP: GE + KO + KK/2 (rund) + Bonus
-  const aupMax = (attr.GE ?? 10) + (attr.KO ?? 10) + Math.ceil((attr.KK ?? 10) / 2) + aupBonus;
+  const aupMaxFormel = (attr.GE ?? 10) + (attr.KO ?? 10) + Math.ceil((attr.KK ?? 10) / 2) + aupBonus;
+  const aupMax = (dv.AuP?._finalMax > 0) ? dv.AuP._finalMax : aupMaxFormel;
   // Aktueller Wert: XML-Wert wenn > 0, sonst Max (0 = aufgebraucht oder nicht getrackt)
   const lepCurrent = (dv.LeP?.value > 0) ? dv.LeP.value : lepMax;
   const aspCurrent = (dv.AsP?.value > 0) ? dv.AsP.value : aspMax;
@@ -1296,7 +1320,14 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   }
 
   if (itemDocs.length > 0) {
-    await actor.createEmbeddedDocuments("Item", itemDocs);
+    const created = await actor.createEmbeddedDocuments("Item", itemDocs);
+    // Erstes Schild automatisch als "geführt" markieren — Sheet zeigt sonst
+    // beim Erst-Render nichts aktiviert und der User wundert sich, warum die
+    // PA-Boni nicht greifen. User kann jederzeit per Click umschalten.
+    const firstShield = created.find(i => (i.system?.type ?? "").toLowerCase() === "shield");
+    if (firstShield) {
+      await firstShield.setFlag("dsa-pixel-tokens", "equipped", true);
+    }
   }
 
   return actor;

@@ -6,6 +6,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.6] — 2026-04-28
+
+### XML-Parser: Eigenschaften-Final-Snapshots ignorieren 🎯
+- **KK/KO/etc. werden nicht mehr fälschlich aufgepusht.** Helden-Software
+  exportiert manche Eigenschaften DOPPELT: erst der Basis-Eintrag mit
+  `startwert`+`mod` (z.B. KK 16, gekaufter Wert), dann ein Final-Snapshot
+  ohne diese Attribute (z.B. KK 22, mit allen temporären SF/Vorteils-Boni).
+  Der Parser nahm bisher den letzten — Alrik landete mit KK 22 / KO 19
+  statt 16 / 15. Jetzt: Final-Snapshots an fehlenden `startwert`/`mod`
+  erkannt und bei Eigenschaften übersprungen.
+- **LeP/AsP/AuP-Max profitiert vom Final-Snapshot.** Wenn HS einen
+  Final-Snapshot mit z.B. LeP=58 liefert, wird das als Max-Override
+  genutzt — überschreibt unsere Standard-Formel (`KO×2 + KK/2 + Bonus`),
+  die nicht alle Vorteile abbildet (z.B. „Hohe Lebenskraft I/II/III").
+
+### Schild-Toggle: Geführt vs. im Gepäck 🛡
+- **Click aufs Schild** im Heldenbogen schaltet zwischen „geführt" (gibt
+  AT/PA-Boni) und „im Gepäck" (kein Effekt) um. DSA-Regel: nur ein
+  Schild gleichzeitig in der Schildhand → Click auf Schild B unequippt
+  automatisch Schild A.
+- **Beim Import wird das erste Schild automatisch als geführt markiert**,
+  damit User sofort die Boni sehen ohne extra Clicks.
+- **Schild-AT/PA-Mods nur noch auf Nahkampf-Talente.** Vorher wurden sie
+  fälschlich auch auf Fernkampf gerechnet — Quatsch, weil man mit Schild
+  eh keinen Bogen führen kann. Jetzt: Bogen/Armbrust/Wurfwaffen ignorieren
+  Schild-Mods komplett.
+- **Visuelles Feedback**: Aktives Schild grün-glow + „GEFÜHRT"-Label,
+  inaktives gegraut + „im Gepäck"-Label.
+
+---
+
 ## [0.4.5] — 2026-04-28
 
 ### XML-Parser: Schild- und Waffen-Schema-Fixes 🛡

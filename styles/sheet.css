@@ -1021,3 +1021,29 @@
   color: var(--fx-gold-bright);
   text-shadow: 0 0 10px rgba(200,151,42,0.45);
 }
+
+/* ─── Schild-Toggle: aktiv/inaktiv ───────────────────────────────────── */
+.dsa-pixel-sheet .shield-toggle {
+  user-select: none;
+}
+.dsa-pixel-sheet .shield-toggle.shield-equipped {
+  background: linear-gradient(90deg, rgba(76,175,80,0.16), rgba(76,175,80,0.06) 60%, transparent);
+  border-left: 2px solid #4caf50;
+  color: #c8f0c8;
+  box-shadow: inset 0 0 6px rgba(76,175,80,0.18);
+}
+.dsa-pixel-sheet .shield-toggle.shield-equipped:hover {
+  background: linear-gradient(90deg, rgba(76,175,80,0.24), rgba(76,175,80,0.10) 60%, transparent);
+}
+.dsa-pixel-sheet .shield-toggle.shield-stowed {
+  background: rgba(255,255,255,0.02);
+  border-left: 2px solid #444;
+  color: #7a8a9a;
+  opacity: 0.65;
+  filter: saturate(0.6);
+}
+.dsa-pixel-sheet .shield-toggle.shield-stowed:hover {
+  background: rgba(126,184,255,0.06);
+  opacity: 0.85;
+  filter: saturate(0.85);
+}

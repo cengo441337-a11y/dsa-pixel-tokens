@@ -380,18 +380,27 @@
         </div>
         {{/each}}
         {{#each shields}}
-        <div style="font-size:14px;padding:2px 0;color:#7eb8ff;margin-top:2px">
-          🛡 {{this.name}}
+        <div class="shield-toggle {{#if this.equipped}}shield-equipped{{else}}shield-stowed{{/if}}"
+             data-shield-id="{{this.id}}"
+             title="{{#if this.equipped}}Klicken: Schild wegstecken{{else}}Klicken: Schild führen (gibt AT/PA-Boni){{/if}}"
+             style="font-size:14px;padding:3px 6px;margin-top:2px;cursor:pointer;border-radius:3px;transition:all 0.15s">
+          {{#if this.equipped}}🛡{{else}}🪨{{/if}} {{this.name}}
           <span style="color:#e94560;font-size:12px;margin-left:4px">AT {{this.atMod}}</span>
           <span style="color:#4caf50;font-size:12px;margin-left:6px">PA +{{this.paMod}}</span>
           {{#if this.ini}}<span style="color:#aaa;font-size:11px;margin-left:4px">INI {{this.ini}}</span>{{/if}}
+          {{#if this.equipped}}
+          <span style="color:#4caf50;font-size:10px;margin-left:6px;text-transform:uppercase;font-weight:bold">geführt</span>
+          {{else}}
+          <span style="color:#666;font-size:10px;margin-left:6px;text-transform:uppercase">im Gepäck</span>
+          {{/if}}
         </div>
         {{/each}}
-        {{#if shields.length}}
-        <div style="font-size:11px;color:#666;margin-top:3px;padding:2px 0 4px;border-top:1px solid rgba(255,255,255,0.06)">
-          Schild: <span style="color:#e94560">AT {{shieldAtMod}}</span>
-          <span style="color:#4caf50;margin-left:6px">PA +{{shieldPaMod}}</span>
-          <span style="color:#555;font-size:10px;margin-left:4px">auf alle Kampftalente</span>
+        {{#if activeShield}}
+        <div style="font-size:11px;color:#888;margin-top:3px;padding:2px 0 4px;border-top:1px solid rgba(255,255,255,0.06)">
+          Geführt: <span style="color:#7eb8ff">{{activeShield.name}}</span> →
+          <span style="color:#e94560">AT {{shieldAtMod}}</span>
+          <span style="color:#4caf50;margin-left:4px">PA +{{shieldPaMod}}</span>
+          <span style="color:#555;font-size:10px;margin-left:4px">auf Nahkampf-Talente</span>
         </div>
         {{/if}}
         {{!-- Natürlicher Rüstungsschutz für Kreaturen (kein Item, aus Flags) --}}

@@ -157,12 +157,23 @@ export class PixelArtCharacterSheet extends ActorSheet {
     data.totalRS = armor.reduce((sum, a) => sum + (a.rs ?? 0), 0);
     data.totalBE = armor.reduce((sum, a) => sum + (a.be ?? 0), 0);  // raw BE (Anzeige)
 
-    // ── Schild-Modifikatoren ──
-    const shieldAtMod  = shields.reduce((s, sh) => s + (sh.atMod ?? 0), 0);
-    const shieldPaMod  = shields.reduce((s, sh) => s + (sh.paMod ?? 0), 0);
-    const shieldIniMod = shields.reduce((s, sh) => s + (sh.ini   ?? 0), 0);
+    // ── Schild-Modifikatoren: nur AKTIV geführtes Schild zählt (DSA: nur ein
+    // Schild gleichzeitig in der Schildhand). Auto-Aktivierung erstes Schild
+    // wenn gar keins markiert ist (verhindert Konfusion bei Erst-Render).
+    const equippedShields = shields.filter(s => s.equipped);
+    const activeShields = equippedShields.length > 0
+      ? equippedShields
+      : (shields.length > 0 ? [shields[0]] : []);
+    // markiere "auto-aktiv" Schilde als equipped fürs Rendering
+    if (equippedShields.length === 0 && shields.length > 0) {
+      shields[0].equipped = true;
+    }
+    const shieldAtMod  = activeShields.reduce((s, sh) => s + (sh.atMod ?? 0), 0);
+    const shieldPaMod  = activeShields.reduce((s, sh) => s + (sh.paMod ?? 0), 0);
+    const shieldIniMod = activeShields.reduce((s, sh) => s + (sh.ini   ?? 0), 0);
     data.shieldAtMod = shieldAtMod;
     data.shieldPaMod = shieldPaMod;
+    data.activeShield = activeShields[0] ?? null;
 
     // ── Rüstungszonen-System (eBE auf gBE-Basis, Zonen-RS, INI-Malus) ──
     const armorCalc = this._prepareArmorZones(armor);
@@ -344,9 +355,13 @@ export class PixelArtCharacterSheet extends ActorSheet {
         if (typeof pa === "number") pa -= paPenalty;
       }
 
-      // Schild-Modifikatoren anwenden (atMod typisch negativ, paMod positiv)
-      at += shieldAtMod;
-      if (typeof pa === "number") pa += shieldPaMod;
+      // Schild-Modifikatoren NUR auf Nahkampf-Talente anwenden (atMod typisch
+      // negativ, paMod positiv). Fernkampf wird vom Schild nicht beeinflusst —
+      // mit Schild kann man eh keinen Bogen führen.
+      const atShieldApplied = isRanged ? 0 : shieldAtMod;
+      const paShieldApplied = isRanged ? 0 : shieldPaMod;
+      at += atShieldApplied;
+      if (typeof pa === "number") pa += paShieldApplied;
 
       // Wund-Penalty: −1 pro Wunde auf AT und PA (WdS Wundregeln)
       at -= woundPenalty;
@@ -356,11 +371,12 @@ export class PixelArtCharacterSheet extends ActorSheet {
         name, taw,
         at, pa,
         // atBase/paBase = Wert ohne eBE-Penalty und ohne Schild-Mod (reiner Basiswert)
-        atBase: at + atPenalty - shieldAtMod + woundPenalty,
-        paBase: typeof pa === "number" ? pa + paPenalty - shieldPaMod + woundPenalty : pa,
+        atBase: at + atPenalty - atShieldApplied + woundPenalty,
+        paBase: typeof pa === "number" ? pa + paPenalty - paShieldApplied + woundPenalty : pa,
         atPenalty, paPenalty,
         woundPenalty,
-        shieldAtMod, shieldPaMod,
+        shieldAtMod: atShieldApplied,
+        shieldPaMod: paShieldApplied,
         eBE: talentEBE,
         tp:      data.tp      ?? "",   // Trefferpunkte/Schaden (Kreaturwaffen)
         special: data.special ?? "",   // Sondereigenschaften
@@ -441,6 +457,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
             paMod: shData.paMod ?? 0,
             ini:   shData.ini   ?? 0,
             bf:    shData.bf    ?? 0,
+            equipped: item.getFlag("dsa-pixel-tokens", "equipped") === true,
           });
         } else {
           items.push({
@@ -625,6 +642,37 @@ export class PixelArtCharacterSheet extends ActorSheet {
       });
       this.render();
     });
+
+    // Schild-Toggle (click → in Hand führen / wegstecken)
+    html.find(".shield-toggle").on("click", this._onShieldToggle.bind(this));
+  }
+
+  /** Schild aktivieren/deaktivieren — nur ein Schild gleichzeitig (Schildhand) */
+  async _onShieldToggle(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const id = event.currentTarget.dataset.shieldId;
+    if (!id) return;
+    const item = this.actor.items.get(id);
+    if (!item) return;
+
+    const wasEquipped = item.getFlag("dsa-pixel-tokens", "equipped") === true;
+
+    if (wasEquipped) {
+      // Aktives Schild abwählen → wegstecken
+      await item.unsetFlag("dsa-pixel-tokens", "equipped");
+    } else {
+      // Anderes Schild aktivieren → erst alle anderen Schilde unequippen
+      for (const other of this.actor.items) {
+        if (other.id === id) continue;
+        if ((other.system?.type ?? "").toLowerCase() !== "shield") continue;
+        if (other.getFlag("dsa-pixel-tokens", "equipped") === true) {
+          await other.unsetFlag("dsa-pixel-tokens", "equipped");
+        }
+      }
+      await item.setFlag("dsa-pixel-tokens", "equipped", true);
+    }
+    this.render();
   }
 
   _onOpenDbBrowser(event) {
