@@ -1365,10 +1365,31 @@ export async function createActorFromImport(heroData, updateExisting = false) {
     },
   };
   if (actor) {
+    // Foundry-Deep-Merge: actor.update() merget Map-Felder (vorteile/nachteile/
+    // talente/skill) — alte Keys bleiben hängen. Wir löschen sie explizit mit
+    // der "-=key"-Notation BEVOR der eigentliche Update-Pass kommt.
+    // Beispiel: User hatte vorher Vorteil "Arroganz" als Vorteil; jetzt soll
+    // er als Nachteil sortiert werden — ohne Cleanup wäre er in beiden Maps.
+    const clearOld = {};
+    const _markDel = (mapPath, mapObj) => {
+      for (const k of Object.keys(mapObj ?? {})) {
+        clearOld[`${mapPath}.-=${k}`] = null;
+      }
+    };
+    _markDel("system.vorteile",  actor.system?.vorteile);
+    _markDel("system.nachteile", actor.system?.nachteile);
+    _markDel("system.talente",   actor.system?.talente);
+    _markDel("system.skill",     actor.system?.skill);
+    if (Object.keys(clearOld).length > 0) {
+      await actor.update(clearOld);
+    }
     await actor.update(actorData);
     // Alte Spell-Items löschen vor Re-Import
     const oldSpells = actor.items.filter(i => i.type === "spell");
     if (oldSpells.length) await actor.deleteEmbeddedDocuments("Item", oldSpells.map(i => i.id));
+    // Alte Inventar-Items (Gegenstände) auch löschen, sonst Duplikate
+    const oldGegenstands = actor.items.filter(i => i.type === "Gegenstand");
+    if (oldGegenstands.length) await actor.deleteEmbeddedDocuments("Item", oldGegenstands.map(i => i.id));
   } else {
     actor = await Actor.create(actorData);
   }
