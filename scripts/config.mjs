@@ -47,21 +47,40 @@ export const RACE_GS = {
 };
 
 // ─── SF-Boni auf Magieresistenz gegen bestimmte Spruchmerkmale ──────────────
-// DSA 4.1 WdZ S.71-74: Bestimmte Sonderfertigkeiten erhöhen die MR
-// kontextspezifisch — nur gegen Sprüche mit passendem Merkmal.
+// DSA 4.1 WdZ S.31 (Eiserner Wille + Gedankenschutz):
 //
-// Format: { sfName: { merkmale: [...], bonus: N, label: "..." } }
+//   Gedankenschutz (passiv): +3 MR gegen Sprüche mit Merkmal
+//     Einfluss / Hellsicht / Herrschaft / Verständigung.
+//     Kumulativ mit anderen Boni.
 //
-// Aktive Anwendung im Spell-Dialog: wenn target diese SF hat UND der gewirkte
-// Spruch ein passendes Merkmal hat → MR um bonus erhöht.
+//   Eiserner Wille I/II (AKTIV — 2 Aktionen + 1 Erschöpfung, MU/2 Spielrunden
+//     Wirkungsdauer): MR +3 (Stufe I) / +7 (Stufe II) gegen dieselben
+//     Merkmale. Während aktiv: Talent-/Zauberproben −3, Eigenschafts-/
+//     Kampfproben −1 als Konzentrations-Penalty.
+//     Stufe III gibt es in DSA 4.1 NICHT.
+//
+// Format: { sfName: { merkmale, bonus, label, active? } }
+//   active: true → SF muss erst aktiviert werden (Toggle). Spell-Dialog wendet
+//   den Bonus nur an wenn ein "aktiv-Flag" am Actor gesetzt ist (geplant).
 export const SF_MR_BONUSES = {
-  "Eiserner Wille I":   { merkmale: ["Einfluss"],             bonus: 2, label: "Eiserner Wille I" },
-  "Eiserner Wille II":  { merkmale: ["Einfluss"],             bonus: 4, label: "Eiserner Wille II" },
-  "Eiserner Wille III": { merkmale: ["Einfluss"],             bonus: 6, label: "Eiserner Wille III" },
-  "Gedankenschutz":     { merkmale: ["Einfluss", "Hellsicht"], bonus: 1, label: "Gedankenschutz" },
-  // Sphärenkenntnis-SFs geben +X auf MR vs Sphärenmagie (selten)
-  "Sphärenkenntnis: Niederhöllen":  { merkmale: ["Dämonisch"],  bonus: 2, label: "Sphärenkenntnis Niederhöllen" },
-  "Sphärenkenntnis: Limbus":        { merkmale: ["Limbus"],     bonus: 2, label: "Sphärenkenntnis Limbus" },
+  "Gedankenschutz": {
+    merkmale: ["Einfluss", "Hellsicht", "Herrschaft", "Verständigung"],
+    bonus: 3,
+    label: "Gedankenschutz",
+    active: false,  // passiv
+  },
+  "Eiserner Wille I": {
+    merkmale: ["Einfluss", "Hellsicht", "Herrschaft", "Verständigung"],
+    bonus: 3,
+    label: "Eiserner Wille I",
+    active: true,   // aktiviert: 2 Aktionen + 1 Ersch., MU/2 SR Wirkungsdauer
+  },
+  "Eiserner Wille II": {
+    merkmale: ["Einfluss", "Hellsicht", "Herrschaft", "Verständigung"],
+    bonus: 7,
+    label: "Eiserner Wille II",
+    active: true,
+  },
 };
 
 // ─── Talentprobe-Zuordnungen ────────────────────────────────────────────────

@@ -234,14 +234,19 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // pro Wunde, die GS um 1 Punkt. Vorher war's hier −1 — falsch.
     data.woundPenalty = data.totalWounds * 2;                                      // −2 pro Wunde (AT/PA/FK/INI)
 
-    // ── MR-Boni gegen bestimmte Spruchmerkmale (Eiserner Wille, Gedankenschutz etc.) ──
-    // SF-Liste durchgehen und alle aktiven MR-Boni sammeln. Wird im Tooltip
-    // angezeigt + im Spell-Dialog als Auto-Bonus angewendet.
+    // ── MR-Boni gegen bestimmte Spruchmerkmale (Gedankenschutz, Eiserner Wille) ──
+    // SF-Liste durchgehen, passive MR-Boni für Auto-Anwendung sammeln.
+    // Aktive SFs (Eiserner Wille I/II — 2 Aktionen + 1 Erschöpfung, MU/2 SR
+    // Wirkungsdauer) werden NUR addiert wenn der User sie über einen Toggle
+    // aktiv markiert (Flag actor.flags.dsa-pixel-tokens.eisernerWilleAktiv).
+    const ewAktiv = this.actor.getFlag?.("dsa-pixel-tokens", "eisernerWilleAktiv") === true;
     const mrBonusList = [];
-    const mrBonusByMerkmal = {};  // { "Einfluss": [{label, bonus}, ...] }
+    const mrBonusByMerkmal = {};
     for (const sfName of sfList) {
       const cfg = SF_MR_BONUSES[sfName];
       if (!cfg) continue;
+      // Aktive SFs nur zählen wenn aktiv-flag gesetzt
+      if (cfg.active && !ewAktiv) continue;
       mrBonusList.push({ sf: sfName, label: cfg.label, bonus: cfg.bonus, merkmale: cfg.merkmale });
       for (const merk of cfg.merkmale) {
         if (!mrBonusByMerkmal[merk]) mrBonusByMerkmal[merk] = 0;
@@ -250,13 +255,13 @@ export class PixelArtCharacterSheet extends ActorSheet {
     }
     data.mrBonusList = mrBonusList;
     data.mrBonusByMerkmal = mrBonusByMerkmal;
+    data.eisernerWilleAktiv = ewAktiv;
     // Tooltip-Text für die MR-Anzeige im Sheet
     data.mrTooltip = mrBonusList.length === 0
       ? `Magieresistenz ${this.actor.system?.MR?.value ?? 0}`
       : `MR ${this.actor.system?.MR?.value ?? 0} +\n` +
         mrBonusList.map(b => `+${b.bonus} vs ${b.merkmale.join("/")} (${b.label})`).join("\n");
-    // Speicher die Boni auch am Actor-Flag damit der Spell-Dialog (vom Caster aus)
-    // den Ziel-MR-Bonus auslesen kann.
+    // Actor-Flag damit Spell-Dialog (vom Caster aus) Ziel-Bonus auslesen kann
     this.actor.setFlag?.(MODULE_ID, "mrBonusByMerkmal", mrBonusByMerkmal).catch(() => {});
     const ko = system.KO?.value ?? 10;
     // Vorteile/Nachteile/SF die WS beeinflussen (WdS S.61)

@@ -270,32 +270,68 @@ function _parseTalents(held, result) {
 }
 
 function _guessTalentCategory(name) {
-  // Primaer: gegen talents.json matchen (kategorie-Feld definitiv korrekt).
-  // Fallback: hardcoded Heuristik fuer Talente die nicht in der DB sind.
-  const lower = name.toLowerCase().trim();
+  // Primaer: gegen talents.json matchen mit aggressiver Normalisierung —
+  // HS-Schreibvarianten weichen oft ab (Capitalisierung, Doppelpunkte,
+  // "und" statt "/", "kennen X"-Suffixe etc.).
   const talentDb = globalThis.DSAPixelData?.talents ?? [];
-  const dbHit = talentDb.find(t => (t.name ?? "").toLowerCase() === lower);
-  if (dbHit?.kategorie) return dbHit.kategorie;
 
-  // Sprachen/Schriften aus dem Namen erkennen (kommen oft mit Suffix)
-  if (/^(sprache|schrift)\b/i.test(name) || /\b(sprache|schrift)\s*\(/i.test(name)) return "sprachen";
+  // Normalisierung: lowercase, Doppelpunkte/Bindestriche/Schrägstriche zu Leerzeichen,
+  // " und " zu "/", multi-spaces collapsed.
+  const _norm = (s) => (s ?? "")
+    .toLowerCase()
+    .replace(/[:]/g, " ")
+    .replace(/\s+und\s+/g, "/")
+    .replace(/[-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  // Hardcoded Fallback (alte Logik)
+  const nNorm = _norm(name);
+
+  // 1. Direkter normalisierter Match
+  for (const t of talentDb) {
+    if (_norm(t.name) === nNorm) return t.kategorie;
+  }
+
+  // 2. Sprachen/Schriften: HS schreibt "Sprachen kennen X", "Lesen/Schreiben Y" etc.
+  // talents.json hat sie als Pattern "Sprachen [Muttersprache]" / "Lesen/Schreiben [Schrift]".
+  if (/^sprachen?\s+kennen\b/i.test(name) || /^sprache\s/i.test(name)) return "sprachen";
+  if (/^(lesen|schreiben|lesen\/schreiben)\b/i.test(name)) return "sprachen";
+
+  // 3. Heilkunde-Spezialfall: "Heilkunde Wunden" ohne Doppelpunkt in DB
+  if (/^heilkunde\b/i.test(name)) return "handwerk";
+
+  // 4. Substring-Match in DB-Namen (fuer Pattern-Talente wie "Sprachen [Muttersprache]")
+  for (const t of talentDb) {
+    const dbN = _norm(t.name).replace(/\s*\[[^\]]*\]\s*/g, "").trim();
+    if (dbN.length > 4 && (nNorm.startsWith(dbN) || dbN.startsWith(nNorm))) {
+      return t.kategorie;
+    }
+  }
+
+  // 5. Ritualkenntnis-Talente (gehoeren nicht in Talente, sondern Rituale)
+  if (/^ritualkenntnis/i.test(name) || /^liturgie/i.test(name)) return "ritual";
+
+  // 6. Hardcoded Fallback fuer Sachen die in keiner DB stehen
   const koerper = ["klettern", "schwimmen", "reiten", "schleichen", "sinnenschärfe",
     "körperbeherrschung", "selbstbeherrschung", "zechen", "akrobatik", "athletik",
-    "fliegen", "gaukeleien", "tanzen", "taschendiebstahl"];
+    "fliegen", "gaukeleien", "tanzen", "taschendiebstahl", "sich verstecken",
+    "singen", "stimmen imitieren", "skifahren", "sich verkleiden"];
   const gesellschaft = ["menschenkenntnis", "überreden", "überzeugen", "etikette",
-    "gassenwissen", "lehren", "betören", "einschüchtern", "bekehren"];
+    "gassenwissen", "lehren", "betören", "einschüchtern", "bekehren",
+    "schauspielerei", "schriftlicher ausdruck"];
   const natur = ["fährtensuchen", "fallenstellen", "fischen", "orientierung",
-    "wettervorhersage", "wildnisleben", "tierkunde", "pflanzenkunde"];
-  const wissen = ["götter", "sagen", "rechnen", "geografie", "geschichtswissen",
-    "magiekunde", "anatomie", "alchimie", "mechanik", "rechtskunde",
-    "philosophie", "kriegskunst", "sternkunde", "kryptografie"];
+    "wettervorhersage", "wildnisleben", "tierkunde", "pflanzenkunde",
+    "fesseln entfesseln", "fesseln/entfesseln"];
+  const wissen = ["götter", "sagen", "rechnen", "geografie", "geographie",
+    "geschichtswissen", "magiekunde", "anatomie", "mechanik", "rechtskunde",
+    "philosophie", "kriegskunst", "sternkunde", "kryptografie", "kryptographie",
+    "schätzen", "brett", "kartenspiel", "heraldik", "staatskunst",
+    "sprachenkunde", "kartografie", "gesteinskunde", "hüttenkunde", "baukunst"];
 
-  if (koerper.some(k => lower.includes(k))) return "koerper";
-  if (gesellschaft.some(k => lower.includes(k))) return "gesellschaft";
-  if (natur.some(k => lower.includes(k))) return "natur";
-  if (wissen.some(k => lower.includes(k))) return "wissen";
+  if (koerper.some(k => nNorm.includes(k))) return "koerper";
+  if (gesellschaft.some(k => nNorm.includes(k))) return "gesellschaft";
+  if (natur.some(k => nNorm.includes(k))) return "natur";
+  if (wissen.some(k => nNorm.includes(k))) return "wissen";
   return "handwerk";
 }
 
