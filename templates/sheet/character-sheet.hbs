@@ -19,8 +19,8 @@
         <div class="stat-label">INI</div>
         <div class="stat-value">{{system.INIBasis.value}}{{#if iniPenalty}}<span style="color:#e94560;font-size:0.7em">-{{iniPenalty}}</span>{{/if}}</div>
       </div>
-      <div class="derived-stat">
-        <div class="stat-label">MR</div>
+      <div class="derived-stat" title="{{mrTooltip}}">
+        <div class="stat-label">MR{{#if mrBonusList.length}}<span style="color:#9be;font-size:0.6em;margin-left:2px">★</span>{{/if}}</div>
         <div class="stat-value">{{system.MR.value}}</div>
       </div>
       <div class="derived-stat">

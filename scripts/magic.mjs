@@ -280,19 +280,41 @@ export async function showSpellDialog(actor, spellData) {
             // Erschwernis auf die Probe addiert. Wenn ein Token markiert ist,
             // ziehen wir die MR daraus automatisch. isMR-Flag aus spells.json,
             // Default false, User kann manuell aktivieren.
+            // Plus: SF-Boni des Ziels gegen das Spruchmerkmal werden addiert
+            // (Eiserner Wille +2/+4/+6 vs Einfluss, Gedankenschutz +1 vs Einfluss/Hellsicht).
             const isMRFlag = !!spellData.isMR;
             const targetToken = game.user?.targets?.first?.();
-            const targetMR = targetToken?.actor?.system?.MR?.value ?? 0;
+            const targetActor = targetToken?.actor;
+            const baseMR = targetActor?.system?.MR?.value ?? 0;
+            // Spruch-Merkmal aus spellData ableiten (z.B. "Einfluss", "Hellsicht").
+            // spells.json speichert i.d.R. ein Merkmal-Array.
+            const spellMerkmale = Array.isArray(spellData.merkmal)
+              ? spellData.merkmal
+              : (spellData.merkmal ? [spellData.merkmal] : (spellData.merkmale ?? []));
+            // Ziel-SF-Boni-Map aus actor-flag holen
+            const targetMRBonusByMerkmal = targetActor?.getFlag?.("dsa-pixel-tokens", "mrBonusByMerkmal") ?? {};
+            // Boni je Merkmal aufsummieren wenn passend
+            let mrSfBonus = 0;
+            const matchedSfList = [];
+            for (const merk of spellMerkmale) {
+              const b = targetMRBonusByMerkmal[merk] ?? 0;
+              if (b > 0) {
+                mrSfBonus += b;
+                matchedSfList.push(`+${b} vs ${merk}`);
+              }
+            }
+            const targetMR = baseMR + mrSfBonus;
+            const merkmaleStr = spellMerkmale.length > 0 ? spellMerkmale.join("/") : "—";
             return `
             <div style="margin:6px 0;padding:6px 8px;background:rgba(180,80,180,0.10);border-left:3px solid #b6b;border-radius:0 4px 4px 0">
               <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#f9f">
                 <input type="checkbox" id="vs-mr" ${isMRFlag ? "checked" : ""} style="margin:0;cursor:pointer">
-                Spruch wirkt gegen MR (WdZ S.30)
+                Spruch wirkt gegen MR (WdZ S.30) · Merkmale: ${merkmaleStr}
               </label>
               <div style="display:flex;align-items:center;gap:8px;margin-top:4px;padding-left:24px;font-size:12px;color:#bbb">
                 <span>Ziel-MR:</span>
                 <input id="target-mr" type="number" min="0" value="${targetMR}" style="width:50px;text-align:center;background:#0d1b2e;border:2px solid #3a3a5e;color:#e0e0e0">
-                ${targetToken ? `<span style="font-size:10px;color:#779">aus markiertem Token: ${targetToken.name}</span>` : `<span style="font-size:10px;color:#779">kein Token markiert</span>`}
+                ${targetToken ? `<span style="font-size:10px;color:#779">${targetToken.name}: MR ${baseMR}${mrSfBonus > 0 ? ` ${matchedSfList.join(", ")} = ${targetMR}` : ""}</span>` : `<span style="font-size:10px;color:#779">kein Token markiert</span>`}
               </div>
             </div>`;
           })()}

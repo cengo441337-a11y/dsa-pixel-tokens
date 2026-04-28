@@ -46,6 +46,24 @@ export const RACE_GS = {
   "Achaz": 7,
 };
 
+// ─── SF-Boni auf Magieresistenz gegen bestimmte Spruchmerkmale ──────────────
+// DSA 4.1 WdZ S.71-74: Bestimmte Sonderfertigkeiten erhöhen die MR
+// kontextspezifisch — nur gegen Sprüche mit passendem Merkmal.
+//
+// Format: { sfName: { merkmale: [...], bonus: N, label: "..." } }
+//
+// Aktive Anwendung im Spell-Dialog: wenn target diese SF hat UND der gewirkte
+// Spruch ein passendes Merkmal hat → MR um bonus erhöht.
+export const SF_MR_BONUSES = {
+  "Eiserner Wille I":   { merkmale: ["Einfluss"],             bonus: 2, label: "Eiserner Wille I" },
+  "Eiserner Wille II":  { merkmale: ["Einfluss"],             bonus: 4, label: "Eiserner Wille II" },
+  "Eiserner Wille III": { merkmale: ["Einfluss"],             bonus: 6, label: "Eiserner Wille III" },
+  "Gedankenschutz":     { merkmale: ["Einfluss", "Hellsicht"], bonus: 1, label: "Gedankenschutz" },
+  // Sphärenkenntnis-SFs geben +X auf MR vs Sphärenmagie (selten)
+  "Sphärenkenntnis: Niederhöllen":  { merkmale: ["Dämonisch"],  bonus: 2, label: "Sphärenkenntnis Niederhöllen" },
+  "Sphärenkenntnis: Limbus":        { merkmale: ["Limbus"],     bonus: 2, label: "Sphärenkenntnis Limbus" },
+};
+
 // ─── Talentprobe-Zuordnungen ────────────────────────────────────────────────
 
 export const TALENT_CATEGORIES = {

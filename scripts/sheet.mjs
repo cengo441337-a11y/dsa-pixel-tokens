@@ -3,7 +3,7 @@
  * Überschreibt das gdsa Standard-Sheet mit Pixel-Art Theme
  */
 
-import { MODULE_ID, ATTRIBUTES, DERIVED_FORMULAS, RACE_GS, SPELL_EFFECT_MAP, COMBAT_MANEUVERS, resolveProbe, checkCritical, resolveActorAsP, lookupSpellEffect, parseAspCost, ALL_ZONES, ZONE_LABELS, ZONE_KEY_MAP, HIT_ZONE_TABLE, parseBeFormula, getRuestungsgewoehnung, calcIniPenalty, getWoundThresholds } from "./config.mjs";
+import { MODULE_ID, ATTRIBUTES, DERIVED_FORMULAS, RACE_GS, SPELL_EFFECT_MAP, COMBAT_MANEUVERS, resolveProbe, checkCritical, resolveActorAsP, lookupSpellEffect, parseAspCost, ALL_ZONES, ZONE_LABELS, ZONE_KEY_MAP, HIT_ZONE_TABLE, parseBeFormula, getRuestungsgewoehnung, calcIniPenalty, getWoundThresholds, SF_MR_BONUSES } from "./config.mjs";
 import { castSpell } from "./magic.mjs";
 import { openDatabaseBrowser } from "./db-browser.mjs";
 
@@ -233,6 +233,31 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // WdS S.57: AT-, PA-, FK- und INI-Basiswert sowie GE sinken um je 2 Punkte
     // pro Wunde, die GS um 1 Punkt. Vorher war's hier −1 — falsch.
     data.woundPenalty = data.totalWounds * 2;                                      // −2 pro Wunde (AT/PA/FK/INI)
+
+    // ── MR-Boni gegen bestimmte Spruchmerkmale (Eiserner Wille, Gedankenschutz etc.) ──
+    // SF-Liste durchgehen und alle aktiven MR-Boni sammeln. Wird im Tooltip
+    // angezeigt + im Spell-Dialog als Auto-Bonus angewendet.
+    const mrBonusList = [];
+    const mrBonusByMerkmal = {};  // { "Einfluss": [{label, bonus}, ...] }
+    for (const sfName of sfList) {
+      const cfg = SF_MR_BONUSES[sfName];
+      if (!cfg) continue;
+      mrBonusList.push({ sf: sfName, label: cfg.label, bonus: cfg.bonus, merkmale: cfg.merkmale });
+      for (const merk of cfg.merkmale) {
+        if (!mrBonusByMerkmal[merk]) mrBonusByMerkmal[merk] = 0;
+        mrBonusByMerkmal[merk] += cfg.bonus;
+      }
+    }
+    data.mrBonusList = mrBonusList;
+    data.mrBonusByMerkmal = mrBonusByMerkmal;
+    // Tooltip-Text für die MR-Anzeige im Sheet
+    data.mrTooltip = mrBonusList.length === 0
+      ? `Magieresistenz ${this.actor.system?.MR?.value ?? 0}`
+      : `MR ${this.actor.system?.MR?.value ?? 0} +\n` +
+        mrBonusList.map(b => `+${b.bonus} vs ${b.merkmale.join("/")} (${b.label})`).join("\n");
+    // Speicher die Boni auch am Actor-Flag damit der Spell-Dialog (vom Caster aus)
+    // den Ziel-MR-Bonus auslesen kann.
+    this.actor.setFlag?.(MODULE_ID, "mrBonusByMerkmal", mrBonusByMerkmal).catch(() => {});
     const ko = system.KO?.value ?? 10;
     // Vorteile/Nachteile/SF die WS beeinflussen (WdS S.61)
     const vorteileMap   = system.vorteile  ?? {};
