@@ -6,6 +6,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.7] — 2026-04-28
+
+### Combat-Tracker Initiative-Würfel funktioniert ⚔
+- **Würfel-Button im Combat-Tracker reagiert wieder.** Bisheriger Bug:
+  `CONFIG.Combat.initiative.formula` war `null` — gdsa-System setzt das
+  nicht und Foundry weiß ohne Formel nicht was beim Würfel-Klick gerollt
+  werden soll. Jetzt: Modul setzt Default-Formel + libWrapper-Override
+  auf `Combatant.prototype.getInitiativeRoll` mit unserer DSA-Logik.
+- **Tracker-Würfel berücksichtigt automatisch:**
+  - INIBasis aus Actor (`system.INIBasis.value`)
+  - SF Kampfreflexe (+4) und Kampfgespür (+2)
+  - Rüstungs-Penalty (gBE/2 abgerundet, alle Rüstungen summiert)
+  - Schild-INI-Penalty (vom aktiv geführten Schild)
+  - Wund-Mali (−1 pro Wunde)
+- **Schöner Chat-Output**: Statt nackte Zahl zeigt der Wurf den vollen
+  Rechenweg (`1W6 (4) + INI 10 + 4 Kampfreflexe − 1 Rüstung`).
+
+---
+
 ## [0.4.6] — 2026-04-28
 
 ### XML-Parser: Eigenschaften-Final-Snapshots ignorieren 🎯

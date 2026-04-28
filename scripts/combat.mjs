@@ -427,6 +427,103 @@ function _registerMovementHook() {
   });
 }
 
+// ─── Combat-Tracker Initiative-Override ────────────────────────────────────
+
+/**
+ * Berechnet die DSA-INI fuer einen Actor inkl. SF-Boni, Ruestung-Malus, Wunden.
+ * @returns {{ ini: number, parts: string[] }}
+ */
+function _computeInitiative(actor) {
+  if (!actor) return { ini: 0, parts: [] };
+  const sys = actor.system ?? {};
+  const sfList = Array.isArray(sys.sf)
+    ? sys.sf
+    : Object.values(sys.sf ?? {}).map(v => v?.name ?? v);
+  const iniBasis = Number(sys.INIBasis?.value ?? 0);
+  const sfKR = sfList.includes("Kampfreflexe") ? 4 : 0;
+  const sfKG = (sfList.includes("Kampfgespür") || sfList.includes("Kampfgespuer")) ? 2 : 0;
+
+  // Ruestungs-Penalty (gBE/2 abgerundet, aus armorZones-Items)
+  let armorIni = 0;
+  const armorItems = actor.items?.filter(i => (i.system?.type ?? "").toLowerCase() === "armor") ?? [];
+  for (const a of armorItems) {
+    const be = Number(a.system?.armor?.be ?? 0);
+    armorIni += Math.floor(be / 2);
+  }
+
+  // Schild-Penalty (negativer ini-Mod = Penalty)
+  const equippedShield = actor.items?.find(i =>
+    (i.system?.type ?? "").toLowerCase() === "shield"
+    && i.getFlag(MODULE_ID, "equipped") === true
+  );
+  const shieldIni = equippedShield ? Math.abs(Math.min(0, Number(equippedShield.system?.shield?.ini ?? 0))) : 0;
+
+  // Wunden-Penalty
+  const wounds = actor.getFlag(MODULE_ID, "wounds") ?? {};
+  const wp = Object.values(wounds).reduce((s, w) => s + (Number(w) || 0), 0);
+
+  const ini = iniBasis + sfKR + sfKG - armorIni - shieldIni - wp;
+  const parts = [
+    `INI ${iniBasis}`,
+    sfKR ? `+${sfKR} Kampfreflexe` : null,
+    sfKG ? `+${sfKG} Kampfgespür` : null,
+    armorIni ? `−${armorIni} Rüstung` : null,
+    shieldIni ? `−${shieldIni} Schild` : null,
+    wp ? `−${wp} Wunden` : null,
+  ].filter(Boolean);
+  return { ini, parts };
+}
+
+/**
+ * Registriert die Initiative-Formel in CONFIG.Combat (gdsa setzt das nicht)
+ * und ueberschreibt Combatant#getInitiativeRoll mit unserer DSA-Logik
+ * (1W6 + INIBasis +/- SF-Boni +/- Ruestung +/- Wunden).
+ */
+function _registerInitiativeOverride() {
+  // Default-Formula setzen — sonst zeigt Foundry den Wuerfel-Button als
+  // disabled, weil er beim Klick nicht weiss was zu rollen ist.
+  // Auch als Fallback wenn libWrapper nicht da ist.
+  CONFIG.Combat.initiative = {
+    formula: "1d6 + @INIBasis.value",
+    decimals: 0,
+  };
+
+  if (typeof libWrapper === "undefined") {
+    console.warn(`[${MODULE_ID}] libWrapper fehlt — INI-Tracker nutzt nur die Default-Formel ohne SF-Boni.`);
+    return;
+  }
+
+  libWrapper.register(MODULE_ID, "Combatant.prototype.getInitiativeRoll", function(wrapped, formula) {
+    const actor = this.actor;
+    if (!actor) return wrapped(formula);
+    const { ini, parts } = _computeInitiative(actor);
+    const rollFormula = `1d6 + ${ini}`;
+    // Tooltip / chat-Flavor: speichern als Property fuer spaetere Anzeige
+    const roll = new Roll(rollFormula, actor.getRollData?.() ?? {});
+    roll._dsaIniParts = parts;
+    return roll;
+  }, "MIXED");
+
+  // Schoener Chat-Output beim Tracker-Wuerfel: hook auf rollInitiative
+  Hooks.on("createChatMessage", (msg) => {
+    const roll = msg.rolls?.[0];
+    if (!roll?._dsaIniParts) return;
+    // Replace bare-bones content with our pretty chat
+    const total = roll.total;
+    const die = roll.dice?.[0]?.total ?? 0;
+    const parts = roll._dsaIniParts.join(" ");
+    const html = `<div class="dsa-pixel-chat">
+      <div class="chat-title">⚔ Initiative</div>
+      <div class="dice-row"><div class="die success">${die}</div></div>
+      <div style="text-align:center;font-size:11px;color:#888;margin-top:3px">1W6 (${die}) + ${parts}</div>
+      <div class="result-line result-success" style="font-size:18px;color:#ffd700">Initiative: ${total}</div>
+    </div>`;
+    msg.update({ content: html }).catch(() => {});
+  });
+
+  console.log(`[${MODULE_ID}] ✓ Initiative-Override (Tracker-Würfel) registriert`);
+}
+
 // ─── Exports ────────────────────────────────────────────────────────────────
 
 export function registerCombatHooks() {
@@ -446,6 +543,7 @@ export function registerCombatHooks() {
   });
 
   _registerMovementHook();
+  _registerInitiativeOverride();
 
   console.log(`[${MODULE_ID}] ✓ Combat System registriert`);
 }
