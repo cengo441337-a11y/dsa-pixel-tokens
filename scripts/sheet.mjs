@@ -389,7 +389,8 @@ export class PixelArtCharacterSheet extends ActorSheet {
       at += atShieldApplied;
       if (typeof pa === "number") pa += paShieldApplied;
 
-      // Wund-Penalty: −1 pro Wunde auf AT und PA (WdS Wundregeln)
+      // Wund-Penalty: −2 pro Wunde auf AT und PA (WdS S.57; data.woundPenalty
+      // ist totalWounds × 2, wir ziehen einfach den vorberechneten Wert ab).
       at -= woundPenalty;
       if (typeof pa === "number") pa -= woundPenalty;
 

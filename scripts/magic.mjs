@@ -167,6 +167,25 @@ export async function showSpellDialog(actor, spellData) {
       title: `Zauber: ${spellData.name}`,
       content: `
         <div class="dsa-pixel-spell-dialog" style="color-scheme:dark">
+          ${(() => {
+            // Attributo & ähnliche: Probe enthält "*" als Platzhalter für die
+            // dynamisch zu wählende Eigenschaft (z.B. KK bei KK-Steigerung).
+            // Zeige Dropdown nur wenn der Spruch eine Wildcard-Eigenschaft hat.
+            const hasWildcard = (spellData.probe ?? []).includes("*");
+            if (!hasWildcard) return "";
+            const attrs = ["MU","KL","IN","CH","FF","GE","KO","KK"];
+            const opts = attrs.map(a => `<option value="${a}">${a}</option>`).join("");
+            return `
+            <div style="margin:6px 0;padding:6px 8px;background:rgba(180,140,80,0.10);border-left:3px solid #c9a;border-radius:0 4px 4px 0">
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#fc9">
+                <span>Wildcard-Eigenschaft (gesteigerte / Ziel):</span>
+                <select id="probe-wildcard" style="background:#0d1b2e;color:#e0e0e0;border:2px solid #3a3a5e;color-scheme:dark">${opts}</select>
+              </label>
+              <div style="font-size:10px;color:#776;margin-top:2px;padding-left:8px">
+                Bei Attributo: Probe-Eigenschaft = die gesteigerte Eigenschaft
+              </div>
+            </div>`;
+          })()}
           <div class="spell-info">
             <div>
               <div class="info-label">Probe</div>
@@ -322,7 +341,7 @@ export async function showSpellDialog(actor, spellData) {
           html.find("#spell-total-asp").text(result.aspCost);
           html.find("#spell-total-zfp").css("color", result.totalZfP > 10 ? "#ff3333" : result.totalZfP > 0 ? "#e94560" : "#888");
         };
-        html.find("select[data-mod], #spell-extra-mod, #spell-variante, #religious-violation, #geode-element, #upkeep-spells, #vs-mr, #target-mr").on("input change", refresh);
+        html.find("select[data-mod], #spell-extra-mod, #spell-variante, #religious-violation, #geode-element, #upkeep-spells, #vs-mr, #target-mr, #probe-wildcard").on("input change", refresh);
       },
     }).render(true);
   });
@@ -343,6 +362,8 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
   const upkeepSpells       = parseInt(html.find("#upkeep-spells").val()) || 0;
   const vsMR               = html.find("#vs-mr").prop("checked") ?? false;
   const targetMR           = parseInt(html.find("#target-mr").val()) || 0;
+  // Wildcard-Eigenschaft (für Sprüche mit "*"-Probe wie Attributo)
+  const probeWildcard      = html.find("#probe-wildcard").val() || "KK";
 
   // Schelm-MR-Schwelle berechnen (extraFlags.schelmMrIgnore wird in castSpell gesetzt)
   const schelmIgnore = extraFlags.schelmMrIgnore ?? 0;
@@ -377,7 +398,7 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
       selections, selectedVariant: varIdx0 >= 0 ? (varianten[varIdx0] ?? null) : null,
       elfKlInTausch: html.find("#elf-kl-in").prop("checked") ?? false,
       // Diagnostik / Display-Felder
-      religiousViolation, geodeElement, upkeepSpells, vsMR, targetMR, effectiveTargetMR,
+      religiousViolation, geodeElement, upkeepSpells, vsMR, targetMR, effectiveTargetMR, probeWildcard,
     };
   }
   const result = calculateModifications(selections, baseKosten, rep, extraFlags);
@@ -439,7 +460,7 @@ export async function castSpell(actor, spellData) {
   const dialogResult = await showSpellDialog(actor, spellData);
   if (!dialogResult) return null;
 
-  const { totalZfP, extraAkt, aspCost, erleichterung, selections, selectedVariant, elfKlInTausch, upkeepSpells, vsMR, targetMR, effectiveTargetMR, religiousViolation, geodeElement } = dialogResult;
+  const { totalZfP, extraAkt, aspCost, erleichterung, selections, selectedVariant, elfKlInTausch, upkeepSpells, vsMR, targetMR, effectiveTargetMR, religiousViolation, geodeElement, probeWildcard } = dialogResult;
 
   // Aufrechterhaltene-Zauber-Counter persistieren (wird in nächstem Dialog
   // wieder vorbelegt). User kann Counter im Dialog jederzeit anpassen.
@@ -473,8 +494,12 @@ export async function castSpell(actor, spellData) {
 
   // 5. Probe auswerten (Erleichterung aus Erzwingen wird als negativer Modifikator angewendet)
   const probeAttrs = (spellData.probe ?? []).map((a, idx) => {
+    // Wildcard: Bei Sprüchen wie Attributo wird "*" durch die im Dialog
+    // gewählte Eigenschaft ersetzt (z.B. KK für KK-Steigerung).
+    let resolved = a;
+    if (a === "*") resolved = probeWildcard || "KK";
     // Elfisch: KL kann durch IN ersetzt werden (WdZ S.322)
-    if (elfKlInTausch && a === "KL") {
+    if (elfKlInTausch && resolved === "KL") {
       const probe = spellData.probe ?? [];
       const inCount = probe.filter(x => x === "IN").length;
       const isFirstKl = probe.indexOf("KL") === idx;
@@ -483,7 +508,7 @@ export async function castSpell(actor, spellData) {
         return actor.system["IN"]?.value ?? 10;
       }
     }
-    return actor.system[a]?.value ?? 10;
+    return actor.system[resolved]?.value ?? 10;
   });
   const probeMod = -erleichterung; // Negativ = Erleichterung
   const result = resolveProbe(dice, probeAttrs, effectiveZfw, probeMod);
@@ -533,6 +558,7 @@ export async function castSpell(actor, spellData) {
   // 8. Chat
   // Probe-Labels für Chat (zeigt ersetztes Attribut an)
   const probeLabels = (spellData.probe ?? []).map((a, idx) => {
+    if (a === "*") return `${probeWildcard || "KK"}*`;
     if (elfKlInTausch && a === "KL" && (spellData.probe ?? []).indexOf("KL") === idx) return "IN*";
     return a;
   });

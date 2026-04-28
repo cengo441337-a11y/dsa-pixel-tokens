@@ -6,6 +6,39 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.14] — 2026-04-28
+
+### Pass-3-Audit-Fixes
+
+- **Wildcard-Eigenschaft im Spell-Dialog (Attributo-Bug)**: Sprüche wie
+  Attributo haben `"*"` als 3. Probe-Eigenschaft (= „die gesteigerte
+  Eigenschaft"). Vorher würfelte der dritte W20 immer gegen 10 (Default)
+  weil `actor.system["*"]` undefined ist. Jetzt: Spell-Dialog zeigt
+  Dropdown zur Eigenschaftswahl, Probe-Wurf nutzt die gewählte
+  Eigenschaft. Chat zeigt "KK*" als Label damit klar ist welche
+  gerade gewählt wurde.
+- **`reps`/`verbreitung`-Doppel-Feld in spells.json bereinigt**: Mein
+  Sharisad-Skript hatte 27 Sprüche mit demselben Array unter beiden
+  Feldnamen gespeichert (Referenz-Aliasing). `reps` war Dead-Data,
+  der Code liest nur `verbreitung`. Konsolidiert: 29 Sprüche mit
+  Sharisad-Repräsentation jetzt nur noch in `verbreitung`.
+- **Stale Kommentar `// −1 pro Wunde`** in `_prepareCombatTalents`
+  korrigiert auf `// −2 pro Wunde` (Code war schon korrekt seit v0.4.9,
+  nur Kommentar war veraltet).
+
+### 9 von 12 Audit-Befunden waren falsch-positiv
+
+Verifiziert mit pdftotext und direktem Code-Read:
+- atBase/paBase „double application" — intentional für Tooltip-Anzeige
+- GS *2 Wundpenalty — kein solcher Code im Modul
+- _rollRitual ohne Wundpenalty — bereits seit v0.4.10 implementiert
+- Finte SF-Levels — DSA hat nur 1 Stufe Finte
+- SF-Mixed-Format — schon defensive normalisiert
+- Schelm-MR-Threshold-Fallback — schon `: 3` als Default
+- Mehrere defensive nice-to-haves nicht relevant
+
+---
+
 ## [0.4.13] — 2026-04-28
 
 ### HUD-Effekt-Leiste UNTER den Token-HUD (horizontal)

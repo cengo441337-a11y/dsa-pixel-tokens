@@ -183,14 +183,6 @@
         "name": "Haut des Seelentiers",
         "zfpKosten": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "hexisch",
-      "druidisch",
-      "kristallomant",
-      "sharisad"
     ]
   },
   {
@@ -347,15 +339,7 @@
     ],
     "komplexitaet": "D",
     "merkmal": "Hellsicht, Metamagie",
-    "varianten": [],
-    "reps": [
-      "gildenmagisch",
-      "hexisch",
-      "druidisch",
-      "geoden",
-      "kristallomant",
-      "sharisad"
-    ]
+    "varianten": []
   },
   {
     "name": "Ängste Lindern",
@@ -617,16 +601,6 @@
         "zfpKosten": 3,
         "minZfw": 11
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "hexisch",
-      "druidisch",
-      "schelm",
-      "geoden",
-      "kristallomant",
-      "sharisad"
     ]
   },
   {
@@ -690,11 +664,6 @@
         "zfpKosten": 10,
         "minZfw": 14
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "kristallomant",
-      "sharisad"
     ]
   },
   {
@@ -1177,13 +1146,7 @@
     ],
     "komplexitaet": "D",
     "merkmal": "Hellsicht, Temporal",
-    "varianten": [],
-    "reps": [
-      "gildenmagisch",
-      "druidisch",
-      "geoden",
-      "sharisad"
-    ]
+    "varianten": []
   },
   {
     "name": "Blitz Dich Find",
@@ -1861,15 +1824,6 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "hexisch",
-      "druidisch",
-      "geoden",
-      "kristallomant",
-      "sharisad"
     ]
   },
   {
@@ -1900,11 +1854,6 @@
         "name": "Sinnenraub",
         "zfpKosten": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "borbaradianer",
-      "sharisad"
     ]
   },
   {
@@ -1937,16 +1886,6 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "hexisch",
-      "druidisch",
-      "schelm",
-      "geoden",
-      "kristallomant",
-      "sharisad"
     ]
   },
   {
@@ -1971,15 +1910,7 @@
     ],
     "komplexitaet": "C",
     "merkmal": "Eigenschaften, Elementar",
-    "varianten": [],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "hexisch",
-      "druidisch",
-      "geoden",
-      "sharisad"
-    ]
+    "varianten": []
   },
   {
     "name": "Eisenrost und Patina",
@@ -2424,13 +2355,6 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "hexisch",
-      "druidisch",
-      "borbaradianer",
-      "sharisad"
     ]
   },
   {
@@ -2462,11 +2386,6 @@
         "name": "Mehrfachschlüssel",
         "zfpKosten": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "schelm",
-      "sharisad"
     ]
   },
   {
@@ -3050,16 +2969,6 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "hexisch",
-      "druidisch",
-      "schelm",
-      "geoden",
-      "kristallomant",
-      "sharisad"
     ]
   },
   {
@@ -3117,15 +3026,6 @@
         "name": "Herr über die Monstren",
         "zfpKosten": 3
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "hexisch",
-      "druidisch",
-      "geoden",
-      "kristallomant",
-      "sharisad"
     ]
   },
   {
@@ -3649,12 +3549,6 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "hexisch",
-      "schelm",
-      "sharisad"
     ]
   },
   {
@@ -4042,10 +3936,6 @@
         "name": "Namensruf",
         "zfpKosten": 3
       }
-    ],
-    "reps": [
-      "schelm",
-      "sharisad"
     ]
   },
   {
@@ -4397,13 +4287,12 @@
     "zauberdauer": "4 Aktionen",
     "reichweite": "selbst; der Schwarm kann sich maximal etwa 30 Meilen bei gerade Flugbahn und maximaler Wirkungsdauer.",
     "wirkungsdauer": "maximal 1 Stunde",
-    "verbreitung": [],
+    "verbreitung": [
+      "sharisad"
+    ],
     "komplexitaet": "E",
     "merkmal": "Form",
-    "varianten": [],
-    "reps": [
-      "sharisad"
-    ]
+    "varianten": []
   },
   {
     "name": "Leib der Erde",
@@ -4809,15 +4698,6 @@
         "name": "Freiwilliger Spender",
         "zfpKosten": 3
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "hexisch",
-      "druidisch",
-      "geoden",
-      "borbaradianer",
-      "kristallomant",
-      "sharisad"
     ]
   },
   {
@@ -4872,15 +4752,6 @@
         "name": "Wirkungsdauer",
         "zfpKosten": 5
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "hexisch",
-      "druidisch",
-      "geoden",
-      "kristallomant",
-      "sharisad"
     ]
   },
   {
@@ -5047,10 +4918,6 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "sharisad"
     ]
   },
   {
@@ -5151,14 +5018,6 @@
         "zfpKosten": 7,
         "minZfw": 11
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "hexisch",
-      "schelm",
-      "kristallomant",
-      "sharisad"
     ]
   },
   {
@@ -5492,10 +5351,6 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "sharisad"
     ]
   },
   {
@@ -5516,11 +5371,7 @@
     ],
     "komplexitaet": "E",
     "merkmal": "Hellsicht, Kraft, Limbus, Metamagie",
-    "varianten": [],
-    "reps": [
-      "gildenmagisch",
-      "sharisad"
-    ]
+    "varianten": []
   },
   {
     "name": "Odem Arcanum",
@@ -5834,16 +5685,6 @@
         "name": "Demotivation",
         "zfpKosten": 3
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "hexisch",
-      "druidisch",
-      "schelm",
-      "geoden",
-      "kristallomant",
-      "sharisad"
     ]
   },
   {
@@ -5905,11 +5746,6 @@
         "zfpKosten": 7,
         "minZfw": 14
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "borbaradianer",
-      "sharisad"
     ]
   },
   {
@@ -6308,12 +6144,7 @@
     ],
     "komplexitaet": "D",
     "merkmal": "Illusion",
-    "varianten": [],
-    "reps": [
-      "gildenmagisch",
-      "schelm",
-      "sharisad"
-    ]
+    "varianten": []
   },
   {
     "name": "Schelmenrausch",
@@ -7136,14 +6967,7 @@
     ],
     "komplexitaet": "C",
     "merkmal": "Heilung, Form",
-    "varianten": [],
-    "reps": [
-      "elfisch",
-      "hexisch",
-      "druidisch",
-      "geoden",
-      "sharisad"
-    ]
+    "varianten": []
   },
   {
     "name": "Tiergedanken",
@@ -7447,13 +7271,12 @@
     "zauberdauer": "20 Aktionen",
     "reichweite": "Berührung",
     "wirkungsdauer": "ZfW Tage",
-    "verbreitung": [],
+    "verbreitung": [
+      "sharisad"
+    ],
     "komplexitaet": "C",
     "merkmal": "Objekt",
-    "varianten": [],
-    "reps": [
-      "sharisad"
-    ]
+    "varianten": []
   },
   {
     "name": "Unsichtbarer Jäger",
@@ -7642,12 +7465,6 @@
         "name": "Teilweise Unsichtbarkeit",
         "zfpKosten": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "schelm",
-      "sharisad"
     ]
   },
   {
@@ -7748,13 +7565,6 @@
         "name": "Elementare Ausstrahlung",
         "zfpKosten": 7
       }
-    ],
-    "reps": [
-      "gildenmagisch",
-      "elfisch",
-      "druidisch",
-      "geoden",
-      "sharisad"
     ]
   },
   {
