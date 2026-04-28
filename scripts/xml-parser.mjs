@@ -1239,15 +1239,30 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   // Originalbezeichnungen zusätzlich für Anzeige / Debugging
   sys.sfOriginal = heroData.specialAbilities.map(s => s.nameOriginal);
 
-  // ── 6c. Ausweichen (AW/Dogde) — PABasis/2 + SF-Bonus ───────────────────
+  // ── 6c. Ausweichen (AW/Dogde) — WdS S.66: AW = volle PA-Basis. ─────────
   // gdsa schreibt dieses Feld als "Dogde" (Typo, aber API-Vertrag).
-  // SF Ausweichen I/II/III geben +1/+2/+3 auf den Basiswert.
+  // SF Ausweichen I/II/III geben +3/+6/+9 auf den Basiswert (regelkonform v0.4.10).
+  // Akrobatik-TaW ≥ 12: +1, dann pro 3 weitere TaP +1.
+  // Nachteils-Mali: Behäbig/Tollpatsch −1, Schlechte Reflexe −2, Schwerfällig −1.
   {
-    const paFormula = Math.floor(((attr.IN ?? 10) + (attr.GE ?? 10) + (attr.KK ?? 10)) / 5);
-    const awSFBonus = sys.sf.includes("Ausweichen III") ? 3
-      : sys.sf.includes("Ausweichen II") ? 2
-      : sys.sf.includes("Ausweichen I") ? 1 : 0;
-    sys.Dogde = Math.floor(paFormula / 2) + awSFBonus;
+    const paFormula = Math.round(((attr.IN ?? 10) + (attr.GE ?? 10) + (attr.KK ?? 10)) / 5);
+    const awSFBonus = sys.sf.includes("Ausweichen III") ? 9
+      : sys.sf.includes("Ausweichen II") ? 6
+      : sys.sf.includes("Ausweichen I") ? 3 : 0;
+    // Akrobatik-Bonus
+    const akrobatik = heroData.talents.find(t => (t.name ?? "").toLowerCase() === "akrobatik");
+    const akrobatikTaW = akrobatik?.taw ?? 0;
+    const awAkrobatikBonus = akrobatikTaW >= 12
+      ? 1 + Math.floor((akrobatikTaW - 12) / 3)
+      : 0;
+    // Nachteils-Mali
+    const nachteilNamen = heroData.disadvantages.map(d => (d.name ?? "").toLowerCase());
+    let awNachteilMalus = 0;
+    if (nachteilNamen.some(n => n.startsWith("behäbig") || n.startsWith("behaebig"))) awNachteilMalus -= 1;
+    if (nachteilNamen.some(n => n.startsWith("tollpatsch"))) awNachteilMalus -= 1;
+    if (nachteilNamen.some(n => n.startsWith("schlechte reflexe") || n.startsWith("schlechter reflexe"))) awNachteilMalus -= 2;
+    if (nachteilNamen.some(n => n.startsWith("schwerfällig") || n.startsWith("schwerfaellig"))) awNachteilMalus -= 1;
+    sys.Dogde = paFormula + awSFBonus + awAkrobatikBonus + awNachteilMalus;
   }
 
   // ── 6b. Repräsentationen → system.Reps (Boolean-Flags für gdsa) ──────────
