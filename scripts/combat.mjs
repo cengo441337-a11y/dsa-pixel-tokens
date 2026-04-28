@@ -440,15 +440,19 @@ function _computeInitiative(actor) {
     ? sys.sf
     : Object.values(sys.sf ?? {}).map(v => v?.name ?? v);
   const iniBasis = Number(sys.INIBasis?.value ?? 0);
-  const sfKR = sfList.includes("Kampfreflexe") ? 4 : 0;
+  // WdS S.75: Kampfreflexe wirkt nur bei Ruestung mit BE <= 4 (nach RG).
+  // Wir summieren BE erst weiter unten — daher Sub-Berechnung hier:
+  const _kfTotalBE = (actor.items?.filter(i => (i.system?.type ?? "").toLowerCase() === "armor") ?? [])
+    .reduce((s, a) => s + Number(a.system?.armor?.be ?? 0), 0);
+  const sfKR = (sfList.includes("Kampfreflexe") && _kfTotalBE <= 4) ? 4 : 0;
   const sfKG = (sfList.includes("Kampfgespür") || sfList.includes("Kampfgespuer")) ? 2 : 0;
 
-  // Ruestungs-Penalty (gBE/2 abgerundet, aus armorZones-Items)
+  // Ruestungs-Penalty fuer INI: WdS S.56 — volle BE, nicht halbiert.
+  // ("der BE-Wert wird von der Initiative abgezogen, nicht der eBE-Wert")
   let armorIni = 0;
   const armorItems = actor.items?.filter(i => (i.system?.type ?? "").toLowerCase() === "armor") ?? [];
   for (const a of armorItems) {
-    const be = Number(a.system?.armor?.be ?? 0);
-    armorIni += Math.floor(be / 2);
+    armorIni += Number(a.system?.armor?.be ?? 0);
   }
 
   // Schild-Penalty (negativer ini-Mod = Penalty)

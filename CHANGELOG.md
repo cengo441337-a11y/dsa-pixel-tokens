@@ -6,6 +6,66 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.9] — 2026-04-28
+
+### DSA-4.1-Regel-Konformität: 5-Agent-Audit-Fixes 📜
+
+Aus systematischem Vergleich des Codes gegen DSA 4.1 WdH/WdS/WdZ und das
+Liber Cantiones — die wichtigsten regelwidrigen Stellen behoben.
+
+**Trefferzonen-Tabelle KOMPLETT umgebaut (WdS S.107)**
+- Vorher: Kopf 1-2, Brust 3-6, Rücken 7-8, Arme 9-12, Bauch 13-14+19-20,
+  Beine 15-18 — komplett invertierte Verteilung mit erfundener „Rücken"-Zone.
+- Jetzt regelkonform: Beine 1-6, Bauch 7-8, Arme 9-14 (ungerade Schildarm,
+  gerade Schwertarm), Brust 15-18, Kopf 19-20. „Rücken" gibt es nur per
+  gezieltem Schlag, nicht in der Zufallstabelle.
+- Vorherige Trefferverteilung war vollkommen unrealistisch (fast jeder
+  zweite Wurf am Kopf).
+
+**Wundmali korrigiert von −1 auf −2 pro Wunde (WdS S.57)**
+- Regel: „AT-, PA-, FK- und INI-Basiswert sowie GE sinken sofort um je
+  2 Punkte pro Wunde, die GS um 1 Punkt."
+- Code hatte −1 pro Wunde → verwundete Charaktere dramatisch zu kampffähig.
+
+**INI-Rüstungs-Penalty volle BE statt halbiert (WdS S.56)**
+- Regel: „der BE-Wert wird von der Initiative abgezogen, nicht der eBE-Wert".
+- Code zog `BE/2` ab. Schwer gerüstete Kämpfer hatten doppelt so hohe INI
+  wie regelkonform.
+
+**Kampfreflexe respektiert BE≤4-Bedingung (WdS S.75)**
+- SF Kampfreflexe gibt nur dann +4 INI, wenn der Kämpfer eine Rüstung mit
+  BE ≤ 4 trägt. Vorher griff der Bonus immer.
+
+**Manöver-Effekte korrigiert**
+- **Hammerschlag** wirkt jetzt: TP×3 inkl. Ansage (WdS S.62-63). Vorher
+  ohne Effekt → keine Schadens-Verdreifachung.
+- **Sturmangriff** ignoriert RS NICHT mehr (WdS S.65). Vorher fälschlich
+  RS-Ignore → übermäßiger Schaden gegen gepanzerte Gegner.
+- **Klingensturm** rechnet AT/2+2 statt AT+2 (WdS S.63). Bei AT 15 jetzt
+  korrekt 2× AT 10. Vorher war Klingensturm stärker als ein normaler
+  Angriff statt schwächer.
+
+**DERIVED_FORMULAS auf echte Rundung (WdH S.20)**
+- Alle abgeleiteten Werte (AT/PA/FK/INI/MR/AuP/AW-Basis) nutzten
+  `Math.floor` statt `Math.round`. WdH sagt explizit „echt gerundet" →
+  Werte wie `(15+15+13)/5 = 8.6` rundeten auf 8 statt korrekt 9.
+
+**Wunden-Cap auf 3 pro Zone (WdS S.107)**
+- Vorher konnte eine Zone unbegrenzt Wunden ansammeln, obwohl sie ab 3
+  schon „unbrauchbar" gilt. Jetzt cappen wir auf max 3.
+
+**Halbzauberer-Erkennung erweitert + Elfen-AsP-Tippfehler (WdH/WdZ)**
+- Hexen, Druiden, Geoden, Schelme, Schamanen werden jetzt als Zauberer
+  erkannt → bekommen AsP-Max nach `MU+IN+CH`-Formel statt 0.
+- Elfen-AsP nutzte fälschlich `IN+MR+CH` statt `MU+IN+CH` (Tippfehler:
+  MR statt MU).
+
+**Liber-Cantiones-Datenkorrektur**
+- Spruch **Attributo**: Probe war `[CH, KO, KK]` — laut Liber korrekt
+  `[KL, CH, *dynamisch*]` (dritte Probe-Eigenschaft = die zu steigernde).
+
+---
+
 ## [0.4.8] — 2026-04-28
 
 ### Aus systematischem Code-Audit gefixt 🔍

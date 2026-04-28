@@ -189,7 +189,9 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const wounds = this.actor.getFlag("dsa-pixel-tokens", "wounds") ?? {};
     data.wounds     = wounds;                                                     // { kopf: 0, brust: 1, ... }
     data.totalWounds = Object.values(wounds).reduce((s, w) => s + (w || 0), 0);  // Summe aller Wunden
-    data.woundPenalty = data.totalWounds;                                          // −1 pro Wunde auf alle Proben
+    // WdS S.57: AT-, PA-, FK- und INI-Basiswert sowie GE sinken um je 2 Punkte
+    // pro Wunde, die GS um 1 Punkt. Vorher war's hier −1 — falsch.
+    data.woundPenalty = data.totalWounds * 2;                                      // −2 pro Wunde (AT/PA/FK/INI)
     const ko = system.KO?.value ?? 10;
     // Vorteile/Nachteile/SF die WS beeinflussen (WdS S.61)
     const vorteileMap   = system.vorteile  ?? {};
@@ -876,17 +878,19 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const sys      = this.actor.system;
     const sf       = Array.isArray(sys.sf) ? sys.sf : Object.values(sys.sf ?? {}).map(v => v?.name ?? v);
     const iniBasis = sys.INIBasis?.value ?? 0;
-    const sfKR     = sf.includes("Kampfreflexe") ? 4 : 0;
+    // WdS S.75: Kampfreflexe wirkt nur bei Ruestung mit BE <= 4 (nach RG).
+    const _kfTotalBE = (this.actor.items?.filter(i => (i.system?.type ?? "").toLowerCase() === "armor") ?? [])
+      .reduce((s, a) => s + Number(a.system?.armor?.be ?? 0), 0);
+    const sfKR     = (sf.includes("Kampfreflexe") && _kfTotalBE <= 4) ? 4 : 0;
     const sfKG     = sf.includes("Kampfgespür") || sf.includes("Kampfgespuer") ? 2 : 0;
-    // Ruestung-Penalty: aus aktiven Ruestungs-Items (sys.armorZones existiert
-    // nicht im gdsa-Schema — wir summieren BE der ausgeruesteten Ruestungen).
+    // Ruestung-Penalty fuer INI: WdS S.56 — "der BE-Wert wird von der Initiative
+    // abgezogen, nicht der eBE-Wert". Also volle BE, nicht BE/2.
     let armorIni = 0;
     const armorItems = this.actor.items?.filter(i =>
       (i.system?.type ?? "").toLowerCase() === "armor"
     ) ?? [];
     for (const a of armorItems) {
-      const be = Number(a.system?.armor?.be ?? 0);
-      armorIni += Math.floor(be / 2);
+      armorIni += Number(a.system?.armor?.be ?? 0);
     }
     // Schild-INI-Penalty (vom aktiv gefuehrten Schild)
     const equippedShield = this.actor.items?.find(i =>
@@ -1260,11 +1264,22 @@ export class PixelArtCharacterSheet extends ActorSheet {
           break;
         }
         case "rush_damage": {
-          // Sturmangriff: TP + ½GS + 4 + Ansage; RS ignoriert (WdS S.65)
+          // Sturmangriff: TP + ½GS + 4 + Ansage (WdS S.65). KEIN RS-Ignore —
+          // nur Todesstoss und Gezielter Stich ignorieren RS.
           const gs = this.actor.system?.GS?.value ?? this.actor.system?.gs ?? 8;
           const bonus = Math.floor(gs / 2) + 4 + ansage;
-          _pendingTpBonus.set(this.actor.id, { bonus, label: `+${bonus} TP Sturmangriff`, ignoreRS: true });
-          maneuverLine = `<div class="dsa-maneuver-effect" style="color:#ffd700">⚡ Sturmangriff: +${bonus} TP, RS ignoriert! → nächster Schadenswurf</div>`;
+          _pendingTpBonus.set(this.actor.id, { bonus, label: `+${bonus} TP Sturmangriff` });
+          maneuverLine = `<div class="dsa-maneuver-effect" style="color:#ffd700">⚡ Sturmangriff: +${bonus} TP → nächster Schadenswurf</div>`;
+          break;
+        }
+        case "tp_triple": {
+          // Hammerschlag: TP×3 inkl. Ansage (WdS S.62-63)
+          _pendingTpBonus.set(this.actor.id, { bonus: 0, label: "Hammerschlag ×3", tpMultiplier: 3, ansageMultiplier: 3 });
+          maneuverLine = `<div class="dsa-maneuver-effect" style="color:#ffaa00">🔨 Hammerschlag: TP×3 (inkl. Ansage)! → nächster Schadenswurf</div>`;
+          break;
+        }
+        case "split_at_half_plus_2": {
+          maneuverLine = `<div class="dsa-maneuver-effect" style="color:#4a90d9">⚔⚔ Klingensturm: 2× AT/2+2 (jeder Treffer normaler Schaden)</div>`;
           break;
         }
         case "todessto": {
@@ -1755,7 +1770,11 @@ export class PixelArtCharacterSheet extends ActorSheet {
 
     const roll = new Roll(tp);
     await roll.evaluate();
-    const total = roll.total + bonusTP;
+    // Hammerschlag (WdS S.62-63): erwürfelte TP UND Ansage werden ×3.
+    // Manöver-Effekt setzt tpMultiplier ≥ 2.
+    const tpMul     = pending?.tpMultiplier     ?? 1;
+    const ansageMul = pending?.ansageMultiplier ?? 1;
+    const total = (roll.total * tpMul) + (bonusTP * ansageMul);
 
     // ── Trefferzone würfeln (1W20) ──────────────────────────────────────
     const zoneRoll = new Roll("1d20");
@@ -1833,7 +1852,11 @@ export class PixelArtCharacterSheet extends ActorSheet {
         const existingWounds = targetActor.getFlag("dsa-pixel-tokens", "wounds") ?? {};
         const zoneKey = hitZone;
         const oldZoneWounds = existingWounds[zoneKey] ?? 0;
-        existingWounds[zoneKey] = oldZoneWounds + newWounds;
+        // WdS S.107: Jede Koerperzone kann maximal 3 Wunden erleiden — bei
+        // 3 Wunden ist die Zone unbrauchbar und weitere Wunden in derselben
+        // Zone bringen keinen weiteren Effekt (sondern werden in andere Zonen
+        // verteilt, was wir hier vereinfacht durch Cap auf 3 abbilden).
+        existingWounds[zoneKey] = Math.min(3, oldZoneWounds + newWounds);
         await targetActor.setFlag("dsa-pixel-tokens", "wounds", existingWounds);
 
         const totalWounds = Object.values(existingWounds).reduce((s, w) => s + (w || 0), 0);

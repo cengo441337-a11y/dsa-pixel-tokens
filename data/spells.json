@@ -572,9 +572,9 @@
   {
     "name": "Attributo",
     "probe": [
+      "KL",
       "CH",
-      "KO",
-      "KK"
+      "*"
     ],
     "wirkung": "Der Zauber hebt den in der Probe durch ‘Eigenschaft’ bezeichneten Wert des Verzauberten für die Dauer einer Stunde um ZfP*/3 Punkte.",
     "kosten": "7 AsP (Sch: 5 AsP)",

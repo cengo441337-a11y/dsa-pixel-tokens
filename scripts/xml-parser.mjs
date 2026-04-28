@@ -963,16 +963,25 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   // HS-Final-Snapshot (falls vorhanden) hat Vorrang — enthält den endgueltigen
   // Max nach allen Vorteilen, die unsere Formel nicht abbildet (z.B. Hohe LE).
   const lepMax = (dv.LeP?._finalMax > 0) ? dv.LeP._finalMax : lepMaxFormel;
-  // AsP: abhängig vom Charaktertyp
-  // Vollzauberer/Magier: MU+IN+CH; Elfen: IN+MR+CH; Sonstige: IN + Astralmacht*10
+  // AsP: abhängig vom Charaktertyp (DSA 4.1 WdH/WdZ)
+  //   Vollzauberer (Magier, Hexen, Druiden, Geoden, Elfen): MU + IN + CH
+  //   Halbzauberer (Schamane, Schelm etc.): MU + IN + CH (gleiche Basis,
+  //                 aber niedrigere Steigerungstabelle — wir kennen den Max-Wert
+  //                 i.d.R. aus dem _finalMax-Snapshot der HS).
+  //   Astralmacht-Vorteil (Geweihte, Achaz): IN + Astralmacht*10
+  //   Achtung: Vorher hatte der Code "istElf → IN+MR+CH" — das war falsch
+  //   (Elfen sind Vollzauberer mit MU+IN+CH, MR statt MU war ein Tippfehler).
   const astralmacht   = heroData.advantages.find(a => a.name === "Astralmacht");
-  const istVollzauber = heroData.advantages.some(a => a.name === "Vollzauberer")
-    || heroData.advantages.some(a => a.name?.includes("Akademische Ausbildung"))
-    || heroData.specialAbilities.some(s => s.name?.includes("Akademische Ausbildung"));
-  const istElf = heroData.race?.toLowerCase().includes("elf")
-    || heroData.race?.toLowerCase().includes("elfe");
-  const aspMaxFormel = istVollzauber ? (attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10) + aspBonus
-    : istElf        ? (attr.IN ?? 10) + (attr.MR ?? 10) + (attr.CH ?? 10) + aspBonus
+  const istZauberer = heroData.advantages.some(a =>
+       a.name === "Vollzauberer"
+    || a.name === "Halbzauberer"
+    || a.name === "Viertelzauberer"
+    || a.name?.includes("Akademische Ausbildung")
+    || a.name === "Magiedilettant"
+  ) || heroData.specialAbilities.some(s => s.name?.includes("Akademische Ausbildung"))
+    || /^(elf|halbelf|hexe|druide|geode|schamane|schelm)/i.test(heroData.race ?? "")
+    || (heroData.profession ?? "").match(/Magier|Hexe|Druide|Geode|Schelm|Schamane|Elf/i);
+  const aspMaxFormel = istZauberer ? (attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10) + aspBonus
     : astralmacht   ? (attr.IN ?? 10) + (parseInt(astralmacht.value) || 0) * 10 + aspBonus
     : aspBonus > 0  ? aspBonus : 0;
   const aspMax = (dv.AsP?._finalMax > 0) ? dv.AsP._finalMax : aspMaxFormel;

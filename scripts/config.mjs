@@ -21,14 +21,16 @@ export const ATTRIBUTES = {
 // ─── Abgeleitete Werte — Formeln ────────────────────────────────────────────
 
 export const DERIVED_FORMULAS = {
-  ATBasis:  (a) => Math.floor((a.MU + a.GE + a.KK) / 5),
-  PABasis:  (a) => Math.floor((a.IN + a.GE + a.KK) / 5),
-  FKBasis:  (a) => Math.floor((a.IN + a.FF + a.KK) / 5),
-  INIBasis: (a) => Math.floor((a.MU + a.MU + a.IN + a.GE) / 5),
-  MR:       (a) => Math.floor((a.MU + a.KL + a.KO) / 5),
-  AuP:      (a) => Math.floor((a.MU + a.KO + a.GE) / 2),
-  AW:       (a) => Math.floor(Math.floor((a.IN + a.GE + a.KK) / 5) / 2), // PA-Basis / 2
-  WS:       (a) => Math.floor((a.KO ?? 10) / 2),                         // Wundschwelle = KO/2 (WdH S.46)
+  // WdH S.20: "echt gerundet" → Math.round, NICHT Math.floor (vorher off-by-1
+  // bei jedem Drittel das nicht aufgeht, z.B. (15+15+13)/5=8.6 → richtig 9, falsch 8)
+  ATBasis:  (a) => Math.round((a.MU + a.GE + a.KK) / 5),
+  PABasis:  (a) => Math.round((a.IN + a.GE + a.KK) / 5),
+  FKBasis:  (a) => Math.round((a.IN + a.FF + a.KK) / 5),
+  INIBasis: (a) => Math.round((a.MU + a.MU + a.IN + a.GE) / 5),
+  MR:       (a) => Math.round((a.MU + a.KL + a.KO) / 5),
+  AuP:      (a) => Math.round((a.MU + a.KO + a.GE) / 2),
+  AW:       (a) => Math.round(Math.round((a.IN + a.GE + a.KK) / 5) / 2), // PA-Basis / 2
+  WS:       (a) => Math.ceil((a.KO ?? 10) / 2),                          // Wundschwelle = KO/2 (WdH S.46), aufgerundet
   GS:       ()  => 8, // Standard Mensch. Elfen: 9, Zwerge: 6 — Override über Rasse-Flag wenn gesetzt.
 };
 
@@ -114,9 +116,11 @@ export const COMBAT_MANEUVERS = {
     label: "Hammerschlag",
     atBase: -8, ansage: true,
     ansageMax: (at, taw) => Math.min(at, taw),
-    effect: "none",       // nur schwerer Treffer, kein Sonder-TP-Effekt
+    // WdS S.62-63: "Sowohl die erwürfelten TP als auch eventuell zur
+    // Schadenserhöhung angesagte Punkte werden VERDREIFACHT."
+    effect: "tp_triple",
     allActions: true,     // verbraucht alle Aktionen der KR
-    desc: "AT−8−Ansage; verbraucht alle Aktionen der KR. WdS S.63",
+    desc: "AT−8−Ansage; bei Treffer: TP×3 (inkl. Ansage); verbraucht alle Aktionen der KR. WdS S.63",
     requiresSF: "Hammerschlag",
   },
 
@@ -133,9 +137,11 @@ export const COMBAT_MANEUVERS = {
     label: "Sturmangriff",
     atBase: 0, ansage: true,
     ansageMax: (at, taw) => Math.min(at, taw),
+    // WdS S.65: "Steigt der Schaden um die halbe GS des Angreifers und zusätzlich
+    // noch um 4 Punkte (plus eine eventuelle Ansage)." Kein RS-Ignore!
     effect: "rush_damage", // TP + ½GS + 4 + Ansage; PA−4 für Gegner
     passierschlagOnFail: true,
-    desc: "AT−Ansage; Treffer: TP+½GS+4+Ansage, RS ignoriert; miss → Passierschlag! WdS S.65",
+    desc: "AT−Ansage; Treffer: TP+½GS+4+Ansage; miss → Passierschlag! WdS S.65",
     requiresSF: "Sturmangriff",
   },
 
@@ -151,9 +157,12 @@ export const COMBAT_MANEUVERS = {
 
   klingensturm: {
     label: "Klingensturm",
-    atBase: 2, ansage: false,
-    effect: "split_at",   // AT+2, auf 2 Gegner aufteilen
-    desc: "AT+2, auf 2 Gegner aufteilen (min. 6 pro Ziel). WdS S.63",
+    // WdS S.63: "in beiden Attacken jeweils die Hälfte seines AT-Werts plus 2".
+    // Bei AT 15 also zweimal AT 10. Vorher hatten wir AT+2 fix — falsch
+    // (das war stärker als normaler Angriff).
+    atBase: null, ansage: false,
+    effect: "split_at_half_plus_2",
+    desc: "Auf 2 Gegner aufteilen, je AT/2+2 (z.B. AT 15 → 2× AT 10). WdS S.63",
     requiresSF: "Klingensturm",
   },
 
@@ -1235,19 +1244,27 @@ export const ZONE_LABELS = {
 };
 
 /**
- * Trefferzone per 1W20 (WdS Erweiterte Kampfregeln).
- * Schlüssel: Würfelergebnis 1-20 → Zonen-Key
+ * Trefferzone per 1W20 (WdS S.107, Erweiterte Kampfregeln Trefferzonen-Tabelle).
+ * Schluessel: Wuerfelergebnis 1-20 → Zonen-Key
+ *
+ * Standard-Tabelle WdS S.107:
+ *   19-20: Kopf
+ *   15-18: Brust
+ *    9-14: Arme (ungerade=Schildarm/lArm, gerade=Schwertarm/rArm)
+ *     7-8: Bauch
+ *     1-6: Beine (ungerade=lBein, gerade=rBein)
+ *
+ * "Ruecken" gibt es in der Zufallstabelle NICHT — nur per Gezielter Schlag
+ * oder Reiter-Tabelle. Vorher hatte unsere Tabelle invertierte Verteilung
+ * + falsche Ruecken-Zone. Damit waren z.B. Beintreffer extrem selten und
+ * Kopftreffer fast jeder zweite Wurf — komplett regelwidrig.
  */
 export const HIT_ZONE_TABLE = {
-  1:  "kopf",    2:  "kopf",
-  3:  "brust",   4:  "brust",   5:  "brust",   6:  "brust",
-  7:  "ruecken", 8:  "ruecken",
-  9:  "lArm",   10:  "lArm",
-  11: "rArm",   12:  "rArm",
-  13: "bauch",  14:  "bauch",
-  15: "lBein",  16:  "lBein",
-  17: "rBein",  18:  "rBein",
-  19: "bauch",  20:  "bauch",
+  1:  "lBein",  2:  "rBein",  3:  "lBein",  4:  "rBein",  5:  "lBein",  6:  "rBein",
+  7:  "bauch",  8:  "bauch",
+  9:  "lArm",  10:  "rArm",  11:  "lArm",  12:  "rArm",  13:  "lArm",  14:  "rArm",
+  15: "brust", 16:  "brust", 17:  "brust", 18:  "brust",
+  19: "kopf",  20:  "kopf",
 };
 
 /**
