@@ -983,6 +983,24 @@ export async function createActorFromImport(heroData, updateExisting = false) {
     actor = await Actor.create(actorData);
   }
 
+  // ── 8b. Force-set kritische Werte via dot-notation ───────────────────────
+  // Das gdsa-Schema hat fuer INIBasis/MR/AT/PA/FK/Dogde komplexe Felder
+  // (modi, sysModi, buy, etc). Wenn wir oben `system: sys` mit nur {value, tempmodi}
+  // schreiben, ueberschreibt das gdsa-System unsere Werte teils zurueck auf 0.
+  // Loesung: nach dem Haupt-Update nochmal explizit nur die value-Felder via
+  // dot-notation setzen (preserved alles andere am Object).
+  const valueFix = {};
+  if (sys.INIBasis?.value != null) valueFix["system.INIBasis.value"] = sys.INIBasis.value;
+  if (sys.MR?.value       != null) valueFix["system.MR.value"]       = sys.MR.value;
+  if (sys.ATBasis?.value  != null) valueFix["system.ATBasis.value"]  = sys.ATBasis.value;
+  if (sys.PABasis?.value  != null) valueFix["system.PABasis.value"]  = sys.PABasis.value;
+  if (sys.FKBasis?.value  != null) valueFix["system.FKBasis.value"]  = sys.FKBasis.value;
+  if (sys.LeP?.max        != null) valueFix["system.LeP.max"]        = sys.LeP.max;
+  if (sys.AsP?.max        != null) valueFix["system.AsP.max"]        = sys.AsP.max;
+  if (sys.AuP?.max        != null) valueFix["system.AuP.max"]        = sys.AuP.max;
+  if (sys.Dogde           != null) valueFix["system.Dogde"]          = sys.Dogde;
+  if (Object.keys(valueFix).length) await actor.update(valueFix);
+
   // ── 9. Zauber als spell-Items ────────────────────────────────────────────
   // gdsa template.json: type="spell", Felder: att1/att2/att3, zfw, rep, cost (nicht costs),
   //                     isMR, lcdPage, trait1-4, technic, casttime, forced, cost, range,
