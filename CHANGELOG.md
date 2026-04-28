@@ -6,6 +6,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.8] — 2026-04-28
+
+### Aus systematischem Code-Audit gefixt 🔍
+
+- **INI-Wurf am Sheet hatte falsche Rüstungs-Penalty.** Bisheriger Bug:
+  `_rollInitiative()` iterierte über `sys.armorZones` — dieses Feld
+  existiert aber gar nicht im gdsa-Schema. Resultat: armorIni war immer 0,
+  egal welche Rüstung man trug. Jetzt: Penalty wird aus den ausgerüsteten
+  Rüstungs-Items berechnet (BE/2 abgerundet, alle Rüstungen summiert).
+  Plus: Schild-INI-Penalty kommt jetzt auch dazu.
+- **Schild-Auto-Equip überschrieb User-Wahl bei jedem Render.** Bisheriger
+  Bug: Beim `getData()` (das passiert bei JEDEM Sheet-Render) wurde
+  automatisch das erste Schild als "geführt" markiert wenn keins aktiv
+  war. Wer also bewusst ohne Schild kämpfen wollte und das Schild per
+  Click weggesteckt hat, sah es beim nächsten Render-Trigger (z.B.
+  Datenbank-Browser, Item-Edit) wieder als "geführt". Jetzt: Auto-Equip
+  passiert nur einmal beim XML-Import; Render respektiert User-Wahl.
+
+---
+
 ## [0.4.7] — 2026-04-28
 
 ### Combat-Tracker Initiative-Würfel funktioniert ⚔

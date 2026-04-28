@@ -158,22 +158,17 @@ export class PixelArtCharacterSheet extends ActorSheet {
     data.totalBE = armor.reduce((sum, a) => sum + (a.be ?? 0), 0);  // raw BE (Anzeige)
 
     // ── Schild-Modifikatoren: nur AKTIV geführtes Schild zählt (DSA: nur ein
-    // Schild gleichzeitig in der Schildhand). Auto-Aktivierung erstes Schild
-    // wenn gar keins markiert ist (verhindert Konfusion bei Erst-Render).
+    // Schild gleichzeitig in der Schildhand). KEIN Auto-Equip beim Render —
+    // sonst wird ein vom User bewusst weggesteckter Schild bei jedem
+    // sheet.render() automatisch wieder aktiviert. Auto-Equip passiert nur
+    // einmalig beim XML-Import (siehe xml-parser.mjs).
     const equippedShields = shields.filter(s => s.equipped);
-    const activeShields = equippedShields.length > 0
-      ? equippedShields
-      : (shields.length > 0 ? [shields[0]] : []);
-    // markiere "auto-aktiv" Schilde als equipped fürs Rendering
-    if (equippedShields.length === 0 && shields.length > 0) {
-      shields[0].equipped = true;
-    }
-    const shieldAtMod  = activeShields.reduce((s, sh) => s + (sh.atMod ?? 0), 0);
-    const shieldPaMod  = activeShields.reduce((s, sh) => s + (sh.paMod ?? 0), 0);
-    const shieldIniMod = activeShields.reduce((s, sh) => s + (sh.ini   ?? 0), 0);
+    const shieldAtMod  = equippedShields.reduce((s, sh) => s + (sh.atMod ?? 0), 0);
+    const shieldPaMod  = equippedShields.reduce((s, sh) => s + (sh.paMod ?? 0), 0);
+    const shieldIniMod = equippedShields.reduce((s, sh) => s + (sh.ini   ?? 0), 0);
     data.shieldAtMod = shieldAtMod;
     data.shieldPaMod = shieldPaMod;
-    data.activeShield = activeShields[0] ?? null;
+    data.activeShield = equippedShields[0] ?? null;
 
     // ── Rüstungszonen-System (eBE auf gBE-Basis, Zonen-RS, INI-Malus) ──
     const armorCalc = this._prepareArmorZones(armor);
@@ -883,16 +878,31 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const iniBasis = sys.INIBasis?.value ?? 0;
     const sfKR     = sf.includes("Kampfreflexe") ? 4 : 0;
     const sfKG     = sf.includes("Kampfgespür") || sf.includes("Kampfgespuer") ? 2 : 0;
-    // Ruestung-Penalty: aus armorZones (gleiche Logik wie Sheet-Anzeige)
+    // Ruestung-Penalty: aus aktiven Ruestungs-Items (sys.armorZones existiert
+    // nicht im gdsa-Schema — wir summieren BE der ausgeruesteten Ruestungen).
     let armorIni = 0;
-    for (const a of (sys.armorZones ?? [])) armorIni += Math.floor((a.gBE ?? a.be ?? 0) / 2);
+    const armorItems = this.actor.items?.filter(i =>
+      (i.system?.type ?? "").toLowerCase() === "armor"
+    ) ?? [];
+    for (const a of armorItems) {
+      const be = Number(a.system?.armor?.be ?? 0);
+      armorIni += Math.floor(be / 2);
+    }
+    // Schild-INI-Penalty (vom aktiv gefuehrten Schild)
+    const equippedShield = this.actor.items?.find(i =>
+      (i.system?.type ?? "").toLowerCase() === "shield"
+      && i.getFlag("dsa-pixel-tokens", "equipped") === true
+    );
+    const shieldIni = equippedShield
+      ? Math.abs(Math.min(0, Number(equippedShield.system?.shield?.ini ?? 0)))
+      : 0;
     const wp = this._getWoundPenalty();
 
     // Falls INIBasis sehr niedrig ist und SF-Boni fehlen → manuell addieren als Sicherheit
     // (Hinweis im Tooltip)
-    const finalIni = iniBasis + sfKR + sfKG - armorIni - wp;
+    const finalIni = iniBasis + sfKR + sfKG - armorIni - shieldIni - wp;
 
-    const mod = await this._askModifier(`Initiative-Probe (Basis ${iniBasis}${sfKR ? ` +${sfKR} Kampfreflexe`:""}${sfKG ? ` +${sfKG} Kampfgespür`:""}${armorIni ? ` −${armorIni} Rüstung`:""}${wp ? ` −${wp} Wunden`:""})`);
+    const mod = await this._askModifier(`Initiative-Probe (Basis ${iniBasis}${sfKR ? ` +${sfKR} Kampfreflexe`:""}${sfKG ? ` +${sfKG} Kampfgespür`:""}${armorIni ? ` −${armorIni} Rüstung`:""}${shieldIni ? ` −${shieldIni} Schild`:""}${wp ? ` −${wp} Wunden`:""})`);
     if (mod === null) return;
 
     const roll = new Roll("1d6");
