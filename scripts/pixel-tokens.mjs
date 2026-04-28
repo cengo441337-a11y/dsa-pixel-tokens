@@ -1410,9 +1410,20 @@ Hooks.on("renderTokenHUD", (hud, html, _data) => {
   const token = hud.object;
   if (!token) return;
 
-  // Effekt-Spalte rechts neben dem HUD
+  // Adaptive Positionierung: wenn der Token nahe am rechten Bildschirmrand
+  // ist (UI-Sidebar von Foundry kollidiert), klappen wir die Spalte LINKS
+  // vom HUD aus. Sonst rechts wie bisher.
+  const sidebarEl = document.querySelector("#sidebar, #ui-right");
+  const sidebarLeft = sidebarEl?.getBoundingClientRect?.().left ?? Infinity;
+  const tokenScreenRight = (token.worldTransform?.tx ?? 0) + (token.w ?? 0);
+  // Heuristik: wenn Token-Pixel-Position + 200px (HUD + unsere 42px Spalte)
+  // die Sidebar-Linke überschreitet, lieber links ausklappen.
+  const flipLeft = (tokenScreenRight + 200) >= sidebarLeft;
+  const positionStyle = flipLeft
+    ? "left:-42px; top:0;"   // links neben dem HUD
+    : "right:-42px; top:0;"; // rechts neben dem HUD (Default)
   const bar = $(`<div class="sf-hud-col" style="
-    position:absolute; right:-42px; top:0;
+    position:absolute; ${positionStyle}
     display:flex; flex-direction:column; gap:2px; z-index:100;
   "></div>`);
 

@@ -6,6 +6,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.11] — 2026-04-28
+
+### Token-HUD-Spalte adaptiv positionieren
+- Effekt-/Kreaturen-Buttons rechts neben dem TokenHUD waren mit der
+  Foundry-Sidebar (Combat-Tracker etc.) kollidierend wenn der Token nahe
+  am rechten Bildschirmrand stand. Jetzt: prüft Position der Sidebar und
+  klappt die Spalte LINKS vom HUD aus, wenn rechts nicht genug Platz ist.
+
+### Passierschlag triggert nicht mehr fälschlich
+Zwei Bugs in `_registerMovementHook`:
+- **Triggerte schon bei "Not Started" Combat** weil `c.active || c.started`
+  auch true ist wenn ein Combat-Tracker eingerichtet aber nicht gestartet ist.
+  Jetzt: nur `c.started` (Runde läuft tatsächlich) triggert Passierschläge.
+- **SC-vs-SC Friendly-Fire**: Spielercharaktere lösten Passierschläge gegen
+  andere SCs aus, weil kein Disposition-Filter da war. Jetzt: nur Tokens
+  mit unterschiedlicher Gesinnung (Friendly vs. Hostile) lösen einander
+  Passierschläge aus. Friendly-vs-Friendly oder Neutral-vs-Beliebig → kein
+  Trigger.
+
+---
+
 ## [0.4.10] — 2026-04-28
 
 ### Vertagte DSA-4.1-Themen aus dem 5-Agent-Audit aufgeräumt

@@ -375,10 +375,12 @@ function _registerMovementHook() {
   //          neue Position aus changes lesen.
   Hooks.on("updateToken", async (tokenDoc, changes) => {
     if (!game.user.isGM) return;
-    // Nur während aktiver Kampf-Session auf der aktuellen Scene
+    // NUR während gestartetem Kampf auf der aktuellen Scene.
+    // Vorher: c.active || c.started → triggerte schon bei "Not Started" Combat.
+    // Jetzt nur c.started: Passierschlag ist Reaktion auf Bewegung WÄHREND
+    // einer Kampfrunde, nicht beim Aufstellen vor dem Kampf.
     const scene = tokenDoc.parent;
-    // v12: combat.active = im Tracker sichtbar; combat.started = Runde läuft
-    const activeCombat = game.combats?.find(c => (c.active || c.started) && c.scene?.id === scene?.id);
+    const activeCombat = game.combats?.find(c => c.started && c.scene?.id === scene?.id);
     if (!activeCombat) { _prevPos.delete(tokenDoc.id); return; }
     if (!_prevPos.has(tokenDoc.id)) return;
     const { x: oldX, y: oldY } = _prevPos.get(tokenDoc.id);
@@ -391,10 +393,30 @@ function _registerMovementHook() {
     if (!scene) return;
     const gridSize = scene.grid?.size ?? 100;
 
-    // Alle Token die an der ALTEN Position angrenzten
+    // Disposition des sich bewegenden Tokens
+    const movingDisp = tokenDoc.disposition ?? 0;
+
+    // Alle Token die an der ALTEN Position angrenzten UND eine andere
+    // Disposition haben (Friendly vs. Hostile). Gleiche Disposition (z.B.
+    // SC neben SC) löst keinen Passierschlag aus — die kämpfen nicht
+    // gegeneinander. Disposition-Werte:
+    //   FRIENDLY = 1 (Spielercharaktere), NEUTRAL = 0, HOSTILE = -1
     const candidates = scene.tokens.contents.filter(t => {
       if (t.id === tokenDoc.id) return false;
       if (!t.actor) return false;
+      // Disposition-Filter: nur feindlich gesinnte triggern
+      const otherDisp = t.disposition ?? 0;
+      // Ein Token kann nur Passierschlag machen wenn er zum Bewegenden
+      // hostile ist. Friendly/Neutral untereinander → kein Passierschlag.
+      const isHostileToEachOther =
+        (movingDisp === 1  && otherDisp === -1) ||  // SC bewegt sich an Gegner vorbei
+        (movingDisp === -1 && otherDisp === 1)  ||  // Gegner an SC vorbei
+        (movingDisp === -1 && otherDisp === -1 && t.actor.id !== tokenDoc.actor?.id);
+        // Hostile vs Hostile bei DIFFERENT actors: möglich aber selten — wir
+        // skippen das default um Friendly Fire zu vermeiden.
+      // Pragmatischer: nur wenn DIFFERENT signs (kein 0 / 0, kein 1 / 1, kein -1 / -1)
+      const differentSigns = (movingDisp * otherDisp) < 0;
+      if (!differentSigns) return false;
       return _isAdjacent(t.x, t.y, oldX, oldY, gridSize);
     });
     if (candidates.length === 0) return;
