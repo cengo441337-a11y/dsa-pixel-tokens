@@ -6,6 +6,50 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.4.10] — 2026-04-28
+
+### Vertagte DSA-4.1-Themen aus dem 5-Agent-Audit aufgeräumt
+
+**Ausweichen-System auf WdS-Konformität (WdS S.66)**
+- AW = **volle PA-Basis** (vorher PA/2, alte 4.0-Konvention)
+- SF **Ausweichen I/II/III** gibt **+3/+6/+9** auf AW (vorher fälschlich +1/+2/+3)
+- **Akrobatik-Bonus** auf AW: TaW ≥ 12 gibt +1, dann +1 pro weitere 3 TaP
+
+**Schild-Sonderfertigkeiten kumulieren PA-Boni (WdS S.74-75)**
+- Aktiv geführtes Schild + SF **Linkhand** → +1 PA mit Schild
+- + SF **Schildkampf I** → weitere +2 PA
+- + SF **Schildkampf II** → weitere +2 PA
+- Kumulativ also bis +5 PA durch SFs zusätzlich zum Schild-paMod
+
+**Finte mit/ohne SF-Differenzierung (WdS S.62)**
+- Ohne SF Finte → halbe Ansage als PA-Erschwernis
+- Mit SF Finte → volle Ansage als PA-Erschwernis
+- Vorher: immer volle Ansage, SF-Vorteil entfiel
+
+**Ritualkenntnis-Probe rollbar gemacht**
+- Click auf Ritualfertigkeit (Gildenmagie/Hexerei/etc.) im Heldenbogen
+  würfelt jetzt 1W20 ≤ TaW mit Mod-Dialog und Wund-Penalty
+- Vorher: Werte wurden nur angezeigt, nicht würfelbar
+
+**Spell-Dialog erweitert um WdZ-konforme Mechaniken**
+- **Ziel-MR-Input** (auto-fill aus markiertem Token), Toggle „Spruch wirkt
+  gegen MR" addiert MR als Erschwernis (WdZ S.30)
+- **Schelm-MR-Schwelle** wird automatisch abgezogen: Standard 3, mit SF
+  *Unbeschwertes Zaubern* 7, mit *Lockeres Zaubern* 12 (WdZ S.327)
+- **Religiöse Bedingung verletzt** Toggle für hex/dru/geo/krist/sch:
+  +12 ZfP (WdZ S.20)
+- **Bevorzugtes Element + Merkmalskenntnis** Toggle für Geoden:
+  −2 ZfP auf Einsparen/Reichweite/ZD (WdZ S.314)
+- **Aufrechterhaltene Zauber Counter** persistent in Actor-Flags,
+  +3 Erschwernis pro aktivem Spruch (WdZ S.13)
+
+**Sharisad/Srl-Repräsentation in spells.json**
+- Vorher: 0/298 Sprüche hatten Sharisad-Repräsentation (systematische Lücke)
+- Jetzt: 29 Sprüche aus dem Liber Cantiones automatisch identifiziert + manuell
+  ergänzt (Plumbumbarum, Visibili, Attributo, Adlerschwinge etc.)
+
+---
+
 ## [0.4.9] — 2026-04-28
 
 ### DSA-4.1-Regel-Konformität: 5-Agent-Audit-Fixes 📜

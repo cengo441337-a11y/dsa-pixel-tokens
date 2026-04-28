@@ -72,7 +72,20 @@ export async function showSpellDialog(actor, spellData) {
 
   // Borbaradianer mit gildenmagischer Repräsentation: ZfP-Zuschläge halbiert (WdZ S.260)
   const borMitGildenmagisch = rep === "borbaradianisch" && !!reps.mag;
-  const extraFlags = { borMitGildenmagisch };
+  // Schelm-MR-Schwelle (WdZ S.327): Standard 3, "Unbeschwertes Zaubern" 7,
+  // "Lockeres Zaubern" 12. Schwelle wird beim MR-Wurf abgezogen — was bleibt,
+  // wird als Probe-Erschwernis appliziert.
+  let schelmMrIgnore = 0;
+  if (rep === "schelmisch") {
+    const _sfRaw = sys?.sonderfertigkeiten ?? sys?.sf ?? [];
+    const _hasSF = (n) => Array.isArray(_sfRaw)
+      ? _sfRaw.some(e => (typeof e === "string" ? e : e?.name ?? "").toLowerCase() === n.toLowerCase())
+      : Object.keys(_sfRaw).some(k => k.toLowerCase() === n.toLowerCase());
+    schelmMrIgnore = _hasSF("Lockeres Zaubern") ? 12
+                    : _hasSF("Unbeschwertes Zaubern") ? 7
+                    : 3;
+  }
+  const extraFlags = { borMitGildenmagisch, schelmMrIgnore };
 
   // Repräsentations-spezifische Einschränkungen (WdZ S.21-22)
   const noErzwingen    = rep === "schelmisch";
@@ -202,7 +215,7 @@ export async function showSpellDialog(actor, spellData) {
               : Object.keys(sfRaw).some(k => k.toLowerCase() === n.toLowerCase());
             const mrIgnore = hasSFSchelm("Lockeres Zaubern") ? 12 : hasSFSchelm("Unbeschwertes Zaubern") ? 7 : 3;
             return `<div style="font-size:11px;color:#9b7;padding:4px 6px;background:rgba(0,0,0,0.2);border-radius:4px;margin:4px 0">
-              ✦ Schelmisch: MR bis ${mrIgnore} ignorieren · Mehrere Ziele: ×2 Opfer-Anzahl
+              ✦ Schelmisch: MR bis ${mrIgnore} wird automatisch abgezogen · Mehrere Ziele: ×2 Opfer-Anzahl
             </div>`;
           })() : ""}
 
@@ -211,10 +224,59 @@ export async function showSpellDialog(actor, spellData) {
             ✦ Kristallomantisch: AsP ×¾ · Mods ×2 ZfP (ohne passende Kristalle)
           </div>` : ""}
 
-          ${rep === "geoden" ? `
-          <div style="font-size:11px;color:#ca8;padding:4px 6px;background:rgba(0,0,0,0.2);border-radius:4px;margin:4px 0">
-            ✦ Geodisch: Bei bev. Element+Merkmalskenntnis: Einsparen/Reichweite/ZD je −2 ZfP
+          ${["hexisch","druidisch","geoden","kristallomant","schelmisch"].includes(rep) ? `
+          <div style="margin:6px 0;padding:6px 8px;background:rgba(180,80,40,0.10);border-left:3px solid #b62;border-radius:0 4px 4px 0">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#fb9">
+              <input type="checkbox" id="religious-violation" style="margin:0;cursor:pointer">
+              Religiöse Bedingung verletzt (+12 ZfP, WdZ S.20)
+            </label>
+            <div style="font-size:10px;color:#776;margin-top:2px;padding-left:24px">
+              Hexen ohne Bodenkontakt · Druiden mit Metall · Geoden ohne Element · Kristallomanten ohne Kristall
+            </div>
           </div>` : ""}
+
+          ${rep === "geoden" ? `
+          <div style="margin:6px 0;padding:6px 8px;background:rgba(200,160,80,0.10);border-left:3px solid #ca8;border-radius:0 4px 4px 0">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#fc9">
+              <input type="checkbox" id="geode-element" style="margin:0;cursor:pointer">
+              Bevorzugtes Element + passende Merkmalskenntnis (−2 ZfP auf Einsparen/Reichweite/ZD, WdZ S.314)
+            </label>
+          </div>` : ""}
+
+          ${(() => {
+            // Aufrechterhaltene Zauber: WdZ S.13 — pro aktivem Spruch +3 Erschwernis
+            const upkeep = actor.getFlag("dsa-pixel-tokens", "upkeepSpells") ?? 0;
+            return `
+            <div style="margin:6px 0;padding:6px 8px;background:rgba(80,140,180,0.10);border-left:3px solid #69b;border-radius:0 4px 4px 0">
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#9be">
+                <span>Aufrechterhaltene Zauber (+3 Erschwernis je):</span>
+                <input id="upkeep-spells" type="number" min="0" value="${upkeep}" style="width:50px;text-align:center;background:#0d1b2e;border:2px solid #3a3a5e;color:#e0e0e0">
+                <span style="font-size:10px;color:#779">WdZ S.13</span>
+              </label>
+            </div>`;
+          })()}
+
+          ${(() => {
+            // Spruch wirkt gegen Magieresistenz (WdZ S.30): MR-Wert wird als
+            // Erschwernis auf die Probe addiert. Wenn ein Token markiert ist,
+            // ziehen wir die MR daraus automatisch. isMR-Flag aus spells.json,
+            // Default false, User kann manuell aktivieren.
+            const isMRFlag = !!spellData.isMR;
+            const targetToken = game.user?.targets?.first?.();
+            const targetMR = targetToken?.actor?.system?.MR?.value ?? 0;
+            return `
+            <div style="margin:6px 0;padding:6px 8px;background:rgba(180,80,180,0.10);border-left:3px solid #b6b;border-radius:0 4px 4px 0">
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#f9f">
+                <input type="checkbox" id="vs-mr" ${isMRFlag ? "checked" : ""} style="margin:0;cursor:pointer">
+                Spruch wirkt gegen MR (WdZ S.30)
+              </label>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:4px;padding-left:24px;font-size:12px;color:#bbb">
+                <span>Ziel-MR:</span>
+                <input id="target-mr" type="number" min="0" value="${targetMR}" style="width:50px;text-align:center;background:#0d1b2e;border:2px solid #3a3a5e;color:#e0e0e0">
+                ${targetToken ? `<span style="font-size:10px;color:#779">aus markiertem Token: ${targetToken.name}</span>` : `<span style="font-size:10px;color:#779">kein Token markiert</span>`}
+              </div>
+            </div>`;
+          })()}
 
           <div style="display:flex;gap:12px;align-items:center;justify-content:center;margin:8px 0">
             <label style="font-size:14px;color:#bbb">Zusätzl. Mod:</label>
@@ -260,7 +322,7 @@ export async function showSpellDialog(actor, spellData) {
           html.find("#spell-total-asp").text(result.aspCost);
           html.find("#spell-total-zfp").css("color", result.totalZfP > 10 ? "#ff3333" : result.totalZfP > 0 ? "#e94560" : "#888");
         };
-        html.find("select[data-mod], #spell-extra-mod, #spell-variante").on("input change", refresh);
+        html.find("select[data-mod], #spell-extra-mod, #spell-variante, #religious-violation, #geode-element, #upkeep-spells, #vs-mr, #target-mr").on("input change", refresh);
       },
     }).render(true);
   });
@@ -275,15 +337,47 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
     if (idx > 0) selections[key] = idx;
   }
 
+  // ── Zusatz-Toggles aus dem Dialog auslesen ─────────────────────────────
+  const religiousViolation = html.find("#religious-violation").prop("checked") ?? false;
+  const geodeElement       = html.find("#geode-element").prop("checked") ?? false;
+  const upkeepSpells       = parseInt(html.find("#upkeep-spells").val()) || 0;
+  const vsMR               = html.find("#vs-mr").prop("checked") ?? false;
+  const targetMR           = parseInt(html.find("#target-mr").val()) || 0;
+
+  // Schelm-MR-Schwelle berechnen (extraFlags.schelmMrIgnore wird in castSpell gesetzt)
+  const schelmIgnore = extraFlags.schelmMrIgnore ?? 0;
+  // Effektive MR-Erschwernis: bei rep=schelmisch reduziere um Schwelle
+  const effectiveTargetMR = vsMR ? Math.max(0, targetMR - schelmIgnore) : 0;
+
+  // Aufrechterhaltene Zauber: +3 pro aktivem Spruch (WdZ S.13)
+  const upkeepErschwernis = upkeepSpells * 3;
+
+  // Religiöse Bedingung verletzt: +12 ZfP (WdZ S.20)
+  const religiousZfp = religiousViolation ? 12 : 0;
+
+  // Geoden bevorzugtes Element: −2 ZfP auf kosten/reichweite/wirkungsdauer-Mods
+  // (WdZ S.314). Wird unten als Korrektur auf totalZfP angewendet.
+  let geodeReduction = 0;
+  if (geodeElement && rep === "geoden") {
+    if (selections.kosten)       geodeReduction += 2;
+    if (selections.reichweite)   geodeReduction += 2;
+    if (selections.wirkungsdauer)geodeReduction += 2;
+  }
+
   // variable Kosten (null) → keine Modifikation durch Mods, aspCost bleibt null
   if (baseKosten === null) {
     const extraMod0 = parseInt(html.find("#spell-extra-mod").val()) || 0;
     const varIdx0 = parseInt(html.find("#spell-variante").val() ?? "-1");
     return {
-      totalZfP: 0, extraAkt: 0, aspCost: null,
-      erleichterung: -extraMod0,
+      totalZfP: religiousZfp,
+      extraAkt: 0,
+      aspCost: null,
+      // Erleichterung negativ = Erschwernis. MR + Aufrechterhaltene + Manueller Mod.
+      erleichterung: -extraMod0 - effectiveTargetMR - upkeepErschwernis,
       selections, selectedVariant: varIdx0 >= 0 ? (varianten[varIdx0] ?? null) : null,
       elfKlInTausch: html.find("#elf-kl-in").prop("checked") ?? false,
+      // Diagnostik / Display-Felder
+      religiousViolation, geodeElement, upkeepSpells, vsMR, targetMR, effectiveTargetMR,
     };
   }
   const result = calculateModifications(selections, baseKosten, rep, extraFlags);
@@ -303,13 +397,17 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
   const elfKlInTausch = html.find("#elf-kl-in").prop("checked") ?? false;
 
   return {
-    totalZfP: result.totalZfP + varZfp,
+    totalZfP: Math.max(0, result.totalZfP + varZfp + religiousZfp - geodeReduction),
     extraAkt: result.totalExtraAkt,
     aspCost: result.finalAsP + varAsp,
-    erleichterung: result.erleichterung - extraMod,
+    // Erleichterung neg = Erschwernis. Subtrahiere MR (mit Schelm-Reduktion),
+    // Aufrechterhaltene Zauber und manuellen Mod von der Erleichterung.
+    erleichterung: result.erleichterung - extraMod - effectiveTargetMR - upkeepErschwernis,
     selections,
     selectedVariant,
     elfKlInTausch,
+    // Diagnostik / Display-Felder
+    religiousViolation, geodeElement, upkeepSpells, vsMR, targetMR, effectiveTargetMR,
   };
 }
 
@@ -341,7 +439,16 @@ export async function castSpell(actor, spellData) {
   const dialogResult = await showSpellDialog(actor, spellData);
   if (!dialogResult) return null;
 
-  const { totalZfP, extraAkt, aspCost, erleichterung, selections, selectedVariant, elfKlInTausch } = dialogResult;
+  const { totalZfP, extraAkt, aspCost, erleichterung, selections, selectedVariant, elfKlInTausch, upkeepSpells, vsMR, targetMR, effectiveTargetMR, religiousViolation, geodeElement } = dialogResult;
+
+  // Aufrechterhaltene-Zauber-Counter persistieren (wird in nächstem Dialog
+  // wieder vorbelegt). User kann Counter im Dialog jederzeit anpassen.
+  if (typeof upkeepSpells === "number") {
+    const currentFlag = actor.getFlag("dsa-pixel-tokens", "upkeepSpells") ?? 0;
+    if (currentFlag !== upkeepSpells) {
+      await actor.setFlag("dsa-pixel-tokens", "upkeepSpells", upkeepSpells);
+    }
+  }
 
   // 3. AsP prüfen (null = variable Kosten → kein automatischer Abzug)
   const aspData = resolveActorAsP(actor);

@@ -486,9 +486,11 @@
       <div class="section-title">Ritualfertigkeiten</div>
       <div class="panel">
         {{#each rituals}}
-        <div style="display:flex;justify-content:space-between;padding:2px 0">
-          <span>{{this.name}}</span>
-          <span class="dim">{{this.value}}</span>
+        <div class="rollable" data-roll="ritual" data-name="{{this.name}}" data-value="{{this.value}}"
+             title="Klicken: Ritualkenntnis-Probe (1W20 ≤ {{this.value}})"
+             style="display:flex;justify-content:space-between;padding:3px 6px;cursor:pointer;border-radius:3px;border-left:2px solid transparent;transition:all 0.15s">
+          <span>📜 {{this.name}}</span>
+          <span style="color:#ffd700;font-weight:bold">{{this.value}}</span>
         </div>
         {{/each}}
       </div>

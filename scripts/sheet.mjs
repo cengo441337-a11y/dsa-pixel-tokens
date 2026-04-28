@@ -109,11 +109,23 @@ export class PixelArtCharacterSheet extends ActorSheet {
     };
     // Race-based GS override (Waldelf = 9, Zwerg = 6, etc.)
     const raceGS = RACE_GS[system.race?.trim?.()] ?? RACE_GS[system.rasse?.trim?.()] ?? 8;
-    // SF Ausweichen I/II/III geben +1/+2/+3 auf AW (WdS S.68)
-    const sfList = system.sf ?? [];
-    const awSFBonus = sfList.includes("Ausweichen III") ? 3
-      : sfList.includes("Ausweichen II") ? 2
-      : sfList.includes("Ausweichen I") ? 1 : 0;
+    // SF-Liste normalisieren (kann Array-of-Strings oder Object-Map sein, je
+    // nach Quelle: gdsa-Item-Set vs unsere Flag-Struktur).
+    const _rawSf = system.sf ?? {};
+    const sfList = Array.isArray(_rawSf)
+      ? _rawSf.map(s => typeof s === "string" ? s : (s?.name ?? ""))
+      : Object.values(_rawSf).map(v => typeof v === "string" ? v : (v?.name ?? ""));
+    // SF Ausweichen I/II/III: WdS S.66 sagt +3/+6/+9 auf AW-Probe.
+    // Vorher hatten wir +1/+2/+3 (alte 4.0-Konvention) — jetzt regelkonform.
+    const awSFBonus = sfList.includes("Ausweichen III") ? 9
+      : sfList.includes("Ausweichen II") ? 6
+      : sfList.includes("Ausweichen I") ? 3 : 0;
+    // Akrobatik-TaW ≥ 12 gibt zusätzlich +1 auf AW, +1 pro weitere 3 TaP
+    // (also bei TaW 15: +2, bei 18: +3 etc.). WdS S.66 + S.19.
+    const akrobatikTaW = Number(system.talente?.Akrobatik?.value ?? 0);
+    const awAkrobatikBonus = akrobatikTaW >= 12
+      ? 1 + Math.floor((akrobatikTaW - 12) / 3)
+      : 0;
     const computed = {
       INIBasis: DERIVED_FORMULAS.INIBasis(rawAttrs),
       MR:       DERIVED_FORMULAS.MR(rawAttrs),
@@ -121,7 +133,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       ATBasis:  DERIVED_FORMULAS.ATBasis(rawAttrs),
       PABasis:  DERIVED_FORMULAS.PABasis(rawAttrs),
       FKBasis:  DERIVED_FORMULAS.FKBasis(rawAttrs),
-      AW:       DERIVED_FORMULAS.AW(rawAttrs) + awSFBonus,
+      AW:       DERIVED_FORMULAS.AW(rawAttrs) + awSFBonus + awAkrobatikBonus,
       GS:       raceGS,
     };
     // Clone + override so we don't mutate the live actor.system reference.
@@ -163,11 +175,28 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // sheet.render() automatisch wieder aktiviert. Auto-Equip passiert nur
     // einmalig beim XML-Import (siehe xml-parser.mjs).
     const equippedShields = shields.filter(s => s.equipped);
-    const shieldAtMod  = equippedShields.reduce((s, sh) => s + (sh.atMod ?? 0), 0);
-    const shieldPaMod  = equippedShields.reduce((s, sh) => s + (sh.paMod ?? 0), 0);
+    let shieldAtMod  = equippedShields.reduce((s, sh) => s + (sh.atMod ?? 0), 0);
+    let shieldPaMod  = equippedShields.reduce((s, sh) => s + (sh.paMod ?? 0), 0);
     const shieldIniMod = equippedShields.reduce((s, sh) => s + (sh.ini   ?? 0), 0);
+
+    // WdS S.74-75: Schild-Sonderfertigkeiten geben PA-Boni mit dem Schild.
+    //   Linkhand        → +1 PA mit Schild (auch SF Linkhand-Kampf nutzbar)
+    //   Schildkampf I   → +2 PA mit Schild (kumuliert mit Linkhand)
+    //   Schildkampf II  → weitere +2 PA mit Schild (kumuliert)
+    // Voraussetzung: ein Schild ist aktiv geführt.
+    let shieldSfBonus = 0;
+    let shieldSfLabel = "";
+    if (equippedShields.length > 0) {
+      const _sfHas = (n) => sfList.some(s => s === n);
+      if (_sfHas("Linkhand"))        { shieldSfBonus += 1; shieldSfLabel += " +1 Linkhand"; }
+      if (_sfHas("Schildkampf I"))   { shieldSfBonus += 2; shieldSfLabel += " +2 SK I"; }
+      if (_sfHas("Schildkampf II"))  { shieldSfBonus += 2; shieldSfLabel += " +2 SK II"; }
+      shieldPaMod += shieldSfBonus;
+    }
     data.shieldAtMod = shieldAtMod;
     data.shieldPaMod = shieldPaMod;
+    data.shieldSfBonus = shieldSfBonus;
+    data.shieldSfLabel = shieldSfLabel.trim();
     data.activeShield = equippedShields[0] ?? null;
 
     // ── Rüstungszonen-System (eBE auf gBE-Basis, Zonen-RS, INI-Malus) ──
@@ -864,7 +893,41 @@ export class PixelArtCharacterSheet extends ActorSheet {
       case "damage":        return this._rollDamage(el.dataset);
       case "disadvantage":  return this._rollDisadvantage(el.dataset);
       case "initiative":    return this._rollInitiative(el.dataset);
+      case "ritual":        return this._rollRitual(el.dataset);
     }
+  }
+
+  // ─── Ritualkenntnis-Probe (1W20 + Mod ≤ TaW) ──────────────────────────
+  // DSA 4.1 WdZ Rituale: Eine Ritualkenntnis-Probe ist eine vereinfachte
+  // 1W20-Probe gegen den TaW. Spezifische Rituale haben ihre eigenen
+  // Probe-Eigenschaften und AsP-Kosten — das ist hier abstrahiert.
+  async _rollRitual(dataset) {
+    const name  = dataset.name ?? "Ritual";
+    const value = parseInt(dataset.value) || 0;
+    const wp = this._getWoundPenalty();
+    const wpHint = wp > 0 ? ` [Wunden −${wp}]` : "";
+    const mod = await this._askModifier(`Ritualkenntnis ${name} (${value})${wpHint}`);
+    if (mod === null) return;
+
+    const roll = new Roll("1d20");
+    await roll.evaluate();
+    const die = roll.total;
+    this._animateDice(die, 20);
+    const target = value - mod - wp;
+    const success = die <= target;
+    const crit = die === 1;
+    const fumble = die === 20;
+
+    const flavor = `<div class="dsa-pixel-chat">
+      <div class="chat-title">📜 ${name} — Ritualkenntnis</div>
+      <div class="dice-row"><div class="die ${crit ? "crit" : fumble ? "fumble" : success ? "success" : "fail"}">${die}</div></div>
+      <div class="result-line ${crit ? "result-crit" : success ? "result-success" : "result-fail"}">
+        ${crit ? "KRITISCH gelungen!" : fumble ? "PATZER!" : success ? "Bestanden" : "Misslungen"}
+        ${mod !== 0 ? ` (Mod: ${mod >= 0 ? "+" : ""}${mod})` : ""}
+        <div style="font-size:11px;color:#888;margin-top:2px">Ziel ${target} (${value}${mod > 0 ? ` −${mod}` : mod < 0 ? ` +${-mod}` : ""}${wp ? ` −${wp} Wunden` : ""})</div>
+      </div>
+    </div>`;
+    roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this.actor }), flavor });
   }
 
   // ─── Initiative-Probe (1W6 + INI-Basis) ──────────────────────────────
@@ -1245,10 +1308,17 @@ export class PixelArtCharacterSheet extends ActorSheet {
           }
           break;
         }
-        case "pa_reduce": {
-          // Finte: gegnerische PA −Ansage
-          if (ansage > 0)
-            maneuverLine = `<div class="dsa-maneuver-effect" style="color:#4ad94a">🗡 Finte: Gegner PA −${ansage} für diese Abwehr</div>`;
+        case "pa_reduce":
+        case "pa_reduce_half_or_full": {
+          // WdS S.62 Finte:
+          //  Mit SF Finte    → volle Ansage als PA-Erschwernis
+          //  Ohne SF Finte   → halbe Ansage (aufgerundet)
+          const hasFinteSF = hasSF("Finte");
+          const paReduce = hasFinteSF ? ansage : Math.ceil(ansage / 2);
+          if (ansage > 0) {
+            const tag = hasFinteSF ? "Finte (SF)" : "Finte (ohne SF: ½ Ansage)";
+            maneuverLine = `<div class="dsa-maneuver-effect" style="color:#4ad94a">🗡 ${tag}: Gegner PA −${paReduce} für diese Abwehr</div>`;
+          }
           break;
         }
         case "gezielter_stich": {

@@ -164,7 +164,8 @@
       "elfisch",
       "hexisch",
       "druidisch",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "D",
     "merkmal": "Form",
@@ -182,6 +183,14 @@
         "name": "Haut des Seelentiers",
         "zfpKosten": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "hexisch",
+      "druidisch",
+      "kristallomant",
+      "sharisad"
     ]
   },
   {
@@ -333,11 +342,20 @@
       "hexisch",
       "druidisch",
       "geoden",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "D",
     "merkmal": "Hellsicht, Metamagie",
-    "varianten": []
+    "varianten": [],
+    "reps": [
+      "gildenmagisch",
+      "hexisch",
+      "druidisch",
+      "geoden",
+      "kristallomant",
+      "sharisad"
+    ]
   },
   {
     "name": "Ängste Lindern",
@@ -588,7 +606,8 @@
       "druidisch",
       "schelm",
       "geoden",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "B",
     "merkmal": "Eigenschaften",
@@ -598,6 +617,16 @@
         "zfpKosten": 3,
         "minZfw": 11
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "hexisch",
+      "druidisch",
+      "schelm",
+      "geoden",
+      "kristallomant",
+      "sharisad"
     ]
   },
   {
@@ -650,7 +679,8 @@
     "wirkungsdauer": "augenblicklich; der Wirbel bleibt ZfP* KR bestehen und schließt sich dann schlagartig.",
     "verbreitung": [
       "gildenmagisch",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "E",
     "merkmal": "Limbus, Kraft",
@@ -660,6 +690,11 @@
         "zfpKosten": 10,
         "minZfw": 14
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "kristallomant",
+      "sharisad"
     ]
   },
   {
@@ -1137,11 +1172,18 @@
     "verbreitung": [
       "gildenmagisch",
       "druidisch",
-      "geoden"
+      "geoden",
+      "sharisad"
     ],
     "komplexitaet": "D",
     "merkmal": "Hellsicht, Temporal",
-    "varianten": []
+    "varianten": [],
+    "reps": [
+      "gildenmagisch",
+      "druidisch",
+      "geoden",
+      "sharisad"
+    ]
   },
   {
     "name": "Blitz Dich Find",
@@ -1808,7 +1850,8 @@
       "hexisch",
       "druidisch",
       "geoden",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "C",
     "merkmal": "Antimagie, Eigenschaften",
@@ -1818,6 +1861,15 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "hexisch",
+      "druidisch",
+      "geoden",
+      "kristallomant",
+      "sharisad"
     ]
   },
   {
@@ -1834,7 +1886,8 @@
     "wirkungsdauer": "maximal ZfP* Stunden (borbaradianische Repräsentation: so viele Stunden, wie der Zauber AsP gekostet hat)",
     "verbreitung": [
       "gildenmagisch",
-      "borbaradianer"
+      "borbaradianer",
+      "sharisad"
     ],
     "komplexitaet": "C",
     "merkmal": "Einfluss, Dämonisch (Amazeroth) (borbaradianische Rep.) bzw. Einfluss, Eigenschaften (gildenmagische Rep.)",
@@ -1847,6 +1900,11 @@
         "name": "Sinnenraub",
         "zfpKosten": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "borbaradianer",
+      "sharisad"
     ]
   },
   {
@@ -1868,7 +1926,8 @@
       "druidisch",
       "schelm",
       "geoden",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "B",
     "merkmal": "Antimagie, Einfluss",
@@ -1878,6 +1937,16 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "hexisch",
+      "druidisch",
+      "schelm",
+      "geoden",
+      "kristallomant",
+      "sharisad"
     ]
   },
   {
@@ -1897,11 +1966,20 @@
       "elfisch",
       "hexisch",
       "druidisch",
-      "geoden"
+      "geoden",
+      "sharisad"
     ],
     "komplexitaet": "C",
     "merkmal": "Eigenschaften, Elementar",
-    "varianten": []
+    "varianten": [],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "hexisch",
+      "druidisch",
+      "geoden",
+      "sharisad"
+    ]
   },
   {
     "name": "Eisenrost und Patina",
@@ -2335,7 +2413,8 @@
       "gildenmagisch",
       "hexisch",
       "druidisch",
-      "borbaradianer"
+      "borbaradianer",
+      "sharisad"
     ],
     "komplexitaet": "D",
     "merkmal": "Dämonisch (Mishkhara) (Bor: dito)",
@@ -2345,6 +2424,13 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "hexisch",
+      "druidisch",
+      "borbaradianer",
+      "sharisad"
     ]
   },
   {
@@ -2361,7 +2447,8 @@
     "wirkungsdauer": "augenblicklich; das Schloss bleibt so lange offen, bis es wieder zugesperrt wird.",
     "verbreitung": [
       "gildenmagisch",
-      "schelm"
+      "schelm",
+      "sharisad"
     ],
     "komplexitaet": "C",
     "merkmal": "Hellsicht, Telekinese",
@@ -2375,6 +2462,11 @@
         "name": "Mehrfachschlüssel",
         "zfpKosten": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "schelm",
+      "sharisad"
     ]
   },
   {
@@ -2937,7 +3029,8 @@
       "druidisch",
       "schelm",
       "geoden",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "C",
     "merkmal": "Antimagie, Hellsicht",
@@ -2957,6 +3050,16 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "hexisch",
+      "druidisch",
+      "schelm",
+      "geoden",
+      "kristallomant",
+      "sharisad"
     ]
   },
   {
@@ -3004,7 +3107,8 @@
       "hexisch",
       "druidisch",
       "geoden",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "D",
     "merkmal": "Herrschaft",
@@ -3013,6 +3117,15 @@
         "name": "Herr über die Monstren",
         "zfpKosten": 3
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "hexisch",
+      "druidisch",
+      "geoden",
+      "kristallomant",
+      "sharisad"
     ]
   },
   {
@@ -3525,7 +3638,8 @@
     "verbreitung": [
       "gildenmagisch",
       "hexisch",
-      "schelm"
+      "schelm",
+      "sharisad"
     ],
     "komplexitaet": "B",
     "merkmal": "Antimagie, Illusion",
@@ -3535,6 +3649,12 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "hexisch",
+      "schelm",
+      "sharisad"
     ]
   },
   {
@@ -3912,7 +4032,8 @@
     "reichweite": "1 Meile Radius, innerhalb der sich der Kobold befinden muss.",
     "wirkungsdauer": "je nach Situation",
     "verbreitung": [
-      "schelm"
+      "schelm",
+      "sharisad"
     ],
     "komplexitaet": "C",
     "merkmal": "Herbeirufung",
@@ -3921,6 +4042,10 @@
         "name": "Namensruf",
         "zfpKosten": 3
       }
+    ],
+    "reps": [
+      "schelm",
+      "sharisad"
     ]
   },
   {
@@ -4275,7 +4400,10 @@
     "verbreitung": [],
     "komplexitaet": "E",
     "merkmal": "Form",
-    "varianten": []
+    "varianten": [],
+    "reps": [
+      "sharisad"
+    ]
   },
   {
     "name": "Leib der Erde",
@@ -4671,7 +4799,8 @@
       "druidisch",
       "geoden",
       "borbaradianer",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "D",
     "merkmal": "Kraft, Verständigung (Bor: Kraft, Verständigung, Iribaar)",
@@ -4680,6 +4809,15 @@
         "name": "Freiwilliger Spender",
         "zfpKosten": 3
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "hexisch",
+      "druidisch",
+      "geoden",
+      "borbaradianer",
+      "kristallomant",
+      "sharisad"
     ]
   },
   {
@@ -4720,7 +4858,8 @@
       "hexisch",
       "druidisch",
       "geoden",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "A",
     "merkmal": "Elementar (Gesamt)",
@@ -4733,6 +4872,15 @@
         "name": "Wirkungsdauer",
         "zfpKosten": 5
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "hexisch",
+      "druidisch",
+      "geoden",
+      "kristallomant",
+      "sharisad"
     ]
   },
   {
@@ -4888,7 +5036,8 @@
     "reichweite": "Berührung",
     "wirkungsdauer": "augenblicklich",
     "verbreitung": [
-      "gildenmagisch"
+      "gildenmagisch",
+      "sharisad"
     ],
     "komplexitaet": "F",
     "merkmal": "Antimagie, Metamagie",
@@ -4898,6 +5047,10 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "sharisad"
     ]
   },
   {
@@ -4974,7 +5127,8 @@
       "elfisch",
       "hexisch",
       "schelm",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "C",
     "merkmal": "Telekinese",
@@ -4997,6 +5151,14 @@
         "zfpKosten": 7,
         "minZfw": 11
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "hexisch",
+      "schelm",
+      "kristallomant",
+      "sharisad"
     ]
   },
   {
@@ -5314,7 +5476,8 @@
     "reichweite": "Berührung",
     "wirkungsdauer": "augenblicklich",
     "verbreitung": [
-      "gildenmagisch"
+      "gildenmagisch",
+      "sharisad"
     ],
     "komplexitaet": "C",
     "merkmal": "Antimagie, Objekt",
@@ -5329,6 +5492,10 @@
         "zfpKosten": 3,
         "minZfw": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "sharisad"
     ]
   },
   {
@@ -5344,11 +5511,16 @@
     "reichweite": "selbst",
     "wirkungsdauer": "je nach AsP-Einsatz (A)",
     "verbreitung": [
-      "gildenmagisch"
+      "gildenmagisch",
+      "sharisad"
     ],
     "komplexitaet": "E",
     "merkmal": "Hellsicht, Kraft, Limbus, Metamagie",
-    "varianten": []
+    "varianten": [],
+    "reps": [
+      "gildenmagisch",
+      "sharisad"
+    ]
   },
   {
     "name": "Odem Arcanum",
@@ -5652,7 +5824,8 @@
       "druidisch",
       "schelm",
       "geoden",
-      "kristallomant"
+      "kristallomant",
+      "sharisad"
     ],
     "komplexitaet": "B",
     "merkmal": "Einfluss",
@@ -5661,6 +5834,16 @@
         "name": "Demotivation",
         "zfpKosten": 3
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "hexisch",
+      "druidisch",
+      "schelm",
+      "geoden",
+      "kristallomant",
+      "sharisad"
     ]
   },
   {
@@ -5707,7 +5890,8 @@
     "wirkungsdauer": "Das Wirken des zu schützenden Spruchs muss innerhalb von 20 KR (A) nach dem PROTECTIONIS begonnen werden.",
     "verbreitung": [
       "gildenmagisch",
-      "borbaradianer"
+      "borbaradianer",
+      "sharisad"
     ],
     "komplexitaet": "F",
     "merkmal": "Antimagie, Kraft, Metamagie (Bor: Antimagie, Metamagie, Dämonisch (Iribaar))",
@@ -5721,6 +5905,11 @@
         "zfpKosten": 7,
         "minZfw": 14
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "borbaradianer",
+      "sharisad"
     ]
   },
   {
@@ -6114,11 +6303,17 @@
     "wirkungsdauer": "nach Wunsch und AsP-Aufwand (A)",
     "verbreitung": [
       "gildenmagisch",
-      "schelm"
+      "schelm",
+      "sharisad"
     ],
     "komplexitaet": "D",
     "merkmal": "Illusion",
-    "varianten": []
+    "varianten": [],
+    "reps": [
+      "gildenmagisch",
+      "schelm",
+      "sharisad"
+    ]
   },
   {
     "name": "Schelmenrausch",
@@ -6936,11 +7131,19 @@
       "elfisch",
       "hexisch",
       "druidisch",
-      "geoden"
+      "geoden",
+      "sharisad"
     ],
     "komplexitaet": "C",
     "merkmal": "Heilung, Form",
-    "varianten": []
+    "varianten": [],
+    "reps": [
+      "elfisch",
+      "hexisch",
+      "druidisch",
+      "geoden",
+      "sharisad"
+    ]
   },
   {
     "name": "Tiergedanken",
@@ -7247,7 +7450,10 @@
     "verbreitung": [],
     "komplexitaet": "C",
     "merkmal": "Objekt",
-    "varianten": []
+    "varianten": [],
+    "reps": [
+      "sharisad"
+    ]
   },
   {
     "name": "Unsichtbarer Jäger",
@@ -7426,7 +7632,8 @@
     "verbreitung": [
       "gildenmagisch",
       "elfisch",
-      "schelm"
+      "schelm",
+      "sharisad"
     ],
     "komplexitaet": "C",
     "merkmal": "Form",
@@ -7435,6 +7642,12 @@
         "name": "Teilweise Unsichtbarkeit",
         "zfpKosten": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "schelm",
+      "sharisad"
     ]
   },
   {
@@ -7521,7 +7734,8 @@
       "gildenmagisch",
       "elfisch",
       "druidisch",
-      "geoden"
+      "geoden",
+      "sharisad"
     ],
     "komplexitaet": "D",
     "merkmal": "Elementar (verschieden)",
@@ -7534,6 +7748,13 @@
         "name": "Elementare Ausstrahlung",
         "zfpKosten": 7
       }
+    ],
+    "reps": [
+      "gildenmagisch",
+      "elfisch",
+      "druidisch",
+      "geoden",
+      "sharisad"
     ]
   },
   {

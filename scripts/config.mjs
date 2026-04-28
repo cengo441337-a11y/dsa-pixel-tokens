@@ -29,7 +29,10 @@ export const DERIVED_FORMULAS = {
   INIBasis: (a) => Math.round((a.MU + a.MU + a.IN + a.GE) / 5),
   MR:       (a) => Math.round((a.MU + a.KL + a.KO) / 5),
   AuP:      (a) => Math.round((a.MU + a.KO + a.GE) / 2),
-  AW:       (a) => Math.round(Math.round((a.IN + a.GE + a.KK) / 5) / 2), // PA-Basis / 2
+  // AW = volle PA-Basis (WdS S.66: "Probe auf den PA-Basiswert").
+  // Vorher hatten wir PA-Basis/2 (alte 4.0-Konvention) — falsch nach 4.1.
+  // SF Ausweichen I/II/III geben +3/+6/+9 als Bonus (in sheet.mjs awSFBonus).
+  AW:       (a) => Math.round((a.IN + a.GE + a.KK) / 5),
   WS:       (a) => Math.ceil((a.KO ?? 10) / 2),                          // Wundschwelle = KO/2 (WdH S.46), aufgerundet
   GS:       ()  => 8, // Standard Mensch. Elfen: 9, Zwerge: 6 — Override über Rasse-Flag wenn gesetzt.
 };
@@ -98,10 +101,13 @@ export const COMBAT_MANEUVERS = {
     label: "Finte",
     atBase: 0, ansage: true,
     ansageMax: (at, taw) => Math.min(at, taw),
-    effect: "pa_reduce",  // Gegnerische PA−Ansage
+    // WdS S.62: Ohne SF Finte → Verteidiger-PA um HALBE Ansage erschwert.
+    // Mit SF Finte → volle Ansage als PA-Erschwernis. Effect-Variante wird
+    // im sheet.mjs anhand actor.sfList → "Finte" entschieden.
+    effect: "pa_reduce_half_or_full",
     maxBE: 4,
-    desc: "AT−Ansage; bei Treffer: PA des Gegners−Ansage für diese Abwehr. WdS S.62",
-    requiresSF: null,     // Finte ist Basis-Manöver
+    desc: "AT−Ansage; bei Treffer: PA des Gegners−Ansage (mit SF Finte) bzw. −½Ansage (ohne SF). WdS S.62",
+    requiresSF: null,     // Finte ist Basis-Manöver, SF nur für Vollwirkung
   },
 
   gezielterStich: {
