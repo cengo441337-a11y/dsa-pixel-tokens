@@ -754,5 +754,15 @@
     "gp": -7,
     "effekt": "",
     "stufe": false
+  },
+  {
+    "name": "Schwacher Astralkoerper",
+    "gp": -5,
+    "effekt": "Verminderte AsP-Regeneration und hoehere Empfindlichkeit gegen astrale Angriffe."
+  },
+  {
+    "name": "Astraler Block",
+    "gp": -7,
+    "effekt": "Held kann keine Magie wirken bzw. lernen. Sperrt magische Berufe und SFs."
   }
 ]

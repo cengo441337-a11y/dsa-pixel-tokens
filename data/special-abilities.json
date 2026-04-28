@@ -782,5 +782,180 @@
     "voraussetzung": "",
     "effekt": "",
     "kategorie": "kampf"
+  },
+  {
+    "name": "Bann-/Schutzkreis gegen Geisterwesen",
+    "ap": 25,
+    "verbreitung": "Mag 5, Achaz 4, Zibilja 3",
+    "kategorie": "beschwoerung",
+    "effekt": "Erlaubt Bann-/Schutzkreise gegen Geisterwesen zu zeichnen. Wesen mit MR < RkP* sind betroffen."
+  },
+  {
+    "name": "Bann-/Schutzkreis gegen Niedere Daemonen",
+    "ap": 50,
+    "verbreitung": "Mag 6, Alchimist 4, Zibilja 1",
+    "kategorie": "beschwoerung",
+    "effekt": "Erlaubt Bann-/Schutzkreise gegen Niedere Daemonen. Voraussetzung: SF Zauberzeichen oder TaW 7 in Invocatio Minor."
+  },
+  {
+    "name": "Bann-/Schutzkreis gegen Gehoernte Daemonen",
+    "ap": 75,
+    "verbreitung": "Mag 5, Alchimist 2",
+    "kategorie": "beschwoerung",
+    "effekt": "Erlaubt Bann-/Schutzkreise gegen Gehoernte Daemonen (50 AP wenn Niederer-Kreis bekannt). Voraussetzung: TaW 7 in Invocatio Maior."
+  },
+  {
+    "name": "Bann-/Schutzkreis gegen Elementare",
+    "ap": 75,
+    "verbreitung": "Achaz 5, Alchimist 4, Mag 3",
+    "kategorie": "beschwoerung",
+    "effekt": "Erlaubt Bann-/Schutzkreise gegen Elementare."
+  },
+  {
+    "name": "Daemonenbindung I",
+    "ap": 150,
+    "voraussetzung": "Magiekunde 11, ZfW Invocatio Minor oder Maior 15",
+    "verbreitung": "3",
+    "kategorie": "beschwoerung",
+    "effekt": "Erlaubt den Dienst Bindung an einen Niederen Daemon."
+  },
+  {
+    "name": "Daemonenbindung II",
+    "ap": 250,
+    "voraussetzung": "Daemonenbindung I, Magiekunde 15",
+    "verbreitung": "3",
+    "kategorie": "beschwoerung",
+    "effekt": "Erlaubt den Dienst Bindung an einen Gehoernten Daemon."
+  },
+  {
+    "name": "Hoehere Daemonenbindung",
+    "ap": 250,
+    "voraussetzung": "Daemonenbindung II, Ritualkenntnis 11",
+    "verbreitung": "2",
+    "kategorie": "beschwoerung",
+    "effekt": "Bindung/Manifestation eines Daemons benoetigt geringere AsP-Kosten - je 3 ZfP* aus Anrufungsprobe senken Basiskosten um 10% (max. 50%)."
+  },
+  {
+    "name": "Merkmalskenntnis Beschwoerung",
+    "ap": 250,
+    "verbreitung": "3",
+    "kategorie": "merkmalskenntnis",
+    "effekt": "Erleichterung auf alle Sprueche mit Merkmal Beschwoerung. Halbe AP-Kosten fuer Beschwoerungs-Sprueche und SFs (z.B. Invocatio Integra)."
+  },
+  {
+    "name": "Merkmalskenntnis Daemonisch",
+    "ap": 300,
+    "verbreitung": "2",
+    "kategorie": "merkmalskenntnis",
+    "effekt": "Erleichterung auf alle Sprueche mit Merkmal Daemonisch (gesamt). Pro Erzdaemon-Domaene separat erlernbar (12 Domaenen: Blakharaz, Belhalhar, Charyptoroth, Lolgramoth, Thargunitoth, Amazeroth, Belshirash, Asfaloth, Tasfarelel, Belzhorash, Agrimoth, Belkelel)."
+  },
+  {
+    "name": "Nekromant",
+    "ap": 250,
+    "voraussetzung": "MU 15, Magiekunde 11, Merkmalskenntnis Daemonisch (Thargunitoth)",
+    "verbreitung": "2",
+    "kategorie": "nekromantie",
+    "effekt": "SKELETTARIUS Mehrere Untote: 1 AsP/Untoter Ersparnis. TOTES HANDLE: nur 1/50 statt 1/20 permanent. Untotenaktivierung Nephazz: 7 AsP statt 11. Start-LO Untoter +2. Gemischte Untotengruppen erhebbar."
+  },
+  {
+    "name": "Former der Leiber",
+    "ap": 200,
+    "voraussetzung": "KL 14, Magiekunde 11, Anatomie 10, Merkmalskenntnis Daemonisch (Thargunitoth)",
+    "verbreitung": "3",
+    "kategorie": "nekromantie",
+    "effekt": "Erschafft mit TOTES HANDLE Golems aus Knochen, totem Fleisch oder Leichenteilen (Knochengolems). Nutzt Golem-Erschaffungsregeln WdZ 197."
+  },
+  {
+    "name": "Bewahrer der Ahnenmacht",
+    "ap": 150,
+    "voraussetzung": "MU 15, Herr ueber die Gebeine",
+    "verbreitung": "1",
+    "kategorie": "nekromantie",
+    "effekt": "Erhebt Untote in der Ahnen-Variante (LO+2, AT+2, PA+2, INI+2, LeP+10, eine Ahnen-Eigenschaft kostenlos)."
+  },
+  {
+    "name": "Geber des Funkens",
+    "ap": 100,
+    "voraussetzung": "KO 12, Selbstbeherrschung 10, Magiekunde 10",
+    "verbreitung": "4",
+    "kategorie": "nekromantie",
+    "effekt": "Schnell-Erweckung durch Beruehrung. SKELETTARIUS-Zauberdauer auf 2 Aktionen, weitere 2 bis Einsatzbereitschaft. Untote folgen nur Pre-Erweckungs-Befehlen. Nach ZfW*2 KR fallen sie zusammen. 1W3 LeP pro Untoter statt AsP."
+  },
+  {
+    "name": "Gebieter der Rotte",
+    "ap": 100,
+    "voraussetzung": "MU 12, Magiekunde 7",
+    "verbreitung": "4",
+    "kategorie": "nekromantie",
+    "effekt": "SKELETTARIUS verteilt Kraft auf mehrere Kadaver (Rotte). Gruppengroessen: gross=2, mittel=3, klein=4, sehr klein=5. Variante Kadaver nicht mehr erschwert + AsP -1."
+  },
+  {
+    "name": "Herr ueber die Gebeine",
+    "ap": 150,
+    "voraussetzung": "KL 15, Magiekunde 11",
+    "verbreitung": "3",
+    "kategorie": "nekromantie",
+    "effekt": "Erhoeht ZfP* zur Eigenschaftsvergabe an Untote. Maximal die Haelfte der noetigen ZfP* in zusaetzliche AsP-Kosten 1:1 umwandelbar."
+  },
+  {
+    "name": "Borbaradianische Ritualkenntnis",
+    "ap": 2500,
+    "verbreitung": "1 (nach Pakt)",
+    "kategorie": "ritual",
+    "effekt": "Erlaubt borbaradianische Spruchvarianten (alternativ: 1W20 AsP statt fix; halbe Kosten als LeP). Voraussetzung: Pakt mit Borbaradianischem Erzdaemon."
+  },
+  {
+    "name": "Elementarist",
+    "ap": 250,
+    "voraussetzung": "CH 15, Magiekunde 11, Merkmalskenntnis Elementar, ZfW 11",
+    "verbreitung": "2",
+    "kategorie": "elementar",
+    "effekt": "BS aller Elementarwesen -3. +2 automatische Dienste. Kontrollprobe -3. AsP der Elementarwesen +5/+10/+20 (Geist/Dschinn/Meister). Zusaetzliche Eigenschaften nach Beschwoerung moeglich (3-fache ZfP*)."
+  },
+  {
+    "name": "Fluesterer der 1000 Namen",
+    "ap": 75,
+    "voraussetzung": "Elementarist oder Golembauer",
+    "verbreitung": "2",
+    "kategorie": "elementar",
+    "effekt": "Wahre Namen Elementarer Wesen fuer halbe AP-Kosten. Bei zufaelliger Qualitaets-Bestimmung +1."
+  },
+  {
+    "name": "Meister der Wuensche",
+    "ap": 200,
+    "voraussetzung": "Elementarist, CH 15, Magiekunde 13",
+    "verbreitung": "2",
+    "kategorie": "elementar",
+    "effekt": "ZfP* in AsP umwandelbar (1 ZfP* = 3 AsP) fuer Elementarwesen. Reichweite der Wuensche durch ZfP* erhoehbar. ZfP* durch zusaetzliche AsP erhoehbar (1:1)."
+  },
+  {
+    "name": "Edelsteinmagie",
+    "ap": 150,
+    "voraussetzung": "Merkmalskenntnis Elementar (Erz)",
+    "verbreitung": "3",
+    "kategorie": "elementar",
+    "effekt": "Edelsteine als materielle Komponenten verringern Zauberkosten."
+  },
+  {
+    "name": "Golemidenbauer",
+    "ap": 250,
+    "voraussetzung": "MU 15, Magiekunde 11, STEIN/STAUB WANDLE 11",
+    "verbreitung": "2",
+    "kategorie": "elementar",
+    "effekt": "Konstruktionsschwierigkeit -3. +2 automatische Dienste. Konstruktions-Proben -3. Permanent-AsP nur 1/50 statt 1/20. Max. Startloyalitaet. Nachtraegliche Eigenschaften moeglich."
+  },
+  {
+    "name": "Merkmalskenntnis Elementar",
+    "ap": 150,
+    "verbreitung": "3",
+    "kategorie": "merkmalskenntnis",
+    "effekt": "Erleichterung auf alle Sprueche mit Merkmal Elementar (Element-spezifisch erlernbar: Feuer/Wasser/Erz/Humus/Eis/Luft)."
+  },
+  {
+    "name": "Merkmalskenntnis Herbeirufung",
+    "ap": 250,
+    "verbreitung": "3",
+    "kategorie": "merkmalskenntnis",
+    "effekt": "Erleichterung auf alle Beschwoerungs-Sprueche (Elementar)."
   }
 ]

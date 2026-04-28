@@ -508,5 +508,20 @@
     "gp": 15,
     "voraussetzung": "",
     "effekt": ""
+  },
+  {
+    "name": "Affinitaet zu Daemonen",
+    "gp": 7,
+    "effekt": "Kontrollprobe bei Daemonenbeschwoerung um 3 Punkte erleichtert. Sperrt SF Elementarharmonisierte Aura."
+  },
+  {
+    "name": "Affinitaet zu Elementaren",
+    "gp": 7,
+    "effekt": "Kontrollprobe bei Elementarbeschwoerung um 3 Punkte erleichtert. Reduziert Kosten von SF Elementarharmonisierte Aura auf 500 AP."
+  },
+  {
+    "name": "Dschinngeboren",
+    "gp": 5,
+    "effekt": "Vorfahre verbunden mit Dschinn. Held bekommt elementare Affinitaet zu einem der sechs Elemente. Automatisch Vorteil Viertelzauberer. Element-Begabungen aus elementaffiner Liste. Automatisch Nachteil Wahrer Name. Halb-/Vollzauberer-Professionen 2 GP billiger."
   }
 ]

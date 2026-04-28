@@ -319,6 +319,86 @@ export async function showSpellDialog(actor, spellData) {
             </div>`;
           })()}
 
+          ${(() => {
+            // ── Beschwörungs-Block ───────────────────────────────────────
+            // Wenn der Spruch eine Beschwörung ist (isBeschwoerung=true),
+            // zeigen wir einen extra Block mit Wesen-Auswahl, Modifikatoren
+            // und Hinweis auf die spätere Kontrollprobe.
+            if (!spellData.isBeschwoerung) return "";
+            const kategorie = spellData.beschwoerungKategorie ?? "?";
+
+            // Wesen-Optionen je Kategorie
+            const wesenOptions = (() => {
+              if (kategorie === "elementar-geist") return [
+                { label: "Elementargeist (BS+4 / BB+2 / 15 AsP)", bs: 4, bb: 2 },
+              ];
+              if (kategorie === "elementar-dschinn") return [
+                { label: "Dschinn (BS+8 / BB+4 / 30 AsP)", bs: 8, bb: 4 },
+              ];
+              if (kategorie === "elementar-meister") return [
+                { label: "Elementarer Meister (BS+12 / BB+8 / 50 AsP)", bs: 12, bb: 8 },
+              ];
+              if (kategorie === "daemon-nieder") return [
+                // Beispiel-Werte aus Tractatus — User kann manuell anpassen
+                { label: "Sharbazz (Belhalhar) — BS+6 / BB+2", bs: 6, bb: 2, basisAsp: 2 },
+                { label: "Aphasmayras Atem — BS+12 / BB+8", bs: 12, bb: 8, basisAsp: 10 },
+                { label: "Asqarath (Blakharaz) — BS+14 / BB+8", bs: 14, bb: 8, basisAsp: 16 },
+                { label: "(Andere — manuell setzen)", bs: 0, bb: 0, basisAsp: 0 },
+              ];
+              if (kategorie === "daemon-gehoert") return [
+                { label: "Arjunoor (Agrimoth) — BS+15 / BB+8", bs: 15, bb: 8, basisAsp: 30 },
+                { label: "Arkhobal (Agrimoth) — BS+17 / BB+9", bs: 17, bb: 9, basisAsp: 30 },
+                { label: "Balkha'bul (Tasfarelel) — BS+18 / BB+10", bs: 18, bb: 10, basisAsp: 30 },
+                { label: "(Andere — manuell setzen)", bs: 0, bb: 0, basisAsp: 0 },
+              ];
+              if (kategorie === "untot-temporaer" || kategorie === "untot-permanent") return [
+                { label: "Skelett (LO 9)", bs: 0, bb: 9 },
+                { label: "Zombie (LO 12)", bs: 0, bb: 12 },
+                { label: "Lebender Leichnam (LO 10)", bs: 0, bb: 10 },
+                { label: "Mumie (LO 7)", bs: 0, bb: 7 },
+                { label: "Tierkadaver (LO 12)", bs: 0, bb: 12 },
+              ];
+              if (kategorie === "golem-daemonisch") return [
+                { label: "winzig/sehr klein (6W6 AsP)", bs: 3, bb: 6, basisAsp: 21 },
+                { label: "klein (8W6 AsP)", bs: 0, bb: 6, basisAsp: 28 },
+                { label: "mittel (12W6 AsP)", bs: 3, bb: 6, basisAsp: 42 },
+                { label: "groß (16W6 AsP)", bs: 6, bb: 6, basisAsp: 56 },
+                { label: "sehr groß (20W6 AsP)", bs: 9, bb: 6, basisAsp: 70 },
+              ];
+              if (kategorie === "golem-elementar") return [
+                { label: "mittel (36 AsP)", bs: 0, bb: 6, basisAsp: 36 },
+                { label: "groß (48 AsP)", bs: 3, bb: 6, basisAsp: 48 },
+                { label: "sehr groß (120 AsP)", bs: 6, bb: 6, basisAsp: 120 },
+              ];
+              return [];
+            })();
+
+            const opts = wesenOptions.map((w, i) => `<option value="${i}" data-bs="${w.bs}" data-bb="${w.bb}" data-asp="${w.basisAsp || 0}">${w.label}</option>`).join("");
+            return `
+            <div style="margin:8px 0;padding:8px;background:rgba(180,40,40,0.10);border-left:3px solid #b44;border-radius:0 4px 4px 0">
+              <div style="font-family:'Press Start 2P',cursive;font-size:9px;color:#f99;margin-bottom:4px">⛤ BESCHWÖRUNG (${kategorie})</div>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#fbb;margin:4px 0">
+                <span>Wesen:</span>
+                <select id="beschw-wesen" style="flex:1;background:#0d1b2e;color:#e0e0e0;border:2px solid #3a3a5e;color-scheme:dark">${opts}</select>
+              </label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;color:#caa;margin-top:4px">
+                <label>Anrufungs-Erschwernis (BS): <input id="beschw-bs" type="number" value="0" style="width:50px;background:#0d1b2e;border:1px solid #3a3a5e;color:#e0e0e0;text-align:center"></label>
+                <label>Beherrschungs-Erschwernis (BB): <input id="beschw-bb" type="number" value="0" style="width:50px;background:#0d1b2e;border:1px solid #3a3a5e;color:#e0e0e0;text-align:center"></label>
+              </div>
+              <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#caa;margin-top:4px">
+                <input type="checkbox" id="beschw-no-name" style="margin:0">
+                Ohne Wahren Namen (+7 Anrufung)
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#caa">
+                Wahrer-Name-Qualität (Q1-7, erleichtert): <input id="beschw-name-qual" type="number" min="0" max="7" value="0" style="width:40px;background:#0d1b2e;border:1px solid #3a3a5e;color:#e0e0e0;text-align:center">
+              </label>
+              <div style="font-size:10px;color:#776;margin-top:4px;padding:3px 6px;background:rgba(0,0,0,0.3);border-radius:3px">
+                ✦ Anrufungsprobe: ${(spellData.probe ?? []).join("/")} +BS+Modifikatoren<br>
+                ✦ Kontrollprobe danach: 1W20 ≤ ${spellData.kontrollProbe ?? "(MU+MU+KL+CH+ZfW)/5"} −BB
+              </div>
+            </div>`;
+          })()}
+
           <div style="display:flex;gap:12px;align-items:center;justify-content:center;margin:8px 0">
             <label style="font-size:14px;color:#bbb">Zusätzl. Mod:</label>
             <input id="spell-extra-mod" type="number" value="0" style="width:50px;text-align:center;font-size:18px;background:#0d1b2e;border:2px solid #3a3a5e;color:#e0e0e0">
@@ -363,7 +443,7 @@ export async function showSpellDialog(actor, spellData) {
           html.find("#spell-total-asp").text(result.aspCost);
           html.find("#spell-total-zfp").css("color", result.totalZfP > 10 ? "#ff3333" : result.totalZfP > 0 ? "#e94560" : "#888");
         };
-        html.find("select[data-mod], #spell-extra-mod, #spell-variante, #religious-violation, #geode-element, #upkeep-spells, #vs-mr, #target-mr, #probe-wildcard").on("input change", refresh);
+        html.find("select[data-mod], #spell-extra-mod, #spell-variante, #religious-violation, #geode-element, #upkeep-spells, #vs-mr, #target-mr, #probe-wildcard, #beschw-wesen, #beschw-bs, #beschw-bb, #beschw-no-name, #beschw-name-qual").on("input change", refresh);
       },
     }).render(true);
   });
@@ -384,8 +464,29 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
   const upkeepSpells       = parseInt(html.find("#upkeep-spells").val()) || 0;
   const vsMR               = html.find("#vs-mr").prop("checked") ?? false;
   const targetMR           = parseInt(html.find("#target-mr").val()) || 0;
-  // Wildcard-Eigenschaft (für Sprüche mit "*"-Probe wie Attributo)
   const probeWildcard      = html.find("#probe-wildcard").val() || "KK";
+
+  // ── Beschwörungs-Werte (Anrufung + spätere Kontrollprobe) ──────────────
+  // Auto-Sync vom Wesen-Select: wenn User wechselt, BS/BB-Inputs füllen
+  const beschwWesenSel = html.find("#beschw-wesen option:selected");
+  if (beschwWesenSel.length) {
+    // Werte aus data-Attributen ziehen, aber User-Override per Input erlaubt
+    const dsBs  = parseInt(beschwWesenSel.attr("data-bs"))  || 0;
+    const dsBb  = parseInt(beschwWesenSel.attr("data-bb"))  || 0;
+    const userBs = parseInt(html.find("#beschw-bs").val());
+    const userBb = parseInt(html.find("#beschw-bb").val());
+    // Wenn User-Input unverändert (0), default aus selected option
+    if (!userBs) html.find("#beschw-bs").val(dsBs);
+    if (!userBb) html.find("#beschw-bb").val(dsBb);
+  }
+  const beschwBs       = parseInt(html.find("#beschw-bs").val()) || 0;  // Anrufungs-Erschwernis
+  const beschwBb       = parseInt(html.find("#beschw-bb").val()) || 0;  // Beherrschungs-Erschwernis
+  const beschwNoName   = html.find("#beschw-no-name").prop("checked") ?? false;
+  const beschwNameQual = parseInt(html.find("#beschw-name-qual").val()) || 0;
+  // Effektive Anrufungs-Erschwernis: BS + 7 wenn ohne Wahren Namen − Qualität
+  const beschwAnrufungZuschlag = beschwBs + (beschwNoName ? 7 : 0) - beschwNameQual;
+  // Effektive Beherrschungs-Erschwernis: BB − Qualität/3
+  const beschwKontrollZuschlag = beschwBb - Math.floor(beschwNameQual / 3);
 
   // Schelm-MR-Schwelle berechnen (extraFlags.schelmMrIgnore wird in castSpell gesetzt)
   const schelmIgnore = extraFlags.schelmMrIgnore ?? 0;
@@ -416,11 +517,12 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
       extraAkt: 0,
       aspCost: null,
       // Erleichterung negativ = Erschwernis. MR + Aufrechterhaltene + Manueller Mod.
-      erleichterung: -extraMod0 - effectiveTargetMR - upkeepErschwernis,
+      erleichterung: -extraMod0 - effectiveTargetMR - upkeepErschwernis - beschwAnrufungZuschlag,
       selections, selectedVariant: varIdx0 >= 0 ? (varianten[varIdx0] ?? null) : null,
       elfKlInTausch: html.find("#elf-kl-in").prop("checked") ?? false,
       // Diagnostik / Display-Felder
       religiousViolation, geodeElement, upkeepSpells, vsMR, targetMR, effectiveTargetMR, probeWildcard,
+      beschwAnrufungZuschlag, beschwKontrollZuschlag, beschwBs, beschwBb, beschwNoName, beschwNameQual,
     };
   }
   const result = calculateModifications(selections, baseKosten, rep, extraFlags);
@@ -445,7 +547,7 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
     aspCost: result.finalAsP + varAsp,
     // Erleichterung neg = Erschwernis. Subtrahiere MR (mit Schelm-Reduktion),
     // Aufrechterhaltene Zauber und manuellen Mod von der Erleichterung.
-    erleichterung: result.erleichterung - extraMod - effectiveTargetMR - upkeepErschwernis,
+    erleichterung: result.erleichterung - extraMod - effectiveTargetMR - upkeepErschwernis - beschwAnrufungZuschlag,
     selections,
     selectedVariant,
     elfKlInTausch,
@@ -482,7 +584,7 @@ export async function castSpell(actor, spellData) {
   const dialogResult = await showSpellDialog(actor, spellData);
   if (!dialogResult) return null;
 
-  const { totalZfP, extraAkt, aspCost, erleichterung, selections, selectedVariant, elfKlInTausch, upkeepSpells, vsMR, targetMR, effectiveTargetMR, religiousViolation, geodeElement, probeWildcard } = dialogResult;
+  const { totalZfP, extraAkt, aspCost, erleichterung, selections, selectedVariant, elfKlInTausch, upkeepSpells, vsMR, targetMR, effectiveTargetMR, religiousViolation, geodeElement, probeWildcard, beschwAnrufungZuschlag, beschwKontrollZuschlag, beschwBs, beschwBb, beschwNoName, beschwNameQual } = dialogResult;
 
   // Aufrechterhaltene-Zauber-Counter persistieren (wird in nächstem Dialog
   // wieder vorbelegt). User kann Counter im Dialog jederzeit anpassen.
@@ -556,6 +658,45 @@ export async function castSpell(actor, spellData) {
     resultClass = "result-fail";
   }
 
+  // 5b. Kontrollprobe für Beschwörungssprüche
+  // DSA 4.1: Nach erfolgreicher Anrufung folgt die Kontrollprobe (1W20 ≤ Kontrollwert).
+  //   Dämonen + Untote/Golem-dämonisch:  KontrollWert = (MU+MU+KL+CH+ZfW)/5
+  //   Elementare:                         KontrollWert = (MU+IN+CH+CH+ZfW)/5
+  //   Erschwernis: Beherrschungsschwierigkeit (BB) − Wahrer-Name-Qualität/3
+  let kontrollResult = null;
+  if (success && spellData.isBeschwoerung) {
+    const sysAttr = (n) => actor.system?.[n]?.value ?? 10;
+    const kontrollFormula = spellData.kontrollProbe ?? "(MU+MU+KL+CH+ZfW)/5";
+    let kontrollWert;
+    if (kontrollFormula.includes("MU+IN+CH+CH")) {
+      kontrollWert = Math.round((sysAttr("MU") + sysAttr("IN") + sysAttr("CH") + sysAttr("CH") + (parseInt(spellData.zfw) || 0)) / 5);
+    } else {
+      kontrollWert = Math.round((sysAttr("MU") + sysAttr("MU") + sysAttr("KL") + sysAttr("CH") + (parseInt(spellData.zfw) || 0)) / 5);
+    }
+    const kontrollErschwernis = beschwKontrollZuschlag ?? 0;
+    const kontrollTarget = kontrollWert - kontrollErschwernis;
+
+    const kontrollRoll = new Roll("1d20");
+    await kontrollRoll.evaluate();
+    const kontrollDie = kontrollRoll.total;
+    const kontrollSuccess = kontrollDie <= kontrollTarget && kontrollDie !== 20;
+    kontrollResult = {
+      die: kontrollDie,
+      target: kontrollTarget,
+      kontrollWert,
+      erschwernis: kontrollErschwernis,
+      success: kontrollSuccess,
+      formula: kontrollFormula,
+    };
+    if (!kontrollSuccess) {
+      // Beherrschung misslungen — Wesen ist FREI / kann angreifen
+      resultLabel = "Anrufung gelang — KONTROLLE MISSLUNGEN!";
+      resultClass = "result-fail";
+    } else {
+      resultLabel = "Anrufung & Kontrolle gelungen";
+    }
+  }
+
   // 6. AsP abziehen — Hexisch: 1/3 bei Misserfolg (WdZ S.310); sonst: Hälfte (WdZ S.14)
   //    null = variable Kosten → kein Abzug, GM macht das manuell
   const failDivisor = repC === "hexisch" ? 3 : 2;
@@ -595,12 +736,23 @@ export async function castSpell(actor, spellData) {
     ? `<div style="text-align:center;font-size:13px;color:#ffd700">Variante: ${selectedVariant.name}</div>`
     : "";
 
+  // Beschwörungs-Block für Chat
+  const kontrollLine = kontrollResult
+    ? `<div style="margin-top:6px;padding:4px 6px;background:rgba(180,40,40,0.18);border-left:3px solid #b44;border-radius:3px;font-size:12px;color:#fbb">
+         ⛤ Kontrollprobe: 1W20 = ${kontrollResult.die} ${kontrollResult.success ? "✓" : "✗"}
+         (Ziel ${kontrollResult.target} = ${kontrollResult.kontrollWert} − ${kontrollResult.erschwernis} BB)
+         <br><span style="color:#caa;font-size:10px">${kontrollResult.formula}</span>
+         ${!kontrollResult.success ? `<br><b style="color:#ff6464">⚠ Wesen außer Kontrolle!</b>` : ""}
+       </div>`
+    : "";
+
   const flavor = `<div class="dsa-pixel-chat">
-    <div class="chat-title">⚡ ${spellData.name}</div>
+    <div class="chat-title">⚡ ${spellData.name}${spellData.isBeschwoerung ? " ⛤" : ""}</div>
     ${variantLine}
     <div class="dice-row">${diceHtml}</div>
     <div class="result-line ${resultClass}">${resultLabel}</div>
     ${success ? `<div class="tap-star">ZfP*: <span>${result.tapStar}</span></div>` : ""}
+    ${kontrollLine}
     <div style="text-align:center;font-size:13px;color:#4a90d9">
       ${actualCost === null
         ? `<span style="color:#ffd700">AsP: variabel — manuell abziehen! (${spellData.kosten})</span>`

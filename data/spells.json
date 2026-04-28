@@ -1683,7 +1683,13 @@
     ],
     "komplexitaet": "E",
     "merkmal": "Elementar, Herbeirufung",
-    "varianten": []
+    "varianten": [],
+    "isBeschwoerung": true,
+    "beschwoerungKategorie": "elementar-dschinn",
+    "kontrollProbe": "(MU+IN+CH+CH+ZfW)/5",
+    "beschwoerungsSchwierigkeit": 8,
+    "beherrschungsSchwierigkeit": 4,
+    "wesenAspPool": 30
   },
   {
     "name": "Dunkelheit",
@@ -2024,7 +2030,13 @@
     ],
     "komplexitaet": "D",
     "merkmal": "Elementar, Herbeirufung",
-    "varianten": []
+    "varianten": [],
+    "isBeschwoerung": true,
+    "beschwoerungKategorie": "elementar-geist",
+    "kontrollProbe": "(MU+IN+CH+CH+ZfW)/5",
+    "beschwoerungsSchwierigkeit": 4,
+    "beherrschungsSchwierigkeit": 2,
+    "wesenAspPool": 15
   },
   {
     "name": "Elfenstimme Flötenton",
@@ -3692,7 +3704,7 @@
       "CH"
     ],
     "wirkung": "Bei Gelingen dieses Zaubers erscheint im Zentrum des Heptagramms eine Kreatur aus der Gruppe der Gehörnten Dämonen. Der Magier muss nun mit einer Kontrollprobe auf (MU+MU+KL+CH+ZfW)/5, erschwert um die Kontrollschwierigkeit, feststellen, ob es ihm gelingt, den Dämon zu beherrschen. Ist dies der Fall, so kann er dem Gehörnten einen oder mehrere Aufträge erteilen, die sich nach Art und Wesen des Gerufenen natürlich unterscheiden können. Eine misslungene Anrufungsgsprobe kann zwei Auswirkungen habe",
-    "kosten": "19 AsP für die Beschwörung. Die Kosten für die Kontrolle des Dämons sind von Gehörntem zu Gehörntem un- terschiedlich. (Borbaradianische Variante: 2W20 AsP für die Beschwörung bzw. die Hälfte dieser Kosten als LeP.)",
+    "kosten": "11 AsP für die Beschwörung + Gesamtsumme der Hörner (Niedere=1, Gehörnte=2) + BS des Dämons. Plus dämonenspezifische Basiskosten für Kontrolle. Borb. Variante: 2W20 AsP bzw. halbe Kosten als LeP.",
     "zauberdauer": "40 Aktionen für die eigentliche Beschwörung. Danach dauert es weitere 5W20 Aktionen, bis der Dämon erscheint.",
     "reichweite": "Der Dämon erscheint im Heptagramm; für die Ausführung des ihm erteilten Auftrags kann er sich beliebig weit vom Beschwörer entfernen.",
     "wirkungsdauer": "je nach Auftrag, Art des Dämons und AsP-Einsatz.",
@@ -3704,17 +3716,23 @@
     ],
     "komplexitaet": "E",
     "merkmal": "Beschwörung, Dämonisch (Bor: dito)",
-    "varianten": []
+    "varianten": [],
+    "_dsa41_korrektur": "AsP-Kosten von 19 → 11 (WdZ S.178)",
+    "isBeschwoerung": true,
+    "beschwoerungKategorie": "daemon-gehoert",
+    "kontrollProbe": "(MU+MU+KL+CH+ZfW)/5",
+    "wesenSource": "tractatus",
+    "anrufung_ohneWahrerName_zuschlag": 7
   },
   {
     "name": "Invocatio Minor",
     "probe": [
       "MU",
-      "MU",
-      "CH"
+      "IN",
+      "FF"
     ],
     "wirkung": "Mit diesem Zauber kann der Magier eine Kreatur aus der Gruppe der Niederen Dämonen beschwören. Sobald der Dämon erscheint, muss der Magier eine Probe auf seinen Kontrollwert ((MU+MU+KL+CH+ZfW)/5) ablegen, die je nach Mächtigkeit des Sphärenwesens erschwert ist. Gelingt die Kontrolle, so kann er dem Dämonen nun einen oder mehrere Aufträge erteilen. Eine misslungene Anrufungsprobe kann zwei Auswirkungen haben: Entweder erscheint überhaupt kein Wesen oder aber es erscheint eine andere Entität – etw",
-    "kosten": "11 AsP für die Beschwörung. Die Kosten für die Kontrolle des Wesens sind von Dämon zu Dämon unterschiedlich",
+    "kosten": "9 AsP für die Beschwörung + Beschwörungsschwierigkeit (BS) des Dämons + Anzahl bei Mehrfach-Beschwörung. Plus dämonenspezifische Basiskosten für Kontrolle (siehe Tractatus). Bei misslungener Probe halbe Kosten.",
     "zauberdauer": "5 Aktionen für die eigentliche Beschwörung, danach dauert es 2W20 Aktionen, bis der Dämon erscheint.",
     "reichweite": "Der Dämon erscheint in unmittelbarer Nähe des Magiers. Danach kann er sich, je nach Dämon und Aufgabe, beliebig weit vom Beschwörer entfernen.",
     "wirkungsdauer": "je nach Dämon und AsP-Aufwand",
@@ -3728,7 +3746,14 @@
     ],
     "komplexitaet": "D",
     "merkmal": "Beschwörung, Dämonisch (Bor: dito)",
-    "varianten": []
+    "varianten": [],
+    "_dsa41_korrektur": "probe von ['MU', 'MU', 'CH'] → MU/IN/FF (WdZ Index Z.30150)",
+    "isBeschwoerung": true,
+    "beschwoerungKategorie": "daemon-nieder",
+    "kontrollProbe": "(MU+MU+KL+CH+ZfW)/5",
+    "wesenSource": "tractatus",
+    "anrufung_wahrerName_pflicht": false,
+    "anrufung_ohneWahrerName_zuschlag": 7
   },
   {
     "name": "Iribaars Hand",
@@ -4774,7 +4799,13 @@
     ],
     "komplexitaet": "F",
     "merkmal": "Elementar, Herbeirufung",
-    "varianten": []
+    "varianten": [],
+    "isBeschwoerung": true,
+    "beschwoerungKategorie": "elementar-meister",
+    "kontrollProbe": "(MU+IN+CH+CH+ZfW)/5",
+    "beschwoerungsSchwierigkeit": 12,
+    "beherrschungsSchwierigkeit": 8,
+    "wesenAspPool": 50
   },
   {
     "name": "Meister Minderer Geister",
@@ -5578,7 +5609,14 @@
     ],
     "komplexitaet": "D",
     "merkmal": "Antimagie, Beschwörung, Dämonisch, Geisterwesen",
-    "varianten": []
+    "varianten": [],
+    "isAntibeschwoerung": true,
+    "kostenStaffel": {
+      "geist": 7,
+      "niederer-daemon": 11,
+      "gehoernter-daemon": 17,
+      "erzdaemon": 35
+    }
   },
   {
     "name": "Pestilenz Erspüren",
@@ -6553,7 +6591,13 @@
         "name": "Kadaver",
         "zfpKosten": 3
       }
-    ]
+    ],
+    "isBeschwoerung": true,
+    "beschwoerungKategorie": "untot-temporaer",
+    "kontrollProbe": "(MU+MU+KL+CH+ZfW)/5",
+    "asp_pro_untoter": 11,
+    "asp_kontrolle_pro_sr_min": 1,
+    "asp_kontrolle_pro_sr_max": 5
   },
   {
     "name": "Solidirid Weg aus Licht",
@@ -8203,5 +8247,132 @@
     "komplexitaet": "D",
     "merkmal": "Herrschaft",
     "varianten": []
+  },
+  {
+    "name": "Stein Wandle",
+    "probe": [
+      "MU",
+      "CH",
+      "KK"
+    ],
+    "wirkung": "Beseelung eines Golemkörpers durch Anrufung eines Erzdämons. Material muss zur Domäne passen (Knochen→Thargunitoth, Stein→Agrimoth, etc.). Misslungene Probe verdirbt das Material. Voraussetzung: Konstruktionsthesis (Wahrer Name) zwingend. Kontrollprobe (MU+MU+KL+CH+ZfW)/5 nach Anrufung.",
+    "kosten": "Größenabhängig: winzig 6W6 / klein 8W6 / mittel 12W6 / groß 16W6 / sehr groß 20W6 AsP, davon je 1/20 permanent (mit SF Golembauer 1/50)",
+    "zauberdauer": "ca. 7 Stunden",
+    "reichweite": "Berührung",
+    "wirkungsdauer": "permanent",
+    "verbreitung": [
+      "gildenmagisch"
+    ],
+    "komplexitaet": "E",
+    "merkmal": "Beschwörung, Dämonisch (Domäne)",
+    "varianten": [],
+    "isBeschwoerung": true,
+    "beschwoerungKategorie": "golem-daemonisch",
+    "kontrollProbe": "(MU+MU+KL+CH+ZfW)/5",
+    "voraussetzungen": [
+      "Wahrer Name (Konstruktionsthesis)",
+      "Heptagramma + Schutzkreis",
+      "passender Golemkörper",
+      "Repräsentation Magier"
+    ]
+  },
+  {
+    "name": "Staub Wandle",
+    "probe": [
+      "MU",
+      "KL",
+      "CH"
+    ],
+    "wirkung": "Erschafft elementar belebte Sand-Golemiden (vergänglich). Originalformel von Sultan Hasrabal nutzt Sand der Gorischen Wüste + Wasser des Chaluk. Misslingen verdirbt Sand. Kontrollprobe (MU+IN+CH+CH+ZfW)/5.",
+    "kosten": "mittel 36 / groß 48 / sehr groß 120 AsP (keine permanenten AsP)",
+    "zauberdauer": "ca. 7 Stunden",
+    "reichweite": "Berührung",
+    "wirkungsdauer": "begrenzt (nicht permanent)",
+    "verbreitung": [
+      "gildenmagisch"
+    ],
+    "komplexitaet": "E",
+    "merkmal": "Elementar (Erz)",
+    "varianten": [],
+    "isBeschwoerung": true,
+    "beschwoerungKategorie": "golem-elementar",
+    "kontrollProbe": "(MU+IN+CH+CH+ZfW)/5",
+    "voraussetzungen": [
+      "Sand der Gorischen Wüste",
+      "Wasser des Chaluk",
+      "Konstruktionsthesis",
+      "Repräsentation Magier"
+    ]
+  },
+  {
+    "name": "Totes Handle",
+    "probe": [
+      "MU",
+      "CH",
+      "KO"
+    ],
+    "wirkung": "Erweckt einen Toten dauerhaft zum Untoten. Mit SF Former der Leiber kann auch ein Knochen-/Fleischgolem erschaffen werden (folgt dann Golem-Regeln). Kontrollprobe (MU+MU+KL+CH+ZfW)/5.",
+    "kosten": "8W6 AsP, davon 1/20 permanent (mit SF Nekromant nur 1/50). Borbaradianisch: halbe Kosten als LeP",
+    "zauberdauer": "1 Spielrunde",
+    "reichweite": "Berührung",
+    "wirkungsdauer": "permanent",
+    "verbreitung": [
+      "gildenmagisch",
+      "borbaradianer"
+    ],
+    "komplexitaet": "C",
+    "merkmal": "Beschwörung, Dämonisch (gesamt), Schaden",
+    "varianten": [],
+    "isBeschwoerung": true,
+    "beschwoerungKategorie": "untot-permanent",
+    "kontrollProbe": "(MU+MU+KL+CH+ZfW)/5",
+    "voraussetzungen": [
+      "passender Leichnam",
+      "Heptagramma + Pentagramma als Schutzkreis empfohlen",
+      "Repräsentation Magier oder Borbaradianer"
+    ]
+  },
+  {
+    "name": "Animatio",
+    "probe": [
+      "KL",
+      "FF",
+      "GE"
+    ],
+    "wirkung": "Verzaubert einen Gegenstand sodass er eingeübte Bewegungen wiederholt (z.B. Tagelöhner-Variante: einfache Arbeit verrichten). Variante 'Knechtschaft': bedingte Anweisungen. Variante 'Ad infinitum': Wirkungsdauer nicht limitiert.",
+    "kosten": "12+ AsP",
+    "zauberdauer": "28+ Aktionen",
+    "reichweite": "Berührung",
+    "wirkungsdauer": "ZfP* Monate",
+    "verbreitung": [
+      "gildenmagisch"
+    ],
+    "komplexitaet": "B",
+    "merkmal": "Telekinese",
+    "varianten": [
+      {
+        "name": "Tagelöhner",
+        "zfpKosten": 3
+      },
+      {
+        "name": "Knechtschaft",
+        "zfpKosten": 3,
+        "minZfw": 11
+      },
+      {
+        "name": "Mehrere Objekte",
+        "zfpKosten": 3
+      },
+      {
+        "name": "Ad infinitum",
+        "zfpKosten": 7
+      },
+      {
+        "name": "Geworfen",
+        "zfpKosten": 7,
+        "minZfw": 11
+      }
+    ],
+    "isBeschwoerung": false
   }
 ]
