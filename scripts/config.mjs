@@ -46,6 +46,47 @@ export const RACE_GS = {
   "Achaz": 7,
 };
 
+// ─── Beschwörungs-Misslingen-Tabellen (WdZ S.191) ──────────────────────────
+// Bei misslungener Anrufungsprobe (Invocatio Minor/Maior, Skelettarius, etc.)
+// würfelt der Beschwörer 2W6 + halbe BS (3W6 bei Blutmagie, +5 bei Gehörnten).
+// Bei "ohne Wahren Namen" plus +7.
+// Ergebnis-Tabelle aus WdZ S.191:
+export const BESCHWOERUNG_MISSLINGEN = [
+  { range: [2, 6],   effekt: "Nichts erscheint, halbe AsP-Kosten",
+    verfall: 0, ersatzWesen: null },
+  { range: [7, 11],  effekt: "Niederer Dämon gleicher Domäne (geringere BS), halbe Kosten",
+    verfall: 0, ersatzWesen: "nieder-gleiche-domaene-leichter" },
+  { range: [12, 15], effekt: "Niederer Dämon gleicher Domäne (höhere BS), halbe Kosten",
+    verfall: 0, ersatzWesen: "nieder-gleiche-domaene-staerker" },
+  { range: [16, 19], effekt: "Gehörnter Dämon gleicher Domäne, 19 AsP, +1 Verfall",
+    verfall: 1, ersatzWesen: "gehoernt-gleiche-domaene", aspKosten: 19 },
+  { range: [20, 99], effekt: "Gehörnter Dämon BELIEBIGER Domäne, 19 AsP, 1W6 Verfall",
+    verfall: "1W6", ersatzWesen: "gehoernt-beliebige-domaene", aspKosten: 19 },
+];
+
+// Misslingen-Tabelle Beherrschung (Kontrollprobe failed) — WdZ S.191 sinngemäß
+// 2W6 + halbe BS, +5 bei Gehörnten
+export const BEHERRSCHUNG_MISSLINGEN = [
+  { range: [2, 5],   effekt: "Dämon zwingt sich noch unter Kontrolle, +1 Erschwernis weiter" },
+  { range: [6, 10],  effekt: "Dämon ignoriert nächsten Befehl, fordert Geschenk" },
+  { range: [11, 15], effekt: "Dämon greift Beschwörer 1× an, dann zurück zur Beschwörung" },
+  { range: [16, 20], effekt: "Dämon zerstört Schutzkreis, frei agierend (1W6 Verfall)" },
+  { range: [21, 99], effekt: "Dämon reißt Beschwörer in die Niederhöllen (Tod oder PERMANENTE Bindung)" },
+];
+
+/**
+ * Hilft: 2W6 (oder 3W6 bei Blutmagie) + halbe BS + Modifier → Tabellen-Lookup.
+ */
+export function rollBeschwoerungMisslingen(table, bsHalf, extraMod = 0, blutmagie = false) {
+  const dieRolls = [];
+  const numDice = blutmagie ? 3 : 2;
+  for (let i = 0; i < numDice; i++) dieRolls.push(Math.floor(Math.random() * 6) + 1);
+  const sum = dieRolls.reduce((a, b) => a + b, 0);
+  const total = sum + bsHalf + extraMod;
+  const entry = table.find(e => total >= e.range[0] && total <= e.range[1]);
+  return { dieRolls, sum, total, entry };
+}
+
 // ─── SF-Boni auf Magieresistenz gegen bestimmte Spruchmerkmale ──────────────
 // DSA 4.1 WdZ S.31 (Eiserner Wille + Gedankenschutz):
 //

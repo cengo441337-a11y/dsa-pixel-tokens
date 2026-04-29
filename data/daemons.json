@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Aphasmayras Atem",
+    "domaene": "Cha'Muyan",
+    "klasse": "nieder",
+    "beschwoerung": 12,
+    "beherrschung": 8,
+    "wahrerName_q_zufall": 1,
+    "wahrerName_q_max": 3,
+    "basiskosten": 10,
+    "tractatusSeite": 124,
+    "_verifiziert": "Audit + pdftotext-Direktverifikation"
+  },
+  {
+    "name": "Arkhobal",
+    "domaene": "Agrimoth",
+    "klasse": "gehoernt",
+    "beschwoerung": 17,
+    "beherrschung": 9,
+    "wahrerName_q_zufall": 2,
+    "wahrerName_q_max": 3,
+    "basiskosten": 30,
+    "tractatusSeite": 102,
+    "_verifiziert": "Audit + pdftotext-Direktverifikation"
+  },
+  {
+    "name": "Balkha'bul",
+    "domaene": "Tasfarelel",
+    "klasse": "gehoernt",
+    "beschwoerung": 18,
+    "beherrschung": 10,
+    "wahrerName_q_zufall": 1,
+    "wahrerName_q_max": 2,
+    "basiskosten": 30,
+    "tractatusSeite": 87,
+    "_verifiziert": "Audit + pdftotext-Direktverifikation"
+  },
+  {
+    "name": "Arjunoor",
+    "domaene": "Agrimoth",
+    "klasse": "gehoernt",
+    "beschwoerung": 15,
+    "beherrschung": 8,
+    "wahrerName_q_zufall": 3,
+    "wahrerName_q_max": 5,
+    "basiskosten": 30,
+    "tractatusSeite": 99,
+    "_verifiziert": "Audit-Bericht; PDF-pdftotext nicht direkt verifizierbar (Multi-Column-Layout)"
+  },
+  {
+    "name": "Asqarath",
+    "domaene": "Blakharaz",
+    "klasse": "gehoernt",
+    "beschwoerung": 14,
+    "beherrschung": 8,
+    "wahrerName_q_zufall": 2,
+    "wahrerName_q_max": 4,
+    "basiskosten": 16,
+    "tractatusSeite": 20,
+    "_verifiziert": "Audit-Bericht (PDF-Multi-Column-Layout-Issue, wahrscheinlich korrekt)"
+  },
+  {
+    "name": "Sharbazz",
+    "domaene": "Belhalhar",
+    "klasse": "nieder",
+    "beschwoerung": 6,
+    "beherrschung": 2,
+    "wahrerName_q_zufall": 2,
+    "wahrerName_q_max": 5,
+    "basiskosten": 2,
+    "tractatusSeite": 88,
+    "_verifiziert": "Audit-Bericht"
+  },
+  {
+    "name": "Bhurkhesch",
+    "domaene": "Belkelel",
+    "klasse": "nieder",
+    "beschwoerung": 6,
+    "beherrschung": 2,
+    "wahrerName_q_zufall": 2,
+    "wahrerName_q_max": 5,
+    "basiskosten": 2,
+    "tractatusSeite": 111,
+    "_verifiziert": "Audit-Bericht (PDF: BS-Wert komplex, mehrere Manifestationsphasen)"
+  }
+]

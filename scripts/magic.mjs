@@ -3,7 +3,7 @@
  * Zauberprobe mit Spontanmodifikationen, AsP-Berechnung, Zone-Markierung
  */
 
-import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds } from "./config.mjs";
+import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, BESCHWOERUNG_MISSLINGEN, BEHERRSCHUNG_MISSLINGEN, rollBeschwoerungMisslingen } from "./config.mjs";
 import { castPandaemonium } from "./pandaemonium.mjs";
 import { castFesselranken, castAugeDesLimbus, castSumpfstrudel } from "./zone-spells.mjs";
 import { tryGardianumAbsorb, castGardianum, showGardianumDialog } from "./gardianum.mjs";
@@ -85,7 +85,17 @@ export async function showSpellDialog(actor, spellData) {
                     : _hasSF("Unbeschwertes Zaubern") ? 7
                     : 3;
   }
-  const extraFlags = { borMitGildenmagisch, schelmMrIgnore };
+  // Pakt-Mechanik: Actor-Flag mit Pakt-Daten (Domäne, GP-Pool).
+  // Bei passendem Spruchmerkmal (Dämonisch X) wird Anrufung erleichtert
+  // (3 Pakt-GP = -1 Erleichterung, max. -7).
+  const aktorPakt = actor.getFlag(MODULE_ID, "pakt") ?? null;
+  // Stimmt die Pakt-Domäne mit Spruchmerkmal überein?
+  const spruchMerkmal = String(spellData.merkmal ?? "").toLowerCase();
+  const paktDomaenePasst = aktorPakt && aktorPakt.domaene
+    && spruchMerkmal.includes((aktorPakt.domaene || "").toLowerCase());
+  const paktGpEinsatz = paktDomaenePasst ? Math.min(Math.floor((aktorPakt.gpPool ?? 0) / 3), 7) : 0;
+
+  const extraFlags = { borMitGildenmagisch, schelmMrIgnore, paktDomaenePasst, paktGpEinsatz };
 
   // Repräsentations-spezifische Einschränkungen (WdZ S.21-22)
   const noErzwingen    = rep === "schelmisch";
@@ -466,6 +476,10 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
   const targetMR           = parseInt(html.find("#target-mr").val()) || 0;
   const probeWildcard      = html.find("#probe-wildcard").val() || "KK";
 
+  // ── Pakt-Bonus (Pakt-GP einsetzen für passende Domäne) ─────────────────
+  // extraFlags enthält paktGpEinsatz (auto-berechnet aus Pakt-Pool / Domäne)
+  const paktBonus = extraFlags.paktGpEinsatz ?? 0;
+
   // ── Beschwörungs-Werte (Anrufung + spätere Kontrollprobe) ──────────────
   // Auto-Sync vom Wesen-Select: wenn User wechselt, BS/BB-Inputs füllen
   const beschwWesenSel = html.find("#beschw-wesen option:selected");
@@ -517,7 +531,7 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
       extraAkt: 0,
       aspCost: null,
       // Erleichterung negativ = Erschwernis. MR + Aufrechterhaltene + Manueller Mod.
-      erleichterung: -extraMod0 - effectiveTargetMR - upkeepErschwernis - beschwAnrufungZuschlag,
+      erleichterung: -extraMod0 - effectiveTargetMR - upkeepErschwernis - beschwAnrufungZuschlag + paktBonus,
       selections, selectedVariant: varIdx0 >= 0 ? (varianten[varIdx0] ?? null) : null,
       elfKlInTausch: html.find("#elf-kl-in").prop("checked") ?? false,
       // Diagnostik / Display-Felder
@@ -547,7 +561,7 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
     aspCost: result.finalAsP + varAsp,
     // Erleichterung neg = Erschwernis. Subtrahiere MR (mit Schelm-Reduktion),
     // Aufrechterhaltene Zauber und manuellen Mod von der Erleichterung.
-    erleichterung: result.erleichterung - extraMod - effectiveTargetMR - upkeepErschwernis - beschwAnrufungZuschlag,
+    erleichterung: result.erleichterung - extraMod - effectiveTargetMR - upkeepErschwernis - beschwAnrufungZuschlag + paktBonus,
     selections,
     selectedVariant,
     elfKlInTausch,
@@ -658,6 +672,18 @@ export async function castSpell(actor, spellData) {
     resultClass = "result-fail";
   }
 
+  // 5a-Beschw. Misslungene Anrufung bei Beschwörungssprüchen → Misslingen-Tabelle
+  // WdZ S.191: 2W6 + halbe BS (+ 7 ohne Wahren Namen, +5 bei Gehörnten, 3W6 bei Blutmagie)
+  let anrufungMisslingen = null;
+  if (!success && spellData.isBeschwoerung && !crit.gluecklich) {
+    const isGehoernt = spellData.beschwoerungKategorie === "daemon-gehoert";
+    const bsHalf = Math.floor((beschwBs || 0) / 2);
+    let extraMod = 0;
+    if (beschwNoName) extraMod += 7;
+    if (isGehoernt)   extraMod += 5;
+    anrufungMisslingen = rollBeschwoerungMisslingen(BESCHWOERUNG_MISSLINGEN, bsHalf, extraMod);
+  }
+
   // 5b. Kontrollprobe für Beschwörungssprüche
   // DSA 4.1: Nach erfolgreicher Anrufung folgt die Kontrollprobe (1W20 ≤ Kontrollwert).
   //   Dämonen + Untote/Golem-dämonisch:  KontrollWert = (MU+MU+KL+CH+ZfW)/5
@@ -689,7 +715,13 @@ export async function castSpell(actor, spellData) {
       formula: kontrollFormula,
     };
     if (!kontrollSuccess) {
-      // Beherrschung misslungen — Wesen ist FREI / kann angreifen
+      // Beherrschung misslungen → Misslingen-Tabelle würfeln (WdZ S.191)
+      // 2W6 + halbe BS, +5 bei Gehörnten
+      const isGehoernt = spellData.beschwoerungKategorie === "daemon-gehoert";
+      const bsHalf = Math.floor((beschwBs || 0) / 2);
+      const extraMod = isGehoernt ? 5 : 0;
+      const miss = rollBeschwoerungMisslingen(BEHERRSCHUNG_MISSLINGEN, bsHalf, extraMod);
+      kontrollResult.misslingenWurf = miss;
       resultLabel = "Anrufung gelang — KONTROLLE MISSLUNGEN!";
       resultClass = "result-fail";
     } else {
@@ -743,6 +775,20 @@ export async function castSpell(actor, spellData) {
          (Ziel ${kontrollResult.target} = ${kontrollResult.kontrollWert} − ${kontrollResult.erschwernis} BB)
          <br><span style="color:#caa;font-size:10px">${kontrollResult.formula}</span>
          ${!kontrollResult.success ? `<br><b style="color:#ff6464">⚠ Wesen außer Kontrolle!</b>` : ""}
+         ${kontrollResult.misslingenWurf ? `
+           <div style="margin-top:3px;padding:3px 5px;background:rgba(255,0,0,0.15);border-radius:2px">
+             <b>Beherrschungs-Misslingen ${kontrollResult.misslingenWurf.dieRolls.join("+")}+${kontrollResult.misslingenWurf.total - kontrollResult.misslingenWurf.sum} = ${kontrollResult.misslingenWurf.total}:</b>
+             <br>${kontrollResult.misslingenWurf.entry?.effekt ?? "?"}
+           </div>` : ""}
+       </div>`
+    : "";
+
+  // Anrufungs-Misslingen für Beschwörung
+  const anrufungMisslingenLine = anrufungMisslingen
+    ? `<div style="margin-top:6px;padding:4px 6px;background:rgba(255,80,80,0.20);border-left:3px solid #f44;border-radius:3px;font-size:12px;color:#fcc">
+         <b>⛤ Anrufungs-Misslingen ${anrufungMisslingen.dieRolls.join("+")}+${anrufungMisslingen.total - anrufungMisslingen.sum} = ${anrufungMisslingen.total} (WdZ S.191):</b>
+         <br>${anrufungMisslingen.entry?.effekt ?? "?"}
+         ${anrufungMisslingen.entry?.verfall ? `<br><b style="color:#f88">+${anrufungMisslingen.entry.verfall} Schleichender Verfall</b>` : ""}
        </div>`
     : "";
 
@@ -753,6 +799,7 @@ export async function castSpell(actor, spellData) {
     <div class="result-line ${resultClass}">${resultLabel}</div>
     ${success ? `<div class="tap-star">ZfP*: <span>${result.tapStar}</span></div>` : ""}
     ${kontrollLine}
+    ${anrufungMisslingenLine}
     <div style="text-align:center;font-size:13px;color:#4a90d9">
       ${actualCost === null
         ? `<span style="color:#ffd700">AsP: variabel — manuell abziehen! (${spellData.kosten})</span>`
