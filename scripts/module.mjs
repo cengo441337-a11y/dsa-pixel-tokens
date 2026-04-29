@@ -13,6 +13,7 @@ import { registerZoneSpellHooks } from "./zone-spells.mjs";
 import { migrateActorFolders, deduplicateActors, moveActorToCategoryFolder } from "./actor-folders.mjs";
 import { registerXMLImporter, showImportDialog } from "./xml-parser.mjs";
 import { openDatabaseBrowser } from "./db-browser.mjs";
+import { registerCalendar, openCalendar } from "./calendar.mjs";
 
 // ─── Datenbanken (werden in ready geladen) ──────────────────────────────────
 
@@ -169,6 +170,11 @@ Hooks.once("ready", async () => {
   registerPandaemoniumHooks();
   registerZoneSpellHooks();
   registerXMLImporter();
+  registerCalendar();
+
+  // Globale Helper für Console / Macros
+  globalThis.DSAPixelTokens = globalThis.DSAPixelTokens ?? {};
+  globalThis.DSAPixelTokens.openCalendar = openCalendar;
 
   // One-shot-Migration: Alte Spell-Items (system.value) auf gdsa-Schema (system.zfw) umstellen
   if (game.user.isGM) {

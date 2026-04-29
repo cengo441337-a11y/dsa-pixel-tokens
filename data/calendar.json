@@ -1,0 +1,197 @@
+{
+  "name": "Aventurischer Kalender (DSA 4.1)",
+  "_legende": "Das Aventurische Jahr hat 12 Monate à 30 Tage + 5 Namenlose Tage = 365 Tage. Jeder Monat ist einem der Zwölfgötter geweiht. Die Woche hat 7 Tage, jeder einem Gott. Aventurische Jahreszählung: BF (Bote-von-Hal-Vorzeichen), Hal-Jahr (z.B. 1043 BF). Standard-Kampagnenjahr ist meist 1027–1043 BF (Borbarad-Krise) oder 1015 BF (klassisch).",
+
+  "monate": [
+    {
+      "nr": 1,
+      "name": "Praios",
+      "gott": "Praios",
+      "domaene": "Sonne, Recht, Adel, Magie-Aufsicht",
+      "saison": "Hochsommer",
+      "tage": 30,
+      "anmerkung": "Heißester Monat, Sommersonnenwende. Praiosfest (PRA 1) — größtes Ordensfest der Praioskirche."
+    },
+    {
+      "nr": 2,
+      "name": "Rondra",
+      "gott": "Rondra",
+      "domaene": "Krieg, Ehre, Gewitter",
+      "saison": "Spätsommer",
+      "tage": 30,
+      "anmerkung": "Zeit der Turniere. Heißester Monat in den Tulamiden."
+    },
+    {
+      "nr": 3,
+      "name": "Efferd",
+      "gott": "Efferd",
+      "domaene": "Meer, Wetter, Reisende",
+      "saison": "Frühherbst",
+      "tage": 30,
+      "anmerkung": "Stürmischer Monat, Erntebeginn an Küsten."
+    },
+    {
+      "nr": 4,
+      "name": "Travia",
+      "gott": "Travia",
+      "domaene": "Heim, Familie, Gastfreundschaft",
+      "saison": "Herbst",
+      "tage": 30,
+      "anmerkung": "Erntedank, Familienzusammenkünfte."
+    },
+    {
+      "nr": 5,
+      "name": "Boron",
+      "gott": "Boron",
+      "domaene": "Tod, Schlaf, Vergessen",
+      "saison": "Spätherbst",
+      "tage": 30,
+      "anmerkung": "Trauermonat, kahle Bäume. Borontag (BOR 30) — Allerseelen-Äquivalent."
+    },
+    {
+      "nr": 6,
+      "name": "Hesinde",
+      "gott": "Hesinde",
+      "domaene": "Wissen, Magie, Schlangen",
+      "saison": "Frühwinter",
+      "tage": 30,
+      "anmerkung": "Akademie-Beginn, Studientage."
+    },
+    {
+      "nr": 7,
+      "name": "Firun",
+      "gott": "Firun",
+      "domaene": "Winter, Jagd, Eis",
+      "saison": "Hochwinter",
+      "tage": 30,
+      "anmerkung": "Kältester Monat. Wintersonnenwende. Firuntag (FIR 1) — Jagdfest im Norden."
+    },
+    {
+      "nr": 8,
+      "name": "Tsa",
+      "gott": "Tsa",
+      "domaene": "Leben, Geburt, Erneuerung",
+      "saison": "Spätwinter",
+      "tage": 30,
+      "anmerkung": "Beginn neuer Vorhaben, Aussäen."
+    },
+    {
+      "nr": 9,
+      "name": "Phex",
+      "gott": "Phex",
+      "domaene": "Handel, Diebe, Nacht, Schatten",
+      "saison": "Frühling",
+      "tage": 30,
+      "anmerkung": "Phexcaer-Festwoche, Handelsmessen."
+    },
+    {
+      "nr": 10,
+      "name": "Peraine",
+      "gott": "Peraine",
+      "domaene": "Ackerbau, Heilung, Geduld",
+      "saison": "Spätfrühling",
+      "tage": 30,
+      "anmerkung": "Aussaat, Heilkundige feiern."
+    },
+    {
+      "nr": 11,
+      "name": "Ingerimm",
+      "gott": "Ingerimm",
+      "domaene": "Feuer, Schmiedekunst, Berge",
+      "saison": "Frühsommer",
+      "tage": 30,
+      "anmerkung": "Zwergenfest, Schmiedetag."
+    },
+    {
+      "nr": 12,
+      "name": "Rahja",
+      "gott": "Rahja",
+      "domaene": "Liebe, Wein, Ekstase",
+      "saison": "Sommer",
+      "tage": 30,
+      "anmerkung": "Mittsommer-Vorlauf, Weinlese im Süden, Hochzeitsmonat."
+    }
+  ],
+
+  "namenlose_tage": {
+    "name": "Namenlose Tage",
+    "anzahl": 5,
+    "position": "nach Rahja, vor Praios",
+    "anmerkung": "Tage des Namenlosen Gottes (Erzfeind der Zwölfgötter). Tabu-Zeit: keine wichtigen Beschlüsse, keine Reisen, keine Hochzeiten. Magier vermeiden Beschwörungen (drohender Verfall). Geweihte sind geschwächt (KaP-Regeneration −50%)."
+  },
+
+  "wochentage": [
+    {
+      "nr": 1,
+      "name": "Windstag",
+      "gott": "Praios",
+      "domaene": "Sonne, Recht",
+      "anmerkung": "Praios-Tag (Sonntag-Äquivalent). Gerichtstag, Adelsversammlungen."
+    },
+    {
+      "nr": 2,
+      "name": "Erdstag",
+      "gott": "Rondra",
+      "domaene": "Krieg",
+      "anmerkung": "Rondra-Tag (Montag). Beginn der Arbeitswoche, Übungsplatz."
+    },
+    {
+      "nr": 3,
+      "name": "Markttag",
+      "gott": "Efferd",
+      "domaene": "Wasser, Reisen",
+      "anmerkung": "Efferd-Tag (Dienstag). Schiffsabfahrten."
+    },
+    {
+      "nr": 4,
+      "name": "Praiostag",
+      "gott": "Travia",
+      "domaene": "Familie",
+      "anmerkung": "Travia-Tag (Mittwoch). Familienessen am Abend."
+    },
+    {
+      "nr": 5,
+      "name": "Rohalstag",
+      "gott": "Hesinde",
+      "domaene": "Wissen, Magie",
+      "anmerkung": "Hesinde-Tag (Donnerstag). Magier-Studientag, benannt nach dem legendären Magier Rohal."
+    },
+    {
+      "nr": 6,
+      "name": "Feuertag",
+      "gott": "Ingerimm",
+      "domaene": "Feuer, Schmiede",
+      "anmerkung": "Ingerimm-Tag (Freitag). Schmiede-Werktag."
+    },
+    {
+      "nr": 7,
+      "name": "Wandeltag",
+      "gott": "Phex",
+      "domaene": "Handel, Glück",
+      "anmerkung": "Phex-Tag (Samstag). Markttag, Gottes­dienst der Phex-Kirche."
+    }
+  ],
+
+  "_alternative_wochentage": {
+    "anmerkung": "Region-spezifische Schreibweisen: 'Praiostag/Rondratag/Efferdtag/Traviatag/Borontag/Hesindetag/Phextag' (aus WdH S.41). Manche Regionen nutzen 'Sonnentag/Streitertag/Wandeltag/Heimtag/Schweigentag/Forschertag/Marktertag'. Das obige Schema ist die mittelreichische Standardform."
+  },
+
+  "jahreszaehlung": {
+    "aera": "BF (Bote-von-Hal-Vorzeichen)",
+    "vorzeichen_jahr": "Hal-Jahr 0 BF = der Sturm des Hal-Vogels über Gareth",
+    "kampagnen_zeitraum": "Standard-Kampagne: 1010-1043 BF (Borbarad-Krise: 1019-1027 BF)",
+    "alt_aera": "vH (vor Hal) für Zeit vor Hal-Sturm",
+    "rohals_zeit": "ca. 800-900 BF (Magierkrieg)"
+  },
+
+  "feiertage": [
+    {"datum": "PRA 1", "name": "Praiosfest", "anmerkung": "Sommersonnenwende, größtes Praios-Fest"},
+    {"datum": "PRA 30", "name": "Tag des Lichts", "anmerkung": "Adelsturniere"},
+    {"datum": "RON 1", "name": "Schwertleitenfest", "anmerkung": "Krieger-Initiationen"},
+    {"datum": "TRA 30", "name": "Erntedankfest", "anmerkung": "Travia-Erntedank, Familienzusammenkunft"},
+    {"datum": "BOR 30", "name": "Borontag", "anmerkung": "Allerseelen, Friedhof-Besuche"},
+    {"datum": "FIR 1", "name": "Wintersonnenwende", "anmerkung": "Kürzester Tag, Firun-Jagdfest"},
+    {"datum": "TSA 1", "name": "Tag der Erneuerung", "anmerkung": "Beginn neuer Vorhaben"},
+    {"datum": "RAH 30", "name": "Rahja-Sommerwende", "anmerkung": "Mittsommernacht (vor den Namenlosen Tagen)"}
+  ]
+}
