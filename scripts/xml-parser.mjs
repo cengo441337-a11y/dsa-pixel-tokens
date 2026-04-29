@@ -1196,7 +1196,13 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   const aspMaxFormel = istZauberer ? (attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10) + aspBonus
     : astralmacht   ? (attr.IN ?? 10) + (parseInt(astralmacht.value) || 0) * 10 + aspBonus
     : aspBonus > 0  ? aspBonus : 0;
-  const aspMax = (dv.AsP?._finalMax > 0) ? dv.AsP._finalMax : aspMaxFormel;
+  // AsP-Override: User hat im Sheet einen Custom-Wert gesetzt (z.B. Aranien-Magier
+  // mit nicht-standardisierter Akademie-Formel). Override hat höchste Priorität.
+  // Existiert nur beim Re-Import — bei Erst-Import (actor=null) gibt es keinen Flag.
+  const aspOverrideMax = actor?.getFlag?.("dsa-pixel-tokens", "aspOverride")?.max;
+  const aspMax = (aspOverrideMax > 0) ? aspOverrideMax
+                 : (dv.AsP?._finalMax > 0) ? dv.AsP._finalMax
+                 : aspMaxFormel;
   // AuP: GE + KO + KK/2 (rund) + Bonus
   const aupMaxFormel = (attr.GE ?? 10) + (attr.KO ?? 10) + Math.ceil((attr.KK ?? 10) / 2) + aupBonus;
   const aupMax = (dv.AuP?._finalMax > 0) ? dv.AuP._finalMax : aupMaxFormel;

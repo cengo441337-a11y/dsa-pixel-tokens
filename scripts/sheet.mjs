@@ -898,6 +898,104 @@ export class PixelArtCharacterSheet extends ActorSheet {
     }
   }
 
+  /** Eiserner Wille toggle: 2 Aktionen + 1 Erschöpfung, MU/2 SR Wirkungsdauer.
+   *  Aktiviert: +3 (Stufe I) bzw. +7 (Stufe II) MR vs Einfluss/Hellsicht/
+   *  Herrschaft/Verständigung. Während aktiv: Talent-/Zauberproben −3,
+   *  Eigenschafts-/Kampfproben −1 (Konzentrations-Penalty, WdZ S.31).
+   */
+  async _toggleEisernerWille(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const sfRaw = this.actor.system?.sf ?? {};
+    const sfList = Array.isArray(sfRaw)
+      ? sfRaw.map(s => typeof s === "string" ? s : s?.name ?? "")
+      : Object.values(sfRaw).map(v => typeof v === "string" ? v : v?.name ?? "");
+    const hasEW = sfList.some(s => s === "Eiserner Wille I" || s === "Eiserner Wille II");
+    if (!hasEW) {
+      ui.notifications.warn("Charakter hat keine SF Eiserner Wille I/II.");
+      return;
+    }
+    const aktuell = this.actor.getFlag("dsa-pixel-tokens", "eisernerWilleAktiv") === true;
+    if (aktuell) {
+      await this.actor.unsetFlag("dsa-pixel-tokens", "eisernerWilleAktiv");
+      ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        content: `<div class="dsa-pixel-chat"><div class="chat-title">⚔ Eiserner Wille DEAKTIVIERT</div>
+          <div class="result-line">Bonus-MR fällt weg. Konzentrations-Penalty entfällt.</div></div>`,
+      });
+    } else {
+      await this.actor.setFlag("dsa-pixel-tokens", "eisernerWilleAktiv", true);
+      // 1 AuP-Erschöpfung anwenden (WdZ S.31)
+      const aupCurrent = this.actor.system?.AuP?.value ?? 0;
+      await this.actor.update({ "system.AuP.value": Math.max(0, aupCurrent - 1) });
+      const stufe = sfList.includes("Eiserner Wille II") ? "II (+7 MR)" : "I (+3 MR)";
+      const muHalf = Math.floor((this.actor.system?.MU?.value ?? 10) / 2);
+      ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        content: `<div class="dsa-pixel-chat"><div class="chat-title">⚔ Eiserner Wille ${stufe} AKTIVIERT</div>
+          <div class="result-line result-success">Wirkungsdauer: ${muHalf} Spielrunden (MU/2)</div>
+          <div style="font-size:11px;color:#aaa;margin-top:3px">−1 AuP (Konzentration). Während aktiv: Talent-/Zauberproben −3, Eigenschafts-/Kampfproben −1.</div></div>`,
+      });
+    }
+    this.render();
+  }
+
+  /** AsP-Custom-Akademie-Override (z.B. Aranien-Magier mit anderer AsP-Formel).
+   *  Speichert AsP-Max permanent als Flag, der bei Re-Import erhalten bleibt.
+   */
+  async _setAspOverride(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const aktMax = this.actor.system?.AsP?.max ?? 0;
+    const aktVal = this.actor.system?.AsP?.value ?? 0;
+    const overrideFlag = this.actor.getFlag("dsa-pixel-tokens", "aspOverride");
+    new Dialog({
+      title: "AsP-Override (Custom-Akademie)",
+      content: `
+        <div style="padding:8px;color:#e0e0e0">
+          <p style="font-size:11px;color:#999">
+            Manche Akademien (z.B. Aranien-Magier) haben spezielle AsP-Formeln,
+            die unsere Standard-Berechnung ${["MU+IN+CH+mod", "(MU+IN+CH)/2+Akademie-Bonus", "andere Halbzauberer-Formel"].join(" oder ")} nicht abbildet.
+            <br>Setze hier den HS-Wert — bei zukünftigen Re-Imports wird er nicht überschrieben.
+          </p>
+          <label style="display:flex;align-items:center;gap:8px;margin:8px 0">
+            <span>AsP-Max:</span>
+            <input id="asp-override-max" type="number" min="0" value="${overrideFlag?.max ?? aktMax}" style="width:80px">
+            <span style="font-size:11px;color:#888">aktuell: ${aktMax}</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;margin:8px 0">
+            <span>AsP-Current:</span>
+            <input id="asp-override-val" type="number" min="0" value="${aktVal}" style="width:80px">
+          </label>
+          <p style="font-size:10px;color:#666;margin-top:6px">
+            Override leeren = Standard-Formel wiederherstellen.
+          </p>
+        </div>`,
+      buttons: {
+        save: {
+          label: "Speichern",
+          callback: async (html) => {
+            const newMax = parseInt(html.find("#asp-override-max").val()) || 0;
+            const newVal = parseInt(html.find("#asp-override-val").val()) || 0;
+            await this.actor.setFlag("dsa-pixel-tokens", "aspOverride", { max: newMax });
+            await this.actor.update({ "system.AsP.max": newMax, "system.AsP.value": Math.min(newVal, newMax) });
+            ui.notifications.info(`AsP-Override gesetzt: ${newVal}/${newMax}`);
+            this.render();
+          }
+        },
+        clear: {
+          label: "Override entfernen",
+          callback: async () => {
+            await this.actor.unsetFlag("dsa-pixel-tokens", "aspOverride");
+            ui.notifications.info("AsP-Override entfernt — Standard-Formel beim nächsten Re-Import.");
+            this.render();
+          }
+        },
+        cancel: { label: "Abbruch" }
+      }
+    }).render(true);
+  }
+
   /** Aktuelle Wund-Penalty berechnen (Summe aller Wunden, −1 pro Wunde) */
   _getWoundPenalty() {
     const wounds = this.actor.getFlag("dsa-pixel-tokens", "wounds") ?? {};
@@ -937,6 +1035,8 @@ export class PixelArtCharacterSheet extends ActorSheet {
       case "disadvantage":  return this._rollDisadvantage(el.dataset);
       case "initiative":    return this._rollInitiative(el.dataset);
       case "ritual":        return this._rollRitual(el.dataset);
+      case "ew-toggle":     return this._toggleEisernerWille(event);
+      case "asp-override":  return this._setAspOverride(event);
     }
   }
 

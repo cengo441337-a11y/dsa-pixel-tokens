@@ -20,8 +20,8 @@
         <div class="stat-value">{{system.INIBasis.value}}{{#if iniPenalty}}<span style="color:#e94560;font-size:0.7em">-{{iniPenalty}}</span>{{/if}}</div>
       </div>
       <div class="derived-stat" title="{{mrTooltip}}">
-        <div class="stat-label">MR{{#if mrBonusList.length}}<span style="color:#9be;font-size:0.6em;margin-left:2px">★</span>{{/if}}</div>
-        <div class="stat-value">{{system.MR.value}}</div>
+        <div class="stat-label">MR{{#if mrBonusList.length}}<span style="color:#9be;font-size:0.6em;margin-left:2px">★</span>{{/if}}{{#if eisernerWilleAktiv}}<span style="color:#ff8c00;font-size:0.6em;margin-left:2px" title="Eiserner Wille aktiviert">⚔</span>{{/if}}</div>
+        <div class="stat-value rollable" data-roll="ew-toggle" style="cursor:pointer" title="Klicken: Eiserner Wille aktivieren/deaktivieren (2 Aktionen + 1 Erschöpfung, MU/2 SR Wirkungsdauer)">{{system.MR.value}}</div>
       </div>
       <div class="derived-stat">
         <div class="stat-label">GS</div>
@@ -68,7 +68,7 @@
     </div>
     {{#if system.AsP.max}}
     <div class="resource-bar asp">
-      <div class="bar-label">AsP</div>
+      <div class="bar-label rollable" data-roll="asp-override" style="cursor:pointer" title="Klicken: AsP-Max-Override (für spezielle Akademien)">AsP</div>
       <div class="bar-track">
         <div class="bar-fill" style="width: {{percent system.AsP.value system.AsP.max}}%"></div>
         <div class="bar-text clickable-bar" data-res="asp" data-path="system.AsP.value" data-max="{{system.AsP.max}}" title="Klick: bearbeiten">
