@@ -85,6 +85,76 @@ export async function setActorKaP(actor, current, max = null, permanent = null) 
     if (max !== null) await actor.setFlag(MODULE_ID, "kapMax", max);
     if (permanent !== null) await actor.setFlag(MODULE_ID, "kapPermanent", permanent);
   }
+  return { current, max, permanent };
+}
+
+/**
+ * Karma-Regeneration (Wege der Götter S.40+).
+ * Modi:
+ *   "meditation":   1 Stunde stilles Gebet → +1 KaP
+ *   "morgengebet":  morgendliche Gebete → +eigeneRegenerationsRate (basis 1)
+ *   "tempel":       Tempel des eigenen Kults → +1 KaP (Bonus zu Meditation)
+ *   "feiertag":     Feiertag des eigenen Kults → +1 KaP zusätzlich (1× pro Tag)
+ *   "voll":         volle Tageszyklus → KaP auf max
+ *
+ * @param {Actor} actor
+ * @param {string} modus
+ * @param {object} opts - { tempel: bool, feiertag: bool, talentReg: number (Talentwert Religion) }
+ * @returns {Promise<object>} { gained, current, max, modus }
+ */
+export async function regenerateKaP(actor, modus = "meditation", opts = {}) {
+  const kap = getActorKaP(actor);
+  if (kap.max <= 0) {
+    ui.notifications.warn(`${actor.name} hat keinen KaP-Pool — keine Regeneration möglich.`);
+    return null;
+  }
+  let gain = 0;
+  let label = "";
+  switch (modus) {
+    case "meditation": {
+      // 1 KaP pro Stunde Meditation, +1 in Tempel, +1 an Feiertag
+      gain = 1;
+      label = "Meditation (1 Stunde)";
+      if (opts.tempel)   { gain += 1; label += " im Tempel +1"; }
+      if (opts.feiertag) { gain += 1; label += " an Feiertag +1"; }
+      break;
+    }
+    case "morgengebet": {
+      // Morgengebet: regeneration nach Talent Religionskenntnis
+      const tw = Number(actor.system?.talente?.["Religion"]?.value ?? 5);
+      gain = Math.max(1, Math.floor(tw / 4)); // 1 KaP pro 4 TaW Religion (faustregel)
+      label = `Morgengebet (Religion ${tw} → +${gain})`;
+      if (opts.tempel)   { gain += 1; label += " im Tempel +1"; }
+      if (opts.feiertag) { gain += 2; label += " an Feiertag +2"; }
+      break;
+    }
+    case "tempel": {
+      gain = 2;
+      label = "Tempelaufenthalt (2 Stunden)";
+      break;
+    }
+    case "voll": {
+      gain = kap.max - kap.current;
+      label = "Volle Regeneration (Heimreise / Initiationsritus)";
+      break;
+    }
+    default: {
+      gain = 1;
+      label = modus;
+    }
+  }
+  const newKaP = Math.min(kap.max, kap.current + gain);
+  const actuallyGained = newKaP - kap.current;
+  await setActorKaP(actor, newKaP);
+
+  ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    content: `<div class="dsa-pixel-chat">
+      <div class="chat-title">🙏 Karma-Regeneration — ${label}</div>
+      <div class="chat-row">+${actuallyGained} KaP (${kap.current} → ${newKaP} / ${kap.max})</div>
+    </div>`,
+  });
+  return { gained: actuallyGained, current: newKaP, max: kap.max, modus };
 }
 
 /** Liturgiekenntnis-Wert (LkW) für einen bestimmten Kult. */

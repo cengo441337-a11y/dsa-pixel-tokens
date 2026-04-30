@@ -219,10 +219,16 @@ function _parseAttributes(held, result) {
         result.derivedValues[key] = { value, mod, permanent };
       }
     } else {
-      // Eigenschaften: NUR Basis-Eintrag akzeptieren. Final-Snapshots ignorieren
-      // (sonst landen aufgepushte temp-Boni wie KK 16→22 als value).
+      // Eigenschaften (Helden-Software-Semantik):
+      //   startwert = AP-gekaufter Wert
+      //   mod       = Rasse-/Kultur-/Vorteils-Modifikator
+      //   value     = FINALER Wert nach allen Mods (already startwert+mod+race+...)
+      //
+      // Vorher addierten wir `value+mod` was bei Grog (KK mod=3, value=20) zu KK=23
+      // führte — komplett falsch. Korrekt: nur `value` nehmen, da HS das bereits
+      // ausrechnet.
       if (isFinalSnapshot) continue;
-      result.attributes[mapped] = value + mod;
+      result.attributes[mapped] = value;
     }
   }
 }
@@ -660,7 +666,17 @@ function _parseEquipmentFull(held, result) {
     // Items mit unterschiedlichen anzahlen hat (z.B. "Dolch" anzahl=1 + "Dolch"
     // anzahl=3), bleiben sie separat erhalten.
     const anzahl = el.getAttribute("anzahl") ?? "1";
-    const dedupKey = `${name.toLowerCase().trim()}|${anzahl}`;
+    // Dedup-Key inkludiert slot UND custom-display-name aus modallgemein —
+    // sonst werden Set-Varianten ("Reise-Outfit" / "Stadt-Outfit") als
+    // Duplikate verworfen (BUG #4 aus Importer-Audit).
+    const slotPart = el.getAttribute("slot") ?? "";
+    let customNamePart = "";
+    const _modAllgemein = el.querySelector("modallgemein");
+    if (_modAllgemein) {
+      const cn = _modAllgemein.querySelector("name")?.getAttribute("value");
+      if (cn) customNamePart = cn.toLowerCase();
+    }
+    const dedupKey = `${name.toLowerCase().trim()}|${anzahl}|${slotPart}|${customNamePart}`;
     if (seenGegenstands.has(dedupKey)) continue;
     seenGegenstands.add(dedupKey);
 
@@ -1172,15 +1188,20 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   // Helden-Software XML:
   //   mod       = gekaufter Bonus (erhöht Max)
   //   permanent = permanent verbrauchte Punkte, z.B. Ritualobjekte (negativ → reduziert Max)
-  //   value     = aktuell verbleibender Wert (0 = komplett aufgebraucht, nicht "kein Bonus")
-  // HS-XML schreibt: mod="11" value="0" für Lebensenergie etc.
-  //   mod      = AP-gekaufte Boni (erhöht Max)
-  //   value    = aktueller Wert (oft 0 = "auf Max" für Re-Import)
-  //   permanent = permanent verlorene Punkte (negativ)
-  // Endwert = Basis-Formel + mod + value(als Override falls > Formel) + permanent
-  const lepBonus = (dv.LeP?.mod ?? 0) + (dv.LeP?.value ?? 0);
-  const aspBonus = (dv.AsP?.mod ?? 0) + (dv.AsP?.value ?? 0) + (dv.AsP?.permanent ?? 0);
-  const aupBonus = (dv.AuP?.mod ?? 0) + (dv.AuP?.value ?? 0);
+  //   value     = aktuell verbleibender Wert (Mid-Combat-Snapshot oder 0)
+  // HS-XML-Semantik:
+  //   mod       = AP-gekaufte Boni + Vorteilsboni (erhöht Max)
+  //   value     = aktueller Pool-Wert (NICHT Max!) — wird beim Import auf Max
+  //               gesetzt (sonst startet Held mit dem HS-Combat-Schaden ins Spiel).
+  //   permanent = permanent verlorene Punkte (negativ → reduziert Max)
+  //
+  // VORHER: bonus = mod + value → bei value=12 wurde der current-Wert als
+  // zusätzlicher Bonus zur Max-Berechnung addiert. → DOPPELT (Grog LeP-Max = 64
+  // statt 48). Korrektur: nur `mod` als Max-Bonus nutzen, `value` ignorieren
+  // (Held wird beim Import auf voll geheilt).
+  const lepBonus = (dv.LeP?.mod ?? 0) + (dv.LeP?.permanent ?? 0);
+  const aspBonus = (dv.AsP?.mod ?? 0) + (dv.AsP?.permanent ?? 0);
+  const aupBonus = (dv.AuP?.mod ?? 0) + (dv.AuP?.permanent ?? 0);
   // LeP-Formel (DSA 4.1 WdH S.46): (KO + KO + KK) / 2 (gerundet)
   // Vorher hatten wir KO*2 + KK/2 — das gab off-by-X.
   const lepMaxFormel = Math.round(((attr.KO ?? 10) + (attr.KO ?? 10) + (attr.KK ?? 10)) / 2) + lepBonus;
@@ -1196,20 +1217,34 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   //   Achtung: Vorher hatte der Code "istElf → IN+MR+CH" — das war falsch
   //   (Elfen sind Vollzauberer mit MU+IN+CH, MR statt MU war ein Tippfehler).
   const astralmacht   = heroData.advantages.find(a => a.name === "Astralmacht");
+  // istZauberer: nur wenn AsP-Vorteil aktiv. Akademische Ausbildung (Tempel)
+  // ≠ Magier-Akademie — Tempel-Akademien sind für Geweihte, ohne AsP.
   const istZauberer = heroData.advantages.some(a =>
        a.name === "Vollzauberer"
     || a.name === "Halbzauberer"
     || a.name === "Viertelzauberer"
-    || a.name?.includes("Akademische Ausbildung")
     || a.name === "Magiedilettant"
-  ) || heroData.specialAbilities.some(s => s.name?.includes("Akademische Ausbildung"))
-    || /^(elf|halbelf|hexe|druide|geode|schamane|schelm)/i.test(heroData.race ?? "")
+    || /Akademische Ausbildung\s*\(M(agie|gier)/i.test(a.name ?? "")
+  ) || heroData.specialAbilities.some(s =>
+       /Akademische Ausbildung\s*\(M(agie|gier)/i.test(s.name ?? "")
+  ) || /^(elf|halbelf|hexe|druide|geode|schamane|schelm)/i.test(heroData.race ?? "")
     || (heroData.profession ?? "").match(/Magier|Hexe|Druide|Geode|Schelm|Schamane|Elf/i);
+  // istKarmaler: für Geweihte (Tempel-Akademie / Geweiht-Vorteil)
+  const istKarmaler = heroData.advantages.some(a =>
+       a.name === "Geweiht"
+    || /Akademische Ausbildung\s*\(Tempel/i.test(a.name ?? "")
+  ) || heroData.specialAbilities.some(s =>
+       /Akademische Ausbildung\s*\(Tempel/i.test(s.name ?? "")
+       || /Geweihter/i.test(s.name ?? "")
+  ) || (heroData.profession ?? "").match(/Geweiht|Priester|Boron-|Praios-|Rondra-/i);
   // AsP-Formel (WdH S.46): (MU + IN + CH) / 2 (echt gerundet) + Modifikatoren.
-  // Vorher fehlte das /2 — gab doppelte Werte. Astralmacht-Vorteil: +10 AsP/Punkt.
-  const aspMaxFormel = istZauberer ? Math.round(((attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10)) / 2) + aspBonus
-    : astralmacht   ? Math.round((attr.IN ?? 10) / 2) + (parseInt(astralmacht.value) || 0) * 10 + aspBonus
-    : aspBonus > 0  ? aspBonus : 0;
+  // Astralmacht-Vorteil: +10 AsP/Punkt — wird IMMER addiert, nicht als Alternative
+  // (vorher: nur wenn !istZauberer, was Magier mit Astralmacht 40 AsP fehlten).
+  const astralmachtBonus = (parseInt(astralmacht?.value) || 0) * 10;
+  const aspMaxFormel = istZauberer
+    ? Math.round(((attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10)) / 2) + aspBonus + astralmachtBonus
+    : astralmachtBonus > 0 ? Math.round((attr.IN ?? 10) / 2) + astralmachtBonus + aspBonus
+    : aspBonus > 0 ? aspBonus : 0;
   // AsP-Override: User hat im Sheet einen Custom-Wert gesetzt (z.B. Aranien-Magier
   // mit nicht-standardisierter Akademie-Formel). Override hat höchste Priorität.
   // Existiert nur beim Re-Import — bei Erst-Import (actor=null) gibt es keinen Flag.
@@ -1232,6 +1267,25 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   sys.LeP = { value: lepCurrent, max: lepMax };
   sys.AsP = { value: aspCurrent, max: aspMax };
   sys.AuP = { value: aupCurrent, max: aupMax };
+
+  // ── KaP-Pool für Geweihte/Schamanen (WdH S.46): 24 KaP (alveranische Götter)
+  // bzw. 12 KaP (Halbgötter, Hochschamanen). HS-XML: <eigenschaft name="Karmaenergie"
+  // mod="X" value="Y"/> — mod ist Zukauf, value current/Basis.
+  // Vorher fehlte das komplett — Tarvas/Grog hatten KaP=0 im Sheet trotz HS-Pool.
+  const kapBonus = (dv.KaP?.mod ?? 0) + (dv.KaP?.permanent ?? 0);
+  const kapValue = dv.KaP?.value ?? 0;
+  let kapMax = 0;
+  if (istKarmaler) {
+    // Default 24 (alveranisch) — kann durch Halbgötter-Profession reduziert werden
+    // HS-Wert in dv.KaP.value spiegelt die finale Anzahl wider.
+    kapMax = kapValue > 0 ? kapValue + kapBonus : 24 + kapBonus;
+  } else if (kapValue > 0 || kapBonus > 0) {
+    // Hochschamanen / Akhi / andere Karmaler ohne Standard-Geweiht-Vorteil
+    kapMax = kapValue + kapBonus;
+  }
+  if (kapMax > 0) {
+    sys.KaP = { value: kapMax, max: kapMax, permanent: 0 };
+  }
   // ── Derived values mit vollstaendigem gdsa-Schema ──────────────────────
   // gdsa template.json:
   //   MR:       { value, modi, tempmodi, buy }
@@ -1364,17 +1418,21 @@ export async function createActorFromImport(heroData, updateExisting = false) {
 
   // ── 6b. Repräsentationen → system.Reps (Boolean-Flags für gdsa) ──────────
   const REP_MAP = {
-    gildenmagisch: "mag", mag: "mag",
+    gildenmagisch: "mag", mag: "mag", magier: "mag",
     elfisch: "elf", elf: "elf",
     hexisch: "hex", hex: "hex",
-    druidisch: "dru", dru: "dru",
+    druidisch: "dru", dru: "dru", druiden: "dru",
     schelmisch: "sch", sch: "sch",
     borbaradianisch: "bor", bor: "bor",
     geoden: "geo", geo: "geo",
     kristallomant: "kri", kri: "kri",
     scharlatanisch: "sha",
+    // Schamanistische Reps fehlten — Grog hatte alle Sprüche unter "Schamanistisch"
+    schamanistisch: "sha", schamanisch: "sha", schamane: "sha",
+    // Liturgien — werden als Spell-Items mit Liturgie-Flag gespeichert (für Tarvas)
+    liturgie: "lit", boron: "lit", praios: "lit", rondra: "lit",
   };
-  const repsFlags = { mag: false, elf: false, hex: false, dru: false, sch: false, bor: false, geo: false, kri: false };
+  const repsFlags = { mag: false, elf: false, hex: false, dru: false, sch: false, bor: false, geo: false, kri: false, sha: false, lit: false };
   // Aus Zaubern ableiten
   for (const spell of heroData.spells) {
     const key = REP_MAP[spell.repraesentation?.toLowerCase()];

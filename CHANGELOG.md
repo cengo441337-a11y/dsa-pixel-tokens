@@ -6,6 +6,63 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.7.1] — 2026-04-30 (Importer-Audit Fixes #1-#5 + #22)
+
+Background-Agent-Audit fand 25 Importer-Bugs. Top-5 davon waren game-breaking
+(Eigenschaften double-Bonus, KaP-Pool fehlte, etc.). Alle gefixt:
+
+### 🚨 KRITISCHE Importer-Fixes
+
+**BUG #1+#2: Eigenschaften + LeP/AsP/AuP doppelt verrechnet**
+- Vorher: `attributes[k] = value + mod` → Grog KK=23 (statt 20), KO=20 (statt 18)
+- Vorher: `lepBonus = mod + value` → Grog LeP=64 (statt 48)
+- Korrigiert: HS-`value` ist bereits FINAL bei Eigenschaften, `mod` ist Max-
+  Bonus bei LeP/AsP/AuP (nicht zusätzlich Current-Wert addieren).
+- Verifiziert via Live-Test: Grog jetzt MU 17, KK 20, KO 18 ✓; LeP 48 ✓
+
+**BUG #3: KaP-Pool für Geweihte/Schamanen fehlte komplett**
+- Tarvas (Boron) hatte KaP=0 statt 58. Grog (Hochschamane) hatte KaP=0 statt 12.
+- Neue `istKarmaler`-Detection: Geweiht-Vorteil + Akademische Ausbildung
+  (Tempel) + Profession-Match (Geweiht/Priester/Boron-/Praios-/Rondra-).
+- KaP-Berechnung: alveranisch 24 + mod, Halbgötter/Hochschamanen 12 + mod.
+- istZauberer schließt jetzt Tempel-Akademien aus (Magier/Magie matched).
+
+**BUG #4: Set-Varianten verloren beim Dedup**
+- Aytan hatte 2× "Dicke Kleidung" (slot=0 Ritualkleidung, slot=1 Reise) →
+  zweite verschwand. Auch 2× Amulett (Sonnenscheibe vs Schutz).
+- Dedup-Key erweitert: `name|anzahl|slot|customDisplayName`. Verschiedene
+  Custom-Display-Names oder Slots → bleiben getrennt.
+
+**BUG #6: Astralmacht-Vorteil fehlte bei Vollzauberern**
+- Vorher: Astralmacht-Bonus nur als Alternative zur Vollzauberer-Formel
+  (either/or). Aytan (Magier + Astralmacht 4) bekam keine zusätzlichen 40 AsP.
+- Korrigiert: `astralmachtBonus` IMMER on top, sowohl für Vollzauberer als
+  auch ohne. Aytan jetzt AsP-max 79 statt 39.
+
+**BUG #22: Schamanistisch/Liturgie-REP-Map fehlte**
+- Grog-Sprüche mit `repraesentation="Schamanistisch"` wurden im REP-Flag
+  ignoriert → Schamanen-Sparte im Sheet leer trotz aller Geister-Sprüche.
+- REP_MAP erweitert: schamanistisch/schamanisch/schamane → "sha";
+  liturgie/boron/praios/rondra → "lit".
+
+### Live-Test-Verifikation (alle 3 Test-XMLs)
+
+| Char | Eigenschaften | LeP | AsP | AuP | KaP | Items |
+|------|---------------|-----|-----|-----|-----|-------|
+| Aytan (Magier) | MU 15, KL 17, IN 15, CH 15, KO 13, KK 12 | 30 | 79 | 32 | 0 | 69 |
+| Grog (Schamane) | MU 17, KK 20, KO 18, GE 10 | 48 | 40 | 23 | **12** | 39 |
+| Tarvas (Geweiht) | MU 16, KL 14, IN 17, CH 17 | 19 | 25 | 21 | **58** | 35 |
+
+Vor v0.7.1: KaP überall 0, AsP/LeP off-by-double, Set-Items verloren.
+
+### Verbliebene Audit-Findings (für v0.8.x)
+
+20 weitere Bugs aus dem Importer-Audit dokumentiert (Auswahl-Werte,
+Talent-Probe als Array, BOM-Handling, Spezialisierungs-Children etc.).
+Alle mit niedriger bis mittlerer Severity, nicht-blockierend.
+
+---
+
 ## [0.7.0] — 2026-04-30 (15 TODOs + Importer-Critical-Fixes)
 
 Alle 15 verbleibenden TODOs aus dem v0.6.0 Audit-Report abgearbeitet, plus
