@@ -1749,6 +1749,56 @@ const VFX_MAP = {
   // Misc
   motoricus:    (x, y, o) => vfxIce(x, y, { ...o, color: 0xffeedd, shards: 10 }),
   verwandlung:  (x, y, o) => vfxFire(x, y, { ...o, color1: 0xaa44ff, color2: 0xff44aa, shake: false }),
+  // ─── Liturgien (Zwölfgötter) ────────────────────────────────────────────────
+  // Generischer Gold-Glanz (jede Segnung)
+  holy_light:   (x, y, o) => vfxHeal(x, y, { ...o, color: 0xffd770, count: 14 }),
+  // Goldene Rüstung — Aureole gleißenden Lichts (Praios)
+  holy_aura:    (x, y, o) => vfxShield(x, y, { ...o, color: 0xffd770, radius: 56, duration: 1800 }),
+  // Heilungssegen + Wundsegen
+  holy_heal:    (x, y, o) => vfxHeal(x, y, { ...o, color: 0xffeeaa, count: 18 }),
+  // Blendstrahl aus Alveran — explosiver Gold-Burst
+  holy_burst:   (x, y, o) => vfxImpact(x, y, { ...o, color: 0xffd770 }),
+  // Zerschmetternder Bannstrahl / Mikailspfeil — Strahl von oben
+  holy_strike:  (x, y, o) => vfxLightning(x, y, { ...o, color: 0xffd770, glowColor: 0xfff5c8 }),
+  // Heiliger Befehl — gold ring expanding (Befehl + Stille)
+  divine_command: (x, y, o) => vfxShield(x, y, { ...o, color: 0xffd770, radius: 70, duration: 900 }),
+  // Praios' Magiebann + Exorzismus — Antimagie-Burst (weißlich)
+  dispel:       (x, y, o) => vfxImpact(x, y, { ...o, color: 0xfff5c8 }),
+  // Praios' Mahnung / Eidsegen-Bruch — dunkler Fluch
+  curse_dark:   (x, y, o) => vfxShadow(x, y, { ...o, color: 0x664400, duration: 1400 }),
+  // Konsekration / Heimsteinsegen — gold seal slow
+  holy_seal:    (x, y, o) => vfxShield(x, y, { ...o, color: 0xffd770, radius: 80, duration: 2400 }),
+  // Boron-Liturgien — silbergrau
+  boron_seal:   (x, y, o) => vfxShield(x, y, { ...o, color: 0xaaaacc, radius: 60, duration: 1600 }),
+  // Rondra-Liturgien — rot-silber
+  rondra_strike:(x, y, o) => vfxImpact(x, y, { ...o, color: 0xff4444 }),
+  rondra_aura:  (x, y, o) => vfxShield(x, y, { ...o, color: 0xff6644, radius: 56, duration: 1500 }),
+  // Hesinde — grün-blau Wissens-Aura
+  hesinde_glow: (x, y, o) => vfxHeal(x, y, { ...o, color: 0x88ccff, count: 12 }),
+  // Travia — warmes Heim-Orange
+  travia_warm:  (x, y, o) => vfxHeal(x, y, { ...o, color: 0xffaa44, count: 12 }),
+  // Phex — schattig-dunkelgrün
+  phex_dark:    (x, y, o) => vfxShadow(x, y, { ...o, color: 0x224422, duration: 1100 }),
+  // Peraine — heilendes Hellgrün
+  peraine_heal: (x, y, o) => vfxHeal(x, y, { ...o, color: 0xaaff88, count: 16 }),
+  // Tsa — Regenbogen-Erneuerung
+  tsa_rainbow:  (x, y, o) => vfxHeal(x, y, { ...o, color: 0xffaaff, count: 20 }),
+  // Firun — Eis/Frost
+  firun_ice:    (x, y, o) => vfxIce(x, y, { ...o, color: 0xaaddff, shards: 10 }),
+  // Ingerimm — Schmiedeglut
+  ingerimm_forge: (x, y, o) => vfxFire(x, y, { ...o, color1: 0xff6600, color2: 0xffaa00, particles: 14, radius: 38 }),
+  // Rahja — rosa Liebes-Aura
+  rahja_love:   (x, y, o) => vfxHeal(x, y, { ...o, color: 0xff88cc, count: 14 }),
+  // Efferd — Wasser
+  efferd_wave:  (x, y, o) => vfxWater(x, y, { ...o, color: 0x4488ff }),
+  // Kor — Blut-Schwarz Schlachtruf
+  kor_battle:   (x, y, o) => vfxImpact(x, y, { ...o, color: 0x882222 }),
+  // Aves — wandernde Pollen
+  aves_travel:  (x, y, o) => vfxHeal(x, y, { ...o, color: 0xddccaa, count: 12 }),
+  // Swafnir — Walschwingen-Welle
+  swafnir_wave: (x, y, o) => vfxWater(x, y, { ...o, color: 0x2266aa }),
+  // Schamanen-Geistwirken (Tairach/Kamaluq)
+  shaman_smoke: (x, y, o) => vfxShadow(x, y, { ...o, color: 0x665544, duration: 1300 }),
 };
 
 /** Maps projectile effect names to travel-VFX functions. */
@@ -1788,6 +1838,15 @@ const VFX_PROJECTILE_MAP = {
   invocatio:    (fx, fy, tx, ty, o) => vfxProjectileMagicRay(fx, fy, tx, ty, { color: 0xffaa44, glow: 0xffdd88 }),
   motoricus:    (fx, fy, tx, ty, o) => vfxProjectileMagicRay(fx, fy, tx, ty, { color: 0xffeedd, glow: 0xffffff }),
   respondami:   (fx, fy, tx, ty, o) => vfxProjectileMagicRay(fx, fy, tx, ty, { color: 0xddddff, glow: 0xffffff }),
+  // ─── Liturgie-Projektile ─────────────────────────────────────────────────
+  // Mikailspfeil (Rondra) — silberner Strahl
+  mikailspfeil: (fx, fy, tx, ty, o) => vfxProjectileMagicRay(fx, fy, tx, ty, { color: 0xeeeeff, glow: 0xffffff, width: 7 }),
+  // Bannstrahl (Praios) — Goldstrahl von oben (eigentlich top-down, aber als Projektil ok)
+  bannstrahl:   (fx, fy, tx, ty, o) => vfxProjectileMagicRay(fx, fy, tx, ty, { color: 0xffd770, glow: 0xfff5c8, width: 9 }),
+  // Phexens Augenzwinkern — schattig dunkel
+  phex_dart:    (fx, fy, tx, ty, o) => vfxProjectileMagicRay(fx, fy, tx, ty, { color: 0x224422, glow: 0x66aa66, width: 4 }),
+  // Firuns Pfeil — Eis-Pfeil
+  firuns_pfeil: (fx, fy, tx, ty, o) => vfxProjectileIceShard(fx, fy, tx, ty, { ...o, speed: 22 }),
 };
 
 // ── Public API ───────────────────────────────────────────────────────────────

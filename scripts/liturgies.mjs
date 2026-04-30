@@ -335,6 +335,17 @@ export async function rollMirakel(actor, modKey = "mirakelPlus") {
   const aspNeu = erfolg ? Math.max(0, kap.current - cost) : Math.max(0, kap.current - 1);
   await setActorKaP(actor, aspNeu);
 
+  // VFX bei erfolgreichem Mirakel: Gold-Glow auf Caster
+  if (erfolg) {
+    try {
+      const { broadcastVFX } = await import("./config.mjs");
+      const tok = canvas.tokens?.placeables?.find(t => t.actor?.id === actor.id);
+      if (tok) {
+        broadcastVFX({ kind: "effect", x: tok.center.x, y: tok.center.y, effect: "holy_aura" });
+      }
+    } catch (e) { /* ignore */ }
+  }
+
   const diceHtml = dice.map((d, i) => {
     const attr = attrs[i] ?? 0;
     const over = d > attr;
@@ -638,6 +649,17 @@ export async function castLiturgie(actor, liturgieId) {
             else if (erfolg) resultHeader = `Erfolg — LkP* ${lkpStar}`;
             else resultHeader = "Fehlschlag";
 
+            // Effekt-Anwendung (VFX + Mechanik) bei Erfolg
+            let effectInfo = null;
+            if (erfolg) {
+              try {
+                const { applyLiturgyEffects } = await import("./liturgy-effects.mjs");
+                effectInfo = await applyLiturgyEffects(actor, lit, lkpStar);
+              } catch (e) {
+                console.warn(`[${MODULE_ID}] Liturgy-Effects fehlgeschlagen:`, e);
+              }
+            }
+
             const html2 = `<div class="dsa-pixel-chat">
               <div class="chat-title">${isPrimaer ? "★ " : ""}🙏 ${lit.name} (${effGrad})</div>
               <div class="chat-row" style="font-size:11px;color:#aaa">${kult} · ${lit.ziel} · ${lit.reichweite}</div>
@@ -651,6 +673,7 @@ export async function castLiturgie(actor, liturgieId) {
                    Wirkungsstärke: ${wirkungsstaerkeMap[lit.grad] ?? lit.grad}<br>
                    Wirkungsdauer: ${lit.wirkungsdauer}</div>
                    <div class="chat-row" style="font-size:11px">${lit.effekt}</div>
+                   ${effectInfo?.mech ? `<div class="chat-row" style="font-size:11px;color:#ffd770">⚡ ${effectInfo.mech}</div>` : ""}
                    <div class="chat-row">KaP: ${kapCost} (${kap.current} → ${aspNeu})${pkapCost ? ` · pKaP: -${pkapCost}` : ""}</div>`
                 : `<div class="result-line result-fail">${resultHeader} — ${Math.max(1, Math.floor(kapCost/5))} KaP verloren (${kap.current} → ${aspNeu})</div>`
               }
@@ -663,7 +686,7 @@ export async function castLiturgie(actor, liturgieId) {
               type: CONST.CHAT_MESSAGE_TYPES.ROLL,
             });
 
-            resolve({ erfolg, lkpStar, kapCost, pkapCost });
+            resolve({ erfolg, lkpStar, kapCost, pkapCost, effectInfo });
           }
         },
         cancel: { label: "Abbrechen", callback: () => resolve(null) }
