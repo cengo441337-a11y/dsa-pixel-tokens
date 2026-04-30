@@ -3,7 +3,7 @@
  * Zauberprobe mit Spontanmodifikationen, AsP-Berechnung, Zone-Markierung
  */
 
-import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, BESCHWOERUNG_MISSLINGEN, BEHERRSCHUNG_MISSLINGEN, rollBeschwoerungMisslingen } from "./config.mjs";
+import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, BESCHWOERUNG_MISSLINGEN, BEHERRSCHUNG_MISSLINGEN, rollBeschwoerungMisslingen, relayActorUpdate, relayTokenUpdate, broadcastVFX } from "./config.mjs";
 import { castPandaemonium } from "./pandaemonium.mjs";
 import { castFesselranken, castAugeDesLimbus, castSumpfstrudel } from "./zone-spells.mjs";
 import { tryGardianumAbsorb, castGardianum, showGardianumDialog } from "./gardianum.mjs";
@@ -72,18 +72,25 @@ export async function showSpellDialog(actor, spellData) {
 
   // Borbaradianer mit gildenmagischer Repräsentation: ZfP-Zuschläge halbiert (WdZ S.260)
   const borMitGildenmagisch = rep === "borbaradianisch" && !!reps.mag;
-  // Schelm-MR-Schwelle (WdZ S.327): Standard 3, "Unbeschwertes Zaubern" 7,
-  // "Lockeres Zaubern" 12. Schwelle wird beim MR-Wurf abgezogen — was bleibt,
-  // wird als Probe-Erschwernis appliziert.
+  // Schelm-MR-Schwelle (WdH S.76, WdZ S.327):
+  //   OHNE Vorteil/SF: 0 (volle MR muss überwunden werden — wie alle anderen)
+  //   Vorteil "Unbeschwertes Zaubern" (WdH S.76): 7
+  //   SF "Lockeres Zaubern" (WdZ S.327, Voraus.: Unbeschwertes Zaubern): 12
+  // Schwelle wird beim MR-Wurf abgezogen — was bleibt, wird als
+  // Probe-Erschwernis appliziert.
   let schelmMrIgnore = 0;
   if (rep === "schelmisch") {
     const _sfRaw = sys?.sonderfertigkeiten ?? sys?.sf ?? [];
-    const _hasSF = (n) => Array.isArray(_sfRaw)
-      ? _sfRaw.some(e => (typeof e === "string" ? e : e?.name ?? "").toLowerCase() === n.toLowerCase())
-      : Object.keys(_sfRaw).some(k => k.toLowerCase() === n.toLowerCase());
+    const _vortRaw = sys?.vorteile ?? {};
+    const _checkList = (raw, n) => {
+      if (Array.isArray(raw)) return raw.some(e => (typeof e === "string" ? e : e?.name ?? "").toLowerCase() === n.toLowerCase());
+      return Object.keys(raw).some(k => k.toLowerCase() === n.toLowerCase());
+    };
+    const _hasSF = (n) => _checkList(_sfRaw, n);
+    const _hasVorteil = (n) => _checkList(_vortRaw, n);
     schelmMrIgnore = _hasSF("Lockeres Zaubern") ? 12
-                    : _hasSF("Unbeschwertes Zaubern") ? 7
-                    : 3;
+                    : (_hasVorteil("Unbeschwertes Zaubern") || _hasSF("Unbeschwertes Zaubern")) ? 7
+                    : 0;
   }
   // Pakt-Mechanik: Actor-Flag mit Pakt-Daten (Domäne, GP-Pool).
   // Bei passendem Spruchmerkmal (Dämonisch X) wird Anrufung erleichtert
@@ -758,6 +765,8 @@ export async function castSpell(actor, spellData) {
     return a;
   });
 
+  // Variante A (WdH S.27 / WdZ S.32): Würfel werden gegen unveränderte
+  // Eigenschaft verglichen, Erschwernis kommt aus dem ZfW (effectiveZfw).
   const diceHtml = dice.map((d, i) => {
     const attr = probeAttrs[i];
     const cls = d === 1 ? "crit" : d === 20 ? "fumble" : d > attr ? "fail" : "success";
@@ -792,12 +801,48 @@ export async function castSpell(actor, spellData) {
        </div>`
     : "";
 
+  // ZfP*-Aufschlüsselung: zeige effektiven ZfW + Modifikator-Abzüge transparent
+  // an, damit User MR / Erschwernis-Abzüge nachvollziehen kann (WdH S.27).
+  const probeModDisplay = probeMod || 0;
+  const overSum = (result.details ?? []).reduce((s, d) => s + (d.consumed || 0), 0);
+  const zfpBreakdownParts = [];
+  if (totalZfP > 0) zfpBreakdownParts.push(`ZfW ${parseInt(spellData.zfw) || 0} − ${totalZfP} (Mod.)`);
+  if (effectiveTargetMR > 0) zfpBreakdownParts.push(`− ${effectiveTargetMR} MR`);
+  if (probeModDisplay !== 0 && effectiveTargetMR === 0) {
+    if (probeModDisplay > 0) zfpBreakdownParts.push(`− ${probeModDisplay} Erschw.`);
+    else                     zfpBreakdownParts.push(`+ ${-probeModDisplay} Erleicht.`);
+  } else if (probeModDisplay - effectiveTargetMR !== 0) {
+    const restMod = probeModDisplay - effectiveTargetMR;
+    if (restMod > 0) zfpBreakdownParts.push(`− ${restMod} Erschw.`);
+    else             zfpBreakdownParts.push(`+ ${-restMod} Erleicht.`);
+  }
+  if (success) zfpBreakdownParts.push(`− ${overSum} (über)`);
+  const zfpBreakdownLine = (success && zfpBreakdownParts.length > 0)
+    ? `<div style="text-align:center;font-size:10px;color:#779;margin-top:-4px">${zfpBreakdownParts.join(" ")} = ${result.tapStar}</div>`
+    : "";
+
+  // Misserfolg: zeige um wieviel verfehlt + Komplett-Breakdown
+  let failureBreakdown = "";
+  if (!success && !crit.patzer && !crit.gluecklich) {
+    const missing = -result.remainder;
+    const baseZfwNum = parseInt(spellData.zfw) || 0;
+    const parts = [`ZfW ${baseZfwNum}`];
+    if (totalZfP > 0)        parts.push(`− ${totalZfP} (Mod.)`);
+    if (effectiveTargetMR>0) parts.push(`− ${effectiveTargetMR} MR`);
+    const otherErschw = probeModDisplay - effectiveTargetMR;
+    if (otherErschw > 0)     parts.push(`− ${otherErschw} Erschw.`);
+    parts.push(`− ${overSum} (über)`);
+    parts.push(`= ${result.remainder}`);
+    failureBreakdown = `<div style="text-align:center;font-size:11px;color:#e94560;margin-top:2px"><b>${missing} Punkt${missing === 1 ? "" : "e"} verfehlt</b></div>
+      <div style="text-align:center;font-size:10px;color:#779;margin-top:-2px">${parts.join(" ")}</div>`;
+  }
+
   const flavor = `<div class="dsa-pixel-chat">
     <div class="chat-title">⚡ ${spellData.name}${spellData.isBeschwoerung ? " ⛤" : ""}</div>
     ${variantLine}
     <div class="dice-row">${diceHtml}</div>
     <div class="result-line ${resultClass}">${resultLabel}</div>
-    ${success ? `<div class="tap-star">ZfP*: <span>${result.tapStar}</span></div>` : ""}
+    ${success ? `<div class="tap-star">ZfP*: <span>${result.tapStar}</span></div>${zfpBreakdownLine}` : failureBreakdown}
     ${kontrollLine}
     ${anrufungMisslingenLine}
     <div style="text-align:center;font-size:13px;color:#4a90d9">
@@ -822,9 +867,33 @@ export async function castSpell(actor, spellData) {
 
   // 9. VFX auto-trigger (SPELL_EFFECT_MAP → Varianten → Keyword-Fallback)
   if (success && typeof DSAPixelTokens !== "undefined") {
-    const mapping = lookupSpellEffect(spellData.name);
+    // Element-Variante kann Spruchnamen überschreiben (z.B. "Pfeil des (Elements)"
+    // mit Variante "Pfeil der Luft" → mapping greift "Pfeil der Luft").
+    const effectiveName = selectedVariant?.spellNameOverride || spellData.name;
+    const mapping = lookupSpellEffect(effectiveName) || lookupSpellEffect(spellData.name);
     if (mapping && !mapping.enchantArrow) {
       _triggerSpellEffect(actor, mapping, spellData);
+    }
+    // Pfeil-Verzauberung: nächster Fernkampf-Schuss (Bogen/Armbrust/etc.)
+    // wird mit dem Element-VFX abgefeuert. Sheet konsumiert den Eintrag.
+    if (mapping?.enchantArrow) {
+      globalThis.DSAPixelArrowEnchants ??= new Map();
+      globalThis.DSAPixelArrowEnchants.set(actor.id, {
+        effect:    mapping.effect,
+        impact:    mapping.impact,
+        label:     mapping.label,
+        color:     mapping.color,
+        spellName: effectiveName,
+        // ZfP* × 10 KR Wirkungsdauer: für Anzeige, Cleanup nicht nötig
+        // weil Verzauberung sowieso nur 1 Schuss hält.
+        zfpStar:   result.tapStar ?? 1,
+      });
+      ui.notifications.info(
+        `✨ ${mapping.label} bereit — nächster Fernkampf-Schuss fliegt verzaubert!`,
+        { permanent: false }
+      );
+      // Sheet re-render damit "Verzauberte Pfeile"-Anzeige aktualisiert
+      if (actor.sheet?.rendered) actor.sheet.render(false);
     }
   }
 
@@ -925,10 +994,18 @@ export async function castSpell(actor, spellData) {
 function _lookupSpellDamageFuzzy(spellName) {
   if (!spellName) return null;
   if (SPELL_DAMAGE_MAP[spellName]) return SPELL_DAMAGE_MAP[spellName];
+  const lower = spellName.toLowerCase();
   // Erstes Wort matchen (z.B. "IGNIFAXIUS" matched "Ignifaxius Flammenstrahl")
-  const firstWord = spellName.split(/\s+/)[0].toLowerCase();
+  const firstWord = lower.split(/\s+/)[0];
   for (const [key, val] of Object.entries(SPELL_DAMAGE_MAP)) {
     if (key.split(/\s+/)[0].toLowerCase() === firstWord) return val;
+  }
+  // Substring-Match: z.B. "Feuerball" alleine matched "Ignisphaero Feuerball"
+  for (const [key, val] of Object.entries(SPELL_DAMAGE_MAP)) {
+    const keyLow = key.toLowerCase();
+    // Jedes Wort des Map-Keys gegen den Spruch-Namen vergleichen
+    const keyWords = keyLow.split(/\s+/);
+    if (keyWords.some(w => w.length >= 4 && lower.includes(w))) return val;
   }
   return null;
 }
@@ -943,6 +1020,13 @@ async function _applySpellDamage(caster, spellData, damageInfo, alreadyPaidAsP, 
     return;
   }
   const targetActor = targetToken?.actor;
+
+  // ── Flächenschaden (Ignisphaero/Feuerball etc.) ────────────────────────
+  // Wenn damageInfo.aoeRadius gesetzt ist, treffen wir alle Tokens im Radius
+  // und wenden den Schaden pro Token mit Distanz-Falloff an.
+  if (damageInfo.aoeRadius && targetToken) {
+    return _applyAoESpellDamage(caster, spellData, damageInfo, alreadyPaidAsP, zfpStar, targetToken);
+  }
 
   // ZfW des Zauberers
   const zfw = Number(
@@ -1020,14 +1104,19 @@ async function _applySpellDamage(caster, spellData, damageInfo, alreadyPaidAsP, 
   if (damageInfo.onlyAuP) {
     const oldAuP = targetActor.system?.AuP?.value ?? 0;
     const newAuP = Math.max(0, oldAuP - sp);
-    await targetActor.update({ "system.AuP.value": newAuP });
+    await relayTokenUpdate(targetToken, { "system.AuP.value": newAuP });
     resourceLine = `💤 ${targetActor.name}: ${oldAuP} → <strong style="color:#ff9800">${newAuP}</strong> AuP`;
   } else if (sp > 0) {
     const oldLeP = targetActor.system?.LeP?.value ?? 0;
     const newLeP = Math.max(0, oldLeP - sp);
-    await targetActor.update({ "system.LeP.value": newLeP });
-    resourceLine = `💔 ${targetActor.name}: ${oldLeP} → <strong style="color:#e94560">${newLeP}</strong> LeP
-      ${newLeP === 0 ? `<span style="color:#ff4444;font-weight:bold"> — KAMPFUNFAEHIG!</span>` : ""}`;
+    await relayTokenUpdate(targetToken, { "system.LeP.value": newLeP });
+    // WdS S.78: kampfunfähig ab LeP ≤ 5 (mind. 1)
+    const status = newLeP <= 0
+      ? `<span style="color:#ff2200;font-weight:bold"> — LEBENSBEDROHLICH!</span>`
+      : newLeP <= 5
+        ? `<span style="color:#ff4444;font-weight:bold"> — KAMPFUNFAEHIG!</span>`
+        : "";
+    resourceLine = `💔 ${targetActor.name}: ${oldLeP} → <strong style="color:#e94560">${newLeP}</strong> LeP${status}`;
   }
 
   // Wunden pruefen (nur wenn kein onlyLeP und echter Schaden)
@@ -1043,7 +1132,7 @@ async function _applySpellDamage(caster, spellData, damageInfo, alreadyPaidAsP, 
     if (newWounds > 0) {
       const wounds = targetActor.getFlag("dsa-pixel-tokens", "wounds") ?? {};
       wounds[hitZone] = (wounds[hitZone] ?? 0) + newWounds;
-      await targetActor.setFlag("dsa-pixel-tokens", "wounds", wounds);
+      await relayTokenUpdate(targetToken, { [`flags.${MODULE_ID}.wounds`]: wounds });
       const total = Object.values(wounds).reduce((s, w) => s + (w || 0), 0);
       woundLine = `<div style="color:#ff4444;margin-top:3px">💀 +${newWounds} Wunde${newWounds>1?"n":""} (${hitZoneLabel}) · Gesamt: ${total} · alle Proben −${total}</div>`;
     }
@@ -1084,10 +1173,250 @@ async function _applySpellDamage(caster, spellData, damageInfo, alreadyPaidAsP, 
     </div>`,
   });
 
-  // VFX: Schadenflash am Ziel
-  if (sp > 0 && typeof DSAPixelTokens !== "undefined" && targetToken) {
-    DSAPixelTokens.spawnEffect(targetToken.center.x, targetToken.center.y, "schadenflash");
+  // VFX (broadcastet an ALLE Clients): Schadenflash + Scrolling-Schadenszahl
+  if (sp > 0 && targetToken) {
+    broadcastVFX({ kind: "effect", x: targetToken.center.x, y: targetToken.center.y, effect: "schadenflash" });
+    const ko2 = targetActor.system?.KO?.value ?? 10;
+    const ws2 = getWoundThresholds(ko2);
+    const woundLevel = sp >= ws2.ws3 ? 3 : sp >= ws2.ws2 ? 2 : sp >= ws2.ws1 ? 1 : 0;
+    const dmgColor = woundLevel >= 3 ? "#ff0000" : woundLevel >= 1 ? "#ff4444" : "#ffaa44";
+    const dmgFont = woundLevel >= 1 ? 42 : 32;
+    broadcastVFX({
+      kind: "scrollingText",
+      tgtTokenId: targetToken.id,
+      text: `-${sp}`,
+      color: dmgColor,
+      fontSize: dmgFont,
+      duration: 1800,
+      distance: 90,
+    });
+  } else if (targetToken) {
+    // 0-SP: kleines "0" zeigen damit der Spieler weiß "Treffer aber abgewehrt"
+    broadcastVFX({
+      kind: "scrollingText",
+      tgtTokenId: targetToken.id,
+      text: damageInfo.onlyAuP ? "0 AuP" : "0",
+      color: "#888888",
+      fontSize: 22,
+    });
   }
+}
+
+// ─── Flächenschaden für Ignisphaero / Igniplano / Wand-Sprüche ──────────────
+//
+// LCR S.140 Ignisphaero: 5W6 + ZfP*/2 TP im Zentrum; pro Schritt Entfernung
+// sinkt der Schaden um (1 + niedrigster Würfel der Schadensrolle).
+// damageInfo:
+//   aoeRadius: maximaler Wirkungsradius in Schritt
+//   aoeFalloff: "perStepMinusOnePlusMinDie" (Ignisphaero) | "linear" (Igniplano)
+async function _applyAoESpellDamage(caster, spellData, damageInfo, alreadyPaidAsP, zfpStar, centerToken) {
+  const zfw = Number(actorFindSkill(caster, spellData.name)?.value ?? spellData.zfw ?? 0);
+  const aspData = resolveActorAsP(caster);
+  const currentAsP = aspData?.val ?? 0;
+  const aspMax = currentAsP + (alreadyPaidAsP || 0);
+
+  // Schaden EINMAL würfeln — gilt als Zentrum-Schaden für alle Tokens im Radius
+  const dmg = await rollSpellDamage(spellData.name, damageInfo, {
+    zfw, zfpStar: zfpStar || 0, aspMax, aspBaseCost: alreadyPaidAsP || 0,
+  });
+  if (!dmg) return;
+
+  const extraAsP = Math.max(0, dmg.aspCost - (alreadyPaidAsP || 0));
+  if (extraAsP > 0 && aspData?.path) {
+    await caster.update({ [aspData.path]: Math.max(0, currentAsP - extraAsP) });
+  }
+
+  const baseTP = dmg.tp;
+  // Niedrigster Würfel der Schadensrolle — wird für Falloff gebraucht
+  const minDie = (dmg.diceResults && dmg.diceResults.length > 0)
+    ? Math.min(...dmg.diceResults)
+    : 1;
+  const stepsPerStep = damageInfo.aoeFalloff === "perStepMinusOnePlusMinDie"
+    ? (1 + minDie)
+    : Math.max(1, Math.floor(baseTP / damageInfo.aoeRadius)); // linear
+
+  // Center-Position
+  const cx = centerToken.center?.x ?? centerToken.x;
+  const cy = centerToken.center?.y ?? centerToken.y;
+  const gridSize = canvas.grid.size;
+  const radiusPx = damageInfo.aoeRadius * gridSize;
+
+  // ── Projektil-Flug Caster → Ziel-Zentrum (alle Clients sehen es) ───────
+  const casterToken = caster.getActiveTokens?.()[0];
+  if (casterToken && centerToken && casterToken.id !== centerToken.id) {
+    broadcastVFX({
+      kind: "projectile",
+      srcTokenId: casterToken.id,
+      tgtTokenId: centerToken.id,
+      projectile: "feuerball",
+      impact: null, // Impact kommt unten über XXL-Effekt
+    });
+    // Flugzeit warten, bevor Explosion zündet
+    const dx = (centerToken.center?.x ?? cx) - (casterToken.center?.x ?? cx);
+    const dy = (centerToken.center?.y ?? cy) - (casterToken.center?.y ?? cy);
+    const dist = Math.hypot(dx, dy);
+    const travelMs = Math.max(250, Math.round((dist / gridSize) * 80));
+    await new Promise(r => setTimeout(r, travelMs));
+  }
+
+  // ── XXL-Explosion am Zentrum (broadcastet an alle Clients) ─────────────
+  broadcastVFX({ kind: "effect", x: cx, y: cy, effect: "feuerball_xxl" });
+
+  // Alle Tokens im Radius sammeln (inkl. Caster wenn er drin steht — er kann sich selbst treffen)
+  const affectedTokens = [];
+  for (const t of canvas.tokens.placeables) {
+    if (!t.actor) continue;
+    const tx = t.center?.x ?? t.x;
+    const ty = t.center?.y ?? t.y;
+    const dx = tx - cx;
+    const dy = ty - cy;
+    const distPx = Math.hypot(dx, dy);
+    if (distPx > radiusPx) continue;
+    const distSchritt = distPx / gridSize;
+    affectedTokens.push({ token: t, actor: t.actor, distSchritt });
+  }
+
+  // Pro Token Schaden berechnen + anwenden
+  // LCR S.140: "Der angerichtete Schaden beträgt bis 1 Schritt Entfernung von
+  // der Explosion 5W6+ZfP*/2 TP. Für jeden Schritt Entfernung sinkt der
+  // Schaden um 1 + den Würfel mit der niedrigsten Augenzahl."
+  // → bis 1 Schritt VOLLER Schaden, danach pro Schritt darüber − stepsPerStep
+  const reportLines = [];
+  for (const { token, actor, distSchritt } of affectedTokens) {
+    const distBeyondOne = Math.max(0, distSchritt - 1);
+    const tpAtDist = Math.max(0, Math.round(baseTP - distBeyondOne * stepsPerStep));
+    if (tpAtDist <= 0) {
+      reportLines.push(`<div style="color:#666;font-size:11px">· ${actor.name} (${distSchritt.toFixed(1)} S) — außer Reichweite</div>`);
+      continue;
+    }
+
+    // Element-Immunität
+    const immunity = _checkElementalImmunity(actor, dmg.element ?? damageInfo.element);
+    let tp = tpAtDist;
+    if (immunity.immune)        tp = 0;
+    else if (immunity.resistant)  tp = Math.floor(tp / 2);
+    else if (immunity.vulnerable) tp = Math.floor(tp * 1.5);
+
+    // Gardianum-Absorption (pro Token einzeln)
+    let absorbedTP = 0;
+    if (tp > 0) {
+      const absorb = await tryGardianumAbsorb(actor, token, damageInfo, tp, spellData.name);
+      absorbedTP = absorb.absorbedTP || 0;
+      tp = absorb.remainingTP;
+    }
+
+    // RS (Brust-Standard für AoE)
+    let targetRS = damageInfo.ignoresRS ? 0 : _getTargetRS(actor, "brust");
+    if (damageInfo.perTenTpRSReduction && targetRS > 0) {
+      const reduction = Math.floor(tp / 10);
+      if (reduction > 0) targetRS = Math.max(0, targetRS - reduction);
+    }
+
+    const sp = Math.max(0, tp - targetRS);
+    if (sp <= 0) {
+      reportLines.push(`<div style="color:#666;font-size:11px">· ${actor.name} (${distSchritt.toFixed(1)} S): ${tpAtDist} TP − ${targetRS} RS = 0 SP</div>`);
+      // Auch bei "abgewehrt" einen kleinen Flash zeigen + 0-SP-Text
+      broadcastVFX({ kind: "effect", x: token.center.x, y: token.center.y, effect: "schadenflash" });
+      broadcastVFX({ kind: "scrollingText", tgtTokenId: token.id, text: `0`, color: "#888888", fontSize: 22 });
+      continue;
+    }
+
+    // LeP abziehen via Token-aware Relay (handelt linked + unlinked korrekt)
+    const oldLeP = actor.system?.LeP?.value ?? 0;
+    const newLeP = Math.max(0, oldLeP - sp);
+    await relayTokenUpdate(token, { "system.LeP.value": newLeP });
+
+    // Wunden bei AoE: standardmäßig nicht (ignoreZones), außer sp >= ws-Schwelle
+    const ko = actor.system?.KO?.value ?? 10;
+    const ws = getWoundThresholds(ko);
+    let newWounds = 0;
+    if (sp >= ws.ws3)      newWounds = 3;
+    else if (sp >= ws.ws2) newWounds = 2;
+    else if (sp >= ws.ws1) newWounds = 1;
+    let woundNote = "";
+    if (newWounds > 0) {
+      const wounds = actor.getFlag(MODULE_ID, "wounds") ?? {};
+      wounds.brust = (wounds.brust ?? 0) + newWounds;
+      await relayTokenUpdate(token, { [`flags.${MODULE_ID}.wounds`]: wounds });
+      woundNote = ` <span style="color:#ff4444">${"💀".repeat(newWounds)}</span>`;
+    }
+
+    const distLabel = distSchritt < 0.5 ? "Zentrum" : `${distSchritt.toFixed(1)} S`;
+    // WdS S.78: kampfunfähig ab LeP ≤ 5
+    const koMark = newLeP <= 0
+      ? ` <strong style="color:#ff2200">— LEBENSBEDROHLICH!</strong>`
+      : newLeP <= 5
+        ? ` <strong style="color:#ff4444">— KAMPFUNFÄHIG!</strong>`
+        : "";
+    reportLines.push(
+      `<div style="color:#e94560;font-size:12px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+        💔 <strong>${actor.name}</strong> (${distLabel}): ${tpAtDist} TP${immunity.immune ? " (immun → 0)" : immunity.resistant ? " ÷2" : immunity.vulnerable ? " ×1.5" : ""}
+        ${absorbedTP > 0 ? ` − ${absorbedTP} Gardianum` : ""}
+        ${targetRS > 0 ? ` − ${targetRS} RS` : ""}
+        = <strong>${sp} SP</strong> · LeP ${oldLeP}→${newLeP}${koMark}${woundNote}
+      </div>`
+    );
+
+    // ── VFX (broadcastet an ALLE Clients) ────────────────────────────
+    // Schadenflash auf dem Token
+    broadcastVFX({ kind: "effect", x: token.center.x, y: token.center.y, effect: "schadenflash" });
+    // Scrolling-Schadenszahl über dem Token (rot, größer wenn Wunde)
+    const dmgColor = newWounds >= 3 ? "#ff0000"
+                  : newWounds >= 1 ? "#ff4444"
+                  : "#ffaa44";
+    const dmgFont = newWounds >= 1 ? 42 : 32;
+    broadcastVFX({
+      kind: "scrollingText",
+      tgtTokenId: token.id,
+      text: `-${sp}`,
+      color: dmgColor,
+      fontSize: dmgFont,
+      duration: 1800,
+      distance: 90,
+    });
+    // Bei Wunden zusätzlich kurz "💀 Wunde!" einblenden
+    if (newWounds > 0) {
+      setTimeout(() => {
+        broadcastVFX({
+          kind: "scrollingText",
+          tgtTokenId: token.id,
+          text: `💀 +${newWounds} Wunde${newWounds > 1 ? "n" : ""}`,
+          color: "#ff4444",
+          fontSize: 22,
+          duration: 1500,
+          distance: 60,
+        });
+      }, 600);
+    }
+  }
+
+  // Kein Token getroffen?
+  const damageReport = reportLines.length > 0
+    ? reportLines.join("")
+    : `<div style="color:#666">Keine Tokens im Wirkungsradius.</div>`;
+
+  // Caster-Zusatzkosten (Ignisphaero: +1W6 LeP +1 AuP)
+  // Note: Diese sind im aspCost-String, muss manuell gehandhabt werden
+  // → wird im Chat als Hinweis angezeigt
+
+  ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor: caster }),
+    content: `<div class="dsa-pixel-chat">
+      <div class="chat-title">⚡ ${spellData.name} — Flächenschaden</div>
+      ${dmg.rollHTML || ""}
+      <div style="text-align:center;font-size:13px;color:#c09040">${dmg.formulaLabel} · Min-W6: ${minDie} · Falloff: −${stepsPerStep}/Schritt · Radius ${damageInfo.aoeRadius} S</div>
+      ${dmg.variantNote || ""}
+      ${extraAsP > 0 ? `<div style="color:#4a90d9;font-size:12px;text-align:center">−${extraAsP} AsP zusätzlich</div>` : ""}
+      <div style="margin-top:6px;padding:4px 6px;background:rgba(233,69,96,0.10);border-left:3px solid #e94560;border-radius:3px">
+        <div style="font-size:11px;color:#aaa;margin-bottom:2px">Zentrum: ${centerToken.actor?.name ?? "Position"}</div>
+        ${damageReport}
+      </div>
+      ${spellData.kosten?.includes("LeP") ? `<div style="margin-top:4px;padding:3px 6px;background:rgba(180,40,40,0.15);border:1px solid rgba(180,40,40,0.3);border-radius:3px;font-size:11px;color:#fbb;text-align:center">⚠ Zauberer-Kosten: ${spellData.kosten} — manuell abziehen!</div>` : ""}
+    </div>`,
+  });
+
+  // (Der zentrale XXL-Effekt wurde bereits oben vor der Schaden-Schleife
+  // gebroadcastet — hier kein doppelter Effekt nötig.)
 }
 
 // ─── Elementare Immunitaet pruefen ──────────────────────────────────────────

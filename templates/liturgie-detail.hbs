@@ -1,0 +1,265 @@
+{{!--
+  Detail-Dialog für eine einzelne Liturgie
+  Zeigt alle Felder strukturiert mit Volltext aus PDF
+--}}
+<div class="dsa-lit-detail">
+  <header class="dsa-lit-detail-head">
+    <h2>
+      {{#if isPrimaer}}<span class="primaer-mark" title="Primäre Segnung">★</span>{{/if}}
+      {{name}}
+    </h2>
+    <div class="grad-display">Grad {{grad}}</div>
+  </header>
+
+  <div class="dsa-lit-detail-meta">
+    <div class="meta-row">
+      <span class="meta-label">Ziel</span>
+      <span class="meta-value">{{ziel}}</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">Reichweite</span>
+      <span class="meta-value">{{reichweite}}</span>
+    </div>
+    {{#if (or ritualdauerDetail ritualdauer)}}
+    <div class="meta-row">
+      <span class="meta-label">Ritualdauer</span>
+      <span class="meta-value">{{#if ritualdauerDetail}}{{ritualdauerDetail}}{{else}}{{ritualdauer}}{{/if}}</span>
+    </div>
+    {{/if}}
+    {{#if (or wirkungsdauerDetail wirkungsdauer)}}
+    <div class="meta-row">
+      <span class="meta-label">Wirkungsdauer</span>
+      <span class="meta-value">{{#if wirkungsdauerDetail}}{{wirkungsdauerDetail}}{{else}}{{wirkungsdauer}}{{/if}}</span>
+    </div>
+    {{/if}}
+    <div class="meta-row">
+      <span class="meta-label">KaP-Kosten</span>
+      <span class="meta-value">{{kapKosten}}{{#if pkap}} (+ {{pkap}} pKaP){{/if}}{{#if probenZuschlag}} · Zuschlag {{probenZuschlagSigned}}{{/if}}</span>
+    </div>
+    {{#if herkunftDetail}}
+    <div class="meta-row">
+      <span class="meta-label">Herkunft</span>
+      <span class="meta-value">{{herkunftDetail}}</span>
+    </div>
+    {{/if}}
+    {{#if voraussetzung}}
+    <div class="meta-row warn">
+      <span class="meta-label">Voraussetzung</span>
+      <span class="meta-value">{{voraussetzung}}</span>
+    </div>
+    {{/if}}
+    {{#if merkmale}}
+    <div class="meta-row">
+      <span class="meta-label">Merkmale</span>
+      <span class="meta-value">
+        {{#each merkmale}}<span class="merkmal-pill">{{this}}</span>{{/each}}
+      </span>
+    </div>
+    {{/if}}
+  </div>
+
+  {{#if effekt}}
+  <div class="dsa-lit-detail-summary">
+    {{effekt}}
+  </div>
+  {{/if}}
+
+  {{#if symboleGesten}}
+  <section class="dsa-lit-detail-section">
+    <h3><i class="fas fa-praying-hands"></i> Symbole, Gesten, Gebete</h3>
+    <p>{{symboleGesten}}</p>
+  </section>
+  {{/if}}
+
+  {{#if auswirkung}}
+  <section class="dsa-lit-detail-section primary">
+    <h3><i class="fas fa-bolt"></i> Auswirkung</h3>
+    <p>{{auswirkung}}</p>
+  </section>
+  {{/if}}
+
+  {{#if anmerkungen}}
+  <section class="dsa-lit-detail-section">
+    <h3><i class="fas fa-info-circle"></i> Anmerkungen</h3>
+    <p>{{anmerkungen}}</p>
+  </section>
+  {{/if}}
+
+  <div class="dsa-lit-detail-actions">
+    <button type="button" class="cast-btn-large" data-action="cast" data-id="{{id}}">
+      <i class="fas fa-praying-hands"></i> Wirken
+    </button>
+    <button type="button" class="close-btn" data-action="close">
+      <i class="fas fa-times"></i> Schließen
+    </button>
+  </div>
+</div>
+
+<style>
+.dsa-lit-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background: #1a1612;
+  color: #f0e8d8;
+  font-family: "Crimson Text", Georgia, serif;
+  font-size: 14px;
+  line-height: 1.55;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.dsa-lit-detail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #3a3025;
+}
+.dsa-lit-detail-head h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #ffd770;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  border: none;
+  flex: 1;
+}
+.primaer-mark { color: #ffd700; margin-right: 6px; text-shadow: 0 0 6px rgba(255, 215, 0, 0.6); }
+.grad-display {
+  background: linear-gradient(180deg, #4a3525 0%, #3a2818 100%);
+  color: #ffd770;
+  padding: 6px 16px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  border: 1px solid #5a4030;
+  align-self: center;
+}
+
+.dsa-lit-detail-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  background: rgba(0,0,0,0.2);
+  padding: 10px 14px;
+  border-radius: 4px;
+  border-left: 3px solid #b8841c;
+}
+.meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.meta-row.warn { color: #e08070; }
+.meta-row .meta-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #999080;
+  font-weight: 600;
+}
+.meta-row.warn .meta-label { color: #e08070; }
+.meta-row .meta-value {
+  font-size: 14px;
+  color: #f0e8d8;
+}
+.meta-row.warn .meta-value { color: #ffb0a0; }
+
+.merkmal-pill {
+  display: inline-block;
+  background: rgba(120, 200, 240, 0.12);
+  color: #a0d0e0;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  border: 1px solid rgba(120, 200, 240, 0.25);
+  margin-right: 4px;
+}
+
+.dsa-lit-detail-summary {
+  font-style: italic;
+  color: #d8c898;
+  background: rgba(184,132,28,0.08);
+  padding: 10px 14px;
+  border-radius: 4px;
+  border-left: 3px solid #b8841c;
+  font-size: 13px;
+}
+
+.dsa-lit-detail-section {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px;
+  padding: 10px 14px;
+}
+.dsa-lit-detail-section.primary {
+  border-color: rgba(255,215,112,0.3);
+  background: rgba(184,132,28,0.06);
+}
+.dsa-lit-detail-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffd770;
+  letter-spacing: 0.3px;
+  border: none;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 215, 112, 0.2);
+}
+.dsa-lit-detail-section h3 i { margin-right: 6px; opacity: 0.8; }
+.dsa-lit-detail-section p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #f0e8d8;
+  white-space: pre-wrap;
+}
+
+.dsa-lit-detail-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+.cast-btn-large {
+  flex: 1;
+  background: linear-gradient(180deg, #5a4030 0%, #3a2818 100%);
+  border: 1px solid #6a4830;
+  border-radius: 4px;
+  color: #ffd770;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.cast-btn-large:hover {
+  background: linear-gradient(180deg, #6a5040 0%, #4a3525 100%);
+  border-color: #ffd770;
+  box-shadow: 0 0 10px rgba(255, 215, 112, 0.4);
+}
+.cast-btn-large i { margin-right: 6px; }
+
+.close-btn {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid #3a3025;
+  border-radius: 4px;
+  color: #999080;
+  padding: 12px 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.close-btn:hover {
+  background: rgba(0,0,0,0.5);
+  color: #f0e8d8;
+}
+.close-btn i { margin-right: 4px; }
+</style>

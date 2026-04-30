@@ -202,25 +202,40 @@ export async function castRitual(actor, ritualId) {
   ` : "";
 
   const dlgContent = `
-    <div class="dsa-pixel-dialog" style="display:flex;flex-direction:column;gap:8px;color:#ddd">
-      <div><strong>${rit.name}</strong>${rit.subtitel ? ` <em>(${rit.subtitel})</em>` : ""}</div>
-      <div style="font-size:11px;color:#aaa">Grad ${rit.grad} · ${rit.ziel} · ${rit.ritualdauer}</div>
-      <div style="font-size:11px;color:#888">Fertigkeit: ${fertLabel} (${probeAttrs.join("/")})</div>
-      <div style="font-size:11px;color:#999">${rit.effekt}</div>
+    <div class="dsa-pixel-sham-dialog">
+      <style>
+        .dsa-pixel-sham-dialog { background: #15181c; color: #e8eef4; padding: 14px; margin: -8px; border-radius: 4px; font-family: "Crimson Text", Georgia, serif; }
+        .dsa-pixel-sham-dialog * { color: #e8eef4; }
+        .dsa-pixel-sham-dialog .dlg-title { font-size: 16px; font-weight: 700; color: #a0d0e8; margin-bottom: 4px; }
+        .dsa-pixel-sham-dialog .dlg-title em { color: #888; font-size: 13px; font-weight: 400; }
+        .dsa-pixel-sham-dialog .dlg-meta { font-size: 11px; color: #8090a0; margin-bottom: 4px; }
+        .dsa-pixel-sham-dialog .dlg-fert { font-size: 11px; color: #c8e0a0; margin-bottom: 6px; }
+        .dsa-pixel-sham-dialog .dlg-effekt { font-size: 12px; color: #b8c8d8; font-style: italic; padding: 6px 10px; background: rgba(0,0,0,0.25); border-left: 2px solid #5078a0; border-radius: 3px; margin-bottom: 8px; }
+        .dsa-pixel-sham-dialog hr { border: none; border-top: 1px solid rgba(160,208,232,0.2); margin: 10px 0; }
+        .dsa-pixel-sham-dialog .dlg-section-title { font-weight: 700; font-size: 13px; color: #a0d0e8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .dsa-pixel-sham-dialog label { display: flex; align-items: center; gap: 8px; padding: 4px 6px; cursor: pointer; border-radius: 3px; }
+        .dsa-pixel-sham-dialog label:hover { background: rgba(160,208,232,0.06); }
+        .dsa-pixel-sham-dialog input[type="checkbox"] { accent-color: #a0d0e8; }
+        .dsa-pixel-sham-dialog input[type="number"], .dsa-pixel-sham-dialog select { background: #1c2530 !important; color: #e8eef4 !important; border: 1px solid #2c3a4a !important; padding: 4px 8px; border-radius: 3px; font-family: inherit; }
+      </style>
+      <div class="dlg-title">${rit.name}${rit.subtitel ? ` <em>(${rit.subtitel})</em>` : ""}</div>
+      <div class="dlg-meta">Grad ${rit.grad} · ${rit.ziel} · ${rit.ritualdauer}</div>
+      <div class="dlg-fert">Fertigkeit: ${fertLabel} (${probeAttrs.join("/")})</div>
+      <div class="dlg-effekt">${rit.effekt || ""}</div>
       ${gradSelectorHtml}
       <hr>
-      <div><strong>Aufstufung:</strong></div>
+      <div class="dlg-section-title">Aufstufung</div>
       ${aufstufungOpts}
       <hr>
-      <label>Hilfsfertigkeit (Trommel/Tanz/Singen) TaP*: <input type="number" name="hilfs" value="0" min="0" style="width:60px"></label>
-      <label>Rauschmittel-Mod (-8 bis +2): <input type="number" name="rausch" value="0" min="-8" max="2" style="width:60px"></label>
-      <label>Eigene Modifikation: <input type="number" name="custom" value="0" style="width:60px"></label>
+      <label>Hilfsfertigkeit (Trommel/Tanz/Singen) TaP*: <input type="number" name="hilfs" value="0" min="0" style="width:70px"></label>
+      <label>Rauschmittel-Mod (-8 bis +2): <input type="number" name="rausch" value="0" min="-8" max="2" style="width:70px"></label>
+      <label>Eigene Modifikation: <input type="number" name="custom" value="0" style="width:70px"></label>
       <hr>
-      <label style="display:flex;gap:6px;align-items:center">
+      <label>
         <input type="checkbox" name="verbotene-pforten">
         SF Verbotene Pforten (LeP statt fehlender AsP)
       </label>
-      <label style="display:flex;gap:6px;align-items:center">
+      <label>
         <input type="checkbox" name="blutmagie">
         SF Blutmagie (1 LeP für 1 AsP-Erleichterung)
       </label>
@@ -261,7 +276,29 @@ export async function castRitual(actor, ritualId) {
             // Misslungen +7 Erschwernis (Spieler kann negativ eingeben)
             const hilfsMod = -Math.floor(hilfsTap / 2);
             const aufstufungMod = aufstufungCount * 2;
-            const totalMod = effMeta.mod + hilfsMod + rauschMod + customMod + aufstufungMod;
+
+            // Keulen-Bonus: wenn aktive Keule "Hilfe der Keule" auf passende Fertigkeit hat
+            let keuleMod = 0;
+            let keuleNote = "";
+            try {
+              const { getKeulenBoni } = await import("./keule.mjs");
+              const boni = getKeulenBoni(actor);
+              // WdZ S.167 "Hilfe der Keule": erleichtert SÄMTLICHE Schamanen-
+              // Rituale (außer Keulen-Rituale selbst). Stufe I/II/III → -1/-2/-3.
+              if (boni?.hilfeMod) {
+                keuleMod += boni.hilfeMod;
+                keuleNote = ` · Hilfe der Keule ${boni.hilfeMod >= 0 ? "+" : ""}${boni.hilfeMod}`;
+              }
+              // WdZ S.167 "Bann der Keule": erleichtert Kontrollproben gegen
+              // Geister/Dämonen um -1/-2/-3 (nicht +9/+12/+15 — das war die
+              // Erschaffungs-Erschwernis). Wirkt auf Geister-bannen-Probe.
+              if (boni?.bannMod && fertigkeit === "geister-bannen") {
+                keuleMod += boni.bannMod;  // bannMod ist bereits negativ (-stufe)
+                keuleNote += ` · Bann der Keule ${boni.bannMod}`;
+              }
+            } catch {}
+
+            const totalMod = effMeta.mod + hilfsMod + rauschMod + customMod + aufstufungMod + keuleMod;
             const target = rkw - totalMod;
 
             // 1W20-Probe
@@ -308,7 +345,7 @@ export async function castRitual(actor, ritualId) {
 
             const html2 = `<div class="dsa-pixel-chat">
               <div class="chat-title">🪶 ${rit.name}${rit.subtitel ? ` <em>(${rit.subtitel})</em>` : ""}</div>
-              <div class="chat-row" style="font-size:11px;color:#aaa">${fertLabel} · Grad ${effGrad}${aufstufungCount ? ` (Aufstufung +${aufstufungCount})` : ""}</div>
+              <div class="chat-row" style="font-size:11px;color:#aaa">${fertLabel} · Grad ${effGrad}${aufstufungCount ? ` (Aufstufung +${aufstufungCount})` : ""}${keuleNote}</div>
               <hr>
               <div class="chat-row">RkW ${rkw} − Mod ${totalMod} → Ziel ${target}</div>
               <div class="chat-row"><strong>1W20:</strong> ${wurf} ${erfolg ? "✓" : "✗"}</div>
@@ -373,10 +410,42 @@ export class SchamanenApp extends Application {
       if (fert && r.fertigkeit !== fert) return false;
       if (this._search) {
         const s = this._search.toLowerCase();
-        if (!r.name.toLowerCase().includes(s) && !(r.effekt||"").toLowerCase().includes(s)) return false;
+        if (!r.name.toLowerCase().includes(s) &&
+            !(r.effekt||"").toLowerCase().includes(s) &&
+            !(r.auswirkung||"").toLowerCase().includes(s)) return false;
       }
       return true;
     });
+
+    // Gruppierung nach Grad
+    const gradOrder = ["I","II","III","IV","V","VI","II-VI","II bis VI"];
+    const byGrad = {};
+    for (const r of rituale) {
+      const g = (r.grad || "?").toString();
+      if (!byGrad[g]) byGrad[g] = [];
+      byGrad[g].push(r);
+    }
+    for (const g of Object.keys(byGrad)) {
+      byGrad[g].sort((a, b) => a.name.localeCompare(b.name, "de"));
+    }
+    const gradeMap = RITUALE_META?._grade || {};
+    const ritualeByGrad = gradOrder
+      .filter(g => byGrad[g] && byGrad[g].length)
+      .map(grad => {
+        const baseGrad = grad.split("-")[0].split(" ")[0];
+        const m = gradeMap[baseGrad] || {};
+        return {
+          grad,
+          rituale: byGrad[grad],
+          aspKosten: m.asp || "?",
+          perm: m.permanent || null,
+        };
+      });
+    for (const g of Object.keys(byGrad)) {
+      if (!gradOrder.includes(g)) {
+        ritualeByGrad.push({ grad: g, rituale: byGrad[g], aspKosten: "?", perm: null });
+      }
+    }
 
     const fertigkeiten = FERTIGKEIT_KEYS.map(k => ({
       key: k,
@@ -395,6 +464,7 @@ export class SchamanenApp extends Application {
       fertigkeiten,
       asp,
       rituale,
+      ritualeByGrad,
       keulenRituale: RITUALE_META?._keulenRituale ?? [],
       knochenkeulen: RITUALE_META?._knochenkeulen ?? [],
     };
@@ -404,9 +474,18 @@ export class SchamanenApp extends Application {
     super.activateListeners(html);
     const $h = html instanceof jQuery ? html : $(html);
     $h.find('[data-action="cast-ritual"]').on("click", async (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
       const id = ev.currentTarget.dataset.id;
       await castRitual(this.actor, id);
       this.render();
+    });
+    $h.find('[data-action="show-detail"]').on("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const id = ev.currentTarget.dataset.id;
+      const rit = (RITUALE ?? []).find(r => r.id === id);
+      if (rit) new SchamanenRitualDetailApp(this.actor, rit, this).render(true);
     });
     $h.find('select[name=kultur]').on("change", (ev) => {
       this._kulturFilter = ev.currentTarget.value;
@@ -432,6 +511,63 @@ export class SchamanenApp extends Application {
         await setRkW(this.actor, fert, val);
         this.render();
       }
+    });
+  }
+}
+
+// ─── Detail-Dialog für ein einzelnes Ritual ────────────────────────────────
+
+export class SchamanenRitualDetailApp extends Application {
+  constructor(actor, ritual, parentApp = null, options = {}) {
+    super(options);
+    this.actor = actor;
+    this.ritual = ritual;
+    this.parentApp = parentApp;
+  }
+
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "dsa-pixel-ritual-detail",
+      title: "Ritual-Details",
+      template: `modules/${MODULE_ID}/templates/ritual-detail.hbs`,
+      width: 620,
+      height: "auto",
+      resizable: true,
+      classes: ["dsa-pixel-app", "dsa-pixel-ritual-detail"],
+    });
+  }
+
+  get title() { return this.ritual?.name || "Ritual"; }
+
+  async getData() {
+    const r = this.ritual;
+    const baseGrad = (r.grad || "I").toString().split("-")[0].split(" ")[0];
+    const gradeMap = RITUALE_META?._grade || {};
+    const m = gradeMap[baseGrad] || {};
+    const fertMeta = RITUALE_META?._fertigkeiten?.[r.fertigkeit];
+    return {
+      ...r,
+      probeAttrs: (fertMeta?.probe || []).join("/"),
+      aspKosten: m.asp || "?",
+      perm: m.permanent || null,
+      probenZuschlag: m.modifikator ?? 0,
+      probenZuschlagSigned: (m.modifikator ?? 0) >= 0 ? `+${m.modifikator}` : `${m.modifikator}`,
+    };
+  }
+
+  activateListeners(html) {
+    super.activateListeners(html);
+    const $h = html instanceof jQuery ? html : $(html);
+    $h.find('[data-action="cast-ritual"]').on("click", async (ev) => {
+      ev.preventDefault();
+      const id = ev.currentTarget.dataset.id;
+      await castRitual(this.actor, id);
+      this.parentApp?.render?.();
+      this.close();
+    });
+    $h.find('[data-action="close"]').on("click", (ev) => {
+      ev.preventDefault();
+      this.close();
     });
   }
 }

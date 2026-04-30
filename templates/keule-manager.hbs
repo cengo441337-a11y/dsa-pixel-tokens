@@ -1,0 +1,264 @@
+{{!--
+  Beseelte Knochenkeule — Manager-App
+--}}
+<form class="dsa-keule-app">
+  {{#unless hasKeule}}
+    <div class="dsa-keule-empty">
+      <i class="fas fa-bone"></i>
+      <h2>Keine beseelte Knochenkeule</h2>
+      <p>{{actorName}} besitzt keine beseelte Knochenkeule mit gesetzten Modul-Flags.</p>
+      <p style="font-size:11px;color:#888080">Kaufe Vorteil "Beseelte Knochenkeule" oder erschaffe sie via Weihe-der-Keule-Ritual.</p>
+    </div>
+  {{else}}
+  <header class="dsa-keule-header">
+    <div class="keule-meta">
+      <h2><i class="fas fa-bone"></i> {{keuleName}}</h2>
+      <div class="keule-stats">
+        <div class="stat"><span class="lbl">Geist</span><span class="val">{{geistType}}</span></div>
+        <div class="stat"><span class="lbl">Typ</span><span class="val">{{keuleType}}</span></div>
+        <div class="stat"><span class="lbl">TP</span><span class="val">{{damage}}</span></div>
+        <div class="stat"><span class="lbl">BF</span><span class="val">{{bf}}</span></div>
+        {{#if weihe}}<div class="stat"ok"><span class="lbl">Weihe</span><span class="val">✓</span></div>{{/if}}
+      </div>
+    </div>
+    <div class="keule-lo">
+      <div class="lo-label">LO-Pool (pAsP-Reservoir)</div>
+      <div class="lo-bar">
+        <div class="lo-bar-fill" style="width:{{LOpercent}}%"></div>
+        <div class="lo-bar-text">{{LOcurrent}} / {{LO}}</div>
+      </div>
+      <div class="lo-buttons">
+        <button type="button" data-action="lo-step" data-step="-1" title="1 LO verbrauchen">−</button>
+        <button type="button" data-action="lo-step" data-step="1" title="1 LO regenerieren">+</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="dsa-keule-summary">
+    <h3><i class="fas fa-bolt"></i> Aktive Boni</h3>
+    <div class="summary-row">
+      {{#if mTPbonus}}<span class="bonus-pill bonus-mtp">+{{mTPbonus}} mTP</span>{{/if}}
+      {{#if bfBonus}}<span class="bonus-pill bonus-bf">+{{bfBonus}} BF</span>{{/if}}
+      {{#if magiegespuer}}<span class="bonus-pill bonus-magic">Magiegespür {{magiegespuer}}</span>{{/if}}
+    </div>
+  </div>
+
+  <h3 class="section-h"><i class="fas fa-scroll"></i> Keulen-Rituale</h3>
+  <div class="dsa-keule-rituals">
+    {{#each rituale}}
+      <div class="ritual-card{{#if aktiv}} is-active{{/if}}">
+        <div class="ritual-head">
+          <label class="ritual-toggle">
+            <input type="checkbox" data-action="toggle-ritual" data-id="{{id}}" {{#if aktiv}}checked{{/if}}>
+            <span class="ritual-name">{{name}}</span>
+          </label>
+          {{#if stufen}}
+            <select data-action="set-stufe" data-id="{{id}}" class="stufe-select">
+              <option value="1" {{#if (eq stufe 1)}}selected{{/if}}>Stufe I</option>
+              <option value="2" {{#if (eq stufe 2)}}selected{{/if}}>Stufe II</option>
+              <option value="3" {{#if (eq stufe 3)}}selected{{/if}}>Stufe III</option>
+            </select>
+          {{/if}}
+        </div>
+        <div class="ritual-body">
+          <p class="ritual-desc">{{beschreibung}}</p>
+          <div class="ritual-meta">
+            <span><strong>Vor.:</strong> {{vor}}</span>
+            <span><strong>Kosten:</strong> {{kosten}}</span>
+          </div>
+          {{#if (eq id "hilfe-der-keule")}}
+            <div class="ritual-config">
+              <label>Gewählte Fertigkeit:
+                <select data-action="set-hilfe-fertigkeit">
+                  <option value="geister-rufen"     {{#if (eq fertigkeit "geister-rufen")}}selected{{/if}}>Geister rufen</option>
+                  <option value="geister-bannen"    {{#if (eq fertigkeit "geister-bannen")}}selected{{/if}}>Geister bannen</option>
+                  <option value="geister-binden"    {{#if (eq fertigkeit "geister-binden")}}selected{{/if}}>Geister binden</option>
+                  <option value="geister-aufnehmen" {{#if (eq fertigkeit "geister-aufnehmen")}}selected{{/if}}>Geister aufnehmen</option>
+                </select>
+              </label>
+              <span class="active-mod">Aktiv: <strong>{{mod}}</strong> auf {{fertigkeit}}</span>
+            </div>
+          {{/if}}
+          {{#if (eq id "bann-der-keule")}}
+            <div class="ritual-config"><span class="active-mod">Bonus auf Geisterbann-Probe: <strong>+{{mod}}</strong></span></div>
+          {{/if}}
+          {{#if (eq id "kraft-der-keule")}}
+            <div class="ritual-config"><span class="active-mod">+{{mTP}} mTP auf alle Treffer</span></div>
+          {{/if}}
+          {{#if (eq id "haerte-der-keule")}}
+            <div class="ritual-config"><span class="active-mod">+{{bfBonus}} BF (Bruchfaktor)</span></div>
+          {{/if}}
+          {{#if (eq id "gespuer-der-keule")}}
+            <div class="ritual-config"><span class="active-mod">Magiegespür-Wert: <strong>{{magiegespuer}}</strong></span></div>
+          {{/if}}
+        </div>
+      </div>
+    {{/each}}
+  </div>
+
+  <h3 class="section-h"><i class="fas fa-magic"></i> Geist der Keule — Gespeicherte Sprüche</h3>
+  <div class="dsa-keule-sprueche">
+    {{#each gespeicherteSprueche}}
+      <div class="spruch-row">
+        <span class="spruch-name">{{this}}</span>
+        <button type="button" class="cast-spruch" data-action="cast-stored" data-idx="{{@index}}" title="Spruch wirken (1 pAsP)"><i class="fas fa-bolt"></i> Wirken</button>
+        <button type="button" class="remove-spruch" data-action="remove-spell" data-idx="{{@index}}" title="Entfernen"><i class="fas fa-times"></i></button>
+      </div>
+    {{/each}}
+    {{#unless gespeicherteSprueche.length}}
+      <p class="no-sprueche">Keine Sprüche gespeichert. Der Geist der Keule kann Sprüche aufnehmen die er auf Befehl wirkt.</p>
+    {{/unless}}
+    <button type="button" class="add-spruch" data-action="add-spell"><i class="fas fa-plus"></i> Spruch hinzufügen</button>
+  </div>
+  {{/unless}}
+</form>
+
+<style>
+.dsa-keule-app {
+  display: flex; flex-direction: column; gap: 14px; padding: 14px;
+  background: linear-gradient(180deg, #1f1815 0%, #15110d 100%);
+  color: #e8d8c0; font-family: "Crimson Text", Georgia, serif;
+  font-size: 14px; line-height: 1.45; height: 100%; overflow-y: auto;
+}
+
+.dsa-keule-empty { text-align: center; padding: 60px 20px; color: #807060; }
+.dsa-keule-empty i { font-size: 48px; display: block; margin-bottom: 16px; color: #604030; }
+.dsa-keule-empty h2 { color: #c0a880; border: none; margin: 0 0 12px 0; }
+
+/* Header */
+.dsa-keule-header {
+  display: grid; grid-template-columns: 1fr 280px; gap: 16px;
+  padding: 14px; background: linear-gradient(180deg, #2a2018 0%, #1f1810 100%);
+  border: 1px solid #4a3525; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.keule-meta h2 {
+  margin: 0 0 8px 0; font-size: 22px; color: #d8a868;
+  font-weight: 700; letter-spacing: 0.5px; border: none;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+.keule-meta h2 i { color: #d8a868; margin-right: 6px; }
+.keule-stats { display: flex; gap: 14px; flex-wrap: wrap; }
+.keule-stats .stat { display: flex; flex-direction: column; gap: 2px; }
+.keule-stats .stat .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: #908070; font-weight: 600; }
+.keule-stats .stat .val { font-size: 14px; font-weight: 700; color: #e8d8c0; }
+
+/* LO-Pool */
+.keule-lo { display: flex; flex-direction: column; gap: 6px; }
+.lo-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #908070; font-weight: 600; }
+.lo-bar {
+  position: relative; height: 26px; background: rgba(0,0,0,0.4);
+  border: 1px solid #4a3525; border-radius: 13px; overflow: hidden;
+}
+.lo-bar-fill {
+  height: 100%; background: linear-gradient(90deg, #5a3818 0%, #d8a868 100%);
+  transition: width 0.3s ease;
+}
+.lo-bar-text {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; color: #f0e0c8; text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  font-size: 14px;
+}
+.lo-buttons { display: flex; gap: 6px; }
+.lo-buttons button {
+  flex: 1; background: linear-gradient(180deg, #3a2818 0%, #2a1f12 100%);
+  border: 1px solid #5a4030; color: #d8a868; padding: 4px;
+  border-radius: 3px; cursor: pointer; font-weight: 700; font-size: 16px;
+}
+.lo-buttons button:hover { background: linear-gradient(180deg, #4a3520 0%, #3a2818 100%); border-color: #d8a868; }
+
+/* Summary */
+.dsa-keule-summary {
+  background: rgba(216, 168, 104, 0.06); border: 1px solid rgba(216, 168, 104, 0.2);
+  border-radius: 5px; padding: 10px 14px;
+}
+.dsa-keule-summary h3 { margin: 0 0 8px 0; font-size: 12px; color: #d8a868; text-transform: uppercase; letter-spacing: 0.8px; border: none; padding: 0; }
+.dsa-keule-summary h3 i { margin-right: 6px; }
+.summary-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.bonus-pill {
+  padding: 4px 10px; border-radius: 12px; font-size: 12px;
+  font-weight: 700; border: 1px solid rgba(255,255,255,0.15);
+}
+.bonus-pill.bonus-mtp   { background: rgba(232, 80, 60, 0.15); color: #ffb0a0; border-color: rgba(232, 80, 60, 0.4); }
+.bonus-pill.bonus-bf    { background: rgba(160, 160, 200, 0.15); color: #c0c0e0; border-color: rgba(160, 160, 200, 0.4); }
+.bonus-pill.bonus-magic { background: rgba(160, 220, 240, 0.15); color: #a0e0f0; border-color: rgba(160, 220, 240, 0.4); }
+
+/* Section Heading */
+.section-h {
+  margin: 0 0 -4px 0; font-size: 16px; color: #d8a868;
+  font-weight: 700; letter-spacing: 0.5px; border: none;
+  padding-bottom: 6px; border-bottom: 1px solid rgba(216, 168, 104, 0.3);
+}
+.section-h i { margin-right: 6px; }
+
+/* Ritual-Cards */
+.dsa-keule-rituals {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.ritual-card {
+  background: rgba(0,0,0,0.3); border: 1px solid #3a2c20;
+  border-radius: 5px; padding: 10px 12px;
+  transition: all 0.15s;
+}
+.ritual-card.is-active {
+  border-color: #b8841c;
+  background: rgba(184, 132, 28, 0.08);
+  box-shadow: 0 0 8px rgba(184, 132, 28, 0.15);
+}
+.ritual-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.ritual-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; }
+.ritual-toggle input { accent-color: #d8a868; cursor: pointer; }
+.ritual-name { color: #e8d8c0; font-size: 14px; }
+.ritual-card.is-active .ritual-name { color: #d8a868; }
+.stufe-select {
+  background: #2a2018; color: #e8d8c0; border: 1px solid #4a3525;
+  padding: 3px 8px; border-radius: 3px; font-size: 12px; font-family: inherit;
+}
+.stufe-select option { background: #1c1812; color: #e8d8c0; }
+.ritual-body { font-size: 12px; color: #c0b09c; }
+.ritual-desc { margin: 0 0 6px 0; line-height: 1.5; }
+.ritual-meta { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: #807060; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.06); }
+.ritual-config {
+  margin-top: 8px; padding: 6px 8px; background: rgba(216, 168, 104, 0.08);
+  border-radius: 3px; border-left: 2px solid #d8a868;
+  display: flex; flex-direction: column; gap: 4px; font-size: 12px;
+}
+.ritual-config select {
+  background: #2a2018; color: #e8d8c0; border: 1px solid #4a3525;
+  padding: 3px 6px; border-radius: 3px; font-size: 12px; font-family: inherit;
+}
+.ritual-config select option { background: #1c1812; color: #e8d8c0; }
+.ritual-config .active-mod strong { color: #ffd770; font-size: 14px; }
+
+/* Sprüche */
+.dsa-keule-sprueche {
+  background: rgba(0,0,0,0.25); border: 1px solid #3a2c20;
+  border-radius: 5px; padding: 10px 12px;
+}
+.spruch-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+  background: rgba(216, 168, 104, 0.06); border: 1px solid rgba(216, 168, 104, 0.2);
+  border-radius: 3px; margin-bottom: 6px;
+}
+.spruch-name { flex: 1; color: #e8d8c0; font-weight: 600; }
+.cast-spruch {
+  background: linear-gradient(180deg, #5a4030 0%, #3a2818 100%);
+  border: 1px solid #6a4830; color: #d8a868;
+  padding: 4px 12px; border-radius: 3px; cursor: pointer;
+  font-size: 12px; font-weight: 700; transition: all 0.15s;
+}
+.cast-spruch:hover { background: linear-gradient(180deg, #6a5040 0%, #4a3525 100%); border-color: #d8a868; }
+.remove-spruch {
+  background: rgba(180, 60, 60, 0.2); border: 1px solid rgba(180, 60, 60, 0.4);
+  color: #e08080; padding: 4px 8px; border-radius: 3px; cursor: pointer;
+}
+.remove-spruch:hover { background: rgba(180, 60, 60, 0.4); }
+.no-sprueche { color: #807060; font-style: italic; margin: 6px 0; }
+.add-spruch {
+  margin-top: 8px; width: 100%;
+  background: linear-gradient(180deg, #3a2818 0%, #2a1f12 100%);
+  border: 1px solid #5a4030; color: #d8a868;
+  padding: 8px; border-radius: 3px; cursor: pointer;
+  font-weight: 600; font-size: 12px;
+}
+.add-spruch:hover { background: linear-gradient(180deg, #4a3520 0%, #3a2818 100%); border-color: #d8a868; }
+</style>

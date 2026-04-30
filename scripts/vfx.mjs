@@ -284,6 +284,286 @@ async function vfxFire(x, y, opts = {}) {
 }
 
 /**
+ * Ignisphaero XXL: 3-Phasen-Explosion mit kinematischer Wucht.
+ *
+ * Phase 1 (0-15%): Anti-Wave + ladender Glow (alles wird in den Zentrum-Punkt
+ *   gezogen → "drückt" sich auf, bevor der Knall kommt).
+ * Phase 2 (15-50%): MASSIVER Knall — 3 Schockwellen-Ringe, 80+ Feuer-Partikel,
+ *   12 Lava-Splatter, weißer Flash, Hitze-Verzerrung, Screen-Shake stark.
+ * Phase 3 (50-100%): Roll-Out — Embers regnen mit Schwerkraft, dunkle
+ *   Rauchsäule steigt auf, glühende Glut bleibt am Boden, Aschestaub flatzert.
+ */
+async function vfxFireballXXL(x, y, opts = {}) {
+  const rad = opts.radius ?? 180;
+  const dur = opts.duration ?? 2200;
+
+  const container = makeContainer(false);
+  const glowLayer = new PIXI.Container();
+  glowLayer.blendMode = PIXI.BLEND_MODES.ADD;
+  container.addChild(glowLayer);
+
+  // Massiver Screen-Shake — drei Pulse, abnehmend
+  screenShake(18, 250);
+  setTimeout(() => screenShake(10, 200), 280);
+  setTimeout(() => screenShake(5, 250),  540);
+
+  // Phase 1: Anti-Wave (Luft wird hereingezogen)
+  const intakeG = new PIXI.Graphics(); container.addChild(intakeG);
+
+  // Phase 2: 3 Schockwellen-Ringe
+  const shockRings = [
+    { delay: 0.16, color: 0xffeecc, width: 8, maxRad: rad * 1.4, speed: 1.0 },
+    { delay: 0.20, color: 0xff6600, width: 6, maxRad: rad * 1.7, speed: 0.85 },
+    { delay: 0.26, color: 0xaa3300, width: 4, maxRad: rad * 2.1, speed: 0.7 },
+  ];
+  const shockGfx = shockRings.map(() => { const g = new PIXI.Graphics(); container.addChild(g); return g; });
+
+  // Phase 2: Weißer Flash (Belichtung) — kurz aber stark
+  const flashG = new PIXI.Graphics(); glowLayer.addChild(flashG);
+
+  // Phase 2: Hitze-Verzerrung — concentrisches Wabbern
+  const heatG = new PIXI.Graphics(); glowLayer.addChild(heatG);
+  const heatRings = Array.from({ length: 6 }, (_, i) => ({
+    baseR: rad * (0.4 + i * 0.18),
+    phase: rnd(0, TAU),
+    speed: rnd(2, 4),
+  }));
+
+  // Phase 2: 80 Feuer-Partikel — multi-layer Tiefe
+  const fireParticles = Array.from({ length: 80 }, () => ({
+    angle: rnd(0, TAU),
+    speed: rnd(0.5, 1.6),
+    size:  rnd(8, 22),
+    col:   Math.random() > 0.55 ? 0xff5500 : (Math.random() > 0.5 ? 0xffcc44 : 0xffaa00),
+    life:  rnd(0.5, 1.0),
+    drift: rnd(-25, 25),
+    spin:  rnd(-3, 3),
+    layer: Math.random() > 0.5 ? "fg" : "bg",
+  }));
+  const fireGfx = fireParticles.map(p => { const g = new PIXI.Graphics(); (p.layer === "bg" ? container : glowLayer).addChild(g); return g; });
+
+  // Phase 2: Lava-Splatter (große, langsame Brocken)
+  const lavaSplats = Array.from({ length: 12 }, () => ({
+    angle: rnd(0, TAU),
+    speed: rnd(0.6, 1.2),
+    size:  rnd(14, 28),
+    grav:  rnd(60, 140),
+    rot:   rnd(0, TAU),
+    rotSpeed: rnd(-4, 4),
+  }));
+  const lavaGfx = lavaSplats.map(() => { const g = new PIXI.Graphics(); glowLayer.addChild(g); return g; });
+
+  // Phase 3: Embers (40 sparks mit Schwerkraft, regnen)
+  const embers = Array.from({ length: 40 }, () => ({
+    angle: rnd(0, TAU),
+    speed: rnd(0.7, 1.5),
+    size:  rnd(2, 4.5),
+    grav:  rnd(80, 200),
+    flicker: rnd(0.6, 1.0),
+  }));
+  const emberG = new PIXI.Graphics(); glowLayer.addChild(emberG);
+
+  // Phase 3: Rauchsäule — 25 dunkle Wolken, steigen langsam
+  const smokes = Array.from({ length: 25 }, () => ({
+    ox: rnd(-40, 40), speed: rnd(0.3, 0.8), size: rnd(20, 50), phase: rnd(0.25, 0.7),
+    drift: rnd(-15, 15),
+  }));
+  const smokeG = new PIXI.Graphics(); container.addChild(smokeG);
+  container.setChildIndex(smokeG, 0);
+
+  // Phase 3: Glut am Boden (bleibt liegen, glüht)
+  const grounded = Array.from({ length: 18 }, () => ({
+    ox: rnd(-rad * 0.7, rad * 0.7),
+    oy: rnd(-rad * 0.2, rad * 0.4),
+    size: rnd(2, 5),
+    flicker: rnd(0.4, 1.0),
+  }));
+  const groundG = new PIXI.Graphics(); glowLayer.addChild(groundG);
+
+  // Phase 1: Core (zentraler Glow während Aufladung & Explosion)
+  const coreG = new PIXI.Graphics(); glowLayer.addChild(coreG);
+
+  await animate(dur, t => {
+    // ── Phase 1: Anti-Wave (0-15%) ────────────────────────────────────
+    intakeG.clear();
+    if (t < 0.15) {
+      const it = t / 0.15;
+      // Konzentrische Linien, die nach innen schrumpfen (suction effect)
+      for (let i = 0; i < 5; i++) {
+        const r = rad * (1.4 - i * 0.2) * (1 - it * 0.7);
+        intakeG.lineStyle(1, 0xff3300, (1 - it) * 0.4);
+        intakeG.drawCircle(x, y, r);
+      }
+    }
+
+    // ── Core (alle Phasen, aber Spitze bei 15-30%) ────────────────────
+    coreG.clear();
+    let coreA, coreR;
+    if (t < 0.15) {
+      // Aufladung
+      coreA = (t / 0.15) * 0.6;
+      coreR = rad * 0.15 * (t / 0.15);
+    } else if (t < 0.50) {
+      // Knall
+      const ct = (t - 0.15) / 0.35;
+      coreA = 1 - ct * 0.5;
+      coreR = rad * 0.6 * easeOut(ct);
+    } else {
+      // Abklingen
+      const ct = (t - 0.50) / 0.50;
+      coreA = (1 - ct) * 0.3;
+      coreR = rad * 0.6;
+    }
+    if (coreA > 0.02) {
+      coreG.beginFill(0xff8800, coreA * 0.5);
+      coreG.drawCircle(x, y, coreR);
+      coreG.endFill();
+      coreG.beginFill(0xffee66, coreA * 0.4);
+      coreG.drawCircle(x, y, coreR * 0.55);
+      coreG.endFill();
+      coreG.beginFill(0xffffff, coreA * 0.3);
+      coreG.drawCircle(x, y, coreR * 0.25);
+      coreG.endFill();
+    }
+
+    // ── Flash (15-22%) ────────────────────────────────────────────────
+    flashG.clear();
+    if (t >= 0.15 && t < 0.22) {
+      const ft = (t - 0.15) / 0.07;
+      const fa = 1 - ft;
+      flashG.beginFill(0xffffff, fa * 0.85);
+      flashG.drawCircle(x, y, rad * 1.5);
+      flashG.endFill();
+    }
+
+    // ── Schockwellen-Ringe (mehrere zeitlich gestaffelt) ──────────────
+    shockRings.forEach((sr, i) => {
+      shockGfx[i].clear();
+      if (t < sr.delay) return;
+      const rt = (t - sr.delay) / 0.45 * sr.speed;
+      if (rt >= 1) return;
+      const ringR = sr.maxRad * easeOut(rt);
+      const a = (1 - rt) * 0.7;
+      shockGfx[i].lineStyle(sr.width * (1 - rt * 0.6), sr.color, a);
+      shockGfx[i].drawCircle(x, y, ringR);
+    });
+
+    // ── Hitze-Verzerrung (subtile wellige Kreise) ─────────────────────
+    heatG.clear();
+    if (t >= 0.18 && t < 0.85) {
+      const ht = (t - 0.18) / 0.67;
+      heatRings.forEach(r => {
+        const wobble = Math.sin(t * r.speed * Math.PI * 2 + r.phase) * 4;
+        const ringR = r.baseR + wobble;
+        heatG.lineStyle(1, 0xffaa66, (1 - ht) * 0.18);
+        heatG.drawCircle(x, y, ringR);
+      });
+    }
+
+    // ── Feuer-Partikel ────────────────────────────────────────────────
+    fireParticles.forEach((p, i) => {
+      const g = fireGfx[i];
+      g.clear();
+      if (t < 0.15 || t >= 0.15 + p.life) return;
+      const pt   = (t - 0.15) / p.life;
+      const dist = rad * p.speed * easeOut(pt);
+      const px   = x + Math.cos(p.angle) * dist + p.drift * pt;
+      const py   = y + Math.sin(p.angle) * dist - dist * 0.25 + p.drift * pt * 0.3;
+      const a    = 1 - easeIn(pt);
+      const sz   = p.size * (1 - pt * 0.4);
+      if (sz < 1 || a < 0.04) return;
+      g.beginFill(p.col, a * 0.85);
+      g.drawCircle(px, py, sz);
+      g.endFill();
+      if (sz > 6) {
+        g.beginFill(0xffffff, a * 0.5);
+        g.drawCircle(px, py, sz * 0.32);
+        g.endFill();
+      }
+    });
+
+    // ── Lava-Splatter (mit Schwerkraft + Rotation) ────────────────────
+    lavaSplats.forEach((s, i) => {
+      const g = lavaGfx[i];
+      g.clear();
+      if (t < 0.18 || t > 0.95) return;
+      const pt = (t - 0.18) / 0.77;
+      const dist = rad * 0.9 * s.speed * easeOut(pt);
+      const px = x + Math.cos(s.angle) * dist;
+      const py = y + Math.sin(s.angle) * dist + s.grav * pt * pt;
+      const a = 1 - pt;
+      const sz = s.size * (1 - pt * 0.3);
+      if (sz < 2 || a < 0.05) return;
+      const rot = s.rot + s.rotSpeed * pt;
+      g.beginFill(0xff5500, a * 0.9);
+      // Unregelmäßiger Brocken — Polygon mit Verzerrung
+      g.moveTo(px + Math.cos(rot) * sz, py + Math.sin(rot) * sz);
+      for (let j = 1; j < 6; j++) {
+        const ang = rot + (j / 6) * TAU;
+        const rr = sz * (0.7 + 0.3 * Math.sin(ang * 3 + i));
+        g.lineTo(px + Math.cos(ang) * rr, py + Math.sin(ang) * rr);
+      }
+      g.closePath();
+      g.endFill();
+      g.beginFill(0xffaa00, a * 0.6);
+      g.drawCircle(px, py, sz * 0.4);
+      g.endFill();
+    });
+
+    // ── Embers (regnen mit Schwerkraft, flackern) ─────────────────────
+    emberG.clear();
+    if (t > 0.30) {
+      const et = (t - 0.30) / 0.70;
+      embers.forEach(e => {
+        if (et > e.flicker) return;
+        const dist = rad * 0.85 * e.speed * easeOut(et);
+        const ex = x + Math.cos(e.angle) * dist;
+        const ey = y + Math.sin(e.angle) * dist + e.grav * et * et;
+        const a = (1 - et / e.flicker) * 0.95;
+        // Flicker-Effekt
+        const flick = 0.7 + 0.3 * Math.sin(t * 30 + e.angle * 7);
+        emberG.beginFill(0xffcc00, a * flick);
+        emberG.drawCircle(ex, ey, e.size * (1 - et * 0.3));
+        emberG.endFill();
+      });
+    }
+
+    // ── Rauchsäule (steigt langsam, dunkel) ───────────────────────────
+    smokeG.clear();
+    smokes.forEach(s => {
+      const pt = (t - s.phase) / (1 - s.phase);
+      if (pt <= 0 || pt >= 1) return;
+      const sx = x + s.ox + Math.sin(pt * 5 + s.phase * 7) * 12 + s.drift * pt;
+      const sy = y - pt * 180 * s.speed;
+      const a  = (1 - pt) * 0.32;
+      const sz = s.size * (0.5 + pt * 1.0);
+      smokeG.beginFill(0x222222, a);
+      smokeG.drawCircle(sx, sy, sz);
+      smokeG.endFill();
+      smokeG.beginFill(0x553322, a * 0.4);
+      smokeG.drawCircle(sx, sy, sz * 0.7);
+      smokeG.endFill();
+    });
+
+    // ── Glut am Boden (bleibt liegen, flackert) ───────────────────────
+    groundG.clear();
+    if (t > 0.40) {
+      const gt = (t - 0.40) / 0.60;
+      grounded.forEach(g => {
+        const flick = g.flicker * (0.5 + 0.5 * Math.sin(t * 25 + g.ox * 0.1));
+        const a = (1 - gt * 0.7) * flick;
+        if (a < 0.05) return;
+        groundG.beginFill(0xff6600, a);
+        groundG.drawCircle(x + g.ox, y + g.oy, g.size);
+        groundG.endFill();
+      });
+    }
+  });
+
+  cleanup(container);
+}
+
+/**
  * Ice v2: crystal polygon shards + frost ring + cold mist + sparkles.
  */
 async function vfxIce(x, y, opts = {}) {
@@ -1425,10 +1705,11 @@ const VFX_MAP = {
   fulminictus:  (x, y, o) => vfxLightning(x, y, { ...o, color: 0x4466ff, glowColor: 0x88aaff }),
   donnerkeil:   (x, y, o) => vfxLightning(x, y, { ...o, color: 0xddaa00, glowColor: 0xffee44 }),
   // Fire
-  feuerball:    (x, y, o) => vfxFire(x, y, o),
-  explosion:    (x, y, o) => vfxFire(x, y, { ...o, particles: 50, radius: 130, duration: 1400 }),
-  flammenpfeil: (x, y, o) => vfxFire(x, y, { ...o, particles: 18, radius: 42 }),
-  brennen:      (x, y, o) => vfxFire(x, y, { ...o, radius: 35, duration: 1800, color1: 0xff4400, color2: 0xff8800, shake: false }),
+  feuerball:        (x, y, o) => vfxFire(x, y, o),
+  feuerball_xxl:    (x, y, o) => vfxFireballXXL(x, y, o),
+  explosion:        (x, y, o) => vfxFire(x, y, { ...o, particles: 50, radius: 130, duration: 1400 }),
+  flammenpfeil:     (x, y, o) => vfxFire(x, y, { ...o, particles: 18, radius: 42 }),
+  brennen:          (x, y, o) => vfxFire(x, y, { ...o, radius: 35, duration: 1800, color1: 0xff4400, color2: 0xff8800, shake: false }),
   // Ice / Frost
   eis:          (x, y, o) => vfxIce(x, y, o),
   aquafaxius:   (x, y, o) => vfxIce(x, y, { ...o, color: 0x44aaff, shards: 12 }),

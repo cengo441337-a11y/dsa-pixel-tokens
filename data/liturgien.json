@@ -156,10 +156,10 @@
       "VIII": "LkP* +30"
     },
     "_primaereSegnung": {
-      "Praios": "Glückssegen",
-      "Rondra": "Eidsegen",
+      "Praios": "Eidsegen",
+      "Rondra": "Schutzsegen",
       "Efferd": "Tranksegen",
-      "Travia": "Schutzsegen",
+      "Travia": "Speisesegen",
       "Boron": "Grabsegen",
       "Hesinde": "Weisheitssegen",
       "Phex": "Glückssegen",
@@ -169,10 +169,14 @@
       "Tsa": "Geburtssegen",
       "Firun": "Märtyrersegen",
       "Aves": "Glückssegen",
-      "Ifirn": "Feuersegen",
+      "Ifirn": "Heilungssegen",
       "Kor": "Märtyrersegen",
       "Nandus": "Weisheitssegen",
-      "Swafnir": "Harmoniesegen",
+      "Swafnir": "Tranksegen",
+      "Angrosch": "Feuersegen",
+      "Gravesh": "Feuersegen",
+      "H'Szint": "Weisheitssegen",
+      "Zsahh": "Heilungssegen",
       "Kamaluq": null,
       "Tairach": null,
       "Himmelswölfe": null
@@ -200,7 +204,17 @@
       "gott": [
         "Praios",
         "Phex",
-        "Aves"
+        "Aves",
+        "Rondra",
+        "Efferd",
+        "Travia",
+        "Boron",
+        "Hesinde",
+        "Peraine",
+        "Ingerimm",
+        "Rahja",
+        "Tsa",
+        "Firun"
       ],
       "grad": "I",
       "ziel": "P",
@@ -209,7 +223,6 @@
       "wirkungsdauer": "LkP* SR",
       "art": "universell",
       "primaer": [
-        "Praios",
         "Phex",
         "Aves"
       ],
@@ -254,7 +267,7 @@
       "wirkungsdauer": "bis LkP* Monate",
       "art": "allgemein",
       "primaer": [
-        "Rondra"
+        "Praios"
       ],
       "merkmale": [
         "Einfluss"
@@ -272,7 +285,18 @@
       "name": "Tranksegen",
       "gott": [
         "Efferd",
-        "H'Ranga"
+        "H'Ranga",
+        "Praios",
+        "Rondra",
+        "Travia",
+        "Boron",
+        "Hesinde",
+        "Phex",
+        "Peraine",
+        "Ingerimm",
+        "Rahja",
+        "Tsa",
+        "Firun"
       ],
       "grad": "I",
       "ziel": "PP",
@@ -281,7 +305,8 @@
       "wirkungsdauer": "augenblicklich",
       "art": "universell",
       "primaer": [
-        "Efferd"
+        "Efferd",
+        "Swafnir"
       ],
       "merkmale": [
         "Wasser",
@@ -319,7 +344,7 @@
       "wirkungsdauer": "LkP* SR",
       "art": "universell",
       "primaer": [
-        "Travia"
+        "Rondra"
       ],
       "merkmale": [
         "Antimagie"
@@ -339,7 +364,16 @@
         "Boron",
         "Peraine",
         "Tsa",
-        "H'Ranga"
+        "H'Ranga",
+        "Praios",
+        "Rondra",
+        "Efferd",
+        "Travia",
+        "Hesinde",
+        "Phex",
+        "Ingerimm",
+        "Rahja",
+        "Firun"
       ],
       "grad": "I",
       "ziel": "P",
@@ -366,7 +400,18 @@
       "name": "Weisheitssegen",
       "gott": [
         "Hesinde",
-        "Nandus"
+        "Nandus",
+        "Praios",
+        "Rondra",
+        "Efferd",
+        "Travia",
+        "Boron",
+        "Phex",
+        "Peraine",
+        "Ingerimm",
+        "Rahja",
+        "Tsa",
+        "Firun"
       ],
       "grad": "I",
       "ziel": "P",
@@ -376,7 +421,8 @@
       "art": "universell",
       "primaer": [
         "Hesinde",
-        "Nandus"
+        "Nandus",
+        "H'Szint"
       ],
       "merkmale": [
         "Eigenschaften"
@@ -415,7 +461,9 @@
       "wirkungsdauer": "augenblicklich",
       "art": "allgemein",
       "primaer": [
-        "Peraine"
+        "Peraine",
+        "Ifirn",
+        "Zsahh"
       ],
       "merkmale": [
         "Heilung"
@@ -435,7 +483,18 @@
         "Ingerimm",
         "Angrosch",
         "Gravesh",
-        "Ifirn"
+        "Ifirn",
+        "Praios",
+        "Rondra",
+        "Efferd",
+        "Travia",
+        "Boron",
+        "Hesinde",
+        "Phex",
+        "Peraine",
+        "Rahja",
+        "Tsa",
+        "Firun"
       ],
       "grad": "I",
       "ziel": "G",
@@ -446,7 +505,7 @@
       "primaer": [
         "Ingerimm",
         "Angrosch",
-        "Ifirn"
+        "Gravesh"
       ],
       "merkmale": [
         "Feuer",
@@ -476,7 +535,8 @@
         "Ingerimm",
         "Efferd",
         "Firun",
-        "Angrosch"
+        "Angrosch",
+        "Rondra"
       ],
       "grad": "I",
       "ziel": "P",
@@ -485,8 +545,7 @@
       "wirkungsdauer": "LkP* SR",
       "art": "allgemein",
       "primaer": [
-        "Rahja",
-        "Swafnir"
+        "Rahja"
       ],
       "merkmale": [
         "Einfluss"
@@ -581,7 +640,17 @@
       "name": "Speisesegen",
       "gott": [
         "Travia",
-        "Peraine"
+        "Peraine",
+        "Praios",
+        "Rondra",
+        "Efferd",
+        "Boron",
+        "Hesinde",
+        "Phex",
+        "Ingerimm",
+        "Rahja",
+        "Tsa",
+        "Firun"
       ],
       "grad": "I",
       "ziel": "PP",
@@ -713,9 +782,9 @@
         "Antimagie"
       ],
       "effekt": "Macht ein Gebiet permanent magiefrei + zweifach geweiht.",
-      "symboleGesten": "Die Geweihte schlägt das Zeichen der Göttin und stimmt den sechsten Vers der Carmina Argelionis an: Dein Wirken, mächt'ge Göttin, liegt in und über dieser Welt. Und nur Deines Geistes Alldurchdringen sie in ihrer Form erhält. Dein Wissen wandelt alles hin zum Guten, darum hältst Du ewig Wacht. Nichts jedoch besteht vor Deinem Zorn und Deiner Macht. Dann dreht sie sich nach rechts um ihre Achse und schlägt dreimal das Zei- chen der Göttin und ruft dabei jeweils: Hesinde, Allweise, große Weberin! Mada, Mondmächtige! Naclador, Gewaltiger!",
-      "auswirkung": "Die Liturgie schwächt oder beendet die Wirkung von Zau- bern oder Ritualen der Merkmale Eigenschaften, Einfluss, Form, Herrschaft, Illusion, Objekt oder Umwelt, die auf ein Objekt oder eine Person wirken. Die LkP*+15 der Geweihten werden von den ZfP* des Zaubers oder Ritu- als abgezogen und so die Wirkung vermindert. Sinken die ZfP* auf 0 oder fallen darunter, wird der Zauber gänzlich aufgehoben.",
-      "anmerkungen": "Gegen Flächenzauber wirkt die Liturgie in einer Zone (Z). Argelions Mantel",
+      "symboleGesten": "Der Geweihte hält eine lange Messe, bei der er sowohl das Auge des Praios als auch einen Strahl des Ewigen Lichts benötigt.",
+      "auswirkung": "Es entsteht eine Zone, in der keinerlei Magie mehr gewirkt werden kann. Magische Artefakte werden unterdrückt, aktive Sprüche wer- den aufgehoben. Für unheilige Wesen gilt die Zone als zweifach geweiht. Magische Wesen wie Geister und Elementare können sich in der Zone auf- halten, fühlen sich darin jedoch nicht wohl, da sie darin ihrer natürlichen Kräfte beraubt sind.",
+      "anmerkungen": "Das Auge des Praios ist ein Talisman der Praioskirche. Mehr zu dem Talisman finden Sie in Wege der Götter auf Seite 37. Argelions bannende Hand",
       "herkunftDetail": "Hesinde (Kuslik, Gareth, Punin, Lowangen, Tiefhusen), Praios;",
       "ritualdauerDetail": "Gebet (1 Spielrunde)",
       "wirkungsdauerDetail": "LkP* in Stunden"
@@ -1549,9 +1618,9 @@
         "Einfluss"
       ],
       "effekt": "Euphorischer Rausch. MU/CH +LkP*/2.",
-      "symboleGesten": "Die Auserwählte, möglicherweise auch die Rah- jageweihte selbst, entkleidet sich und ruft die Macht der Göttin an. Die überlieferten Worte lauten (Übersetzung aus dem Ur-Tulamidya): Radja, siehe, (sie) erträgt die Qual, Zauber können (sie) nicht berühren, Das Feuer vermag (sie) nicht zu verbrennen. Segne (sie) mit Stärke und Unverwundbarkeit, Rahja, oh Herrin der Ekstase!",
-      "auswirkung": "Die Gesegnete wird für die Wirkungsdauer unverwundbar. Weder profaner, noch magischer oder geweihter Schaden kann sie treffen, je- doch werden alle Sinneseindrücke deutlich verstärkt wahrgenommen. Würde ein einzelner Hieb 10 SP oder mehr anrichten, ist eine Selbstbeherrschungs- Probe erforderlich, die um die erlittenen SP erschwert ist. Misslingt sie, wird die Gesegnete von Schmerzen übermannt. Alle angerichteten SP werden am Ende der Wirkungsdauer von ihrer Ausdauer abgezogen.",
-      "anmerkungen": "Diese Liturgie wird vor allem in der tulamidischen Kirche angewandt, um Rauschzustände und Ekstase zu verstärken oder Säbeltänzer bei ihren Kämpfen zu unterstützen. Reiches Land",
+      "symboleGesten": "Die Rahjageweihte richtet ein Gebet an ihre Göttin und segnet die bereitgestellten Rauschmittel mit einer leichten Be- rührung. Sodann bittet sie um Erquickung und darum, dass die Göttin die Gläubige mit ihrer Innigkeit und Euphorie berauschen möge.",
+      "auswirkung": "Die gesegneten Rauschmittel entfalten stärkere Wirkung oder sind für den Anwender weniger riskant zu konsumieren. Bewusstseinserwei- ternde Rauschmittel wirken deutlich stärker und intensiver, die Nachwir- kungen leichter Rauschmittel sind am nächsten Tag nicht mehr spürbar. Bei stärkeren Substanzen wird zudem die Gefahr einer Abhängigkeit gebannt. Narkotische Mittel können nicht mittels dieser Liturgie gesegnet werden.",
+      "anmerkungen": "Falls die Rahjageweihte die gesegneten Rauschmittel selbst benutzt, wird die Liturgie zur Berechnung von Entrückung wie um einen Grad höher behandelt. Rahjas Schoss",
       "herkunftDetail": "Rahja (Fasar, Erkenstein)",
       "ritualdauerDetail": "Gebet (1 Spielrunde)",
       "wirkungsdauerDetail": "LkP* in Spielrunden"
@@ -1748,7 +1817,10 @@
       "merkmale": [
         "Antimagie"
       ],
-      "effekt": "Bannt niedere Dämonen Gegendomäne. Grad IV = gehörnte Dämonen Gegendomäne. Grad V = gehörnte Dämonen anderer Domänen + Unheiligtümer-Zerstörung. Grad VI = alle Domänen."
+      "effekt": "Bannt niedere Dämonen Gegendomäne. Grad IV = gehörnte Dämonen Gegendomäne. Grad V = gehörnte Dämonen anderer Domänen + Unheiligtümer-Zerstörung. Grad VI = alle Domänen.",
+      "auswirkung": "Mit dieser Liturgie zwingt der Geweihte einen niederen Dä- mon aus dem Gefolge des Widersachers seiner Gottheit in die Niederhöllen zurück. Varianten: Grad IV: Auf diesen Grad aufgestuft bannt die Liturgie gehörnte Dä- monen der Gegendomäne oder niedere Dämonen einer anderen Domäne. Grad V: Auf Grad V können gehörnte Dämonen anderer Domänen ge- bannt werden. Unheiligtümer des Widersachers der Gottheit werden zer- stört. Diese Variante muss separat erlernt werden. Grad VI: Diese mächtige Variante vermag Unheiligtümer aller Domä- nen zu zerstören. Diese Variante muss separat erlernt werden.",
+      "symboleGesten": "Der Geweihte blickt den Dämon oder die be- sessene Person fest an, schlägt das Zeichen seines Gottes und spricht: Im Namen meines heiligen Herrn /meiner heiligen Herrin [Gottheit], unheiliges Gezücht, kehre zurück in die Niederhöllen, aus denen du gekommen bist!",
+      "anmerkungen": "Die Beherrschungsschwierigkeit des Dämons erschwert die Mirakelprobe, die Sonderfertigkeit Exorzist kann diese bei passender Vorbe- reitung erleichtern. Firuns Einsicht"
     },
     {
       "id": "exkommunikation",
@@ -1780,9 +1852,9 @@
         "Einfluss"
       ],
       "effekt": "Schließt Zwölfgöttergläubigen aus. Grad IV = Geweihter-Excomm. (KaP-Sperre). Grad V = Weihe-Entzug.",
-      "symboleGesten": "Der Geweihte blickt den Dämon oder die be- sessene Person fest an, schlägt das Zeichen seines Gottes und spricht: Im Namen meines heiligen Herrn /meiner heiligen Herrin [Gottheit], unheiliges Gezücht, kehre zurück in die Niederhöllen, aus denen du gekommen bist!",
-      "auswirkung": "Mit dieser Liturgie zwingt der Geweihte einen niederen Dä- mon aus dem Gefolge des Widersachers seiner Gottheit in die Niederhöllen zurück. Varianten: Grad IV: Auf diesen Grad aufgestuft bannt die Liturgie gehörnte Dä- monen der Gegendomäne oder niedere Dämonen einer anderen Domäne. Grad V: Auf Grad V können gehörnte Dämonen anderer Domänen ge- bannt werden. Unheiligtümer des Widersachers der Gottheit werden zer- stört. Diese Variante muss separat erlernt werden. Grad VI: Diese mächtige Variante vermag Unheiligtümer aller Domä- nen zu zerstören. Diese Variante muss separat erlernt werden.",
-      "anmerkungen": "Die Beherrschungsschwierigkeit des Dämons erschwert die Mirakelprobe, die Sonderfertigkeit Exorzist kann diese bei passender Vorbe- reitung erleichtern. Firuns Einsicht",
+      "symboleGesten": "Nach einem Gebet, das eine Bitte um Einsicht in die göttliche Ordnung und die Weisheit, das Richtige zu tun, beinhaltet, werden ausführlich die Verstöße gegen die zwölfgöttlichen Gebote der zu exkommunizierenden Person aufgezählt. Dabei wird deren Schwere betont, da eine Exkommunikation nicht leichtfertig ausgesprochen werden sollte. Anschließend wird die zu erfüllende Buße genannt.",
+      "auswirkung": "Durch diese Liturgie wird eine Person aus der Zwölfgöttli- chen Gemeinschaft ausgeschlossen. Bis sie ihre Buße vollbracht hat, gilt sie als Frevler. Varianten: Grad IV: Um einen Geweihten zu exkommunizieren, muss die Liturgie auf Grad IV aufgestuft werden. Dem Geweihten steht bis zum Ende der Wirkungsdauer keinerlei Karmaenergie mehr zur Verfügung. Er wird von allen Kirchenämtern ausgeschlossen und verliert alle Privilegien seines Stan- des. Dieser Grad muss separat erlernt werden. Grad V: Mit dieser ausschließlich Kirchenoberhäuptern bekannten Va- riante ist es sogar möglich, die Weihe dauerhaft von einem Geweihten zu nehmen. Auch sie muss separat erlernt werden.",
+      "anmerkungen": "Die Buße sollte zur Art des Frevels und zur aussprechenden Geweihten passen. Sie sollte erfüllbar sein, sodass der Exkommunizierte überhaupt eine Chance hat, in die Gemeinschaft der Gläubigen zurückzu- kehren. Exorzismus",
       "herkunftDetail": "Zwölfgötterkult, Angrosch, Gravesh, H'Ranga; Salbung der",
       "ritualdauerDetail": "Stoßgebet (15 Aktionen) bei Dämonen, Zeremonie (8 Stun-",
       "wirkungsdauerDetail": "augenblicklich"
@@ -1926,9 +1998,9 @@
         "Einfluss"
       ],
       "effekt": "Schutzfluch: Mirakel+-Talente -LkP*. Dämonen+Paktierer LkP*+10 SP. Grad V/VI = +Liturgie bis Grad II/III.",
-      "symboleGesten": "Die Geweihte stellt sich die Person, zu der sie sprechen will, vor ihrem inneren Auge vor und spricht stumm die Botschaft.",
-      "auswirkung": "Mit dieser Liturgie kann die Geweihte eine Botschaft mit einer Länge von bis zu LkP*/2+5 Worten an den Geweihten, der sie geweiht hat, oder den Tempelvorsteher ihres Heimattempels (bzw. dessen Nachfolger) sen- den. Der Empfänger hört die Nachricht, ganz gleich was er gerade tut. Varianten: Grad III: Um andere, zumindest namentlich bekannte Geweihte zu er- reichen, muss die Liturgie auf Grad III separat erlernt werden. Die maxima- le Länge der Botschaft beträgt dann LkP*+5 Wörter. Grad IV: Auf Grad IV kann man Geweihte beliebiger Tempel erreichen. Die Länge der Botschaft bei dieser separat zu erlernenden Variante beträgt LkP*+10 Worte.",
-      "anmerkungen": "Die meisten Geweihten nutzen diese Liturgie nur in größ- ter Not, oder wenn es auf üblichem Wege nicht möglich ist, eine Nachricht abzusetzen. Die Kategorie Ziel kann bei dieser Liturgie nicht aufgestuft wer- den, es ist ausschließlich dem Geweihten selbst möglich, die Nachricht zu übermitteln. Göttliches Zeichen",
+      "symboleGesten": "Der Geweihte betet und erklärt dabei seiner Gottheit, warum dieser Ort oder Gegenstand geschützt werden muss. Au- ßerdem führt er aus, vor welchen Personen oder Wesen der Schutz nicht gelten muss.",
+      "auswirkung": "Der benannte Ort oder Gegenstand wird durch göttliches Wirken geschützt. Alle außer den Benannten ereilt eine passende Strafe, so sie den Ort betreten oder den Gegenstand berühren: Mirakel+Talente und Eigenschaften werden gleichmäßig um LkP* Punkte gesenkt. Dämonen der Gegendomäne und entsprechende Paktierer erleiden LkP*+10 SP. Hinzu kommt außerdem eine weitere, zum Wesen der Gottheit passende Strafe. Ein durch diese Liturgie geschützter Gegenstand kann nicht weiter als LkW Schritt bewegt werden, sonst verfliegt die Wirkung. Die Bewohner des Or- tes, an dem der Gegenstand aufbewahrt wird, müssen sich außerdem den Geboten der schützenden Gottheit entsprechend verhalten. Varianten: Grad V: Auf diesem Grad ist es möglich, eine andere Liturgie bis maxi- mal Grad II einzubinden. Dämonen und Paktierer erleiden unabhängig von ihrer Domäne den oben genannten Schaden. Grad VI: Auf diesem Grad ist die Wirkungsdauer permanent, und es kann eine Liturgie bis Grad III eingebunden werden. Neben Dämonen und Paktierern erleiden auch unheilige Wesen den oben genannten Schaden. Die- se Variante muss extra erlernt werden, hierzu sind zudem Kenntnisse der Konsekration und der Objektweihe erforderlich.",
+      "anmerkungen": "Diese Liturgie wird nur Tempelvorstehern gelehrt. Göttliche Verständigung",
       "herkunftDetail": "Zwölfgötterkult, Angrosch",
       "ritualdauerDetail": "Stoßgebet (10 Aktionen)",
       "wirkungsdauerDetail": "augenblicklich"
@@ -2217,9 +2289,9 @@
         "Einfluss"
       ],
       "effekt": "Ziel im Winterschlaf. Zeit pausiert.",
-      "symboleGesten": "Die Priesterin sucht gemeinsam mit dem zu verwandelnden Wesen einen feuchten, warmen Ort auf. Dort umarmt die Priesterin das Wesen eine ganze Nacht lang. Am nächsten Morgen ist die Wandlung vollzogen.",
-      "auswirkung": "Die Priesterin kann das Geschlecht eines Tieres oder einer Person tauschen. Männer werden zu Frauen, Frauen zu Männern. Die Ver- wandlung in das andere Geschlecht ist umfassend. Sowohl Aussehen, als auch Stimme und andere geschlechtsspezifische Merkmale ändern sich ent- sprechend. Die Rückverwandlung nach Ablauf der Wirkungsdauer braucht ­ wie auch die Verwandlung ­ eine Nacht.",
-      "anmerkungen": "Bei den Echsenvölkern ist es durchaus üblich, bei einer Ungleichverteilung das Geschlecht kurzzeitig zu wechseln, um den Fortbe- stand des Stammes zu sichern. Theoretisch entfaltet diese Liturgie auch bei Menschen oder anderen humanoiden Rassen ihre Wirkung. Praktisch hat wohl kein Warmblüter jemals diese Segnung empfangen. Wundersame Blütenpracht",
+      "symboleGesten": "Der Empfänger der Liturgie schließt seine Au- gen. Währenddessen spricht der Firungeweihte ein Gebet und legt seine Hände auf die geschlossenen Lider des zu Segnenden. Nach etwa einer hal- ben Stunde fällt dieser dann in den Winterschlaf.",
+      "auswirkung": "Die Zielperson fällt in einen tiefen Winterschlaf, dessen Dau- er vor Beginn der Liturgie durch den Geweihten festgelegt werden muss. Während dieser Zeit braucht er weder Nahrung noch Atemluft und natürli- che Temperaturschwankungen können ihm nichts anhaben. Er erleidet erst ab niederhöllischer Kälte bzw. kochend heißer Temperatur Schaden. Die Regeneration von Lebens- und Astralenergie findet anstelle von täg- lich nur noch einmal wöchentlich statt. Die Wirkung von Krankheiten und Giften wird für die Dauer des Winterschlafes ausgesetzt. Erleidet der Win- terschläfer Schaden, erwacht er.",
+      "anmerkungen": "Manchmal ist diese Liturgie die einzige Möglichkeit, im hohen Norden zu überwintern. Wunderbarer Geschlechterwandel",
       "herkunftDetail": "Zsahh, H'Szint, Ssad'Huar",
       "ritualdauerDetail": "Zeremonie (8 Stunden)",
       "wirkungsdauerDetail": "LkP* in Wochen"
@@ -2896,9 +2968,9 @@
         "Hellsicht"
       ],
       "effekt": "Findet sicheren Unterschlupf in der Wildnis (Höhle, Felsspalt, Schneewehe).",
-      "symboleGesten": "Die Geweihte betet und schildert dabei ihre Not. Dabei bläst sie Daunen über die zu Schützenden, oder breitet sym- bolisch ihren Mantel über sie, und entzündet zwischen ihnen ein Feuer.",
-      "auswirkung": "Im Wirkungsbereich entsteht eine orange leuchtende Schutzkuppel, die vor Umweltbedingungen und dämonischen Einflüssen schützt. Die Kuppel ist nicht beweglich, der Boden innerhalb gilt als zwei- fach geweiht. Varianten: Grad VI: Diese Variante öffnet eine Tür in einen warmen Raum mit ausreichend Speisen und Getränken für LkP* Personen. Wenn die Tür ein- mal geschlossen wurde, ist sie nur noch von innen zu öffnen. Sollte sich jemand im Raum traviaungefällig verhalten, verschwindet der Raum und die Schutzsuchenden sind wieder dort, wo sie ihn betreten haben. Diese Variante ist als Travias Gebet der verborgenen Halle (ZZ) bekannt.",
-      "anmerkungen": "Ganz gleich, welche Witterung vorherrscht und wie karg das Brennmaterial ist, wird es der Geweihten immer gelingen, mittels dieser Liturgie ein Feuer zu entfachen. Travinians Segen der Schwelle",
+      "symboleGesten": "Der Firungeweihte nimmt Eis, Schnee oder Wasser in seine Hände und reibt sich damit Augen und Schläfen ein. Die- sen Vorgang wiederholt er mehrere Male und dankt dabei seinem Gott so- wie seiner milden Tochter Ifirn für ihre Gnade.",
+      "auswirkung": "Durch diese Liturgie kann der Geweihte ohne weitere Proben eine sichere Zuflucht finden, in der er und seine Gefährten vor Wind und Wetter geschützt sind. Der Weg dorthin kann zusätzlich bis zu 6 Spielrun- den in Anspruch nehmen.",
+      "anmerkungen": "Avesgeweihte drehen sich mitsamt ihres Wanderstabes dreimal um sich selbst, in der Traviakirche ist es üblich Gänsedaunen oder Brotkrumen auf den Weg zu streuen. Die Kaskju der Nivesen rufen die Himmelswölfe an und bitten um eine sichere Zuflucht. eIGene lIturGIen übersIcht der lIturGIen Bezeichnung zu finden unter Grad Seite a 260 Achmad'ayan ankhrellah Ruf zum Bund wider die Mächte der Finsternis VI 235 al'nurach Shaitanim 88 Al'Dhafar Phexens Verteidigung II 90 Aller Welt Freund ­ IV 91 Allmacht der Lohe ­ II 330 Alte Schuppen ­ III 94 Am Busen der Natur Zuflucht finden II 96 Anathema ­ V 98 Angroschs Opfergabe ­ II 100 Angroschs Zorn Waliburias Wehr III 101 Anrufung der Erdkraft ­ II 103 Anrufung der Winde ­ II 105 Anrufung Nuiannas ­ III 106 Arcanum Interdictum ­ VI Argelions bannende Hand ­ V Argelions Mantel ­ III Argelions Spiegel ­ IV Ascandears Hingabe ­ III Auge der wartenden Seelen Nemekaths Geisterblick II Auge des Händlers ­ II Auge des Mondes ­ II Auge Xeledons ­ Xeledons Helles Licht ­ V Aura der Form ­ III Aura des Regenbogens ­ III Auraprüfung Seelenprüfung IV Azilas Quellgesang ­ III b Bann der Geisterkräfte Praios' Magiebann IV 237 Bannfluch des Heiligen Khalid ­ III 107 Begehen der heiligen Wasser ­ III 108 Belemans Hochzeit ­ IV 109 Bindung der Schlange ­ II 110 Birkenzweig ­ II 111 Bishdariels Angesicht Kleine Liturgie des Heiligen Nemekath IV 200 Bezeichnung zu finden unter Grad Seite Bishdariels Auge ­ II 112 Bishdariels Warnung Nemekaths Bannfluch Blendstrahl aus Alveran III 113 Blick an den klaren Himmel ­ Blick auf das Geisterwirken Sterne funkeln immerfort I 114 Blick der Weberin Blick durch Tairachs Augen Sicht auf Madas Welt I 296 Blick für das Handwerk ­ Blick in die Erinnerung II 289 Blick in die Flammen Blick der Weberin Blutschwur ­ II 115 Bootssegen Borons süße Gnade Kleine Liturgie des Heiligen Nemekath II 115 Buchprüfung ­ Bund von Feuer und Erz II 117 Großer Eidsegen ­ IV 200 ­ ­ III 118 Großer Eidsegen III 174 III 119 IV 120 III 121 III 174 c ­ IV 122 Handwerkssegen Canyzeths Weisheit II 178 Cereborns Handreichung ­ Conagas Ruf III 123 d ­ IV 124 Unverstellter Blick Daradors Bann der Schatten III 320 Daradors prüfender Blick ­ Das schwarze Fell durch das rote Blut Zuflucht finden II 125 Der Gänsemutter warmes Nest Der über das Schlachtfeld schreitet ­ II 344 Des Einen bezaubernder Sphärenklang ­ Des Herren goldener Mittag Weisung des Himmels I 126 Die goldene Hand ­ Dorlens Verbrüderung ­ III 127 Dreifacher Saatsegen ­ Dythlinds Wandeln im Feuer Vertrauter der Flamme I 336 I 128 VI 129 III 130 II 324 Bezeichnung zu finden unter Grad Seite e Efferdsegen ­ III 131 Eherne Kraft ­ Lodernder Zorn ­ VI 132 Ehrenhafter Zweikampf ­ II 133 Eidechsenhaut ­ III 134 Eidsegen 12 Segnungen / Eidsegen I 74 Ein Bild für die Ewigkeit ­ II 135 Ein Freund in Zeiten der Not ­ IV 136 Eissturm Schneesturm V 267 Elementwandlung ­ II 137 Entzug des Wissens Entzug von Nandus' Gaben II 138 Entzug von Nandus' Gaben ­ II 138 Erlösung des Tapams Borons süße Gnade IV 120 Erneuerung des Geborstenen ­ I 138 Erzieherische Maßnahme der Heiligen Yalsicena ­ III 140 Etilias Gnade ­ III 141 Etilias Zeit der Meditation Ruf zur Ruhe I 261 Ewige Jugend ­ V 142 Ewiger Wächter ­ V 143 Ewiges Wissen ­ V 144 Exkommunikation ­ III 145 Exorzismus ­ III 146 f 12 Segnungen / Feuersegen I 76 Feuersegen Initiation IV 147 Feuertaufe Firuns Einsicht ­ IV 147 Firuns Zorn Flagge des Regenbogens ­ III 148 Fluch wider die Ungläubigen Freundliche Aufnahme ­ III 149 Frieden der Melodie Fünfte Lobpreisung des Frühlings ­ V 150 Fürbitten des Heiligen Therbûn ­ III 151 ­ I 152 ­ V 153 ­ III 154 Bezeichnung zu finden unter Grad Seite G Garafans gleißende Schwingen ­ V 155 Gebet des kristallklaren Blicks ­ III 156 Gebieter der Lava ­ V 157 Geburtssegen 12 Segnungen / Geburtssegen I 77 Geistermantel Argelions Mantel III 98 Geläutert sei Erz und Goldgestein ­ III 158 Gemeinschaft der treuen Gefährten ­ II 159 Gesang der Delphine ­ II 160 Gesang der Wale Gesang der Delphine II 160 Gesegneter Fang ­ II 161 Geteiltes Leid ­ II 162 Gift der Erkenntnis ­ II 163 Gilborns heilige Aura Argelions Mantel III 98 Gleichklang des Geistes ­ I 164 Glückssegen 12 Segnungen / Glückssegen I 78 Göttliche Strafe ­ IV 165 Göttliche Verständigung ­ I 166 Göttliches Zeichen ­ I 167 Goldene Rüstung ­ II 168 Goldener Blick ­ III 169 Golgaris Zwielicht ­ II 170 Gorfangs Fluch Sippenfluch IV 291 Gott der Götter ­ II bis VI 171 Grabsegen 12 Segnungen / Grabsegen I 79 Graues Siegel ­ III 172 Grispelz' Ackersegen Dreifacher Saatsegen III 130 Grispelz' Fruchtbarkeit Tsas Wundersame Fruchtbarkeit IV 316 Große Seelenprüfung Seelenprüfung V 275 Große Seelenwaschung Exorzismus III 146 Große Weihe des Heimsteins ­ VI 173 Großer Eidsegen ­ III 174 Großer Giftbann Großer Speisesegen III 175 Großer Reisesegen Reisesegen III 253 Großer Speisesegen ­ III 175 Großer Weihesegen der Waffe ­ VI 176 Großes Tabu Siegel Borons III 290 Gruß des Versunkenen ­ IV 177 Bezeichnung zu finden unter Grad Seite h Händlersegen 12 Segnungen / Eidsegen II 75 Handwerkssegen ­ II 178 Harmoniesegen 12 Segnungen / Harmoniesegen I 80 Hashnabiths Flehen ­ II 179 Hauch Borons ­ III 180 Hauch der Leidenschaft Handwerkssegen II 178 Hausfrieden ­ III 181 Haut des Chamäleons Verborgen wie der Neumond III 323 Heilige Salbung der Peraine Tsas heiliges Lebensgeschenk V 312 Heilige Schmiedeglut ­ I 182 Heiliger Befehl ­ II 183 Heiliger Lehnseid 12 Segnungen / Eidsegen II 75 Heiliges Liebesspiel ­ II 184 Heilungssegen 12 Segnungen / Heilungssegen I 81 Herbeirufung der Diener des Herren ­ II 185 Herbeirufung der Heerscharen des Rattenkindes ­ III 186 Herr über Feuer und Glut ­ IV 187 Hesindes Fingerzeig Buchprüfung III 121 Hilfe in der Not ­ II 188 Hoftag der Sprachen ­ IV 189 I, j Indoktrination ­ IV 190 Ingalfs Alchimie ­ IV 191 Ingerimms Zorn verschone uns ­ VI 192 Initiation ­ II 193 Innere Ruhe ­ I 194 Jagdglück ­ III 195 Bezeichnung zu finden unter Grad Seite k Kälbchensegen ­ I 196 Kamaluqs Fluch Sippenfluch IV 291 Kamaluqs unerbittlicher Speer Bannfluch des Heiligen Khalid III 107 Keta Ajaban Kud'a Wundersames Teilen des Martyriums IV 341 Khablas Jugend ­ III 197 Khablas makelloser Leib ­ V 198 Kirschblütenregen ­ II 199 Kleine Liturgie des Heiligen Nemekath ­ IV 200 Kleine Segnung des Heimsteins ­ II 201 Kleiner Giftbann ­ II 202 Kleines Tabu Ruf zur Ruhe I 261 Konsekration ­ V 203 Kräftigung der Schwachen und Versehrten ­ V 204 Kräutersegen des Heiligen Nemekath Rahjas Rauschsegen II 248 l ­ V 205 ­ Largorax' Hammer rufen ­ III 206 Levthans Fesseln ­ Licht des Herrn ­ III 207 Licht des verborgenen Pfades ­ Lidaris Herz Unverstellter Blick II 208 Lohn der Unverzagten Lug und Trug III 209 II 210 III 320 m ­ III 211 Nemekaths Geisterblick Mannschaftssegen II 219 Marbos Geisterblick ­ Marbos Geleit Etilias Gnade V 212 Marbos Gnade 12 Segnungen / Märtyrersegen Märtyrersegen Wandeln in Hesindes Hain III 141 Meisterstück Mikailspfeil ­ I 82 Mondsilberzunge ­ V 331 III 213 III 214 Bezeichnung zu finden unter Grad Seite n Namenlose Kälte ­ II 215 Namenlose Raserei ­ II 216 Namenloser Zweifel ­ Namenlose Erleuchtung ­ IV 217 Namenloses Vergessen ­ I 218 Nandus' Schriftkenntnis Schrifttum ferner Lande III 269 Nemekaths Geisterblick ­ II 219 Nemekaths Zwiesprache ­ IV 220 Neun Streiche in Einem ­ I 221 Nimmermüde Wanderschaft ­ II 222 Noionas Zuspruch Segen der Heiligen Velvenya III 280 o Zerschmetternder Bannstrahl V 343 Obarans Bannstrahl ­ I 223 Objektsegen Objektweihe ­ II 224 Ordination ­ IV 225 p, q ­ III 226 ­ Parinors Vermächtnis ­ II 227 Pech und Schwefel ­ Peraines Pflanzengespür ­ II 228 Phexens Augenzwinkern Blick für das Handwerk Phexens Elsterflug ­ III 229 Phexens Kunstverstand ­ Phexens Meisterschlüssel ­ III 230 Phexens Nebelleib ­ Phexens Schatten ­ II 117 Phexens Sternenwurf ­ Phexens Verteidigung ­ V 231 Phexens wunderbare Verständigung ­ Praios' Magiebann ­ IV 232 Praios' Mahnung ­ Prophezeiung ­ V 233 Purgation Quellsegen IV 234 II 235 II 236 IV 237 III 238 I 239 III 240 III 241 Bezeichnung zu finden unter Grad Seite r Rahjalinas Farbenspiel ­ I 242 Rahjalinas Kuss ­ IV 243 Rahjalinas Weinranke Parinors Vermächtnis III 226 Rahjas Begehren ­ III 244 Rahjas Erquickung Schlaf des Gesegneten I 264 Rahjas Fest der Freude ­ III 245 Rahjas Freiheit ­ IV 246 Rahjas geheiligter Wein ­ IV 247 Rahjas heitere Gelassenheit Segen der Heiligen Noiona III 278 Rahjas Rauschsegen ­ II 248 Rahjas Schoß ­ IV 249 Rahjas Sinnlichkeit ­ VI 250 Rahjasbund Großer Eidsegen III 174 Reiches Land ­ IV 251 Reichung des Amethyst ­ I 252 Reisesegen ­ II 253 Revolution der Gedanken ­ III 254 Ritus der Schlachthilfe ­ V 255 Rondras Hochzeit Belemans Hochzeit IV 109 Rondras wundersame Rüstung ­ V 256 Ruf der Ferne ­ II 257 Ruf der Gefährten ­ II 258 Ruf in Borons Arme ­ II 259 Ruf zum Bund wider die Mächte der Finsternis ­ VI 260 Ruf zur Ruhe ­ I 261 Runjensweisung ­ II 262 s Exorzismus III 146 Argelions bannende Hand Salbung der Heiligen Noiona V 97 Sankt Gilborns Bannfluch ­ Schattenlarve Bootssegen VI 263 Schiffssegen Schlaf des Gesegneten ­ IV 119 Schlangenstab ­ Schleichende Fäulnis ­ I 264 Schneesturm ­ Schnell wie eine Eidechse ­ II 265 IV 266 V 267 II 268 Bezeichnung zu finden unter Grad Seite Schrifttum ferner Lande ­ III 269 Schutz des Geleges ­ Schutzsegen 12 Segnungen / Schutzsegen II 270 Schwindende Zauberkraft ­ Schwitzhütte Fünfte Lobpreisung des Frühlings I 83 Sechs Leben des Mungos ­ Seelenbannung ­ IV 271 Seelengefährte ­ Seelenprüfung ­ V 153 Seelenrudel Seelengefährte Seelenschatten ­ II 272 Segen der Gabetaj Parinors Vermächtnis Segen der Heiligen Ardare ­ IV 273 Segen der Heiligen Noiona ­ Segen der Heiligen Theria ­ II 274 Segen der Heiligen Velvenya ­ Segen des Heiligen Badilak Segen der Heiligen Noiona III 275 Segen des Heiligen Hlûthar ­ Segen des Plättlings ­ IV 274 Segensreiches Wasser ­ Segnung der Schlacht ­ IV 276 Segnung der stählernen Stirn ­ Segnung des Heims ­ III 226 Sichere Wanderung im Schnee ­ Sicherer Weg durch Fels ­ IV 277 Sicht auf Madas Welt ­ Siegel Borons ­ III 278 Simias Kelch Tsas Segensreicher Neuanfang Speisesegen 12 Segnungen / Speisesegen VI 279 Speisung der Bedürftigen ­ Speisung der hungernden Seelen ­ III 280 Sprechende Symbole ­ Sterne funkeln immerfort ­ III 278 Sternenglanz ­ Sternenspur ­ IV 281 Sternenstaub ­ Sulvas Gnade ­ II 282 Swafnirs Fluke ­ Swafnirs Ruhelied ­ IV 283 V 284 I 285 III 286 II 287 IV 288 II 289 III 290 II 314 I 291 I 293 II 294 I 295 I 296 II 297 II 298 II 299 II 300 V 301 I 302 Bezeichnung zu finden unter Grad Seite t Siegel Borons III 290 Tabu Sippenfluch IV 291 Tairachs Fluch Teilung der Wasser ­ II 303 Thalionmels Schlachtgesang Therbûns Erkenntnis ­ III 304 Tierempathie Tiergestalt ­ I 305 Tiersprache Tranksegen ­ II 306 Traviabund Travias Gebet der sicheren Zuflucht ­ III 307 Travias Gebet der verborgenen Halle Travinians Segen der Schwelle Tierempathie III 306 Trophäe erhalten Tsas ewige Jugend 12 Segnungen / Tranksegen I 85 Tsas heiliges Lebensgeschenk Tsas Lebensschutz Großer Eidsegen III 308 Tsas segensreicher Neuanfang Tsas wunderbare Erneuerung ­ V 308 Tsas wundersame Fruchtbarkeit Travias Gebet der sicheren Zuflucht VI 308 ­ III 309 ­ II 310 ­ VI 311 ­ V 312 ­ IV 313 ­ II 314 ­ V 315 ­ IV 316 u ­ II 317 Ucuris Geleit ­ V 318 Über die Wolken Unterpfand des Heiligen Rhÿs ­ IV 319 Unverstellter Blick Urischars ordnender Blick ­ III 320 ­ III 321 V ­ IV 322 Haut des Chamäleons Vaês Tränen III 323 Verborgen wie der Neumond Graues Siegel Versiegeltes Wissen ­ III 172 Vertrauter der Flamme ­ Vertrauter des Felsens ­ II 324 Vertreibung des Dunkelsinns ­ Visionssuche II 325 IV 326 III 327 Bezeichnung zu finden unter Grad Seite w Wachsamkeit der Gänse ­ II 328 Waffenfluch ­ III 329 Waliburias Wehr Angroschs Zorn III 330 Wandeln in Hesindes Hain ­ V 331 Weg des Fuchses ­ I 332 Wegzehrung der Heiligen Salma ­ I 333 Weihe der ewigen Flamme ­ IV 334 Weihe der letzten Ruhestatt ­ II 335 Weihegesang der Heiligen Elida von Salza Anrufung der Winde V 94 Weisheitssegen 12 Segnungen / Weisheitssegen I 86 Weisung des Himmels ­ I 336 Wille zur Wahrheit ­ IV 337 Winterschlaf ­ IV 338 Wort der Wahrheit Heiliger Befehl II 183 Wunderbarer Geschlechterwandel ­ III 339 Wundersame Blütenpracht ­ I 340 Wundersames Teilen des Martyriums ­ IV 341 Wundsegen ­ II 342 Z ­ V 343 Zerschmetternder Bannstrahl ­ II 344 Zuflucht finden",
       "herkunftDetail": "Travia (Al'Anfa, Donnerbach, Lowangen, Thorwal, Waskir)",
       "ritualdauerDetail": "Gebet (1 Spielrunde)",
       "wirkungsdauerDetail": "maximal LkP* in Tagen"
@@ -4411,9 +4483,9 @@
       "art": "allgemein",
       "merkmale": [],
       "effekt": "Der benannte Ort oder Gegenstand wird durch göttliches Wirken geschützt.",
-      "symboleGesten": "Der Geweihte betet und erklärt dabei seiner Gottheit, warum dieser Ort oder Gegenstand geschützt werden muss. Au- ßerdem führt er aus, vor welchen Personen oder Wesen der Schutz nicht gelten muss.",
-      "auswirkung": "Der benannte Ort oder Gegenstand wird durch göttliches Wirken geschützt. Alle außer den Benannten ereilt eine passende Strafe, so sie den Ort betreten oder den Gegenstand berühren: Mirakel+Talente und Eigenschaften werden gleichmäßig um LkP* Punkte gesenkt. Dämonen der Gegendomäne und entsprechende Paktierer erleiden LkP*+10 SP. Hinzu kommt außerdem eine weitere, zum Wesen der Gottheit passende Strafe. Ein durch diese Liturgie geschützter Gegenstand kann nicht weiter als LkW Schritt bewegt werden, sonst verfliegt die Wirkung. Die Bewohner des Or- tes, an dem der Gegenstand aufbewahrt wird, müssen sich außerdem den Geboten der schützenden Gottheit entsprechend verhalten. Varianten: Grad V: Auf diesem Grad ist es möglich, eine andere Liturgie bis maxi- mal Grad II einzubinden. Dämonen und Paktierer erleiden unabhängig von ihrer Domäne den oben genannten Schaden. Grad VI: Auf diesem Grad ist die Wirkungsdauer permanent, und es kann eine Liturgie bis Grad III eingebunden werden. Neben Dämonen und Paktierern erleiden auch unheilige Wesen den oben genannten Schaden. Die- se Variante muss extra erlernt werden, hierzu sind zudem Kenntnisse der Konsekration und der Objektweihe erforderlich.",
-      "anmerkungen": "Diese Liturgie wird nur Tempelvorstehern gelehrt. Göttliche Verständigung",
+      "symboleGesten": "Die Perainegeweihte vollführt eine heilige Ges- te, indem sie mit ihren Händen und ausgespreizten Fingern eine Schale formt, berührt anschließend ihr Gegenüber am Kopf und spricht ein leises Gebet.",
+      "auswirkung": "Durch diese Liturgie ist es möglich, die Gefühle eines an- deren Menschen zu lesen und zu ergründen. Die Geweihte erhält einen Eindruck von der Gefühlslage ihres Gegenübers, ähnlich der Wirkung des Zaubers SENSIBAR.",
+      "anmerkungen": "Rahjageweihte küssen den Gesegneten üblicherweise und verzichten auf die übrigen Gesten, Tsageweihte tauchen das Antlitz des zu Lesenden in das Regenbogenlicht ihres Prismas und in der Efferdkirche kommt häufig gesegnetes Wasser zum Einsatz. Göttliche Strafe",
       "herkunftDetail": "universell",
       "ritualdauerDetail": "Gebet (1 Spielrunde)",
       "wirkungsdauerDetail": "LkP* in Wochen",
@@ -4423,7 +4495,7 @@
       "id": "golgaris-zwielicht",
       "name": "Golgaris Zwielicht",
       "gott": [
-        "universell"
+        "Boron"
       ],
       "grad": "II",
       "ziel": "G",
@@ -4433,9 +4505,9 @@
       "art": "speziell",
       "merkmale": [],
       "effekt": "Diese Liturgie hebt die Wirkung von Wundern und Liturgien anderer Götter auf.",
-      "symboleGesten": "Der Geweihte verflucht die Gottheit, deren Wunder er aufheben will und berührt den Gegenstand oder die Person sei- nes Hasses.",
-      "auswirkung": "Diese Liturgie hebt die Wirkung von Wundern und Liturgien anderer Götter auf. Je nach Mächtigkeit des ursprünglichen Wunders ist auch der Grad dieser Liturgie unterschiedlich. Als Richtwert mag dienen: Um eine Liturgie aufzuheben, muss man Gott der Götter mit einem Grad von [Grad der ursprünglichen Liturgie +1] wirken.",
-      "anmerkungen": "Obwohl der Namenlose als erklärter Feind der Zwölfgötter gilt, ist es mittels dieser Liturgie dennoch möglich, auch das Wirken ande- rer Götter aufzuheben. Graues Siegel",
+      "symboleGesten": "Der Geweihte bedeckt die Augen mit den Hän- den und bittet Boron stumm, ihn sehen zu lassen.",
+      "auswirkung": "Wenn der Geweihte die Augen wieder öffnet, ist die Welt für ihn in graues Zwielicht getaucht. Wie durch einen Schleier kann er selbst in absoluter Finsternis ohne Einbußen (aber mit dem Nachteil Farbenblind) sehen. Durch das verwaschene Grau gelten jedoch alle Ziele im Fernkampf als zwei Kategorien weiter entfernt. Gegen magische Dunkelheit wer- den die LkP* mit den ZfP* verrechnet und der Zauber wird entsprechend abgeschwächt, wenn er nicht ohnehin gänzlich wirkungslos bleibt.",
+      "anmerkungen": "Mittels dieser Liturgie ist es selbst einem Blinden möglich, wenn auch mit deutlichen Einschränkungen, kurzzeitig die Welt durch Bo- rons Schleier sehen. Gott der Götter",
       "herkunftDetail": "Namenlos",
       "ritualdauerDetail": "Stoßgebet (10 Aktionen)",
       "wirkungsdauerDetail": "permanent",
@@ -4518,7 +4590,10 @@
       "herkunftDetail": "Zwölfgötterkult (außer Aves), Angrosch; Rahjasbund (Rahja),",
       "ritualdauerDetail": "Andacht (etwa eine halbe Stunde)",
       "wirkungsdauerDetail": "permanent",
-      "_quelle": "Liber Liturgium (PDF-Auto-Import)"
+      "_quelle": "Liber Liturgium (PDF-Auto-Import)",
+      "primaer": [
+        "Praios"
+      ]
     },
     {
       "id": "grosser-speisesegen",
@@ -4541,7 +4616,10 @@
       "herkunftDetail": "Travia, Peraine; Grosser Giftbann (Peraine)",
       "ritualdauerDetail": "Gebet (1 Spielrunde)",
       "wirkungsdauerDetail": "augenblicklich",
-      "_quelle": "Liber Liturgium (PDF-Auto-Import)"
+      "_quelle": "Liber Liturgium (PDF-Auto-Import)",
+      "primaer": [
+        "Travia"
+      ]
     },
     {
       "id": "grosser-weihesegen-der-waffe",
@@ -4625,9 +4703,9 @@
       "art": "speziell",
       "merkmale": [],
       "effekt": "Diese Beschwörungs-Liturgie ruft einen Dämon herbei.",
-      "symboleGesten": "Der Geweihte bittet seinen Gott um Beistand durch einen seiner Diener und ruft den Dämon bei seinem Namen.",
-      "auswirkung": "Diese Beschwörungs-Liturgie ruft einen Dämon herbei. Da- bei kann es sich um den Feuerteufel Ivash, den Grakvaloth oder das Ma- ruk-Methai handeln. Die Liturgiekenntnis-Probe ist je nach Dämonenart erschwert. Maruk-Methai in sich fahren zu lassen ist um 3 Punkte erschwert. Das Herbeirufen eines Ivash ist um 6 Punkte erschwert. Die Beschwörung eines Grakvaloth bringt einen Malus von 9 Punkten mit sich. Die Dienste, die die Dämonen ausführen können, entsprechen den in Wege der Zauberei aufgeführten Diensten. Es fallen jedoch keine Folgekosten an, dafür erfüllt der Dämon dem Priester üblicherweise auch nur einen Dienst.",
-      "anmerkungen": "Dem Namenlosen geweihte Magier können die Dämonen selbstverständlich auch gemäß den Regeln in Wege der Zauberei beschwö- ren und kontrollieren. Diese Liturgie kann jedoch jeder Geweihte des Na- menlosen einsetzen und sich so für kurze Zeit den Mächten der Siebten Sphäre bedienen. Herbeirufung der Heerscharen des Rattenkindes",
+      "symboleGesten": "Das ausgewählte Liebespaar wird von der Rah- jageweihten geküsst und umarmt. Anschließend küsst sie die Liebenden innig und führt die beiden vor der Göttin zusammen.",
+      "auswirkung": "Das Paar wird im Liebesspiel rahjagefällige Wonnen emp- finden und dank Rahjas Segen höchste Erfüllung finden. Der Talentwert Betören steigt während der Wirkungsdauer um LkP*/2+5 Punkte.",
+      "anmerkungen": "Schon mehr als ein Paar, das mit dieser Segnung bedacht wurde, hat dauerhaft zueinander gefunden. Welche Ausprägung genau das Liebesspiel annimmt, hängt von den gemeinsamen Vorlieben der beiden ab. Sicher ist aber, dass es in jedem Fall leidenschaftlich zugeht, und dass beide diese Erfahrung so schnell nicht vergessen werden. Herbeirufung der Diener des Herrn",
       "herkunftDetail": "Namenlos",
       "ritualdauerDetail": "Stoßgebet (10 Aktionen)",
       "wirkungsdauerDetail": "LkP* in Spielrunden",
@@ -4728,7 +4806,18 @@
       "id": "indoktrination",
       "name": "Indoktrination",
       "gott": [
-        "universell"
+        "Praios",
+        "Rondra",
+        "Efferd",
+        "Travia",
+        "Boron",
+        "Hesinde",
+        "Phex",
+        "Peraine",
+        "Ingerimm",
+        "Rahja",
+        "Tsa",
+        "Firun"
       ],
       "grad": "IV",
       "ziel": "P",
@@ -6180,9 +6269,9 @@
       "art": "speziell",
       "merkmale": [],
       "effekt": "Mittels dieser Segnung kann die Zielperson auf Schnee und Eis ebenso sicheren Tritt finden wie auf Erde.",
-      "symboleGesten": "Die nackten Füße des Nutznießers der Liturgie werden mit Schnee eingerieben. Diesen Vorgang wiederholt der Geweihte mehrmals und sendet ein stummes Gebet an seinen Gott.",
-      "auswirkung": "Mittels dieser Segnung kann die Zielperson auf Schnee und Eis ebenso sicheren Tritt finden wie auf Erde. Sie sinkt selbst bei tiefem Schnee kaum ein, rutscht auf Eisflächen niemals aus und verspürt auch kei- ne Schmerzen durch die Kälte an den Füßen. Die Liturgie kann sowohl auf den Geweihten, als auch auf eine andere Zielperson angewandt werden. Varianten: Grad III: Mittels dieser Variante kann die Zielperson auch auf dün- nen Eisflächen laufen ohne einzubrechen. Eiszapfen, Gletscherwände und ähnliche Eisformationen verhalten sich unter der Wirkung wie fester Stein, man kann also z.B. an ihnen hochklettern.",
-      "anmerkungen": "Auch unter den nivesischen Kaskjua ist diese Liturgie recht verbreitet. Sie stoßen ein langes Heulen aus, um die Himmelswölfe anzu- rufen. Neben dem Abreiben entsprechender Körperteile mit Schnee ist es auch üblich, sich im Schnee zu wälzen. Sicherer Weg durch Fels",
+      "symboleGesten": "Die Geweihte schreitet den zu segnenden Be- reich ab, während sie einen Segen und die Gesetze der Gastfreundschaft spricht, und zeichnet mit einem brennenden Scheit aus dem Feuer das Zei- chen Travias in die Luft.",
+      "auswirkung": "Jedes denkende Wesen, das den Wirkungsbereich betritt, wird sich unbewusst an die Gesetze der Gastfreundschaft und des Anstandes hal- ten. Um willentlich gegen die Gebote zu verstoßen, muss eine um LkP*+5 erschwerte Selbstbeherrschungs-Probe gelingen. Wer dies tut, gilt als Eidbre- cher. Für die Wirkungsdauer gilt der gesegnete Bereich als einfach geweiht.",
+      "anmerkungen": "Als denkende Wesen gelten alle vernunftbegabten Lebe- wesen. Tiere oder unheilige Wesen fallen explizit nicht unter die Wirkung dieser Liturgie. Es ist aber durchaus möglich, dass Tiere sich innerhalb des Wirkungsbereichs nach Maßgabe des Meisters friedlich verhalten. Sichere Wanderung im Schnee",
       "herkunftDetail": "Firun, Ifirn, Himmelswölfe",
       "ritualdauerDetail": "Gebet (1 Spielrunde)",
       "wirkungsdauerDetail": "LkP* in Stunden",
@@ -7164,9 +7253,9 @@
       "art": "speziell",
       "merkmale": [],
       "effekt": "Durch diese Liturgie kann der Geweihte ohne weitere Proben eine sichere Zuflucht finden, in der er und seine Gefährten vor Wind und Wetter geschützt sind.",
-      "symboleGesten": "Der Firungeweihte nimmt Eis, Schnee oder Wasser in seine Hände und reibt sich damit Augen und Schläfen ein. Die- sen Vorgang wiederholt er mehrere Male und dankt dabei seinem Gott so- wie seiner milden Tochter Ifirn für ihre Gnade.",
-      "auswirkung": "Durch diese Liturgie kann der Geweihte ohne weitere Proben eine sichere Zuflucht finden, in der er und seine Gefährten vor Wind und Wetter geschützt sind. Der Weg dorthin kann zusätzlich bis zu 6 Spielrun- den in Anspruch nehmen.",
-      "anmerkungen": "Avesgeweihte drehen sich mitsamt ihres Wanderstabes dreimal um sich selbst, in der Traviakirche ist es üblich Gänsedaunen oder Brotkrumen auf den Weg zu streuen. Die Kaskju der Nivesen rufen die Himmelswölfe an und bitten um eine sichere Zuflucht. eIGene lIturGIen übersIcht der lIturGIen Bezeichnung zu finden unter Grad Seite a 260 Achmad'ayan ankhrellah Ruf zum Bund wider die Mächte der Finsternis VI 235 al'nurach Shaitanim 88 Al'Dhafar Phexens Verteidigung II 90 Aller Welt Freund ­ IV 91 Allmacht der Lohe ­ II 330 Alte Schuppen ­ III 94 Am Busen der Natur Zuflucht finden II 96 Anathema ­ V 98 Angroschs Opfergabe ­ II 100 Angroschs Zorn Waliburias Wehr III 101 Anrufung der Erdkraft ­ II 103 Anrufung der Winde ­ II 105 Anrufung Nuiannas ­ III 106 Arcanum Interdictum ­ VI Argelions bannende Hand ­ V Argelions Mantel ­ III Argelions Spiegel ­ IV Ascandears Hingabe ­ III Auge der wartenden Seelen Nemekaths Geisterblick II Auge des Händlers ­ II Auge des Mondes ­ II Auge Xeledons ­ Xeledons Helles Licht ­ V Aura der Form ­ III Aura des Regenbogens ­ III Auraprüfung Seelenprüfung IV Azilas Quellgesang ­ III b Bann der Geisterkräfte Praios' Magiebann IV 237 Bannfluch des Heiligen Khalid ­ III 107 Begehen der heiligen Wasser ­ III 108 Belemans Hochzeit ­ IV 109 Bindung der Schlange ­ II 110 Birkenzweig ­ II 111 Bishdariels Angesicht Kleine Liturgie des Heiligen Nemekath IV 200 Bezeichnung zu finden unter Grad Seite Bishdariels Auge ­ II 112 Bishdariels Warnung Nemekaths Bannfluch Blendstrahl aus Alveran III 113 Blick an den klaren Himmel ­ Blick auf das Geisterwirken Sterne funkeln immerfort I 114 Blick der Weberin Blick durch Tairachs Augen Sicht auf Madas Welt I 296 Blick für das Handwerk ­ Blick in die Erinnerung II 289 Blick in die Flammen Blick der Weberin Blutschwur ­ II 115 Bootssegen Borons süße Gnade Kleine Liturgie des Heiligen Nemekath II 115 Buchprüfung ­ Bund von Feuer und Erz II 117 Großer Eidsegen ­ IV 200 ­ ­ III 118 Großer Eidsegen III 174 III 119 IV 120 III 121 III 174 c ­ IV 122 Handwerkssegen Canyzeths Weisheit II 178 Cereborns Handreichung ­ Conagas Ruf III 123 d ­ IV 124 Unverstellter Blick Daradors Bann der Schatten III 320 Daradors prüfender Blick ­ Das schwarze Fell durch das rote Blut Zuflucht finden II 125 Der Gänsemutter warmes Nest Der über das Schlachtfeld schreitet ­ II 344 Des Einen bezaubernder Sphärenklang ­ Des Herren goldener Mittag Weisung des Himmels I 126 Die goldene Hand ­ Dorlens Verbrüderung ­ III 127 Dreifacher Saatsegen ­ Dythlinds Wandeln im Feuer Vertrauter der Flamme I 336 I 128 VI 129 III 130 II 324 Bezeichnung zu finden unter Grad Seite e Efferdsegen ­ III 131 Eherne Kraft ­ Lodernder Zorn ­ VI 132 Ehrenhafter Zweikampf ­ II 133 Eidechsenhaut ­ III 134 Eidsegen 12 Segnungen / Eidsegen I 74 Ein Bild für die Ewigkeit ­ II 135 Ein Freund in Zeiten der Not ­ IV 136 Eissturm Schneesturm V 267 Elementwandlung ­ II 137 Entzug des Wissens Entzug von Nandus' Gaben II 138 Entzug von Nandus' Gaben ­ II 138 Erlösung des Tapams Borons süße Gnade IV 120 Erneuerung des Geborstenen ­ I 138 Erzieherische Maßnahme der Heiligen Yalsicena ­ III 140 Etilias Gnade ­ III 141 Etilias Zeit der Meditation Ruf zur Ruhe I 261 Ewige Jugend ­ V 142 Ewiger Wächter ­ V 143 Ewiges Wissen ­ V 144 Exkommunikation ­ III 145 Exorzismus ­ III 146 f 12 Segnungen / Feuersegen I 76 Feuersegen Initiation IV 147 Feuertaufe Firuns Einsicht ­ IV 147 Firuns Zorn Flagge des Regenbogens ­ III 148 Fluch wider die Ungläubigen Freundliche Aufnahme ­ III 149 Frieden der Melodie Fünfte Lobpreisung des Frühlings ­ V 150 Fürbitten des Heiligen Therbûn ­ III 151 ­ I 152 ­ V 153 ­ III 154 Bezeichnung zu finden unter Grad Seite G Garafans gleißende Schwingen ­ V 155 Gebet des kristallklaren Blicks ­ III 156 Gebieter der Lava ­ V 157 Geburtssegen 12 Segnungen / Geburtssegen I 77 Geistermantel Argelions Mantel III 98 Geläutert sei Erz und Goldgestein ­ III 158 Gemeinschaft der treuen Gefährten ­ II 159 Gesang der Delphine ­ II 160 Gesang der Wale Gesang der Delphine II 160 Gesegneter Fang ­ II 161 Geteiltes Leid ­ II 162 Gift der Erkenntnis ­ II 163 Gilborns heilige Aura Argelions Mantel III 98 Gleichklang des Geistes ­ I 164 Glückssegen 12 Segnungen / Glückssegen I 78 Göttliche Strafe ­ IV 165 Göttliche Verständigung ­ I 166 Göttliches Zeichen ­ I 167 Goldene Rüstung ­ II 168 Goldener Blick ­ III 169 Golgaris Zwielicht ­ II 170 Gorfangs Fluch Sippenfluch IV 291 Gott der Götter ­ II bis VI 171 Grabsegen 12 Segnungen / Grabsegen I 79 Graues Siegel ­ III 172 Grispelz' Ackersegen Dreifacher Saatsegen III 130 Grispelz' Fruchtbarkeit Tsas Wundersame Fruchtbarkeit IV 316 Große Seelenprüfung Seelenprüfung V 275 Große Seelenwaschung Exorzismus III 146 Große Weihe des Heimsteins ­ VI 173 Großer Eidsegen ­ III 174 Großer Giftbann Großer Speisesegen III 175 Großer Reisesegen Reisesegen III 253 Großer Speisesegen ­ III 175 Großer Weihesegen der Waffe ­ VI 176 Großes Tabu Siegel Borons III 290 Gruß des Versunkenen ­ IV 177 Bezeichnung zu finden unter Grad Seite h Händlersegen 12 Segnungen / Eidsegen II 75 Handwerkssegen ­ II 178 Harmoniesegen 12 Segnungen / Harmoniesegen I 80 Hashnabiths Flehen ­ II 179 Hauch Borons ­ III 180 Hauch der Leidenschaft Handwerkssegen II 178 Hausfrieden ­ III 181 Haut des Chamäleons Verborgen wie der Neumond III 323 Heilige Salbung der Peraine Tsas heiliges Lebensgeschenk V 312 Heilige Schmiedeglut ­ I 182 Heiliger Befehl ­ II 183 Heiliger Lehnseid 12 Segnungen / Eidsegen II 75 Heiliges Liebesspiel ­ II 184 Heilungssegen 12 Segnungen / Heilungssegen I 81 Herbeirufung der Diener des Herren ­ II 185 Herbeirufung der Heerscharen des Rattenkindes ­ III 186 Herr über Feuer und Glut ­ IV 187 Hesindes Fingerzeig Buchprüfung III 121 Hilfe in der Not ­ II 188 Hoftag der Sprachen ­ IV 189 I, j Indoktrination ­ IV 190 Ingalfs Alchimie ­ IV 191 Ingerimms Zorn verschone uns ­ VI 192 Initiation ­ II 193 Innere Ruhe ­ I 194 Jagdglück ­ III 195 Bezeichnung zu finden unter Grad Seite k Kälbchensegen ­ I 196 Kamaluqs Fluch Sippenfluch IV 291 Kamaluqs unerbittlicher Speer Bannfluch des Heiligen Khalid III 107 Keta Ajaban Kud'a Wundersames Teilen des Martyriums IV 341 Khablas Jugend ­ III 197 Khablas makelloser Leib ­ V 198 Kirschblütenregen ­ II 199 Kleine Liturgie des Heiligen Nemekath ­ IV 200 Kleine Segnung des Heimsteins ­ II 201 Kleiner Giftbann ­ II 202 Kleines Tabu Ruf zur Ruhe I 261 Konsekration ­ V 203 Kräftigung der Schwachen und Versehrten ­ V 204 Kräutersegen des Heiligen Nemekath Rahjas Rauschsegen II 248 l ­ V 205 ­ Largorax' Hammer rufen ­ III 206 Levthans Fesseln ­ Licht des Herrn ­ III 207 Licht des verborgenen Pfades ­ Lidaris Herz Unverstellter Blick II 208 Lohn der Unverzagten Lug und Trug III 209 II 210 III 320 m ­ III 211 Nemekaths Geisterblick Mannschaftssegen II 219 Marbos Geisterblick ­ Marbos Geleit Etilias Gnade V 212 Marbos Gnade 12 Segnungen / Märtyrersegen Märtyrersegen Wandeln in Hesindes Hain III 141 Meisterstück Mikailspfeil ­ I 82 Mondsilberzunge ­ V 331 III 213 III 214 Bezeichnung zu finden unter Grad Seite n Namenlose Kälte ­ II 215 Namenlose Raserei ­ II 216 Namenloser Zweifel ­ Namenlose Erleuchtung ­ IV 217 Namenloses Vergessen ­ I 218 Nandus' Schriftkenntnis Schrifttum ferner Lande III 269 Nemekaths Geisterblick ­ II 219 Nemekaths Zwiesprache ­ IV 220 Neun Streiche in Einem ­ I 221 Nimmermüde Wanderschaft ­ II 222 Noionas Zuspruch Segen der Heiligen Velvenya III 280 o Zerschmetternder Bannstrahl V 343 Obarans Bannstrahl ­ I 223 Objektsegen Objektweihe ­ II 224 Ordination ­ IV 225 p, q ­ III 226 ­ Parinors Vermächtnis ­ II 227 Pech und Schwefel ­ Peraines Pflanzengespür ­ II 228 Phexens Augenzwinkern Blick für das Handwerk Phexens Elsterflug ­ III 229 Phexens Kunstverstand ­ Phexens Meisterschlüssel ­ III 230 Phexens Nebelleib ­ Phexens Schatten ­ II 117 Phexens Sternenwurf ­ Phexens Verteidigung ­ V 231 Phexens wunderbare Verständigung ­ Praios' Magiebann ­ IV 232 Praios' Mahnung ­ Prophezeiung ­ V 233 Purgation Quellsegen IV 234 II 235 II 236 IV 237 III 238 I 239 III 240 III 241 Bezeichnung zu finden unter Grad Seite r Rahjalinas Farbenspiel ­ I 242 Rahjalinas Kuss ­ IV 243 Rahjalinas Weinranke Parinors Vermächtnis III 226 Rahjas Begehren ­ III 244 Rahjas Erquickung Schlaf des Gesegneten I 264 Rahjas Fest der Freude ­ III 245 Rahjas Freiheit ­ IV 246 Rahjas geheiligter Wein ­ IV 247 Rahjas heitere Gelassenheit Segen der Heiligen Noiona III 278 Rahjas Rauschsegen ­ II 248 Rahjas Schoß ­ IV 249 Rahjas Sinnlichkeit ­ VI 250 Rahjasbund Großer Eidsegen III 174 Reiches Land ­ IV 251 Reichung des Amethyst ­ I 252 Reisesegen ­ II 253 Revolution der Gedanken ­ III 254 Ritus der Schlachthilfe ­ V 255 Rondras Hochzeit Belemans Hochzeit IV 109 Rondras wundersame Rüstung ­ V 256 Ruf der Ferne ­ II 257 Ruf der Gefährten ­ II 258 Ruf in Borons Arme ­ II 259 Ruf zum Bund wider die Mächte der Finsternis ­ VI 260 Ruf zur Ruhe ­ I 261 Runjensweisung ­ II 262 s Exorzismus III 146 Argelions bannende Hand Salbung der Heiligen Noiona V 97 Sankt Gilborns Bannfluch ­ Schattenlarve Bootssegen VI 263 Schiffssegen Schlaf des Gesegneten ­ IV 119 Schlangenstab ­ Schleichende Fäulnis ­ I 264 Schneesturm ­ Schnell wie eine Eidechse ­ II 265 IV 266 V 267 II 268 Bezeichnung zu finden unter Grad Seite Schrifttum ferner Lande ­ III 269 Schutz des Geleges ­ Schutzsegen 12 Segnungen / Schutzsegen II 270 Schwindende Zauberkraft ­ Schwitzhütte Fünfte Lobpreisung des Frühlings I 83 Sechs Leben des Mungos ­ Seelenbannung ­ IV 271 Seelengefährte ­ Seelenprüfung ­ V 153 Seelenrudel Seelengefährte Seelenschatten ­ II 272 Segen der Gabetaj Parinors Vermächtnis Segen der Heiligen Ardare ­ IV 273 Segen der Heiligen Noiona ­ Segen der Heiligen Theria ­ II 274 Segen der Heiligen Velvenya ­ Segen des Heiligen Badilak Segen der Heiligen Noiona III 275 Segen des Heiligen Hlûthar ­ Segen des Plättlings ­ IV 274 Segensreiches Wasser ­ Segnung der Schlacht ­ IV 276 Segnung der stählernen Stirn ­ Segnung des Heims ­ III 226 Sichere Wanderung im Schnee ­ Sicherer Weg durch Fels ­ IV 277 Sicht auf Madas Welt ­ Siegel Borons ­ III 278 Simias Kelch Tsas Segensreicher Neuanfang Speisesegen 12 Segnungen / Speisesegen VI 279 Speisung der Bedürftigen ­ Speisung der hungernden Seelen ­ III 280 Sprechende Symbole ­ Sterne funkeln immerfort ­ III 278 Sternenglanz ­ Sternenspur ­ IV 281 Sternenstaub ­ Sulvas Gnade ­ II 282 Swafnirs Fluke ­ Swafnirs Ruhelied ­ IV 283 V 284 I 285 III 286 II 287 IV 288 II 289 III 290 II 314 I 291 I 293 II 294 I 295 I 296 II 297 II 298 II 299 II 300 V 301 I 302 Bezeichnung zu finden unter Grad Seite t Siegel Borons III 290 Tabu Sippenfluch IV 291 Tairachs Fluch Teilung der Wasser ­ II 303 Thalionmels Schlachtgesang Therbûns Erkenntnis ­ III 304 Tierempathie Tiergestalt ­ I 305 Tiersprache Tranksegen ­ II 306 Traviabund Travias Gebet der sicheren Zuflucht ­ III 307 Travias Gebet der verborgenen Halle Travinians Segen der Schwelle Tierempathie III 306 Trophäe erhalten Tsas ewige Jugend 12 Segnungen / Tranksegen I 85 Tsas heiliges Lebensgeschenk Tsas Lebensschutz Großer Eidsegen III 308 Tsas segensreicher Neuanfang Tsas wunderbare Erneuerung ­ V 308 Tsas wundersame Fruchtbarkeit Travias Gebet der sicheren Zuflucht VI 308 ­ III 309 ­ II 310 ­ VI 311 ­ V 312 ­ IV 313 ­ II 314 ­ V 315 ­ IV 316 u ­ II 317 Ucuris Geleit ­ V 318 Über die Wolken Unterpfand des Heiligen Rhÿs ­ IV 319 Unverstellter Blick Urischars ordnender Blick ­ III 320 ­ III 321 V ­ IV 322 Haut des Chamäleons Vaês Tränen III 323 Verborgen wie der Neumond Graues Siegel Versiegeltes Wissen ­ III 172 Vertrauter der Flamme ­ Vertrauter des Felsens ­ II 324 Vertreibung des Dunkelsinns ­ Visionssuche II 325 IV 326 III 327 Bezeichnung zu finden unter Grad Seite w Wachsamkeit der Gänse ­ II 328 Waffenfluch ­ III 329 Waliburias Wehr Angroschs Zorn III 330 Wandeln in Hesindes Hain ­ V 331 Weg des Fuchses ­ I 332 Wegzehrung der Heiligen Salma ­ I 333 Weihe der ewigen Flamme ­ IV 334 Weihe der letzten Ruhestatt ­ II 335 Weihegesang der Heiligen Elida von Salza Anrufung der Winde V 94 Weisheitssegen 12 Segnungen / Weisheitssegen I 86 Weisung des Himmels ­ I 336 Wille zur Wahrheit ­ IV 337 Winterschlaf ­ IV 338 Wort der Wahrheit Heiliger Befehl II 183 Wunderbarer Geschlechterwandel ­ III 339 Wundersame Blütenpracht ­ I 340 Wundersames Teilen des Martyriums ­ IV 341 Wundsegen ­ II 342 Z ­ V 343 Zerschmetternder Bannstrahl ­ II 344 Zuflucht finden",
+      "symboleGesten": "Der Geweihte weist mit dem Zeichen des Auges auf das Ziel und ruft: Herr Praios, ewige Sonne, Trenner von Recht und Un- recht! Gepriesen sei Deine Macht! Dein strafender Blick falle auf diesen Frevler! Es sei!",
+      "auswirkung": "Aus dem Himmel fährt ein gleißender Strahl auf das Ziel her- ab. Der Bannstrahl zerschmettert unheilige Wesen wie Chimären, Golems, Untote und (maximal fünfgehörnte) Dämonen zu Staub, andere Wesen ver- lieren das Bewusstsein. Magiebegabte oder Zauberwesen verlieren außer- dem sämtliche aktuell vorhandene Astralenergie. Paktierer erleiden darüber hinaus LkP*+15 SP. Der Schaden gilt immer als geweihter Schaden, gegen Paktierer außerdem als verletzend.",
+      "anmerkungen": "Auch am Körper mitgeführte magische oder unheilige Artefakte können nach Maßgabe des Meisters in Mitleidenschaft gezogen werden. Zuflucht finden",
       "herkunftDetail": "Firun, Ifirn, Travia (Lowangen, Trallop, Travingen), Aves,",
       "ritualdauerDetail": "Gebet (1 Spielrunde)",
       "wirkungsdauerDetail": "maximal LkP* in Stunden",
@@ -7350,6 +7439,160 @@
       "ritualdauerDetail": "Zeremonie (8 Stunden)",
       "wirkungsdauerDetail": "LkP* in Wochen",
       "_quelle": "Liber Liturgium (PDF V2)"
+    },
+    {
+      "id": "bishdariels-angesicht",
+      "name": "Bishdariels Angesicht",
+      "gott": [
+        "Boron"
+      ],
+      "grad": "II",
+      "ziel": "P",
+      "reichweite": "Berührung",
+      "ritualdauer": "Gebet (1 Spielrunde)",
+      "wirkungsdauer": "LkP* Spielrunden",
+      "art": "speziell",
+      "merkmale": [],
+      "effekt": "Der zur Ruhe gebettete Gläubige kann in seinen Träumen sei- ne Vergangenheit nacherleben und sich so selbst lange verschüttet geglaubte Erinnerungen wieder ins Gedächtnis rufen.",
+      "symboleGesten": "Der Geweihte segnet die Schlafstätte und zeich- net mit Salbungsöl die Eckpunkte eines Boronsrades darauf nach. Dann bettet er den Gläubigen zur Ruhe, legt ihm einige Krumen Graberde zwi- schen die gefalteten Hände und betet gemeinsam mit ihm um eine Vision.",
+      "auswirkung": "Der zur Ruhe gebettete Gläubige kann in seinen Träumen sei- ne Vergangenheit nacherleben und sich so selbst lange verschüttet geglaubte Erinnerungen wieder ins Gedächtnis rufen. Die Traumgesichte sind häufig vieldeutig und nicht immer leicht zu entschlüsseln. Auch die Wirkung von Vergessenszaubern wie MEMORABIA oder ERINNERUNG VERLASSE DICH werden geschwächt. LkP*/2+5 Punkte werden von der Wirkung solcher Zauber abgezogen, und die Wirkung dementsprechend vermindert oder sogar aufgehoben.",
+      "anmerkungen": "Die Priester des Tairach wirken die Liturgie zumeist auf sich selbst, um Fingerzeige ihres Gottes zu deuten. Es ist auch möglich, sich mittels dieser Liturgie an bisher unbedeutende Kleinigkeiten aus der eigenen Vergangenheit zu erinnern. Besonders bei der Lösung eines Rätsels oder Kriminalfalles kann sie so im Spiel unschätzbare Dienste leisten. Kleine Segnung des Heimsteins",
+      "herkunftDetail": "Boron (Al'Anfa, Punin), Tairach; Bishdariels Angesicht",
+      "ritualdauerDetail": "Gebet (1 Spielrunde)",
+      "wirkungsdauerDetail": "LkP* Spielrunden",
+      "_quelle": "Liber Liturgium (Boron-Liste, Alias zu PDF: Kleine Liturgie, des heiligen Nemekath)"
+    },
+    {
+      "id": "marbos-geisterblick",
+      "name": "Marbos Geisterblick",
+      "gott": [
+        "Boron"
+      ],
+      "grad": "II",
+      "ziel": "G",
+      "reichweite": "Selbst",
+      "ritualdauer": "Gebet (1 Spielrunde)",
+      "wirkungsdauer": "maximal LkP* Spielrunden",
+      "art": "speziell",
+      "merkmale": [],
+      "effekt": "Bis er die Augen wieder öffnet, vermag der Geweihte anwe- sende Geister zu sehen, die für das menschliche Auge normalerweise un- sichtbar bleiben.",
+      "symboleGesten": "Nachdem er seine Lider mit geweihtem Lotos- öl benetzt hat, ruft der Geweihte Marbo (Al'Anfa: St. Nemekath) an und schließt die Augen.",
+      "auswirkung": "Bis er die Augen wieder öffnet, vermag der Geweihte anwe- sende Geister zu sehen, die für das menschliche Auge normalerweise un- sichtbar bleiben. Er kann ihnen Fragen stellen, die Wesenheiten können, müssen ihm jedoch nicht antworten. Varianten: Grad III: Auf diesem Grad kann die Wirkung der Liturgie binnen LkP* Stunden auf Wunsch eingesetzt werden. Allerdings ist es dafür erforderlich, dass der Geweihte sich das Lotosöl in die Augen träufelt. Für diesen Zeit- raum und den ganzen darauf folgenden Tag, muss er Einbußen auf seine Sehkraft hinnehmen. Alle dementsprechenden Sinnenschärfe-Proben sind um die Hälfte der übrigbehaltenen LkP* erschwert, andere Tätigkeiten nach Entscheidung des Meisters.",
+      "anmerkungen": "Für Zwölfgöttergläubige gilt diese Liturgie für nicht ma- nifestierte Wesenheiten wie Totengeister, Dämonen und Elementargeister. Anhänger animistischer Religionen können außerdem Wesenheiten wie Ahnen- oder Waldgeister sehen, so diese sich in ihr Weltbild fügen. Nemekaths Zwiesprache",
+      "herkunftDetail": "Boron (Al'Anfa, seltener Punin), Kamaluq, Tairach;",
+      "ritualdauerDetail": "Gebet (1 Spielrunde)",
+      "wirkungsdauerDetail": "maximal LkP* Spielrunden",
+      "_quelle": "Liber Liturgium (Boron-Liste, Alias zu PDF: Nemekaths Geisterblick)"
+    },
+    {
+      "id": "marbos-gnade",
+      "name": "Marbos Gnade",
+      "gott": [
+        "Boron"
+      ],
+      "grad": "III",
+      "ziel": "P",
+      "reichweite": "Berührung",
+      "ritualdauer": "Zeremonie",
+      "wirkungsdauer": "Permanent",
+      "art": "speziell",
+      "merkmale": [],
+      "effekt": "Die Zielperson versinkt in borongefälligen, visionären Träu- men und verstirbt noch vor Anbruch des nächsten Tages.",
+      "symboleGesten": "Der Geweihte nimmt sich Zeit, den Sterbewil- ligen im Gespräch und Gebet auf sein baldiges Ende vorzubereiten, und zeichnet ihm mit ascheversetzem Salbungsöl Uthars nimmerfehlenden Pfeil auf die Stirn. So möglich, richten sie gemeinsam ihre Gebete an Boron und den Wächter des Totenreiches, und bittet die heilige Etilia um sanftes Geleit in die Nachwelt.",
+      "auswirkung": "Die Zielperson versinkt in borongefälligen, visionären Träu- men und verstirbt noch vor Anbruch des nächsten Tages. Varianten: Grad III: Die Marbiden kennen eine Variante dieser Liturgie als Mar- bos Gnade, die ausschließlich auf bereits im Sterben Liegende angewandt wird. Schmerzen und Leid fallen vom derart Gesegneten ab, und er ent- schläft nach LkP*+5 Tagen friedlich.",
+      "anmerkungen": "Diese Liturgie ist dazu gedacht, Todkranken und Leiden- den den Weg in den Tod zu erleichtern und darf nur auf Sterbewillige oder bereits im Sterben liegende angewandt werden. Ewige Jugend",
+      "herkunftDetail": "Boron (Etilianer); Marbos Gnade (Marbiden)",
+      "ritualdauerDetail": "Zeremonie",
+      "wirkungsdauerDetail": "Permanent",
+      "_quelle": "Liber Liturgium (Boron-Liste, Alias zu PDF: Etilias Gnade)"
+    },
+    {
+      "id": "bannfluch-des-heiligen-khalid",
+      "name": "Bannfluch des Heiligen Khalid",
+      "gott": [
+        "Boron"
+      ],
+      "grad": "III",
+      "ziel": "P",
+      "reichweite": "Sicht",
+      "ritualdauer": "Gebet (1 Spielrunde)",
+      "wirkungsdauer": "augenblicklich",
+      "art": "speziell",
+      "merkmale": [],
+      "effekt": "Der Geweihte kann bis zu LkP*+5 Untote oder verirrte See- len zur ewigen Ruhe betten.",
+      "symboleGesten": "Heilige Gesänge oder ein Gebet anstimmend schreitet der Geweihte unter die Untoten. Dabei segnet er sie, indem er Weihrauch verbrennt oder die Wiedergänger mit geweihter Graberde zur Ruhe bettet.",
+      "auswirkung": "Der Geweihte kann bis zu LkP*+5 Untote oder verirrte See- len zur ewigen Ruhe betten. Damit das unheilige Leben weicht, muss die Kreatur von Weihrauch oder geweihter Erde berührt werden. Von dieser Liturgie betroffen sind boronunheilige Kreaturen wie Untote, Totengeister oder Thargunitoth-Golemiden.",
+      "anmerkungen": "Waldmenschenschamanen verbrennen berauschende Kräuter oder berühren die Tschumbies (mohisch für Untote) mit ihrer Knochenkeule. Begehen der Heiligen Wasser",
+      "herkunftDetail": "Boron (Gorien), Kamaluq; Kamaluqs unerbittlicher Speer",
+      "ritualdauerDetail": "Gebet (1 Spielrunde)",
+      "wirkungsdauerDetail": "augenblicklich",
+      "_quelle": "Liber Liturgium (Boron-Liste, Alias zu PDF: Bannfluch, des Heiligen Khalid)"
+    },
+    {
+      "id": "noionas-zuspruch",
+      "name": "Noionas Zuspruch",
+      "gott": [
+        "Boron"
+      ],
+      "grad": "III",
+      "ziel": "P",
+      "reichweite": "Berührung",
+      "ritualdauer": "Gebet",
+      "wirkungsdauer": "LkP* Wochen, ein erneutes Auftreten ist jedoch möglich",
+      "art": "speziell",
+      "merkmale": [],
+      "effekt": "Die negativen Auswirkungen von Nachteilen, die Borons Wirken entgegengesetzt sind, lassen sich so für die Wirkungsdauer aufhe- ben.",
+      "symboleGesten": "Der Geweihte berührt mit der Hand die Stirn des zu Segnenden und erfleht die Gnade der Heiligen Velvenya.",
+      "auswirkung": "Die negativen Auswirkungen von Nachteilen, die Borons Wirken entgegengesetzt sind, lassen sich so für die Wirkungsdauer aufhe- ben. Auch andere Ängste können für die Hälfte der Wirkungsdauer (LKP*/2 Tage) ausgesetzt werden.",
+      "anmerkungen": "Am besten entfaltet diese Liturgie ihre Wirkung bei Nach- teilen wie Schlafstörungen, Alpträume, Einbildungen, Wahnvorstellungen, Dunkel- oder Totenangst. Segen des heiligen Hlûthar",
+      "herkunftDetail": "Boron (Al'Anfa, Punin, erfahrene Etilianer);",
+      "ritualdauerDetail": "Gebet",
+      "wirkungsdauerDetail": "LkP* Wochen, ein erneutes Auftreten ist jedoch möglich",
+      "_quelle": "Liber Liturgium (Boron-Liste, Alias zu PDF: Segen der heiligen Velvenya)"
+    },
+    {
+      "id": "salbung-der-heiligen-noiona",
+      "name": "Salbung der Heiligen Noiona",
+      "gott": [
+        "Boron"
+      ],
+      "grad": "III",
+      "ziel": "P",
+      "reichweite": "Sicht (Stoßgebet), Berührung (Zeremonie)",
+      "ritualdauer": "Stoßgebet (15 Aktionen) bei Dämonen, Zeremonie (8 Stun-",
+      "wirkungsdauer": "augenblicklich",
+      "art": "speziell",
+      "merkmale": [],
+      "effekt": "Mit dieser Liturgie zwingt der Geweihte einen niederen Dä- mon aus dem Gefolge des Widersachers seiner Gottheit in die Niederhöllen zurück.",
+      "symboleGesten": "Der Geweihte blickt den Dämon oder die be- sessene Person fest an, schlägt das Zeichen seines Gottes und spricht: Im Namen meines heiligen Herrn /meiner heiligen Herrin [Gottheit], unheiliges Gezücht, kehre zurück in die Niederhöllen, aus denen du gekommen bist!",
+      "auswirkung": "Mit dieser Liturgie zwingt der Geweihte einen niederen Dä- mon aus dem Gefolge des Widersachers seiner Gottheit in die Niederhöllen zurück. Varianten: Grad IV: Auf diesen Grad aufgestuft bannt die Liturgie gehörnte Dä- monen der Gegendomäne oder niedere Dämonen einer anderen Domäne. Grad V: Auf Grad V können gehörnte Dämonen anderer Domänen ge- bannt werden. Unheiligtümer des Widersachers der Gottheit werden zer- stört. Diese Variante muss separat erlernt werden. Grad VI: Diese mächtige Variante vermag Unheiligtümer aller Domä- nen zu zerstören. Diese Variante muss separat erlernt werden.",
+      "anmerkungen": "Die Beherrschungsschwierigkeit des Dämons erschwert die Mirakelprobe, die Sonderfertigkeit Exorzist kann diese bei passender Vorbe- reitung erleichtern. Firuns Einsicht",
+      "herkunftDetail": "Zwölfgötterkult, Angrosch, Gravesh, H'Ranga; Salbung der",
+      "ritualdauerDetail": "Stoßgebet (15 Aktionen) bei Dämonen, Zeremonie (8 Stun-",
+      "wirkungsdauerDetail": "augenblicklich",
+      "_quelle": "Liber Liturgium (Boron-Liste, Alias zu PDF: Exorzismus)"
+    },
+    {
+      "id": "segen-der-heiligen-noiona",
+      "name": "Segen der Heiligen Noiona",
+      "gott": [
+        "Boron"
+      ],
+      "grad": "III",
+      "ziel": "P",
+      "reichweite": "Berührung",
+      "ritualdauer": "Zyklus",
+      "wirkungsdauer": "LkP* Wochen, ein erneutes Auftreten ist jedoch möglich",
+      "art": "speziell",
+      "merkmale": [],
+      "effekt": "Der Geweihte kann mittels dieser Liturgie Geistesstörungen und selbst schwere Abhängigkeiten deutlich schneller und oft auch nach- haltiger behandeln.",
+      "symboleGesten": "Der Geweihte betet einmal täglich gemeinsam mit dem Patienten. Es folgen intensive Gespräche, in denen der Patient von seinen Ängsten, Sorgen und Nöten spricht. Anschließend spendet der Ge- weihte Zuspruch, und steht ihm mit Gebeten und dem Segen seines Gottes bei. Der Choral der Ewigkeit wird angestimmt, sobald die Behandlung ab- geschlossen ist.",
+      "auswirkung": "Der Geweihte kann mittels dieser Liturgie Geistesstörungen und selbst schwere Abhängigkeiten deutlich schneller und oft auch nach- haltiger behandeln. Er darf ein Drittel seines TaW in Heilkunde Seele zu den LkW* hinzurech- nen. Übersteigt die Summe die Stufe der Sucht oder Erkrankung, so gilt der Behandelte als geheilt. Ob nach Ablauf der Wirkungsdauer bei einer Konfrontation mit dem Aus- löser eine Sucht oder entsprechende Störung im Laufe des Spiels erneut auftritt, liegt in den Händen des Meisters. Varianten: Grad IV: Um jegliches Bedürfnis nach einem Suchtmittel zu tilgen, oder eine Geistesstörung dauerhaft zu behandeln, kann die Liturgie auf Grad IV aufgestuft werden. Die Wirkungsdauer ist dann permanent.",
+      "anmerkungen": "Ein Hochschamane des Kamaluq zieht sich mit dem zu Behandelnden mehrere Tage lang zurück und versucht, gemeinsam mit ihm die bösen Geister zu vertreiben. Je nach Stamm kann dies beispielsweise durch großzügige Rauchopfer, rituelle Tänze, Gesänge oder möglichst lau- tes Tam-Tam (moh. Lärm) unter Einbeziehung des ganzen Stammes sein. Segen der heiligen Theria",
+      "herkunftDetail": "Boron (Selem, Al'Anfa, Gareth, Punin, Perricum, Lowangen),",
+      "ritualdauerDetail": "Zyklus",
+      "wirkungsdauerDetail": "LkP* Wochen, ein erneutes Auftreten ist jedoch möglich",
+      "_quelle": "Liber Liturgium (Boron-Liste, Alias zu PDF: Segen der heiligen Noiona)"
     }
   ]
 }

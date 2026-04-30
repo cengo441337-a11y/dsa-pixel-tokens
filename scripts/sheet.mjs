@@ -3,12 +3,15 @@
  * Überschreibt das gdsa Standard-Sheet mit Pixel-Art Theme
  */
 
-import { MODULE_ID, ATTRIBUTES, DERIVED_FORMULAS, RACE_GS, SPELL_EFFECT_MAP, COMBAT_MANEUVERS, resolveProbe, checkCritical, resolveActorAsP, lookupSpellEffect, parseAspCost, ALL_ZONES, ZONE_LABELS, ZONE_KEY_MAP, HIT_ZONE_TABLE, parseBeFormula, getRuestungsgewoehnung, calcIniPenalty, getWoundThresholds, SF_MR_BONUSES } from "./config.mjs";
+import { MODULE_ID, ATTRIBUTES, DERIVED_FORMULAS, RACE_GS, SPELL_EFFECT_MAP, COMBAT_MANEUVERS, resolveProbe, checkCritical, resolveActorAsP, lookupSpellEffect, parseAspCost, ALL_ZONES, ZONE_LABELS, ZONE_KEY_MAP, HIT_ZONE_TABLE, parseBeFormula, getRuestungsgewoehnung, calcIniPenalty, getWoundThresholds, SF_MR_BONUSES, relayActorUpdate, relayTokenUpdate, broadcastVFX } from "./config.mjs";
 import { castSpell } from "./magic.mjs";
 import { openDatabaseBrowser } from "./db-browser.mjs";
 
-// Akteur-ID → aktive Pfeilverzauberung { effect, impact, label, color }
-const _arrowEnchants = new Map();
+// Akteur-ID → aktive Pfeilverzauberung { effect, impact, label, color, spellName }
+// Geteilt mit magic.mjs via globalThis, damit Verzauberung bei Spruchwirkung
+// gesetzt und beim nächsten Bogen-Schuss konsumiert werden kann.
+globalThis.DSAPixelArrowEnchants ??= new Map();
+const _arrowEnchants = globalThis.DSAPixelArrowEnchants;
 
 // Akteur-ID → ausstehender TP-Bonus (Wuchtschlag) für nächsten Schadenswurf
 const _pendingTpBonus = new Map();
@@ -178,8 +181,10 @@ export class PixelArtCharacterSheet extends ActorSheet {
     data.armor   = armor;
     data.shields = shields;
     data.items   = items;
-    data.totalRS = armor.reduce((sum, a) => sum + (a.rs ?? 0), 0);
-    data.totalBE = armor.reduce((sum, a) => sum + (a.be ?? 0), 0);  // raw BE (Anzeige)
+    // Nur GETRAGENE Rüstungen zählen für RS/BE
+    const wornArmor = armor.filter(a => a.worn !== false);
+    data.totalRS = wornArmor.reduce((sum, a) => sum + (a.rs ?? 0), 0);
+    data.totalBE = wornArmor.reduce((sum, a) => sum + (a.be ?? 0), 0);  // raw BE (Anzeige)
 
     // ── Schild-Modifikatoren: nur AKTIV geführtes Schild zählt (DSA: nur ein
     // Schild gleichzeitig in der Schildhand). KEIN Auto-Equip beim Render —
@@ -216,13 +221,37 @@ export class PixelArtCharacterSheet extends ActorSheet {
     data.eBE        = armorCalc.eBE;       // dezimal (z.B. 1.7)
     data.totalGBE   = armorCalc.totalGBE;  // dezimal gBE-Summe
     // Formatierte Anzeige (Dezimal nur wenn nötig, z.B. "2.1" statt "2.0999...")
-    const _fmt = v => v % 1 === 0 ? String(v) : v.toFixed(1);
+    // Anzeige-Format: BE-Werte werden mathematisch gerundet (≥0.5 → 1).
+    // Die internen Float-Werte (totalGBE, eBE) bleiben für Probe-Berechnungen
+    // exakt — gerundet wird NUR bei der Sheet-Anzeige.
+    // Ausnahme: bei 0 zeigen wir 0 (nicht "—" oder leer).
+    const _fmt = v => String(Math.round(v));
     data.totalGBEDisplay = _fmt(armorCalc.totalGBE);
     data.eBEDisplay      = _fmt(armorCalc.eBE);
+    data.totalBEDisplay  = _fmt(data.totalBE);
     data.rg         = armorCalc.rg;
     data.zoneRS     = armorCalc.zoneRS;
-    // INI-Malus: Rüstung + Schild (shieldIniMod ist negativ, z.B. -1)
-    data.iniPenalty = armorCalc.iniPenalty + (shieldIniMod < 0 ? -shieldIniMod : 0);
+    // INI-Malus: Rüstung (gBE) + Schild + Nachteile
+    // gBE wird mathematisch gerundet (BE 0.9 → -1 INI, nicht -0)
+    // WdS S.57: pro vollem gBE-Punkt -1 INI (gerundet)
+    let iniNachteilMalus = 0;
+    if (_nachteileNames.some(n => n.startsWith("behäbig") || n.startsWith("behaebig"))) iniNachteilMalus += 1; // WdH: Behäbig -1 INI
+    if (_nachteileNames.some(n => n.startsWith("schlechte reflexe") || n.startsWith("schlechter reflexe"))) iniNachteilMalus += 2;
+    if (_nachteileNames.some(n => n.startsWith("schwerfällig") || n.startsWith("schwerfaellig"))) iniNachteilMalus += 1;
+    if (_nachteileNames.some(n => n.startsWith("tollpatsch"))) iniNachteilMalus += 1;
+    const iniArmorMalus = Math.round(armorCalc.totalGBE) - (armorCalc.rg || 0);
+    data.iniPenalty = Math.max(0, iniArmorMalus) + (shieldIniMod < 0 ? -shieldIniMod : 0) + iniNachteilMalus;
+
+    // ── AW reduzieren um eBE (WdS S.66): Rüstung mindert Ausweichen ──
+    // eBE wirkt direkt auf den AW-Wert (nicht erst bei der Probe). gerundet.
+    const awBEMalus = Math.max(0, Math.round(armorCalc.eBE));
+    if (awBEMalus > 0) {
+      // Falls computed.AW noch nicht in sysClone.Dogde geschrieben war, nachziehen
+      const baseAW = computed.AW; // schon mit awSFBonus, awAkrobatikBonus, awNachteilMalus
+      const finalAW = Math.max(0, baseAW - awBEMalus);
+      sysClone.Dogde = finalAW;
+      computed.AW = finalAW; // damit data.derivedComputed.AW konsistent ist
+    }
     data.zoneLabels = ZONE_LABELS;
     data.allZones   = ALL_ZONES;
 
@@ -292,6 +321,17 @@ export class PixelArtCharacterSheet extends ActorSheet {
 
     // ── Ritualfertigkeiten ──
     data.rituals = this._prepareRituals();
+
+    // ── Aktive Pfeil-Verzauberung (verbraucht beim nächsten Fernkampfschuss) ──
+    const activeEnchant = _arrowEnchants.get(this.actor.id);
+    data.arrowEnchant = activeEnchant
+      ? {
+          label: activeEnchant.label,
+          color: activeEnchant.color,
+          spellName: activeEnchant.spellName,
+          zfpStar: activeEnchant.zfpStar,
+        }
+      : null;
 
     // ── Kreatur-Daten aus Flags (abilities, spells, services etc. — nicht im gdsa-Schema) ──
     data.creature = this.actor.getFlag("dsa-pixel-tokens", "creature") ?? null;
@@ -376,6 +416,30 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const matchedSchamane = schamaneKeywords.some(k => profStr.includes(k));
     data.isSchamane = hasGeisterFert || matchedSchamane;
 
+    // Beseelte Knochenkeule — Quick-Block für Sheet
+    const keule = (this.actor.items ?? [])
+      .find(i => /keule/i.test(i.name) && i.flags?.[MODULE_ID]?.beseelt);
+    if (keule) {
+      const flags = keule.flags[MODULE_ID] || {};
+      const r = flags.rituale || {};
+      const LOmax = flags.LO || 0;
+      const LOcur = flags.LOcurrent ?? LOmax;
+      data.keuleData = {
+        name: keule.name,
+        geistType: flags.geistType || "Geist",
+        LO: LOmax,
+        LOcurrent: LOcur,
+        LOpercent: LOmax ? Math.round((LOcur / LOmax) * 100) : 0,
+        mTPbonus: r["kraft-der-keule"]?.aktiv ? (r["kraft-der-keule"].mTP || flags.mTPbonus || 0) : 0,
+        bfBonus: r["haerte-der-keule"]?.aktiv ? (r["haerte-der-keule"].bfBonus || flags.bfBonus || 0) : 0,
+        magiegespuer: r["gespuer-der-keule"]?.aktiv ? (r["gespuer-der-keule"].magiegespuer || flags.magiegespuerBonus || 0) : 0,
+        hilfeMod: r["hilfe-der-keule"]?.aktiv ? (r["hilfe-der-keule"].mod ?? -(r["hilfe-der-keule"].stufe || 1)) : 0,
+        hilfeFertigkeit: r["hilfe-der-keule"]?.aktiv ? r["hilfe-der-keule"].fertigkeit : null,
+        bannMod: r["bann-der-keule"]?.aktiv ? (r["bann-der-keule"].mod || 9) : 0,
+        gespeicherteSprueche: r["geist-der-keule"]?.gespeicherteSprueche || [],
+      };
+    }
+
     return data;
   }
 
@@ -394,6 +458,16 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // BE-Regeln für körperliche Talente aus armor-zones.json
     const physicalRules = globalThis.DSAPixelData?.armorZones?.beRules?.physicalTalents ?? {};
 
+    // Talent-Datenbank (talents.json) als Fallback für probe wenn system.talente
+    // keine probe-Info hat (z.B. weil nur als TaW im gdsa-Schema gespeichert)
+    const talentDb = (globalThis.DSAPixelData?.talents ?? []);
+    const probeFromDb = (talentName) => {
+      const entry = talentDb.find(t => t.name === talentName);
+      if (!entry) return "";
+      const arr = Array.isArray(entry.probe) ? entry.probe : String(entry.probe || "").split(/[\/,]/);
+      return arr.map(s => String(s).trim()).filter(Boolean).join("/");
+    };
+
     // Talente aus system.talente (importiert per XML-Parser)
     const talente = this.actor.system?.talente ?? {};
     for (const [name, data] of Object.entries(talente)) {
@@ -409,10 +483,21 @@ export class PixelArtCharacterSheet extends ActorSheet {
         }
       }
 
+      // Probe normalisieren: kann Array ["MU","IN","CH"], String "MU/IN/CH" oder
+      // leer sein. Im Template brauchen wir genau einen "/"-getrennten String.
+      let probeStr = "";
+      if (Array.isArray(data.probe)) {
+        probeStr = data.probe.map(s => String(s).trim()).filter(Boolean).join("/");
+      } else if (typeof data.probe === "string" && data.probe.trim()) {
+        probeStr = data.probe.replace(/[(),]/g, "/").split("/").map(s => s.trim()).filter(Boolean).join("/");
+      }
+      // Fallback: aus talents.json holen
+      if (!probeStr) probeStr = probeFromDb(name);
+
       target.talents.push({
         name,
-        probe: data.probe ?? "",
-        probeDisplay: data.probe ?? "",
+        probe: probeStr,
+        probeDisplay: probeStr,
         taw: data.value ?? 0,
         bePenalty,
       });
@@ -578,6 +663,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
             name: item.name,
             rs: armor_data.rs ?? 0,
             be: armor_data.be ?? 0,
+            worn: sys.worn !== false, // Default: getragen, außer explizit false
           });
         } else if (itemType === "shield") {
           const shData = sys.shield ?? {};
@@ -610,6 +696,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
           id: item.id, name: item.name,
           rs: sys.rs ?? sys.protection ?? 0,
           be: sys.be ?? sys.encumbrance ?? 0,
+          worn: sys.worn !== false,
         });
       }
       // spells, rituals etc. are handled elsewhere — skip
@@ -672,28 +759,40 @@ export class PixelArtCharacterSheet extends ActorSheet {
   }
 
   _prepareVorteile(key) {
-    const data = this.actor.system?.[key] ?? {};
-    const entries = Object.entries(data).map(([name, val]) => ({
+    // Strategie:
+    // - Wenn der Parser bereits getrennt hat (system.vorteile + system.nachteile separat
+    //   gefüllt), trauen wir der Trennung und rendern alles aus dem entsprechenden Map.
+    // - Wenn nur system.vorteile gefüllt ist (alter Parser-Output / Helden-Software-
+    //   Behavior wo ALLES als <vorteil> kommt), filtern wir per Nachteil-Lookup.
+    const ownMap = this.actor.system?.[key] ?? {};
+    const otherMap = this.actor.system?.[key === "vorteile" ? "nachteile" : "vorteile"] ?? {};
+    const ownCount = Object.keys(ownMap).length;
+    const otherCount = Object.keys(otherMap).length;
+
+    const toEntry = ([name, val]) => ({
       name,
       value: (val !== null && val !== "" && val !== 0) ? val : null,
-    }));
+    });
 
-    // Helden-Software exportiert ALLES als <vorteil> — wir muessen Nachteile
-    // anhand der bekannten DSA-Nachteil-Namen herausfiltern.
-    const filtered = key === "vorteile"
-      ? entries.filter(e => !_isDisadvantage(e.name))
-      : entries.filter(e => _isDisadvantage(e.name));
-
-    // Bei "nachteile"-Aufruf: falls data leer ist, aus vorteile die Nachteile extrahieren
-    if (key === "nachteile" && filtered.length === 0) {
-      const vorteile = this.actor.system?.vorteile ?? {};
-      return Object.entries(vorteile).filter(([n]) => _isDisadvantage(n)).map(([name, val]) => ({
-        name,
-        value: (val !== null && val !== "" && val !== 0) ? val : null,
-      })).sort((a, b) => a.name.localeCompare(b.name, "de"));
+    let result;
+    if (ownCount > 0 && otherCount > 0) {
+      // Sauber getrennt — direkt nehmen, kein Filter nötig
+      result = Object.entries(ownMap).map(toEntry);
+    } else if (ownCount > 0 && otherCount === 0) {
+      // Nur ownMap gefüllt → bei "vorteile" kann das alles inkl. Nachteilen sein
+      // (Helden-Software-Output). Filtern per _isDisadvantage.
+      const all = Object.entries(ownMap).map(toEntry);
+      result = key === "vorteile"
+        ? all.filter(e => !_isDisadvantage(e.name))
+        : all.filter(e => _isDisadvantage(e.name));
+    } else {
+      // ownMap leer + otherMap voll → bei "nachteile"-Aufruf aus vorteile extrahieren
+      // (Edge-Case wo der Parser nicht getrennt hat)
+      result = key === "nachteile"
+        ? Object.entries(otherMap).filter(([n]) => _isDisadvantage(n)).map(toEntry)
+        : [];
     }
-
-    return filtered.sort((a, b) => a.name.localeCompare(b.name, "de"));
+    return result.sort((a, b) => a.name.localeCompare(b.name, "de"));
   }
 
   _prepareSF() {
@@ -777,6 +876,14 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // Schild-Toggle (click → in Hand führen / wegstecken)
     html.find(".shield-toggle").on("click", this._onShieldToggle.bind(this));
 
+    // Pfeil-Verzauberung verwerfen (✕-Button im Kampf-Tab)
+    html.find(".arrow-enchant-clear").on("click", (ev) => {
+      ev.preventDefault();
+      _arrowEnchants.delete(this.actor.id);
+      ui.notifications.info("Pfeil-Verzauberung verworfen.");
+      this.render(false);
+    });
+
     // Liturgien & Mirakel
     html.find("[data-action='open-liturgien']").on("click", async (ev) => {
       ev.preventDefault();
@@ -817,6 +924,51 @@ export class PixelArtCharacterSheet extends ActorSheet {
         console.error(e);
         ui.notifications.error("Schamanen-App konnte nicht geöffnet werden.");
       }
+    });
+
+    // Beseelte Knochenkeule
+    html.find("[data-action='open-keule']").on("click", async (ev) => {
+      ev.preventDefault();
+      try {
+        const { KeulenManagerApp } = await import("./keule.mjs");
+        new KeulenManagerApp(this.actor).render(true);
+      } catch (e) {
+        console.error(e);
+        ui.notifications.error("Keulen-Manager konnte nicht geöffnet werden.");
+      }
+    });
+
+    // Inventar-Item löschen (mit Bestätigung)
+    html.find("[data-action='delete-item']").on("click", async (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const id = ev.currentTarget.dataset.itemId;
+      const name = ev.currentTarget.dataset.itemName || "Item";
+      const item = this.actor.items.get(id);
+      if (!item) return;
+      const confirm = await Dialog.confirm({
+        title: "Item löschen",
+        content: `<p>Soll <strong>${name}</strong> wirklich aus dem Inventar entfernt werden?</p>`,
+        yes: () => true,
+        no: () => false,
+        defaultYes: false,
+      });
+      if (confirm) {
+        await item.delete();
+        this.render();
+      }
+    });
+
+    // Rüstung tragen/abnehmen (worn-Toggle)
+    html.find("[data-action='toggle-worn']").on("change", async (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const id = ev.currentTarget.dataset.itemId;
+      const item = this.actor.items.get(id);
+      if (!item) return;
+      const newWorn = ev.currentTarget.checked;
+      await item.update({ "system.worn": newWorn });
+      this.render();
     });
   }
 
@@ -1343,8 +1495,33 @@ export class PixelArtCharacterSheet extends ActorSheet {
   async _rollTalent(dataset) {
     const name = dataset.talent;
     const taw  = parseInt(dataset.taw) || 0;
-    const probeStr = dataset.probe || "";
-    const probeAttrs = probeStr.split("/").map(a => a.trim());
+    let probeStr = (dataset.probe || "").trim();
+
+    // Fallback 1: system.talente
+    if (!probeStr || probeStr === "undefined") {
+      const t = this.actor.system?.talente?.[name];
+      if (t) {
+        if (Array.isArray(t.probe)) {
+          probeStr = t.probe.map(s => String(s).trim()).filter(Boolean).join("/");
+        } else if (typeof t.probe === "string" && t.probe.trim()) {
+          probeStr = t.probe;
+        }
+      }
+    }
+    // Fallback 2: talents.json
+    if (!probeStr || probeStr === "undefined") {
+      const dbEntry = (globalThis.DSAPixelData?.talents ?? []).find(t => t.name === name);
+      if (dbEntry) {
+        const arr = Array.isArray(dbEntry.probe) ? dbEntry.probe : String(dbEntry.probe || "").split(/[\/,]/);
+        probeStr = arr.map(s => String(s).trim()).filter(Boolean).join("/");
+      }
+    }
+    if (!probeStr) {
+      ui.notifications.warn(`Keine Probe-Definition für Talent "${name}" gefunden.`);
+      return;
+    }
+
+    const probeAttrs = probeStr.split(/[\/,]/).map(a => a.trim()).filter(Boolean);
 
     // Eigenschaftswerte auslesen
     const attrs = probeAttrs.map(a => this.actor.system[a]?.value ?? 10);
@@ -1373,17 +1550,19 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const dice = roll.terms[0].results.map(r => r.result);
     this._animateDice(dice, 20);
 
-    // Probe auswerten (mit BE-Penalty als Erschwernis)
+    // Probe auswerten — Variante A (WdH S.27): Erschwernis mindert TaW vorab,
+    // Würfel werden gegen die unveränderten Eigenschaften verglichen.
     const result = resolveProbe(dice, attrs, taw, totalMod);
     const crit   = checkCritical(dice);
 
-    // Chat
+    // Chat — Würfelfarbe gegen Eigenschaft (Variante A: attr unverändert)
     const diceHtml = dice.map((d, i) => {
-      const over = d > attrs[i];
+      const attr = attrs[i] ?? 0;
+      const over = d > attr;
       const is1 = d === 1;
       const is20 = d === 20;
       const cls = is1 ? "crit" : is20 ? "fumble" : over ? "fail" : "success";
-      return `<div class="die ${cls}" title="${probeAttrs[i]} ${attrs[i]}">${d}</div>`;
+      return `<div class="die ${cls}" title="${probeAttrs[i] ?? "?"} ${attr}">${d}</div>`;
     }).join("");
 
     let resultText, resultClass;
@@ -1409,11 +1588,28 @@ export class PixelArtCharacterSheet extends ActorSheet {
       ? `<div style="text-align:center;font-size:13px;color:#888">${modParts.join(" · ")}</div>`
       : "";
 
+    // Variante A (WdH S.27): TaP*-Aufschlüsselung zeigen
+    // Erfolg: TaW − Erschwernis − Σ(über) = TaP*
+    // Misserfolg: zeige um wieviel verfehlt (remainder ist negativ)
+    const overSum = (result.details ?? []).reduce((s, d) => s + (d.consumed || 0), 0);
+    let tapBreakdown = "";
+    if (result.success && totalMod !== 0) {
+      tapBreakdown = `<div style="text-align:center;font-size:10px;color:#779;margin-top:-4px">TaW ${taw} − ${totalMod} (Erschw.) − ${overSum} (über) = ${result.tapStar}</div>`;
+    } else if (!result.success && !crit.patzer && !crit.gluecklich) {
+      // Misslungen: zeige fehlende Punkte
+      const missing = -result.remainder;
+      const breakdownLine = totalMod !== 0
+        ? `TaW ${taw} − ${totalMod} (Erschw.) − ${overSum} (über) = ${result.remainder}`
+        : `TaW ${taw} − ${overSum} (über) = ${result.remainder}`;
+      tapBreakdown = `<div style="text-align:center;font-size:11px;color:#e94560;margin-top:2px"><b>${missing} Punkt${missing === 1 ? "" : "e"} verfehlt</b></div>
+        <div style="text-align:center;font-size:10px;color:#779;margin-top:-2px">${breakdownLine}</div>`;
+    }
+
     const flavor = `<div class="dsa-pixel-chat">
       <div class="chat-title">${name}</div>
       <div class="dice-row">${diceHtml}</div>
       <div class="result-line ${resultClass}">${resultText}</div>
-      ${result.success ? `<div class="tap-star">TaP*: <span>${result.tapStar}</span></div>` : ""}
+      ${result.success ? `<div class="tap-star">TaP*: <span>${result.tapStar}</span></div>${tapBreakdown}` : tapBreakdown}
       ${modLine}
     </div>`;
 
@@ -1569,8 +1765,10 @@ export class PixelArtCharacterSheet extends ActorSheet {
           break;
         }
         case "gezielter_stich": {
-          _pendingTpBonus.set(this.actor.id, { bonus: 0, label: "Gezielter Stich", ignoreRS: 2, autoWounds: 1 });
-          maneuverLine = `<div class="dsa-maneuver-effect" style="color:#e94560">🎯 Gezielter Stich: −2 RS, auto +1 Wunde! → nächster Schadenswurf</div>`;
+          // WdS S.65: −4 AT, halber gegnerischer RS, Wundschwelle −2,
+          // auto +1 Wunde, RS komplett ignoriert (TP=SP).
+          _pendingTpBonus.set(this.actor.id, { bonus: 0, label: "Gezielter Stich", ignoreRS: true, autoWounds: 1, reduceWS: 2 });
+          maneuverLine = `<div class="dsa-maneuver-effect" style="color:#e94560">🎯 Gezielter Stich: RS ignoriert, WS−2, auto +1 Wunde! → nächster Schadenswurf</div>`;
           break;
         }
         case "knockdown": {
@@ -1700,7 +1898,11 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const srcToken = this.actor.getActiveTokens()[0];
     const tgtToken = [...game.user.targets][0];
     const enchant  = isRanged ? _arrowEnchants.get(this.actor.id) : null;
-    if (enchant) _arrowEnchants.delete(this.actor.id);
+    if (enchant) {
+      _arrowEnchants.delete(this.actor.id);
+      // Sheet-Banner aktualisieren (Verzauberung ist verbraucht)
+      setTimeout(() => { if (this.rendered) this.render(false); }, 50);
+    }
 
     if (confirmedFumble) {
       // Patzer-Sound sofort
@@ -2141,10 +2343,12 @@ export class PixelArtCharacterSheet extends ActorSheet {
 
     // ── Auto-SP-Abzug: LeP des Ziels reduzieren + Wunden prüfen ────────
     let lepLine = "";
+    let totalNewWounds = 0; // für VFX unten
     if (targetActor && sp > 0) {
       const oldLeP = targetActor.system?.LeP?.value ?? 0;
       const newLeP = Math.max(0, oldLeP - sp);
-      await targetActor.update({ "system.LeP.value": newLeP });
+      // Token-aware: bei unlinked NSC die Token-delta-Schicht updaten
+      await relayTokenUpdate(targetToken, { "system.LeP.value": newLeP });
 
       // ── Wunden-Check (WdS Wundregeln) ──────────────────────────────
       const ko = targetActor.system?.KO?.value ?? 10;
@@ -2162,6 +2366,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
 
       // Auto-Wunden aus Manövern (Gezielter Stich +1, Todesstoß +2)
       newWounds += pending?.autoWounds ?? 0;
+      totalNewWounds = newWounds;
 
       // Wunden persistent auf Actor-Flag speichern (pro Zone)
       let woundLine = "";
@@ -2174,7 +2379,8 @@ export class PixelArtCharacterSheet extends ActorSheet {
         // Zone bringen keinen weiteren Effekt (sondern werden in andere Zonen
         // verteilt, was wir hier vereinfacht durch Cap auf 3 abbilden).
         existingWounds[zoneKey] = Math.min(3, oldZoneWounds + newWounds);
-        await targetActor.setFlag("dsa-pixel-tokens", "wounds", existingWounds);
+        // Token-aware: bei unlinked NSC die Token-delta-Schicht updaten
+        await relayTokenUpdate(targetToken, { [`flags.${MODULE_ID}.wounds`]: existingWounds });
 
         const totalWounds = Object.values(existingWounds).reduce((s, w) => s + (w || 0), 0);
         const zoneTotal = existingWounds[zoneKey];
@@ -2187,9 +2393,20 @@ export class PixelArtCharacterSheet extends ActorSheet {
         </div>`;
       }
 
+      // WdS S.78: kampfunfähig ab LeP ≤ 5 (mind. 1), tot ab 0 oder darunter,
+      // unwiderruflich tot bei LeP < -KO. Vorteile Eisern/Zäher Hund verschieben
+      // diese Schwellen — hier vereinfacht nicht berücksichtigt im Display.
+      const koTarget = targetActor.system?.KO?.value ?? 10;
+      const status = newLeP <= -koTarget
+        ? `<span style="color:#ff0000;font-weight:bold"> — UNWIDERRUFLICH TOT!</span>`
+        : newLeP <= 0
+          ? `<span style="color:#ff2200;font-weight:bold"> — LEBENSBEDROHLICH (W6×KO KR bis Tod)!</span>`
+          : newLeP <= 5
+            ? `<span style="color:#ff4444;font-weight:bold"> — KAMPFUNFÄHIG (LeP ≤ 5)!</span>`
+            : "";
       lepLine = `<div style="font-size:13px;text-align:center;margin-top:4px;padding:3px 6px;background:rgba(233,69,96,0.15);border:1px solid rgba(233,69,96,0.3);border-radius:3px">
         💔 ${targetActor.name}: ${oldLeP} → <strong style="color:#e94560">${newLeP}</strong> LeP
-        ${newLeP === 0 ? `<span style="color:#ff4444;font-weight:bold"> — KAMPFUNFÄHIG!</span>` : ""}
+        ${status}
       </div>${woundLine}`;
     }
 
@@ -2238,6 +2455,41 @@ export class PixelArtCharacterSheet extends ActorSheet {
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       flavor,
     });
+
+    // ── VFX broadcasten: Schadenflash + Scrolling-Schadenszahl ──────────
+    if (sp > 0 && targetToken) {
+      broadcastVFX({ kind: "effect", x: targetToken.center.x, y: targetToken.center.y, effect: "schadenflash" });
+      const dmgColor = totalNewWounds >= 3 ? "#ff0000"
+                    : totalNewWounds >= 1 ? "#ff4444"
+                    : "#ffaa44";
+      const dmgFont = totalNewWounds >= 1 ? 42 : 32;
+      broadcastVFX({
+        kind: "scrollingText",
+        tgtTokenId: targetToken.id,
+        text: `-${sp}`,
+        color: dmgColor,
+        fontSize: dmgFont,
+        duration: 1800,
+        distance: 90,
+      });
+      if (totalNewWounds > 0) {
+        setTimeout(() => {
+          broadcastVFX({
+            kind: "scrollingText",
+            tgtTokenId: targetToken.id,
+            text: `💀 +${totalNewWounds} Wunde${totalNewWounds > 1 ? "n" : ""}`,
+            color: "#ff4444", fontSize: 22, duration: 1500, distance: 60,
+          });
+        }, 600);
+      }
+    } else if (targetToken && total > 0) {
+      // Treffer aber abgewehrt
+      broadcastVFX({
+        kind: "scrollingText",
+        tgtTokenId: targetToken.id,
+        text: `0`, color: "#888888", fontSize: 22,
+      });
+    }
   }
 
   // ─── Modifikator-Dialog ───────────────────────────────────────────────

@@ -701,14 +701,17 @@ export const SPELL_MODIFICATIONS = {
   },
   erzwingen: {
     label: "Erzwingen",
-    desc: "Erleichtert die Probe durch zusätzliche AsP (Kosten verdoppeln sich pro Stufe!)",
+    desc: "Erleichtert die Probe durch zusätzliche AsP — pro Stufe verdoppelt (WdZ S.20).",
     options: [
+      // WdZ S.20: 1 Punkt = 1 AsP, 2 = 2, 3 = 4, 4 = 8, 5 = 16, 6 = 32 AsP.
+      // Egal wie viele Punkte erzwungen werden, zählt dies als EINE Modifikation.
       { label: "Nicht erzwingen",      zfpCost: 0, extraAkt: 0, aspExtra: 0 },
       { label: "+1 Erleichterung",     zfpCost: 0, extraAkt: 1, aspExtra: 1,  erleichterung: 1 },
-      { label: "+2 Erleichterung",     zfpCost: 0, extraAkt: 2, aspExtra: 3,  erleichterung: 2 },
-      { label: "+3 Erleichterung",     zfpCost: 0, extraAkt: 3, aspExtra: 7,  erleichterung: 3 },
-      { label: "+4 Erleichterung",     zfpCost: 0, extraAkt: 4, aspExtra: 15, erleichterung: 4 },
-      { label: "+5 Erleichterung",     zfpCost: 0, extraAkt: 5, aspExtra: 31, erleichterung: 5 },
+      { label: "+2 Erleichterung",     zfpCost: 0, extraAkt: 2, aspExtra: 2,  erleichterung: 2 },
+      { label: "+3 Erleichterung",     zfpCost: 0, extraAkt: 3, aspExtra: 4,  erleichterung: 3 },
+      { label: "+4 Erleichterung",     zfpCost: 0, extraAkt: 4, aspExtra: 8,  erleichterung: 4 },
+      { label: "+5 Erleichterung",     zfpCost: 0, extraAkt: 5, aspExtra: 16, erleichterung: 5 },
+      { label: "+6 Erleichterung",     zfpCost: 0, extraAkt: 6, aspExtra: 32, erleichterung: 6 },
     ],
   },
   technik: {
@@ -758,8 +761,11 @@ export function calculateModifications(selections, baseAsP, rep = "gildenmagisch
       zfpCost = opt.reichweiteSteps * 7;
     }
 
-    // Kristallomantisch: alle ZfP-Kosten verdoppelt (ohne passende Kristalle, WdZ S.324)
-    if (rep === "kristallomant" && zfpCost > 0) {
+    // Kristallomantisch (WdZ S.322/324): "Zudem werden die Zuschläge für
+    // Spontane Modifikationen und Varianten verdoppelt, wenn sie nicht von
+    // entsprechend geschliffenen Kristallen unterstützt werden."
+    // → nur verdoppeln wenn extraFlags.passenderKristall NICHT gesetzt ist.
+    if (rep === "kristallomant" && zfpCost > 0 && !extraFlags?.passenderKristall) {
       zfpCost = zfpCost * 2;
     }
 
@@ -878,8 +884,15 @@ export const SPELL_DAMAGE_MAP = {
   // ─── Feuer ─────────────────────────────────────────────────────────────
   "Ignifaxius Flammenstrahl":  { damageType: "chooseDice", maxDice: "zfw", element: "Feuer", perTenTpRSReduction: true },
   "Igniflumen Flammenspur":    { damageType: "fixedPlusZfpStar", formula: "2W6", element: "Feuer", perTenTpRSReduction: true },
-  "Igniplano Flaechenbrand":   { damageType: "fixedPlusZfpStar", formula: "3W6", element: "Feuer", ignoreZones: true, perTenTpRSReduction: true },
-  "Ignisphaero Feuerball":     { damageType: "fixedPlusZfpStar", formula: "5W6", zfpDivisor: 2, element: "Feuer", ignoreZones: true, perTenTpRSReduction: true },
+  // Igniplano (LCR S.130): 25 AsP fix, kein TP=AsP-Pricing
+  "Igniplano Flaechenbrand":   { damageType: "fixedPlusZfpStar", formula: "3W6", element: "Feuer", ignoreZones: true, perTenTpRSReduction: true,
+                                  aoeRadius: 3, aoeFalloff: "linear", fixedAspCost: 25 },
+  // Ignisphaero (LCR S.140): 21 AsP plus 1W6 LeP plus 1 Erschöpfung,
+  // 5W6 + ZfP*/2 TP im Zentrum, pro Schritt Entfernung
+  // sinkt der Schaden um (1 + niedrigster Würfel der Schadensrolle). Wirkt auf
+  // alle Tokens im Wirkungsradius (bis Schaden auf 0 fällt).
+  "Ignisphaero Feuerball":     { damageType: "fixedPlusZfpStar", formula: "5W6", zfpDivisor: 2, element: "Feuer", ignoreZones: true, perTenTpRSReduction: true,
+                                  aoeRadius: 12, aoeFalloff: "perStepMinusOnePlusMinDie", fixedAspCost: 21 },
   "Brenne Sal'Hanamkha":       { damageType: "fixedRoll", formula: "1W6+2", element: "Feuer" },
   // BRENNE TOTER STOFF (LCR S.54): kein Direkt-Schaden auf Lebewesen — nur ueber Ruestung/Kleidung
   // Basis: 3W6 SP am Traeger der gezauberten Ruestung (borbaradianisch: 1 SP/Aktion)
@@ -1150,7 +1163,7 @@ export async function rollSpellDamage(spellName, damageInfo, context = {}) {
     tp = roll.total;
     aspCost = tp; // AsP = TP!
     formulaLabel = `${n}W${diceSize} = ${tp} TP (${tp} AsP)`;
-    rollHTML = `<div class="dice-row">${roll.dice[0].results.map(r => `<div class="die success">${r.result}</div>`).join("")}</div>`;
+    rollHTML = `<div class="dice-row">${roll.dice[0].results.map(r => `<div class="die die-d6 success">${r.result}</div>`).join("")}</div>`;
   } else if (type === "fixedPlusZfpStar") {
     // FULMINICTUS-Stil: Feste Formel + ZfP*
     const fml = (damageInfo.formula ?? "1W6").replace(/W/gi, "d");
@@ -1159,11 +1172,17 @@ export async function rollSpellDamage(spellName, damageInfo, context = {}) {
     const divisor = damageInfo.zfpDivisor ?? 1;
     const zfpAdd = divisor > 1 ? Math.floor(zfpStar / divisor) : zfpStar;
     tp = roll.total + zfpAdd;
-    aspCost = tp; // bei FAXIUS/FULMINICTUS: AsP = TP (alle haben diese Regel)
-    formulaLabel = `${fml}${divisor > 1 ? `+ZfP*/${divisor}` : "+ZfP*"} = ${roll.total}+${zfpAdd} = ${tp} TP (${tp} AsP)`;
+    // AsP-Cost: bei FAXIUS/FULMINICTUS gilt AsP = TP. Bei Ignisphaero/Igniplano
+    // sind die Kosten FIX (LCR S.130/140) — fixedAspCost überschreibt das Default.
+    aspCost = damageInfo.fixedAspCost ?? tp;
+    const aspLabel = damageInfo.fixedAspCost != null ? `${damageInfo.fixedAspCost} AsP fix` : `${tp} AsP`;
+    formulaLabel = `${fml}${divisor > 1 ? `+ZfP*/${divisor}` : "+ZfP*"} = ${roll.total}+${zfpAdd} = ${tp} TP (${aspLabel})`;
     rollHTML = roll.dice[0]
-      ? `<div class="dice-row">${roll.dice[0].results.map(r => `<div class="die success">${r.result}</div>`).join("")}</div>`
+      ? `<div class="dice-row">${roll.dice[0].results.map(r => `<div class="die die-d6 success">${r.result}</div>`).join("")}</div>`
       : "";
+    // Speichere die einzelnen Würfel-Ergebnisse für Falloff-Berechnung
+    // (Ignisphaero: pro Schritt Entfernung sinkt der Schaden um 1 + niedrigster Würfel)
+    var diceResults = roll.dice[0]?.results.map(r => r.result) ?? [];
   } else if (type === "separateCostRoll") {
     // KULMINATIO: TP und AsP GETRENNT wuerfeln
     const dmgFml = (damageInfo.damageFormula ?? "1W6").replace(/W/gi, "d");
@@ -1176,9 +1195,9 @@ export async function rollSpellDamage(spellName, damageInfo, context = {}) {
     aspCost = aspRoll.total;
     formulaLabel = `Schaden: ${dmgFml}=${tp} · AsP: ${aspFml}=${aspCost}`;
     rollHTML = `<div class="dice-row">
-      ${dmgRoll.dice[0]?.results.map(r => `<div class="die success" title="Schaden">${r.result}</div>`).join("") ?? ""}
+      ${dmgRoll.dice[0]?.results.map(r => `<div class="die die-d6 success" title="Schaden">${r.result}</div>`).join("") ?? ""}
       <span style="color:#666;margin:0 6px">|</span>
-      ${aspRoll.dice[0]?.results.map(r => `<div class="die" style="background:#1a3a6e" title="AsP">${r.result}</div>`).join("") ?? ""}
+      ${aspRoll.dice[0]?.results.map(r => `<div class="die die-d6" style="background:#1a3a6e" title="AsP">${r.result}</div>`).join("") ?? ""}
     </div>`;
   } else if (type === "aspDirect") {
     tp = result.asp;
@@ -1194,7 +1213,7 @@ export async function rollSpellDamage(spellName, damageInfo, context = {}) {
     aspCost = (damageInfo.baseAspCost ?? 0) + (damageInfo.perKrAspCost ?? 0) * zfpStar;
     formulaLabel = `${fml}/KR = ${tp} SP · fuer ${zfpStar} KR · ${aspCost} AsP`;
     rollHTML = roll.dice[0]
-      ? `<div class="dice-row">${roll.dice[0].results.map(r => `<div class="die success">${r.result}</div>`).join("")}</div>`
+      ? `<div class="dice-row">${roll.dice[0].results.map(r => `<div class="die die-d6 success">${r.result}</div>`).join("")}</div>`
       : "";
   } else if (type === "fixedRoll") {
     const fml = (damageInfo.formula ?? "1W6").replace(/W/gi, "d");
@@ -1204,7 +1223,7 @@ export async function rollSpellDamage(spellName, damageInfo, context = {}) {
     // aspCost bleibt aspBaseCost (aus kosten-Feld)
     formulaLabel = `${fml} = ${tp} TP${damageInfo.separateAspCost ? ` (${aspCost} AsP separat)` : ""}`;
     rollHTML = roll.dice[0]
-      ? `<div class="dice-row">${roll.dice[0].results.map(r => `<div class="die success">${r.result}</div>`).join("")}</div>`
+      ? `<div class="dice-row">${roll.dice[0].results.map(r => `<div class="die die-d6 success">${r.result}</div>`).join("")}</div>`
       : "";
   } else if (type === "manual") {
     tp = result.tp;
@@ -1255,6 +1274,7 @@ export async function rollSpellDamage(spellName, damageInfo, context = {}) {
     element: effectiveElement,
     variantInfo,
     variantNote,
+    diceResults: typeof diceResults !== "undefined" ? diceResults : [],
   };
 }
 
@@ -1501,21 +1521,239 @@ export function checkCritical(dice) {
  * @returns {{ success: boolean, tapStar: number, remainder: number, details: object }}
  */
 export function resolveProbe(dice, attrs, taw, modifier = 0) {
+  // DSA 4.1 Variante A (WdH S.27 / WdZ S.32 "Talent mindern"):
+  // Erschwernis E wird VOR der Probe vom TaW/ZfW abgezogen, die drei Würfel
+  // werden dann gegen die unveränderten Eigenschaften gewürfelt. Was vom
+  // effektiven TaW nach Abzug aller Über-Punkte übrig bleibt = TaP*/ZfP*.
+  //
+  // Numerisch identisch zu "Erschwernis vom ZfP* abziehen": probe_TaP*  -  E
+  // Vorteil: Würfel-Farbgebung im Chat (rot/grün) referenziert den nackten
+  // Eigenschafts-Wert — User sieht sofort, wann ein Würfel "über" der
+  // Eigenschaft liegt, unabhängig vom Modifikator.
+  //
+  // MR und Aufstufungs-Erschwernisse fließen genauso über `modifier` ein und
+  // werden so vom ZfP* abgezogen (WdZ S.30 für MR).
+  //
+  // Spezialregel WdH S.7: "Wenn ein Held in einem Talent einen negativen
+  // Talentwert aufweist oder sein TaW durch situationsabhängige Modifikatoren
+  // unter null fällt, so muss er diesen Betrag unter null als Erschwernis zu
+  // jedem der drei Würfe der Probe addieren und darf dennoch den jeweiligen
+  // Eigenschaftswert nicht übertreffen, wenn die Probe gelingen soll."
+  // → bei effectiveTaw < 0 wird |effectiveTaw| auf jede Eigenschaft als
+  // zusätzliche Erschwernis aufaddiert und der TaW-Puffer auf 0 gesetzt.
   const effectiveTaw = taw - modifier;
-  let remaining = Math.max(0, effectiveTaw);
+  let buffer  = effectiveTaw;
+  let extraEigErschwernis = 0;
+  if (effectiveTaw < 0) {
+    extraEigErschwernis = -effectiveTaw;
+    buffer = 0;
+  }
 
+  let remaining = buffer;
   const details = dice.map((d, i) => {
-    const attr = attrs[i];
-    const over = d - attr;
+    const effAttr = attrs[i] - extraEigErschwernis;
+    const over = d - effAttr;
     if (over > 0) {
       remaining -= over;
-      return { die: d, attr, over, consumed: over };
+      return { die: d, attr: attrs[i], effAttr, over, consumed: over };
     }
-    return { die: d, attr, over: 0, consumed: 0 };
+    return { die: d, attr: attrs[i], effAttr, over: 0, consumed: 0 };
   });
 
+  // Wenn extra-Erschwernis aktiv war: remainder im Report inkl. negativem TaW
+  const reportedRemainder = effectiveTaw < 0
+    ? effectiveTaw + (remaining - buffer)  // = effTaw - over_sum (für Display)
+    : remaining;
+
   const success = remaining >= 0;
+  // bei TaP* = 0 (alles weggegessen) gilt Probe als bestanden mit Mindest-TaP* 1
   const tapStar = success ? Math.max(1, remaining) : 0;
 
-  return { success, tapStar, remainder: remaining, details };
+  return { success, tapStar, remainder: reportedRemainder, details, effectiveTaw, modifier };
+}
+
+// ─── GM-Relay für Player-zu-NPC-Updates ─────────────────────────────────────
+//
+// Foundry-Permissions: ein Player darf nur Aktoren updaten, die ihm gehören.
+// Wenn Sören mit Aytan einen Feuerball auf einen NSC zaubert, würde
+// `targetActor.update({ "system.LeP.value": ... })` mit "lacks permission"
+// fehlschlagen. Lösung: über game.socket.emit eine Anfrage an den GM
+// schicken, der die Aktualisierung ausführt.
+
+const SOCKET_NAME = `module.${MODULE_ID}`;
+
+/**
+ * Registriert den Socket-Handler. Wird in module.mjs::ready aufgerufen.
+ * Nur der GM verarbeitet Anfragen — alle anderen ignorieren sie.
+ */
+/**
+ * Führt einen VFX-Befehl LOKAL aus (auf diesem Client). Wird vom Sender selbst
+ * und von allen empfangenden Clients über Socket aufgerufen, damit jeder die
+ * Animation sieht.
+ */
+function _runLocalVFX(msg) {
+  if (!globalThis.DSAPixelTokens) return;
+  try {
+    if (msg.kind === "effect") {
+      globalThis.DSAPixelTokens.spawnEffect?.(msg.x, msg.y, msg.effect);
+    } else if (msg.kind === "projectile") {
+      const src = canvas.tokens?.get(msg.srcTokenId);
+      const tgt = canvas.tokens?.get(msg.tgtTokenId);
+      if (src && tgt) {
+        globalThis.DSAPixelTokens.spawnProjectile?.(src, tgt, msg.projectile, msg.impact ?? null);
+      } else if (msg.x != null && msg.y != null) {
+        // Fallback: Effekt am Zielpunkt
+        globalThis.DSAPixelTokens.spawnEffect?.(msg.x, msg.y, msg.projectile);
+      }
+    } else if (msg.kind === "scrollingText") {
+      const tok = canvas.tokens?.get(msg.tgtTokenId);
+      if (!tok || !canvas.interface?.createScrollingText) return;
+      canvas.interface.createScrollingText(tok.center, msg.text ?? "", {
+        fontSize: msg.fontSize ?? 32,
+        fill: msg.color ?? "#ff4444",
+        stroke: 0x000000,
+        strokeThickness: 4,
+        anchor: CONST.TEXT_ANCHOR_POINTS?.BOTTOM ?? 4,
+        direction: CONST.TEXT_ANCHOR_POINTS?.TOP ?? 2,
+        duration: msg.duration ?? 1500,
+        distance: msg.distance ?? 80,
+      });
+    }
+  } catch (err) {
+    console.warn(`[${MODULE_ID}] VFX-Local fehlgeschlagen:`, err);
+  }
+}
+
+/**
+ * Broadcastet einen VFX-Befehl an ALLE Clients (inkl. Sender). Nutzt Foundry's
+ * game.socket.emit, damit Player-getriebene Sprüche auch beim GM und bei
+ * anderen Spielern visuell ankommen.
+ */
+export function broadcastVFX(msg) {
+  if (!game?.socket) return;
+  // Lokal sofort ausführen (Sender sieht's auch)
+  _runLocalVFX(msg);
+  // An alle anderen Clients schicken
+  game.socket.emit(SOCKET_NAME, { type: "vfx", ...msg });
+}
+
+export function registerGmRelay() {
+  if (!game?.socket) return;
+  game.socket.on(SOCKET_NAME, async (msg) => {
+    if (!msg) return;
+
+    // VFX-Broadcast: läuft auf JEDEM Client (nicht nur GM), damit alle die
+    // Animation sehen. Eigene Echo-Calls werden via game.socket.emit() nicht
+    // an den Sender zurückgespielt → kein Doppel-Trigger.
+    if (msg.type === "vfx") {
+      _runLocalVFX(msg);
+      return;
+    }
+
+    if (!game.user.isGM) return; // alle anderen Operationen: nur GM
+    // Nur einmal verarbeiten — bei mehreren GMs nimmt der mit kleinster ID
+    const activeGMs = game.users.filter(u => u.isGM && u.active).sort((a,b) => a.id.localeCompare(b.id));
+    if (activeGMs[0]?.id !== game.user.id) return;
+
+    try {
+      if (msg.type === "actor-update") {
+        const actor = game.actors.get(msg.actorId);
+        if (!actor) {
+          console.warn(`[${MODULE_ID}] GM-Relay: Aktor nicht gefunden: ${msg.actorId}`);
+          return;
+        }
+        await actor.update(msg.updates);
+        console.log(`[${MODULE_ID}] GM-Relay: ${actor.name} updated:`, msg.updates);
+      } else if (msg.type === "token-actor-update") {
+        // Unlinked-Token-Update: delta-Schicht über tokenDocument anfassen
+        const scene = game.scenes.get(msg.sceneId);
+        const tokenDoc = scene?.tokens?.get(msg.tokenId);
+        if (!tokenDoc?.actor) {
+          console.warn(`[${MODULE_ID}] GM-Relay: Token nicht gefunden: ${msg.tokenId} in scene ${msg.sceneId}`);
+          return;
+        }
+        await tokenDoc.actor.update(msg.updates);
+        console.log(`[${MODULE_ID}] GM-Relay: token ${tokenDoc.name} updated:`, msg.updates);
+      } else if (msg.type === "spawn-creature") {
+        // Lazy-Import damit pixel-tokens.mjs nicht in jedem Client zur Init-Zeit geladen wird
+        const requester = game.users.get(msg.requesterId);
+        const requesterName = requester?.name ?? "Player";
+        ui.notifications.info(`${requesterName} → Spawn ${msg.name}…`);
+        const { spawnCreature } = await import("./pixel-tokens.mjs");
+        await spawnCreature(msg.name, { x: msg.x, y: msg.y, sceneId: msg.sceneId });
+      } else if (msg.type === "set-actor-flag") {
+        const actor = game.actors.get(msg.actorId);
+        if (!actor) return;
+        await actor.setFlag(MODULE_ID, msg.key, msg.value);
+      }
+    } catch (err) {
+      console.error(`[${MODULE_ID}] GM-Relay handler failed:`, err);
+    }
+  });
+  console.log(`[${MODULE_ID}] GM-Relay socket registriert (VFX + actor-update + spawn-creature)`);
+}
+
+/**
+ * Aktualisiert einen Actor — falls der aktuelle User keine Schreibrechte hat,
+ * wird die Anfrage über Socket an den GM weitergeleitet. Das ist der einzige
+ * Weg, damit Player-getriebene Schaden-/Heilung-Wirkungen auf NSCs landen.
+ *
+ * Foundry-Token-Quirk: bei UNLINKED Tokens (default für NSCs) ist `actor`
+ * ein synthetischer delta-merged Actor, dessen Updates an die TokenDocument
+ * delta gehen, NICHT an den World-Actor. Wenn ein Token-Actor übergeben wird,
+ * routen wir gezielt über `tokenId + sceneId`, damit der GM-Handler das
+ * richtige Delta beschreibt.
+ *
+ * @param {Actor} actor   - Ziel-Aktor (oder Token-Synthetic-Actor)
+ * @param {object} updates - Update-Daten (wie für actor.update)
+ * @param {Token} [token] - Optional: Original-Token (wenn nicht linked, hilft uns die ID)
+ * @returns {Promise<boolean>} - true wenn lokal angewendet, false wenn relayed
+ */
+export async function relayActorUpdate(actor, updates, token = null) {
+  if (!actor) return false;
+  // Ownership-Check: kann der aktuelle User schreiben?
+  if (actor.isOwner || game.user.isGM) {
+    try {
+      await actor.update(updates);
+      return true;
+    } catch (err) {
+      // Auch Owner können scheitern (z.B. Race-Condition). Fallback auf GM-Relay.
+      console.warn(`[${MODULE_ID}] direct update failed, falling back to GM-Relay:`, err);
+    }
+  }
+  // Kein Ownership → GM-Relay
+  if (!game.users.some(u => u.isGM && u.active)) {
+    ui.notifications.warn(
+      `Update für ${actor.name} fehlgeschlagen — kein GM online. Kann Update nicht relayen.`,
+      { permanent: false }
+    );
+    return false;
+  }
+  // Wenn Token gegeben + nicht linked → token-actor-update (delta-Schicht)
+  if (token?.id && token?.scene?.id && token?.document?.actorLink === false) {
+    game.socket.emit(SOCKET_NAME, {
+      type: "token-actor-update",
+      tokenId: token.id,
+      sceneId: token.scene.id,
+      updates,
+    });
+    return false;
+  }
+  // Sonst: World-Actor-Update
+  game.socket.emit(SOCKET_NAME, {
+    type: "actor-update",
+    actorId: actor.id,
+    updates,
+  });
+  return false;
+}
+
+/**
+ * Updatet einen Token-Actor (delta-merged) — funktioniert für linked + unlinked.
+ * Wrapper über relayActorUpdate, der den Token-Kontext mitschickt damit
+ * unlinked NSC-Token zuverlässig aktualisiert werden.
+ */
+export async function relayTokenUpdate(token, updates) {
+  if (!token?.actor) return false;
+  return relayActorUpdate(token.actor, updates, token);
 }

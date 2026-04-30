@@ -1,5 +1,6 @@
 {{!--
-  Liturgien-Browser für DSA 4.1 — Lesefreundlich-Edition
+  Liturgien-Browser für DSA 4.1 — Listen-Layout, gruppiert nach Grad
+  Click auf Liturgie öffnet Detail-Dialog mit Volltext
 --}}
 <form class="dsa-lit-app">
   <header class="dsa-lit-header">
@@ -38,76 +39,60 @@
         {{/each}}
       </select>
     </label>
-    <label>
-      <span>Grad</span>
-      <select name="grad">
-        <option value="">Alle Grade</option>
-        {{#each grade}}
-          <option value="{{this}}">Grad {{this}}</option>
-        {{/each}}
-      </select>
-    </label>
     <label class="grow">
       <span>Suche</span>
       <input type="text" name="search" placeholder="Name oder Effekt durchsuchen…">
     </label>
   </div>
 
-  <div class="dsa-lit-list">
-    {{#each liturgien}}
-      <article class="dsa-lit-card{{#if (lookup ../isPrimaerMap id)}} is-primaer{{/if}}" data-id="{{id}}">
-        <header class="dsa-lit-card-head">
-          <h3>
-            {{#if (lookup ../isPrimaerMap id)}}<span class="primaer-mark" title="Primäre Segnung">★</span>{{/if}}
-            {{name}}
-          </h3>
-          <span class="grad-badge">Grad {{grad}}</span>
-        </header>
-
-        <div class="dsa-lit-card-meta">
-          <span class="meta-pill"><i class="fas fa-bullseye"></i> {{ziel}}</span>
-          <span class="meta-pill"><i class="fas fa-ruler-horizontal"></i> {{reichweite}}</span>
-          {{#if merkmale}}{{#each merkmale}}<span class="merkmal-pill">{{this}}</span>{{/each}}{{/if}}
-        </div>
-
-        {{#if effekt}}<p class="dsa-lit-effekt">{{effekt}}</p>{{/if}}
-
-        {{#if symboleGesten}}
-          <details class="dsa-lit-section">
-            <summary><i class="fas fa-praying-hands"></i> Symbole, Gesten, Gebete</summary>
-            <p class="dsa-lit-bodytext">{{symboleGesten}}</p>
-          </details>
-        {{/if}}
-
-        {{#if auswirkung}}
-          <details class="dsa-lit-section" open>
-            <summary><i class="fas fa-bolt"></i> Auswirkung</summary>
-            <p class="dsa-lit-bodytext">{{auswirkung}}</p>
-          </details>
-        {{/if}}
-
-        {{#if anmerkungen}}
-          <details class="dsa-lit-section">
-            <summary><i class="fas fa-info-circle"></i> Anmerkungen</summary>
-            <p class="dsa-lit-bodytext">{{anmerkungen}}</p>
-          </details>
-        {{/if}}
-
-        <dl class="dsa-lit-info">
-          <div><dt>Ritualdauer</dt><dd>{{#if ritualdauerDetail}}{{ritualdauerDetail}}{{else}}{{ritualdauer}}{{/if}}</dd></div>
-          <div><dt>Wirkungsdauer</dt><dd>{{#if wirkungsdauerDetail}}{{wirkungsdauerDetail}}{{else}}{{wirkungsdauer}}{{/if}}</dd></div>
-          {{#if herkunftDetail}}<div><dt>Herkunft</dt><dd>{{herkunftDetail}}</dd></div>{{/if}}
-          {{#if voraussetzung}}<div class="warn"><dt>Voraussetzung</dt><dd>{{voraussetzung}}</dd></div>{{/if}}
-        </dl>
-
-        <button type="button" class="cast-btn" data-action="cast" data-id="{{id}}">
-          <i class="fas fa-praying-hands"></i> Wirken
-        </button>
-      </article>
+  <div class="dsa-lit-list-wrap">
+    {{#each liturgienByGrad}}
+      <details class="dsa-lit-grad-section" open>
+        <summary class="dsa-lit-grad-header">
+          <span class="grad-label">Grad {{grad}}</span>
+          <span class="grad-count">{{liturgien.length}} Liturgien</span>
+          <span class="grad-cost">{{kapKosten}} KaP{{#if pkap}} ({{pkap}} pKaP){{/if}}</span>
+        </summary>
+        <table class="dsa-lit-table">
+          <thead>
+            <tr>
+              <th class="col-name">Name</th>
+              <th class="col-ziel">Ziel</th>
+              <th class="col-reichweite">Reichweite</th>
+              <th class="col-dauer">Ritualdauer</th>
+              <th class="col-merkmale">Merkmale</th>
+              <th class="col-action"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each liturgien}}
+              <tr class="dsa-lit-row{{#if (lookup ../../isPrimaerMap id)}} is-primaer{{/if}}" data-id="{{id}}">
+                <td class="col-name">
+                  <a href="#" data-action="show-detail" data-id="{{id}}">
+                    {{#if (lookup ../../isPrimaerMap id)}}<span class="primaer-mark" title="Primäre Segnung">★</span>{{/if}}
+                    {{name}}
+                  </a>
+                </td>
+                <td class="col-ziel">{{ziel}}</td>
+                <td class="col-reichweite">{{reichweite}}</td>
+                <td class="col-dauer">{{ritualdauer}}</td>
+                <td class="col-merkmale">
+                  {{#if merkmale}}{{#each merkmale}}<span class="merkmal-pill-tiny">{{this}}</span>{{/each}}{{/if}}
+                </td>
+                <td class="col-action">
+                  <button type="button" class="cast-mini" data-action="cast" data-id="{{id}}" title="Wirken">
+                    <i class="fas fa-praying-hands"></i>
+                  </button>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </details>
     {{/each}}
   </div>
 
-  {{#unless liturgien.length}}
+  {{#unless liturgienByGrad.length}}
     <div class="dsa-lit-empty">
       <i class="fas fa-search"></i>
       <p>Keine Liturgien gefunden — Filter anpassen oder anderen Gott wählen.</p>
@@ -116,7 +101,7 @@
 </form>
 
 <style>
-/* ─── DSA Liturgien-Browser, lesefreundlich ─── */
+/* ─── DSA Liturgien-Browser, Listen-Layout ─── */
 .dsa-lit-app {
   display: flex;
   flex-direction: column;
@@ -126,7 +111,7 @@
   color: #f0e8d8;
   font-family: "Crimson Text", Georgia, serif;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.4;
   height: 100%;
   overflow-y: auto;
 }
@@ -153,49 +138,26 @@
   border: none;
 }
 .dsa-lit-actor h2 i { color: #ffd770; margin-right: 6px; }
-.dsa-lit-stats {
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-}
-.dsa-lit-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.dsa-lit-stat .lbl {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #999080;
-  font-weight: 600;
-}
-.dsa-lit-stat .val {
-  font-size: 17px;
-  font-weight: 700;
-  color: #f0e8d8;
-}
+.dsa-lit-stats { display: flex; gap: 18px; flex-wrap: wrap; }
+.dsa-lit-stat { display: flex; flex-direction: column; gap: 2px; }
+.dsa-lit-stat .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #999080; font-weight: 600; }
+.dsa-lit-stat .val { font-size: 17px; font-weight: 700; color: #f0e8d8; }
 
 /* Mirakel-Buttons */
-.dsa-lit-mirakel {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 200px;
-}
+.dsa-lit-mirakel { display: flex; flex-direction: column; gap: 6px; min-width: 180px; }
 .dsa-lit-mirakel button {
   background: linear-gradient(180deg, #3a2818 0%, #2a1f12 100%);
   border: 1px solid #5a4030;
   border-radius: 4px;
   color: #ffd770;
-  padding: 8px 12px;
-  font-size: 14px;
+  padding: 6px 10px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: 1px;
   text-align: left;
   transition: all 0.15s;
 }
@@ -205,13 +167,13 @@
   box-shadow: 0 0 8px rgba(255, 215, 112, 0.3);
 }
 .dsa-lit-mirakel button small {
-  font-size: 11px;
+  font-size: 10px;
   color: #aaa080;
   font-weight: 400;
   letter-spacing: 0.5px;
 }
 
-/* Filter-Bar */
+/* Filter */
 .dsa-lit-filters {
   display: flex;
   gap: 12px;
@@ -221,20 +183,9 @@
   border: 1px solid #2a2520;
   border-radius: 4px;
 }
-.dsa-lit-filters label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: #aaa080;
-}
+.dsa-lit-filters label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #aaa080; }
 .dsa-lit-filters label.grow { flex: 1; }
-.dsa-lit-filters label span {
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 10px;
-}
+.dsa-lit-filters label span { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
 .dsa-lit-filters select,
 .dsa-lit-filters input {
   background: #2a2018 !important;
@@ -251,191 +202,112 @@
   padding: 4px 8px;
 }
 .dsa-lit-filters select option:checked,
-.dsa-lit-filters select option:hover,
-.dsa-lit-filters select option:focus {
-  background: #4a3525 !important;
-  color: #ffd770 !important;
-}
+.dsa-lit-filters select option:hover { background: #4a3525 !important; color: #ffd770 !important; }
 .dsa-lit-filters select:focus,
-.dsa-lit-filters input:focus {
-  outline: none;
-  border-color: #ffd770 !important;
-  box-shadow: 0 0 6px rgba(255, 215, 112, 0.3);
-}
+.dsa-lit-filters input:focus { outline: none; border-color: #ffd770 !important; box-shadow: 0 0 6px rgba(255, 215, 112, 0.3); }
 
-/* Liturgie-Karten */
-.dsa-lit-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 12px;
-}
-.dsa-lit-card {
-  background: linear-gradient(180deg, #2a1f15 0%, #1f1810 100%);
-  border: 1px solid #3a2c20;
+/* Liste / Grad-Sections */
+.dsa-lit-list-wrap { display: flex; flex-direction: column; gap: 8px; }
+
+.dsa-lit-grad-section {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid #2a2520;
   border-radius: 5px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  transition: all 0.15s;
+  overflow: hidden;
 }
-.dsa-lit-card:hover {
-  border-color: #5a4530;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-}
-.dsa-lit-card.is-primaer {
-  border-color: #b8841c;
-  background: linear-gradient(180deg, #2f2418 0%, #251c12 100%);
-  box-shadow: 0 0 12px rgba(255, 215, 112, 0.15);
-}
-
-.dsa-lit-card-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  padding-bottom: 8px;
-}
-.dsa-lit-card-head h3 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 700;
-  color: #ffd770;
-  line-height: 1.25;
-  border: none;
-  flex: 1;
-}
-.dsa-lit-card.is-primaer .dsa-lit-card-head h3 { color: #ffe898; }
-.primaer-mark {
-  color: #ffd700;
-  font-size: 18px;
-  margin-right: 4px;
-  text-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
-}
-.grad-badge {
-  background: #4a3525;
-  color: #ffd770;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  border: 1px solid #5a4030;
-}
-
-/* Meta-Pills (Ziel, Reichweite, Merkmale) */
-.dsa-lit-card-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.meta-pill {
-  background: rgba(255, 215, 112, 0.1);
-  color: #d8c898;
-  padding: 3px 8px;
-  border-radius: 3px;
-  font-size: 12px;
-  border: 1px solid rgba(255, 215, 112, 0.2);
-}
-.meta-pill i { margin-right: 4px; opacity: 0.7; }
-.merkmal-pill {
-  background: rgba(120, 200, 240, 0.1);
-  color: #a0d0e0;
-  padding: 3px 8px;
-  border-radius: 3px;
-  font-size: 12px;
-  border: 1px solid rgba(120, 200, 240, 0.25);
-}
-
-/* Effekt-Text (Kurzfassung) */
-.dsa-lit-effekt {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.55;
-  color: #e8e0d0;
-  background: rgba(0,0,0,0.2);
-  padding: 10px 12px;
-  border-radius: 3px;
-  border-left: 3px solid #b8841c;
-  font-style: italic;
-}
-
-/* Detail-Sektionen (Symbole/Auswirkung/Anmerkungen) */
-.dsa-lit-section {
-  background: rgba(0,0,0,0.2);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 3px;
-  padding: 6px 10px;
-}
-.dsa-lit-section summary {
+.dsa-lit-grad-header {
   cursor: pointer;
-  font-weight: 700;
-  font-size: 13px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: linear-gradient(90deg, #2a2018 0%, #1f1810 100%);
+  border-bottom: 1px solid #3a3025;
+}
+.dsa-lit-grad-header::-webkit-details-marker { display: none; }
+.dsa-lit-grad-header::before {
+  content: "▶";
   color: #ffd770;
-  padding: 4px 0;
-  letter-spacing: 0.3px;
+  font-size: 11px;
+  transition: transform 0.2s;
 }
-.dsa-lit-section summary i { margin-right: 6px; opacity: 0.8; }
-.dsa-lit-section summary:hover { color: #ffe898; }
-.dsa-lit-section[open] summary { border-bottom: 1px solid rgba(255,215,112,0.2); margin-bottom: 8px; padding-bottom: 6px; }
-.dsa-lit-bodytext {
-  margin: 8px 0 4px 0;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #f0e8d8;
-  white-space: pre-wrap;
-  font-style: normal;
+.dsa-lit-grad-section[open] .dsa-lit-grad-header::before { transform: rotate(90deg); }
+.dsa-lit-grad-header .grad-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffd770;
+  letter-spacing: 1px;
 }
+.dsa-lit-grad-header .grad-count { font-size: 13px; color: #aaa080; flex: 1; }
+.dsa-lit-grad-header .grad-cost { font-size: 12px; color: #c8a060; padding: 3px 10px; background: rgba(184,132,28,0.15); border-radius: 12px; border: 1px solid rgba(184,132,28,0.3); }
 
-/* Info-Liste (Ritual-/Wirkungsdauer) */
-.dsa-lit-info {
-  margin: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 12px;
+/* Tabelle */
+.dsa-lit-table {
+  width: 100%;
+  border-collapse: collapse;
   font-size: 13px;
 }
-.dsa-lit-info > div { display: contents; }
-.dsa-lit-info > div > dt {
-  color: #999080;
-  font-weight: 600;
+.dsa-lit-table thead tr {
+  background: rgba(0,0,0,0.4);
+}
+.dsa-lit-table th {
+  padding: 6px 10px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: #999080;
+  border-bottom: 1px solid #3a3025;
+}
+.dsa-lit-row {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s;
+}
+.dsa-lit-row:hover { background: rgba(255, 215, 112, 0.06); }
+.dsa-lit-row.is-primaer { background: rgba(255, 215, 112, 0.04); }
+.dsa-lit-row td {
+  padding: 7px 10px;
+  vertical-align: middle;
+  color: #e8e0d0;
+}
+.dsa-lit-row .col-name a {
+  color: #ffd770;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dsa-lit-row .col-name a:hover { text-decoration: underline; color: #ffe898; }
+.primaer-mark { color: #ffd700; margin-right: 4px; text-shadow: 0 0 4px rgba(255, 215, 0, 0.6); }
+.col-ziel, .col-reichweite, .col-dauer { font-size: 12px; color: #c8b890; }
+.col-merkmale { font-size: 11px; }
+.merkmal-pill-tiny {
+  display: inline-block;
+  background: rgba(120, 200, 240, 0.12);
+  color: #a0d0e0;
+  padding: 1px 6px;
+  border-radius: 8px;
   font-size: 10px;
-  align-self: center;
+  border: 1px solid rgba(120, 200, 240, 0.2);
+  margin-right: 3px;
 }
-.dsa-lit-info > div > dd {
-  margin: 0;
-  color: #f0e8d8;
-  font-size: 13px;
-  align-self: center;
-}
-.dsa-lit-info > div.warn > dt { color: #e08070; }
-.dsa-lit-info > div.warn > dd { color: #ffb0a0; }
-
-/* Wirken-Button */
-.cast-btn {
+.col-action { width: 36px; text-align: center; }
+.cast-mini {
   background: linear-gradient(180deg, #5a4030 0%, #3a2818 100%);
   border: 1px solid #6a4830;
-  border-radius: 4px;
+  border-radius: 3px;
   color: #ffd770;
-  padding: 10px;
-  font-size: 14px;
-  font-weight: 700;
+  padding: 4px 8px;
   cursor: pointer;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  font-size: 12px;
   transition: all 0.15s;
 }
-.cast-btn:hover {
+.cast-mini:hover {
   background: linear-gradient(180deg, #6a5040 0%, #4a3525 100%);
   border-color: #ffd770;
-  box-shadow: 0 0 10px rgba(255, 215, 112, 0.4);
+  box-shadow: 0 0 6px rgba(255, 215, 112, 0.4);
 }
-.cast-btn i { margin-right: 6px; }
 
 /* Empty State */
 .dsa-lit-empty {
@@ -446,14 +318,6 @@
   border-radius: 4px;
   border: 1px dashed #3a3025;
 }
-.dsa-lit-empty i {
-  font-size: 32px;
-  display: block;
-  margin-bottom: 12px;
-  color: #666050;
-}
-.dsa-lit-empty p {
-  margin: 0;
-  font-size: 14px;
-}
+.dsa-lit-empty i { font-size: 32px; display: block; margin-bottom: 12px; color: #666050; }
+.dsa-lit-empty p { margin: 0; font-size: 14px; }
 </style>

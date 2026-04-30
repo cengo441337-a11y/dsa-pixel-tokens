@@ -653,10 +653,14 @@ function _parseEquipmentFull(held, result) {
   for (const el of allGegenstaende) {
     const name = el.getAttribute("name");
     if (!name) continue;
-    // Dedup-Key: name+slot+anzahl statt nur name. So gehen 2× "Dolch" nicht verloren.
-    const slot   = el.getAttribute("slot") ?? "";
+    // Dedup-Strategy: HS exportiert dasselbe Item oft 2× mit unterschiedlichen
+    // Slot-Werten (slot=0 / slot=1) — das sind "Set-Varianten" (z.B. Set "Reise"
+    // vs Set "Stadt"), aber in Foundry wollen wir das Item nur EINMAL.
+    // Daher: Dedup-Key = name|anzahl (slot ignoriert). Wenn HS bewusst 2 separate
+    // Items mit unterschiedlichen anzahlen hat (z.B. "Dolch" anzahl=1 + "Dolch"
+    // anzahl=3), bleiben sie separat erhalten.
     const anzahl = el.getAttribute("anzahl") ?? "1";
-    const dedupKey = `${name}|${slot}|${anzahl}`;
+    const dedupKey = `${name.toLowerCase().trim()}|${anzahl}`;
     if (seenGegenstands.has(dedupKey)) continue;
     seenGegenstands.add(dedupKey);
 
@@ -1168,10 +1172,17 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   //   mod       = gekaufter Bonus (erhöht Max)
   //   permanent = permanent verbrauchte Punkte, z.B. Ritualobjekte (negativ → reduziert Max)
   //   value     = aktuell verbleibender Wert (0 = komplett aufgebraucht, nicht "kein Bonus")
-  const lepBonus = dv.LeP?.mod ?? 0;
-  const aspBonus = (dv.AsP?.mod ?? 0) + (dv.AsP?.permanent ?? 0);
-  const aupBonus = dv.AuP?.mod ?? 0;
-  const lepMaxFormel = (attr.KO ?? 10) * 2 + Math.ceil((attr.KK ?? 10) / 2) + lepBonus;
+  // HS-XML schreibt: mod="11" value="0" für Lebensenergie etc.
+  //   mod      = AP-gekaufte Boni (erhöht Max)
+  //   value    = aktueller Wert (oft 0 = "auf Max" für Re-Import)
+  //   permanent = permanent verlorene Punkte (negativ)
+  // Endwert = Basis-Formel + mod + value(als Override falls > Formel) + permanent
+  const lepBonus = (dv.LeP?.mod ?? 0) + (dv.LeP?.value ?? 0);
+  const aspBonus = (dv.AsP?.mod ?? 0) + (dv.AsP?.value ?? 0) + (dv.AsP?.permanent ?? 0);
+  const aupBonus = (dv.AuP?.mod ?? 0) + (dv.AuP?.value ?? 0);
+  // LeP-Formel (DSA 4.1 WdH S.46): (KO + KO + KK) / 2 (gerundet)
+  // Vorher hatten wir KO*2 + KK/2 — das gab off-by-X.
+  const lepMaxFormel = Math.round(((attr.KO ?? 10) + (attr.KO ?? 10) + (attr.KK ?? 10)) / 2) + lepBonus;
   // HS-Final-Snapshot (falls vorhanden) hat Vorrang — enthält den endgueltigen
   // Max nach allen Vorteilen, die unsere Formel nicht abbildet (z.B. Hohe LE).
   const lepMax = (dv.LeP?._finalMax > 0) ? dv.LeP._finalMax : lepMaxFormel;

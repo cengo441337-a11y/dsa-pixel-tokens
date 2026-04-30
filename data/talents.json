@@ -858,5 +858,15 @@
     ],
     "kategorie": "handwerk",
     "steigerung": "B"
+  },
+  {
+    "name": "Kartografie",
+    "probe": [
+      "KL",
+      "IN",
+      "FF"
+    ],
+    "kategorie": "handwerk",
+    "steigerung": "B"
   }
 ]

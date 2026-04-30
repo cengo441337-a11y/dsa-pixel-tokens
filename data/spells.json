@@ -5666,12 +5666,62 @@
     "merkmal": "Elementar (je nach Zauber), Objekt",
     "varianten": [
       {
-        "name": "Speer und Bolzen",
-        "zfpKosten": 3
+        "name": "Pfeil des Feuers",
+        "spellNameOverride": "Pfeil des Feuers",
+        "merkmal": "Elementar (Feuer), Objekt",
+        "wirkungText": "Im Flug glühender Pfeil. Trifft brennbares Material → entzündet sich (1-ZfP* auf W20 bei 1 Schritt, 1-ZfP*/2 bei 2 Schritt). Lebewesen erhalten ZfP*/2 KR lang je 1W6 SP, solange das Projektil nicht entfernt wird."
+      },
+      {
+        "name": "Pfeil des Eises",
+        "spellNameOverride": "Pfeil des Eises",
+        "merkmal": "Elementar (Eis), Objekt",
+        "wirkungText": "Eiszapfen (halbe Reichweite). Normaler TP-Schaden + ZfP*/2 AuP-Verlust pro KR. Bei 0 AuP → 1 SP/KR bis Pfeil entfernt. Gegen kälteempfindliche Wesen verdoppelt, gegen kälteresistente halbiert."
+      },
+      {
+        "name": "Pfeil des Wassers",
+        "spellNameOverride": "Pfeil des Wassers",
+        "merkmal": "Elementar (Wasser), Objekt",
+        "wirkungText": "Efferdspfeil mit irisierender Perlmuttspitze. Schießt durch Wasser, Regen und Nebel ohne Reichweiten-/FK-Malus (auch unter Wasser, WdS S.100 gilt nicht)."
+      },
+      {
+        "name": "Pfeil des Erzes",
+        "spellNameOverride": "Pfeil des Erzes",
+        "merkmal": "Elementar (Erz), Objekt",
+        "fkMalus": 4,
+        "wirkungText": "Hämmerer: Maximalreichweite auf 1/3, FK-Probe um 4 erschwert. Entwickelt im Flug Schmetterkraft: pro 3 ZfP* +1W6 TP (max. 4W6 zusätzlich). Treffer = automatisches Niederwerfen-Manöver."
+      },
+      {
+        "name": "Pfeil der Luft",
+        "spellNameOverride": "Pfeil der Luft",
+        "merkmal": "Elementar (Luft), Objekt",
+        "wirkungText": "Windläufer (blass-blau, federleicht). Doppelte Reichweite, keine Ablenkung durch Seiten-/Gegenwind, keine TP-Minderung bei großen Entfernungen. TP wie aus nächster Nähe."
+      },
+      {
+        "name": "Pfeil des Humus",
+        "spellNameOverride": "Pfeil des Humus",
+        "merkmal": "Elementar (Humus), Objekt",
+        "wirkungText": "Efeupfeil (halbe Reichweite). Gegen Wand/Mauer → wuchert mit Ranken. Gegen Lebewesen → halbe TP, aber Opfer wird umsponnen (Entfesseln-Probe vs TP, +1 pro misslungene Probe; Befreiung von außen dauert TP KR)."
+      },
+      {
+        "name": "Speer (statt Pfeil)",
+        "zfpKosten": 7,
+        "desc": "Verzauberung auf einen Speer/Wurfspeer übertragen"
+      },
+      {
+        "name": "Bolzen (statt Pfeil)",
+        "zfpKosten": 3,
+        "desc": "Verzauberung auf einen Armbrustbolzen übertragen (+3 Erschwernis)"
       },
       {
         "name": "Permanenz",
-        "zfpKosten": 7
+        "zfpKosten": 7,
+        "aspKosten": 13,
+        "aspPermanent": 1,
+        "desc": "21 AsP gesamt, 1 davon permanent. Pfeil hält bis zur ersten Verwendung."
+      },
+      {
+        "name": "Reversalis",
+        "desc": "Effekt des gegensätzlichen Elements tritt ein (Feuer↔Wasser, Erz↔Luft, Humus↔Eis)."
       }
     ]
   },

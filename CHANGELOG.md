@@ -6,6 +6,219 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.6.0] — 2026-04-30 (Komplett-Audit: Regelkonformität gegen WdH/WdS/WdZ/LCR/LL)
+
+### 🔍 Vollständiger Regel-Audit aller Module
+
+Jedes der 18 Module gegen die offiziellen DSA 4.1-Regelwerke verifiziert
+(WdH, WdS, WdZ, LCR, Liber Liturgium). 4 Background-Audit-Agents +
+eigene Live-Tests via Foundry-Bridge. **18 Bugs gefixt**, davon 2
+**KRITISCH** (game-breaking) + 6 **HOCH** + 10 **MITTEL/NIEDRIG**.
+
+Vollständiger Audit-Report: [`AUDIT-REPORT.md`](AUDIT-REPORT.md)
+
+### 🚨 KRITISCHE Fixes
+
+**`keule.mjs` — Bann der Keule-Mod-Bug** (game-breaking)
+War: Bann der Keule erleichterte Geister-Bann-Proben um −9/−12/−15
+(quasi Auto-Erfolg). Korrekt per WdZ S.167: −1/−2/−3 Erleichterung
+(die +9/+12/+15 sind die *Erschaffungs-Erschwernis*, nicht der
+*Wirkungs-Bonus*). Geist-der-Keule-Mechanik jetzt regelkonform.
+
+**`data/liturgien.json` — Primäre Segnungen 5 Götter falsch zugeordnet**
+War: Praios=Glückssegen, Rondra=Eidsegen, Travia=Schutzsegen,
+Ifirn=Feuersegen, Swafnir=Harmoniesegen (alle falsch).
+Korrekt per Liber Liturgium S.9: Praios=Eidsegen, Rondra=Schutzsegen,
+Travia=Speisesegen, Ifirn=Heilungssegen, Swafnir=Tranksegen.
+`_primaereSegnung`-Map korrigiert + 4 Halbgötter (Angrosch/Gravesh/
+H'Szint/Zsahh) ergänzt + 10 Liturgie-`primaer`-Arrays automatisch
+umgehängt via Migrations-Script.
+
+### 🔧 HOCH-Severity-Fixes
+
+- **`config.mjs::resolveProbe`** — Negativer effektiver TaW erschwert
+  jetzt jede Eigenschafts-Probe um |effTaw| (WdH S.7). Vorher schaffte
+  ein Held mit TaW 3 + Erschw 5 die Probe noch leicht; jetzt regelkonform
+  schwer.
+- **`sheet.mjs`/`magic.mjs` — Kampfunfähig-Schwelle WdS S.78**: Dreistufiger
+  Status (KAMPFUNFÄHIG ≤5, LEBENSBEDROHLICH ≤0, UNWIDERRUFLICH TOT
+  < −KO). Vorher nur "KAMPFUNFAEHIG" bei LeP=0 — zu spät.
+- **`liturgies.mjs`** — Aufgestufte primäre Segnung kostet jetzt einen
+  Grad weniger (Liber Liturgium S.9). Praios-Geweihter mit Glückssegen
+  Grad I→II zahlt Grad-I-Kosten (5 KaP, +0), nicht Grad-II.
+- **`shamanism.mjs`/`keule.mjs`** — "Hilfe der Keule" wirkt jetzt auf
+  ALLE Schamanen-Rituale (außer Keulen-Rituale selbst) statt nur auf
+  eine gewählte Fertigkeit (WdZ S.167).
+- **`magic.mjs`** — Schelm-MR-Default 0 statt 3. Schelm ohne Vorteil
+  "Unbeschwertes Zaubern" muss volle MR überwinden (WdH S.76).
+- **`config.mjs`** — Erzwingen-AsP-Kosten jetzt 1/2/4/8/16/32 statt
+  1/3/7/15/31. Verdopplung pro Stufe (WdZ S.20).
+- **`config.mjs`** — Ignisphaero/Igniplano fixedAspCost 21/25 statt
+  TP=AsP (LCR S.130/140). Vorher zahlte der Caster ~30 AsP; jetzt
+  korrekt fix 21.
+
+### 🛠 MITTEL/NIEDRIG-Severity-Fixes
+
+- **`config.mjs`** — Kristallomant-ZfP-Verdopplung nur ohne passenden
+  Kristall (WdZ S.322). Vorher unbedingt verdoppelt.
+- **`zone-spells.mjs`** — Sumpfstrudel-Befreiungsprobe jetzt korrekte
+  Talent-Probe auf Körperbeherrschung (MU/IN/GE) statt 3× gegen KO
+  (LCR S.276).
+- **`combat.mjs`** — INI-Tracker berücksichtigt jetzt Behäbig (−1),
+  Schwerfällig (−1), Tollpatsch (−1), Schlechte Reflexe (−2). Vorher
+  nur in Sheet-Anzeige, nicht im Tracker.
+- **`combat.mjs`** — Wunden-Penalty auf INI jetzt −2 pro Wunde
+  (WdS S.57), nicht −1. Auch Waffen-INI-Mod (Rapier +1, Streitkolben
+  −1 etc.) wird gelesen.
+- **`combat.mjs`** — Kampfreflexe-BE-Check nutzt jetzt eBE nach
+  Rüstungsgewöhnung. Held mit BE 6 + RG II hat effektiv BE 4 → Kampf-
+  reflexe greift.
+- **`sheet.mjs`** — Gezielter Stich jetzt mit RS-komplett-Ignore +
+  Wundschwelle −2 + auto +1 Wunde (WdS S.65). Vorher nur −2 RS.
+- **`zone-spells.mjs`** — `evaluate({async:false})` deprecated-Aufrufe
+  durch `await evaluate()` ersetzt (Foundry V12+).
+- **`zone-spells.mjs`/`pandaemonium.mjs`** — Direkte `actor.update`
+  durch `relayActorUpdate` ersetzt für Player-getriebene Schadens-
+  Anwendung auf NSCs ohne Permission.
+
+### 📋 Audit-Findings im Überblick
+
+- **18 Bugs gefixt** (alle KRITISCH + HOCH + Mittel/Niedrig)
+- **15 TODOs für v0.6.x** (nicht-blockierend, dokumentiert in AUDIT-REPORT.md)
+- **40+ Punkte korrekt verifiziert** (alle Kern-Formeln, Probe-Mechanik, Hit-Zone-Tabelle, Schamanen-AsP-Würfel, Beschwörung, Aufstufung etc.)
+
+---
+
+## [0.5.2] — 2026-04-30 (Multiplayer + Feuerball + Pfeil-Verzauberung)
+
+### 🛡 GM-Relay-Socket für Player-getriebene Updates
+
+Player-Charaktere konnten bislang keinen Schaden auf NSCs anwenden, weil ihnen
+Foundry-Schreibrechte fehlen ("User lacks permission"). Behoben durch
+Socket-Relay: alle Schaden-/Heilung-/Wunden-/Spawn-Operationen laufen jetzt
+über `relayActorUpdate`, das bei fehlendem Ownership transparent an den GM-
+Client routet, der die DB-Operation durchführt.
+
+**Betroffene Pfade**:
+- `magic.mjs::_applySpellDamage` — direktSchaden + Wunden auf Ziel
+- `magic.mjs::_applyAoESpellDamage` — Flächenschaden auf alle Tokens im Radius
+- `sheet.mjs` Schaden-Auto-Apply via Chat-Click
+- `zone-spells.mjs` Fesselranken/Sumpfstrudel/Auge-des-Limbus DOT-Ticks
+- Kreatur-Spawn (`spawnCreature`) — Player können jetzt über GM-Relay spawnen
+
+### 🔥 Ignisphaero Feuerball: korrekter LCR-Flächenschaden
+
+`SPELL_DAMAGE_MAP["Ignisphaero Feuerball"]` jetzt mit `aoeRadius: 8 Schritt` +
+`aoeFalloff: "perStepMinusOnePlusMinDie"` (LCR S.140):
+
+- Zentrum: `5W6 + ZfP*/2` TP
+- Pro Schritt Entfernung: `−(1 + niedrigster_W6_der_Schadensrolle)` TP
+- Trifft alle Tokens im Radius (inkl. Caster wenn er drin steht)
+- Pro Token: eigene RS, Element-Immunität, Gardianum-Absorption,
+  Wunden-Schwellen
+- `perTenTpRSReduction` für RS-Reduktion ab 10+ TP wie bei Ignifaxius
+
+Chat-Output zeigt pro Token: Distanz, raw TP, RS-Abzug, finale SP, neue LeP,
+Wunden, Kampfunfähigkeit. Igniplano Flächenbrand bekommt ebenfalls
+`aoeRadius: 3` mit linearem Falloff.
+
+### ✨ vfxFireballXXL: 3-Phasen-Cinematic-Animation
+
+Neuer großer Feuerball-Effekt (`feuerball_xxl`), der bei AoE-Cast getriggert
+wird:
+
+- **Phase 1 (0-15%)**: Anti-Wave — konzentrische Sog-Linien ziehen sich
+  zentral zusammen, ladender Glow.
+- **Phase 2 (15-50%)**: Detonation — weißer Flash, 3 zeitlich gestaffelte
+  Schockwellen-Ringe, 80 Feuer-Partikel, 12 Lava-Splatter mit Schwerkraft +
+  Rotation, Hitze-Verzerrungswellen, dreifacher Screen-Shake (18→10→5).
+- **Phase 3 (50-100%)**: Roll-Out — 40 Embers regnen mit Schwerkraft,
+  flackern; dunkle Rauchsäule mit ~25 Wolken steigt auf; 18 glühende
+  Glut-Punkte bleiben am Boden liegen und flackern.
+
+### 🏹 Pfeil-Verzauberung Multi-Element + Bug-Fix
+
+`_arrowEnchants.set()` war nie aufgerufen — Verzauberung verpuffte ohne
+Wirkung. Jetzt:
+
+- `magic.mjs::castSpell` setzt nach erfolgreichem `enchantArrow`-Cast den
+  Eintrag in `globalThis.DSAPixelArrowEnchants`
+- Sheet konsumiert beim nächsten Fernkampfschuss → richtiger Element-VFX
+- Sheet-Banner im Kampf-Tab zeigt aktive Verzauberung mit ✕-Button
+
+`spells.json` "Pfeil des (Elements)" um alle 6 Element-Varianten + 4
+Sondervarianten erweitert (LCR S.140):
+
+- Pfeil des Feuers/Eises/Wassers/Erzes/Luft/Humus mit individuellen
+  Beschreibungen, Merkmalen und Sonder-Effekten (Pfeil des Erzes hat
+  `fkMalus: 4` für die Fernkampfprobe)
+- Speer (+7 ZfP) / Bolzen (+3 ZfP) als Trägerwaffen-Variante
+- Permanenz (+7 ZfP, +13 AsP, 1 permanent)
+- Reversalis (gegensätzliches Element)
+
+`castSpell` nutzt `selectedVariant.spellNameOverride` für den
+`lookupSpellEffect()`-Lookup → richtiger Element-VFX (`pfeil_luft` /
+`pfeil_feuer` / etc.) wird beim Schuss gefeuert.
+
+### 📋 Probe-Display: Misserfolg mit Aufschlüsselung
+
+Bei misslungener Talent-/Zauber-Probe zeigt der Chat jetzt zusätzlich:
+- Roter Header: **N Punkt(e) verfehlt**
+- Komplett-Breakdown: `TaW 7 − 4 (Erschw.) − 8 (über) = -5`
+
+Damit ist sofort sichtbar, woran's gescheitert ist.
+
+---
+
+## [0.5.1] — 2026-04-30 (Probe-Mechanik-Hotfix)
+
+### 🎲 Probe-Mechanik auf RAW-Variante A umgestellt
+
+`config.mjs::resolveProbe` setzt jetzt **WdH S.27 / WdZ S.32 "Talent mindern"**
+um (statt "Eigenschaft mindern"):
+
+- Erschwernis E wird **vor** der Probe vom TaW/ZfW abgezogen
+- Würfel werden gegen die **unveränderten** Eigenschaften verglichen
+- Restwert nach Abzug aller Über-Punkte = TaP*/ZfP*
+- Numerisch identisch zu *"Erschwernis vom TaP*/ZfP* abziehen"*
+
+**Auswirkung auf Magieresistenz-Sprüche** (`isMR=true`):
+- ZfP* wird jetzt automatisch um die Ziel-MR reduziert
+- Bei `isMR + targetMR=4`: effektiver ZfW −4, ZfP* zeigt korrekten Endwert
+- Schelm-MR-Schwelle (3/7/12) wird wie zuvor abgezogen
+
+**Auswirkung auf Aufstufungen / Erschwernisse**:
+- Reichweite/Zauberdauer-Mods: Kosten in ZfP werden vom ZfW abgezogen
+  (war schon vorher korrekt)
+- Manueller Mod / BE / Aufrechterhaltene Zauber / Pakt-Bonus: gehen jetzt
+  als TaW-Reduktion in den ZfP*/TaP* ein (statt Eigenschaft zu mindern)
+
+**Würfel-Farbe im Chat**:
+- Rot/Grün referenziert ab jetzt den **nackten Eigenschaftswert**
+  (Variante A Konvention) — damit ist sofort sichtbar, wann ein Würfel
+  über der Eigenschaft liegt, unabhängig vom Modifikator
+- Behebt Display-Bug: Würfel 14 vs MU 15 wird jetzt grün (war vorher rot)
+
+**ZfP*/TaP*-Aufschlüsselung im Chat**:
+- Bei aktivem Modifikator wird die Berechnung sichtbar:
+  `TaW 12 − 4 (Erschw.) − 2 (über) = TaP* 6`
+- Bei MR-Sprüchen: `ZfW 11 − 4 MR − 2 über = ZfP* 5`
+
+### 🔧 Talent-Probe Robustheit
+
+`sheet.mjs::_prepareTalents` + `_rollTalent`:
+
+- **Probe-Fallback-Kette**: HTML data-attribute → `system.talente[name].probe`
+  → `talents.json`-DB-Lookup. Behebt fehlende Probe-Daten bei Talenten,
+  die aus älteren XML-Imports stammen oder nur als TaW im gdsa-Schema
+  vorliegen.
+- Probe-Format normalisiert: Array `["MU","IN","CH"]` und String `"MU/IN/CH"`
+  werden konsistent zu `MU/IN/CH` für `data-probe`-Attribut.
+- Warnung wenn Probe komplett unauffindbar (statt stiller Default-Lookup
+  gegen 10/10/10).
+
+---
+
 ## [0.5.0] — 2026-04-30
 
 ### 🙏 Neues System: Liturgien & Karma

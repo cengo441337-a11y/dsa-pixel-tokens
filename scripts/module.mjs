@@ -3,7 +3,7 @@
  * Registriert Sheet-Override, Hooks, und lädt Datenbanken
  */
 
-import { MODULE_ID } from "./config.mjs";
+import { MODULE_ID, registerGmRelay } from "./config.mjs";
 import { PixelArtCharacterSheet } from "./sheet.mjs";
 import { registerDiceHooks } from "./dice-hooks.mjs";
 import { registerCombatHooks, rollPassierschlag } from "./combat.mjs";
@@ -16,6 +16,7 @@ import { openDatabaseBrowser } from "./db-browser.mjs";
 import { registerCalendar, openCalendar } from "./calendar.mjs";
 import { registerLiturgies, loadLiturgien, LiturgienApp } from "./liturgies.mjs";
 import { registerShamanism, loadSchamanenRituale, SchamanenApp } from "./shamanism.mjs";
+import { registerKeule, KeulenManagerApp } from "./keule.mjs";
 
 // ─── Datenbanken (werden in ready geladen) ──────────────────────────────────
 
@@ -58,6 +59,42 @@ async function loadDataFiles() {
       console.warn(`[${MODULE_ID}] Could not load ${file}:`, e.message);
     }
   }
+}
+
+// ─── CSS Cache-Buster ───────────────────────────────────────────────────────
+//
+// Foundry serviert Modul-CSS ohne Cache-Bust-Hash, also können Browser- oder
+// CDN-Caches alte Regeln festhalten. Kritische / häufig geänderte Regeln
+// werden per JS injiziert, sodass sie immer aktuell sind.
+function injectCriticalCss() {
+  const id = "dsa-pixel-tokens-critical-css";
+  if (document.getElementById(id)) return;
+  const style = document.createElement("style");
+  style.id = id;
+  style.textContent = `
+    /* W6-Silhouette für Schadensrollen (überschreibt cached W20-Default) */
+    .dsa-pixel-chat .die.die-d6 {
+      clip-path: polygon(0% 25%, 22% 0%, 78% 0%, 100% 25%, 100% 100%, 0% 100%);
+      width: 36px;
+      height: 36px;
+      font-size: 16px;
+      background-image:
+        linear-gradient(180deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 22%, transparent 25%, rgba(0,0,0,0.25) 100%),
+        linear-gradient(135deg, rgba(255,255,255,0.10) 0%, transparent 50%);
+      letter-spacing: -0.5px;
+    }
+    .dsa-pixel-chat .die.die-d6::before {
+      clip-path: inherit;
+      border-width: 2px;
+    }
+    /* Pfeil-Verzauberungs-Banner (für aktive Element-Pfeile) */
+    .arrow-enchant-banner button.arrow-enchant-clear:hover {
+      background: rgba(255,255,255,0.08);
+      color: #ccc;
+    }
+  `;
+  document.head.appendChild(style);
+  console.log(`[${MODULE_ID}] critical CSS injected (W6 dice + banner)`);
 }
 
 // ─── Handlebars Partials ────────────────────────────────────────────────────
@@ -177,6 +214,12 @@ Hooks.once("ready", async () => {
   registerCalendar();
   registerLiturgies();
   registerShamanism();
+  registerKeule();
+  registerGmRelay();
+
+  // CSS-Cache-Buster: kritische Pixel-Würfel-Regeln per JS-Inject, damit sie
+  // auch greifen wenn Foundry/Browser das Modul-CSS aggressiv cacht.
+  injectCriticalCss();
 
   // Globale Helper für Console / Macros
   globalThis.DSAPixelTokens = globalThis.DSAPixelTokens ?? {};

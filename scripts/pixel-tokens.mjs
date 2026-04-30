@@ -2178,11 +2178,33 @@ function _fuzzyCreatureLookup(db, name) {
   return null;
 }
 
-async function spawnCreature(name) {
+async function spawnCreature(name, opts = {}) {
   const allPresets = await _getMergedPresets();
   const preset = allPresets[name];
   if (!preset) return;
-  if (!game.user.isGM) { ui.notifications.warn("Nur GMs können Kreaturen spawnen."); return; }
+
+  // Player ohne GM-Permission: über Socket an GM schicken
+  if (!game.user.isGM) {
+    if (!game.users.some(u => u.isGM && u.active)) {
+      ui.notifications.warn("Kein GM online — Kreatur kann nicht gespawnt werden.");
+      return;
+    }
+    const requesterX = canvas.scene
+      ? Math.floor((canvas.app.renderer.events.pointer?.global?.x ?? canvas.scene.width / 2) / canvas.grid.size) * canvas.grid.size
+      : null;
+    const requesterY = canvas.scene
+      ? Math.floor((canvas.app.renderer.events.pointer?.global?.y ?? canvas.scene.height / 2) / canvas.grid.size) * canvas.grid.size
+      : null;
+    game.socket.emit(`module.dsa-pixel-tokens`, {
+      type: "spawn-creature",
+      name,
+      requesterId: game.user.id,
+      sceneId: canvas.scene?.id,
+      x: requesterX, y: requesterY,
+    });
+    ui.notifications.info(`Spawn-Anfrage für ${name} an GM gesendet…`);
+    return;
+  }
 
   // Load stats from creatures.json — fuzzy name matching
   const creatureDb = await getCreatureData();
@@ -2278,12 +2300,14 @@ async function spawnCreature(name) {
     console.warn("[DSA Pixel] Folder-Sort fehlgeschlagen:", err);
   }
 
-  // Token auf aktive Szene droppen
-  const scene = game.scenes.active;
+  // Token auf gewünschte Szene droppen (opts.sceneId für Player-Relay)
+  const scene = (opts.sceneId ? game.scenes.get(opts.sceneId) : null) ?? game.scenes.active;
   if (!scene) { ui.notifications.warn("Keine aktive Szene gefunden."); return; }
   const gridSize = scene.grid.size ?? 100;
-  const cx = Math.floor(scene.width / 2 / gridSize) * gridSize;
-  const cy = Math.floor(scene.height / 2 / gridSize) * gridSize;
+  // Position aus opts (falls Player über Socket eine Position mitgegeben hat)
+  // sonst Zentrum der Szene
+  const cx = (opts.x != null) ? opts.x : Math.floor(scene.width / 2 / gridSize) * gridSize;
+  const cy = (opts.y != null) ? opts.y : Math.floor(scene.height / 2 / gridSize) * gridSize;
 
   await scene.createEmbeddedDocuments("Token", [{
     name,

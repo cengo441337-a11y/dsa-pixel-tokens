@@ -462,20 +462,21 @@ function _computeInitiative(actor) {
     ? sys.sf
     : Object.values(sys.sf ?? {}).map(v => v?.name ?? v);
   const iniBasis = Number(sys.INIBasis?.value ?? 0);
-  // WdS S.75: Kampfreflexe wirkt nur bei Ruestung mit BE <= 4 (nach RG).
-  // Wir summieren BE erst weiter unten — daher Sub-Berechnung hier:
-  const _kfTotalBE = (actor.items?.filter(i => (i.system?.type ?? "").toLowerCase() === "armor") ?? [])
-    .reduce((s, a) => s + Number(a.system?.armor?.be ?? 0), 0);
-  const sfKR = (sfList.includes("Kampfreflexe") && _kfTotalBE <= 4) ? 4 : 0;
+
+  // Rüstungsgewöhnung-Reduktion (WdS S.76): I/II/III → BE −1/−2/−3
+  const rgLevel = sfList.includes("Rüstungsgewöhnung III") ? 3
+                : sfList.includes("Rüstungsgewöhnung II")  ? 2
+                : sfList.includes("Rüstungsgewöhnung I")   ? 1 : 0;
+
+  const armorItems = actor.items?.filter(i => (i.system?.type ?? "").toLowerCase() === "armor") ?? [];
+  const _rawTotalBE = armorItems.reduce((s, a) => s + Number(a.system?.armor?.be ?? 0), 0);
+  // WdS S.75: Kampfreflexe wirkt nur bei Rüstung mit eBE <= 4 (nach RG).
+  const _kfEffectiveBE = Math.max(0, _rawTotalBE - rgLevel);
+  const sfKR = (sfList.includes("Kampfreflexe") && _kfEffectiveBE <= 4) ? 4 : 0;
   const sfKG = (sfList.includes("Kampfgespür") || sfList.includes("Kampfgespuer")) ? 2 : 0;
 
-  // Ruestungs-Penalty fuer INI: WdS S.56 — volle BE, nicht halbiert.
-  // ("der BE-Wert wird von der Initiative abgezogen, nicht der eBE-Wert")
-  let armorIni = 0;
-  const armorItems = actor.items?.filter(i => (i.system?.type ?? "").toLowerCase() === "armor") ?? [];
-  for (const a of armorItems) {
-    armorIni += Number(a.system?.armor?.be ?? 0);
-  }
+  // Rüstungs-Penalty für INI: WdS S.56 — volle BE (nach RG), nicht halbiert.
+  const armorIni = Math.max(0, _rawTotalBE - rgLevel);
 
   // Schild-Penalty (negativer ini-Mod = Penalty)
   const equippedShield = actor.items?.find(i =>
@@ -484,18 +485,37 @@ function _computeInitiative(actor) {
   );
   const shieldIni = equippedShield ? Math.abs(Math.min(0, Number(equippedShield.system?.shield?.ini ?? 0))) : 0;
 
-  // Wunden-Penalty
+  // Aktive Waffe — INI-Modifikator (WdS S.46): Rapier +1, Streitkolben −1, etc.
+  const equippedWeapon = actor.items?.find(i =>
+    (i.system?.type ?? "").toLowerCase() === "meleeweapon"
+    && i.getFlag(MODULE_ID, "equipped") === true
+  );
+  const weaponIni = equippedWeapon ? Number(equippedWeapon.system?.weapon?.ini ?? 0) : 0;
+
+  // Wunden-Penalty: WdS S.57 — pro Wunde −2 (NICHT −1) auf alle Proben inkl. INI
   const wounds = actor.getFlag(MODULE_ID, "wounds") ?? {};
   const wp = Object.values(wounds).reduce((s, w) => s + (Number(w) || 0), 0);
+  const woundIniMali = wp * 2;
 
-  const ini = iniBasis + sfKR + sfKG - armorIni - shieldIni - wp;
+  // Nachteil-INI-Mali (WdS/WdH): Behäbig −1, Schwerfällig −1, Tollpatsch −1, Schlechte Reflexe −2
+  const nachteile = sys.nachteile ?? {};
+  const _nachteileNames = Object.keys(nachteile).map(n => n.toLowerCase());
+  let nachteilMali = 0;
+  if (_nachteileNames.some(n => n.startsWith("behäbi") || n.startsWith("behaebi"))) nachteilMali += 1;
+  if (_nachteileNames.some(n => n.startsWith("schwerf"))) nachteilMali += 1;
+  if (_nachteileNames.some(n => n.startsWith("tollpat"))) nachteilMali += 1;
+  if (_nachteileNames.some(n => n.startsWith("schlechte reflex"))) nachteilMali += 2;
+
+  const ini = iniBasis + sfKR + sfKG + weaponIni - armorIni - shieldIni - woundIniMali - nachteilMali;
   const parts = [
     `INI ${iniBasis}`,
     sfKR ? `+${sfKR} Kampfreflexe` : null,
     sfKG ? `+${sfKG} Kampfgespür` : null,
-    armorIni ? `−${armorIni} Rüstung` : null,
+    weaponIni ? `${weaponIni > 0 ? "+" : ""}${weaponIni} Waffe` : null,
+    armorIni ? `−${armorIni} Rüstung${rgLevel ? ` (RG ${rgLevel})` : ""}` : null,
     shieldIni ? `−${shieldIni} Schild` : null,
-    wp ? `−${wp} Wunden` : null,
+    woundIniMali ? `−${woundIniMali} Wunden (×2)` : null,
+    nachteilMali ? `−${nachteilMali} Nachteile` : null,
   ].filter(Boolean);
   return { ini, parts };
 }
@@ -540,7 +560,7 @@ function _registerInitiativeOverride() {
     const parts = roll._dsaIniParts.join(" ");
     const html = `<div class="dsa-pixel-chat">
       <div class="chat-title">⚔ Initiative</div>
-      <div class="dice-row"><div class="die success">${die}</div></div>
+      <div class="dice-row"><div class="die die-d6 success">${die}</div></div>
       <div style="text-align:center;font-size:11px;color:#888;margin-top:3px">1W6 (${die}) + ${parts}</div>
       <div class="result-line result-success" style="font-size:18px;color:#ffd700">Initiative: ${total}</div>
     </div>`;

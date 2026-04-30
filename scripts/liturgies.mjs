@@ -276,20 +276,38 @@ export async function castLiturgie(actor, liturgieId) {
   ` : "";
 
   const dlgContent = `
-    <div class="dsa-pixel-dialog" style="display:flex;flex-direction:column;gap:8px;color:#ddd">
-      <div><strong>${lit.name}</strong> (Grad ${lit.grad}, Ziel ${lit.ziel}, ${lit.reichweite})</div>
-      <div style="font-size:11px;color:#aaa">${lit.effekt}</div>
+    <div class="dsa-pixel-dialog">
+      <style>
+        .dsa-pixel-dialog { background: #1a1612; color: #f0e8d8; padding: 14px; margin: -8px; border-radius: 4px; font-family: "Crimson Text", Georgia, serif; }
+        .dsa-pixel-dialog * { color: #f0e8d8; }
+        .dsa-pixel-dialog .dlg-title { font-size: 16px; font-weight: 700; color: #ffd770; margin-bottom: 4px; }
+        .dsa-pixel-dialog .dlg-meta { font-size: 11px; color: #aaa080; margin-bottom: 8px; }
+        .dsa-pixel-dialog .dlg-effekt { font-size: 12px; color: #d8c898; font-style: italic; padding: 6px 10px; background: rgba(0,0,0,0.25); border-left: 2px solid #b8841c; border-radius: 3px; margin-bottom: 8px; }
+        .dsa-pixel-dialog hr { border: none; border-top: 1px solid rgba(255,215,112,0.2); margin: 10px 0; }
+        .dsa-pixel-dialog .dlg-section-title { font-weight: 700; font-size: 13px; color: #ffd770; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .dsa-pixel-dialog label { display: flex; align-items: center; gap: 8px; padding: 4px 6px; cursor: pointer; border-radius: 3px; }
+        .dsa-pixel-dialog label:hover { background: rgba(255,215,112,0.06); }
+        .dsa-pixel-dialog input[type="checkbox"] { accent-color: #ffd770; }
+        .dsa-pixel-dialog input[type="number"], .dsa-pixel-dialog select { background: #2a2018 !important; color: #f0e8d8 !important; border: 1px solid #4a3525 !important; padding: 4px 8px; border-radius: 3px; font-family: inherit; }
+        .dsa-pixel-dialog .primaer-banner { background: linear-gradient(180deg, #b8841c 0%, #8a5f12 100%); color: #1a1612 !important; padding: 6px 10px; border-radius: 3px; font-weight: 700; margin: 8px 0; }
+        .dsa-pixel-dialog .primaer-banner strong { color: #1a1612 !important; }
+        .dsa-pixel-dialog .lkw-info { font-size: 11px; color: #999080; margin-bottom: 4px; }
+      </style>
+      <div class="dlg-title">${lit.name}</div>
+      <div class="dlg-meta">Grad ${lit.grad} · Ziel ${lit.ziel} · ${lit.reichweite}</div>
+      <div class="dlg-effekt">${lit.effekt || ""}</div>
       ${gradSelectorHtml}
       <hr>
-      <div><strong>Modifikatoren:</strong></div>
+      <div class="dlg-section-title">Modifikatoren</div>
       ${optionsHtml}
-      ${isPrimaer ? `<div style="background:#ffd700;color:#000;padding:4px;border-radius:3px"><strong>★ Primäre Segnung</strong> — -2 Erleichterung, 2 KaP</div>` : ""}
+      ${isPrimaer ? `<div class="primaer-banner"><strong>★ Primäre Segnung</strong> — -2 Erleichterung, 2 KaP</div>` : ""}
       <hr>
-      <div><strong>Aufstufung:</strong> (3×Grad ≤ LkW = ${lkw})</div>
+      <div class="dlg-section-title">Aufstufung</div>
+      <div class="lkw-info">3×Grad ≤ LkW = ${lkw}</div>
       ${aufstufungOpts}
       <hr>
-      <label>Eigene Modifikation: <input type="number" name="custom-mod" value="0" style="width:60px"></label>
-      <label>Mitbeter: <input type="number" name="mitbeter" value="0" style="width:60px"></label>
+      <label>Eigene Modifikation: <input type="number" name="custom-mod" value="0" style="width:70px"></label>
+      <label>Mitbeter: <input type="number" name="mitbeter" value="0" style="width:70px"></label>
     </div>
   `;
 
@@ -341,10 +359,28 @@ export async function castLiturgie(actor, liturgieId) {
             let pkapCost = kapEntry?.pkap ?? 0;
             let probenZuschlag = kapEntry?.probenZuschlag ?? 0;
 
-            // Primäre Segnung — nur wenn baseGrad I
-            if (isPrimaer && effGrad === "I") {
-              kapCost = 2;
-              probenZuschlag = -2;
+            // Primäre Segnung (Liber Liturgium S.9): "Auch Aufstufungen sind
+            // in Kosten und Probenerschwernis, nicht aber in ihrer Wirkung
+            // und Wirkungsdauer, als ein Grad niedriger anzunehmen."
+            // → Bei einer Aufstufung von Grad I auf II zahlt der Geweihte die
+            // Kosten/Erschwernis von Grad I; bei Grad II→III die von Grad II
+            // usw. Auf Grad I ohne Aufstufung gilt Grad 0 (2 KaP, −2 Mod).
+            if (isPrimaer) {
+              const grades = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+              const currentIdx = grades.indexOf(effGrad);
+              if (currentIdx >= 0) {
+                const lowerGrade = currentIdx === 0 ? "0" : grades[currentIdx - 1];
+                const lowerEntry = meta[lowerGrade];
+                if (lowerEntry) {
+                  kapCost = lowerEntry.kap ?? kapCost;
+                  pkapCost = lowerEntry.pkap ?? pkapCost;
+                  probenZuschlag = lowerEntry.probenZuschlag ?? probenZuschlag;
+                } else if (currentIdx === 0) {
+                  // Fallback wenn meta["0"] fehlt
+                  kapCost = 2;
+                  probenZuschlag = -2;
+                }
+              }
             }
 
             // Aufstufungs-Erschwernis (+2 pro Kategorie)
@@ -448,13 +484,48 @@ export class LiturgienApp extends Application {
     const kult = this._kultFilter;
     const liturgien = (LITURGIEN ?? []).filter(l => {
       if (kult && !(l.gott?.includes(kult) || l.art === "universell")) return false;
-      if (this._gradFilter && l.grad !== this._gradFilter) return false;
       if (this._search) {
         const s = this._search.toLowerCase();
-        if (!l.name.toLowerCase().includes(s) && !(l.effekt||"").toLowerCase().includes(s)) return false;
+        if (!l.name.toLowerCase().includes(s) &&
+            !(l.effekt||"").toLowerCase().includes(s) &&
+            !(l.auswirkung||"").toLowerCase().includes(s)) return false;
       }
       return true;
     });
+
+    // Gruppierung nach Grad
+    const meta = LITURGIEN_META?._kapKosten ?? {};
+    const gradOrder = ["0","I","II","III","IV","V","VI","VII","VIII","II-VI","II bis VI","I-V"];
+    const byGrad = {};
+    for (const l of liturgien) {
+      const g = l.grad || "?";
+      if (!byGrad[g]) byGrad[g] = [];
+      byGrad[g].push(l);
+    }
+    // Sort innerhalb Grad nach Name
+    for (const g of Object.keys(byGrad)) {
+      byGrad[g].sort((a, b) => a.name.localeCompare(b.name, "de"));
+    }
+    // Array-Form mit KaP-Kosten
+    const liturgienByGrad = gradOrder
+      .filter(g => byGrad[g] && byGrad[g].length)
+      .map(grad => {
+        const kapEntry = meta[grad] || meta[grad.split("-")[0]] || {};
+        return {
+          grad,
+          liturgien: byGrad[grad],
+          kapKosten: kapEntry.kap ?? "?",
+          pkap: kapEntry.pkap || 0,
+          probenZuschlag: kapEntry.probenZuschlag ?? 0,
+        };
+      });
+    // Auch Liturgien mit unbekanntem Grad anhängen
+    for (const g of Object.keys(byGrad)) {
+      if (!gradOrder.includes(g)) {
+        liturgienByGrad.push({ grad: g, liturgien: byGrad[g], kapKosten: "?", pkap: 0 });
+      }
+    }
+
     const kap = getActorKaP(this.actor);
     const lkw = getLkW(this.actor, kult);
     return {
@@ -463,6 +534,7 @@ export class LiturgienApp extends Application {
       lkw,
       kap,
       liturgien,
+      liturgienByGrad,
       isPrimaerMap: Object.fromEntries(liturgien.map(l => [l.id, Array.isArray(l.primaer) && l.primaer.includes(kult)])),
       goetter: ["Praios","Rondra","Efferd","Travia","Boron","Hesinde","Phex","Peraine","Ingerimm","Rahja","Tsa","Firun","Aves","Ifirn","Kor","Nandus","Swafnir","Marbo","Kamaluq","Tairach","Himmelswölfe"],
       grade: ["I","II","III","IV","V","VI","VII","VIII"],
@@ -473,9 +545,18 @@ export class LiturgienApp extends Application {
     super.activateListeners(html);
     const $h = html instanceof jQuery ? html : $(html);
     $h.find('[data-action="cast"]').on("click", async (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
       const id = ev.currentTarget.dataset.id;
       await castLiturgie(this.actor, id);
       this.render();
+    });
+    $h.find('[data-action="show-detail"]').on("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const id = ev.currentTarget.dataset.id;
+      const lit = (LITURGIEN ?? []).find(l => l.id === id);
+      if (lit) new LiturgieDetailApp(this.actor, lit, this).render(true);
     });
     $h.find('[data-action="mirakel"]').on("click", async (ev) => {
       const mod = ev.currentTarget.dataset.mod || "mirakelPlus";
@@ -486,13 +567,70 @@ export class LiturgienApp extends Application {
       this._kultFilter = ev.currentTarget.value;
       this.render();
     });
-    $h.find('select[name=grad]').on("change", (ev) => {
-      this._gradFilter = ev.currentTarget.value;
-      this.render();
-    });
     $h.find('input[name=search]').on("input", (ev) => {
       this._search = ev.currentTarget.value;
       this.render();
+    });
+  }
+}
+
+// ─── Detail-Dialog für eine einzelne Liturgie ──────────────────────────────
+
+export class LiturgieDetailApp extends Application {
+  constructor(actor, liturgie, parentApp = null, options = {}) {
+    super(options);
+    this.actor = actor;
+    this.liturgie = liturgie;
+    this.parentApp = parentApp;
+  }
+
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "dsa-pixel-liturgie-detail",
+      title: "Liturgie-Details",
+      template: `modules/${MODULE_ID}/templates/liturgie-detail.hbs`,
+      width: 620,
+      height: "auto",
+      resizable: true,
+      classes: ["dsa-pixel-app", "dsa-pixel-liturgie-detail"],
+    });
+  }
+
+  get title() {
+    return this.liturgie?.name || "Liturgie";
+  }
+
+  async getData() {
+    const lit = this.liturgie;
+    const kult = getActorKult(this.actor);
+    const meta = LITURGIEN_META?._kapKosten ?? {};
+    const baseGrad = (lit.grad || "I").split("-")[0].split(" ")[0];
+    const kapEntry = meta[baseGrad] || meta["I"];
+    const isPrimaer = Array.isArray(lit.primaer) && lit.primaer.includes(kult);
+    const probenZuschlag = kapEntry?.probenZuschlag ?? 0;
+    return {
+      ...lit,
+      isPrimaer,
+      kapKosten: isPrimaer && lit.grad === "I" ? 2 : (kapEntry?.kap ?? "?"),
+      pkap: kapEntry?.pkap || 0,
+      probenZuschlag,
+      probenZuschlagSigned: probenZuschlag >= 0 ? `+${probenZuschlag}` : `${probenZuschlag}`,
+    };
+  }
+
+  activateListeners(html) {
+    super.activateListeners(html);
+    const $h = html instanceof jQuery ? html : $(html);
+    $h.find('[data-action="cast"]').on("click", async (ev) => {
+      ev.preventDefault();
+      const id = ev.currentTarget.dataset.id;
+      await castLiturgie(this.actor, id);
+      this.parentApp?.render?.();
+      this.close();
+    });
+    $h.find('[data-action="close"]').on("click", (ev) => {
+      ev.preventDefault();
+      this.close();
     });
   }
 }

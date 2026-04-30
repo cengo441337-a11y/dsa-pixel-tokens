@@ -307,18 +307,66 @@ export function registerCalendar() {
     default: DEFAULT_DATE,
   });
 
-  // Scene Controls — Token-Tools-Button
-  Hooks.on("getSceneControlButtons", (controls) => {
-    const tokenCtrl = controls.find(c => c.name === "token");
-    if (!tokenCtrl) return;
-    tokenCtrl.tools.push({
-      name: "dsa-calendar",
-      title: "Aventurischer Kalender",
-      icon: "fas fa-calendar-alt",
-      button: true,
-      onClick: openCalendar,
+  // Globaler Floating-Button oben links — DOM-injektion, weil Foundry v12's
+  // getSceneControlButtons-Hook im Modus-Lifecycle nur einmal früh in der
+  // Init-Phase feuert und dynamische Module-Hooks nicht mehr greifen.
+  // Fixed-position links neben den Scene-Controls sichtbar für ALLE User.
+  function injectGlobalCalendarButton() {
+    if (document.getElementById("dsa-pixel-calendar-global-btn")) return;
+    const btn = document.createElement("button");
+    btn.id = "dsa-pixel-calendar-global-btn";
+    btn.title = "Aventurischer Kalender öffnen";
+    btn.innerHTML = `<i class="fas fa-calendar-alt"></i>`;
+    btn.style.cssText = `
+      position: fixed;
+      top: 8px;
+      left: 80px;
+      z-index: 100;
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #2a3a5e 0%, #1a2540 100%);
+      border: 2px solid #ffd700;
+      color: #ffd700;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 4px rgba(255,215,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+      font-family: monospace;
+    `;
+    btn.addEventListener("mouseenter", () => {
+      btn.style.transform = "scale(1.08)";
+      btn.style.boxShadow = "0 2px 12px rgba(255,215,0,0.5), 0 0 8px rgba(255,215,0,0.6)";
     });
+    btn.addEventListener("mouseleave", () => {
+      btn.style.transform = "scale(1)";
+      btn.style.boxShadow = "0 2px 8px rgba(0,0,0,0.5), 0 0 4px rgba(255,215,0,0.3)";
+    });
+    btn.addEventListener("click", () => openCalendar());
+    document.body.appendChild(btn);
+  }
+
+  // Direkt nach ready injizieren
+  injectGlobalCalendarButton();
+
+  // Auch nach jedem Canvas-Wechsel sichern (Foundry kann DOM zurücksetzen)
+  Hooks.on("canvasReady", () => injectGlobalCalendarButton());
+  Hooks.on("renderSceneControls", () => injectGlobalCalendarButton());
+
+  // Backup: Settings-Tab-Button (für User die den Floating-Button verstecken)
+  Hooks.on("renderSettings", (_app, html) => {
+    if (html.find("#dsa-pixel-calendar-btn").length) return;
+    const btn = $(`
+      <button type="button" id="dsa-pixel-calendar-btn" style="margin:4px 0;width:100%">
+        <i class="fas fa-calendar-alt"></i> Aventurischer Kalender
+      </button>
+    `);
+    btn.on("click", () => openCalendar());
+    html.find("#settings-game").append(btn);
   });
 
-  console.log(`[${MODULE_ID}] ✓ Aventurischer Kalender registriert`);
+  console.log(`[${MODULE_ID}] ✓ Aventurischer Kalender registriert (Floating-Button oben links + Settings)`);
 }

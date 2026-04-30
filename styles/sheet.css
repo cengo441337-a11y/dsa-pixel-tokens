@@ -564,7 +564,7 @@
   margin: 6px 0;
   flex-wrap: wrap;
 }
-/* W20-Silhouette (Ikosaeder 2D-Projektion) via clip-path — ersetzt W6-Box */
+/* W20-Silhouette (Ikosaeder 2D-Projektion) via clip-path — Standard für 3W20-Proben */
 .dsa-pixel-chat .die {
   position: relative;
   display: inline-flex;
@@ -594,6 +594,27 @@
   border: 2px solid currentColor;
   opacity: 0.6;
   pointer-events: none;
+}
+
+/* W6-Silhouette (Würfel mit zwei sichtbaren Facetten) — für Schadensrollen */
+.dsa-pixel-chat .die.die-d6 {
+  /* Pseudo-3D-Würfel: Vorderseite (Quadrat) + obere Kante schräg
+   * Polygon-Punkte: links-unten → links-oben(versetzt) → mitte-oben → rechts-oben(versetzt) → rechts-unten → links-unten */
+  clip-path: polygon(0% 25%, 22% 0%, 78% 0%, 100% 25%, 100% 100%, 0% 100%);
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  /* Stärkerer 3D-Effekt durch zwei Gradients (Vorderseite dunkler unten, Top-Facette heller) */
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 22%, transparent 25%, rgba(0,0,0,0.25) 100%),
+    linear-gradient(135deg, rgba(255,255,255,0.10) 0%, transparent 50%);
+  /* Punkte (Pips) wären zu klein lesbar — wir bleiben bei Zahl, aber stilisiert */
+  letter-spacing: -0.5px;
+}
+.dsa-pixel-chat .die.die-d6::before {
+  /* Border folgt der Silhouette */
+  clip-path: inherit;
+  border-width: 2px;
 }
 .dsa-pixel-chat .die.success {
   background-color: rgba(0,30,10,0.9);

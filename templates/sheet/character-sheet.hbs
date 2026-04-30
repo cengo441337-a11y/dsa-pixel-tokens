@@ -257,6 +257,20 @@
     {{!-- ─── TAB: KAMPF ─── --}}
     <div class="tab" data-tab="combat" data-group="primary">
 
+      {{#if arrowEnchant}}
+      <div class="arrow-enchant-banner" style="margin-bottom:8px;padding:6px 10px;background:linear-gradient(90deg, rgba(170,238,255,0.15), rgba(170,238,255,0.05));border:1px solid {{arrowEnchant.color}};border-left:4px solid {{arrowEnchant.color}};border-radius:3px;display:flex;align-items:center;gap:8px;font-family:'VT323',monospace">
+        <span style="font-size:18px">✨</span>
+        <div style="flex:1">
+          <div style="font-size:14px;color:{{arrowEnchant.color}};font-weight:bold">{{arrowEnchant.label}} bereit</div>
+          <div style="font-size:11px;color:#779">Nächster Fernkampf-Schuss fliegt verzaubert · {{arrowEnchant.spellName}} (ZfP* {{arrowEnchant.zfpStar}})</div>
+        </div>
+        <button type="button" class="arrow-enchant-clear" title="Verzauberung verwerfen"
+                style="background:transparent;border:1px solid #779;color:#779;cursor:pointer;font-family:'VT323',monospace;font-size:11px;padding:2px 8px;border-radius:2px">
+          ✕
+        </button>
+      </div>
+      {{/if}}
+
       <div class="section-title">Kampftalente</div>
       <table class="talent-list">
         <thead>
@@ -341,7 +355,7 @@
       </div>
       <div class="panel">
         {{#each weapons}}
-        <div class="weapon-entry" style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+        <div class="weapon-entry" style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);align-items:center">
           <span class="weapon-name">{{this.name}}</span>
           <span class="dim" title="Trefferpunkte">{{this.tp}}</span>
           <span class="dim" title="Reichweite">{{this.reichweite}}</span>
@@ -349,6 +363,10 @@
                 data-tp="{{this.tp}}" title="Schaden würfeln">
             <i class="fas fa-dice-d6"></i>
           </span>
+          {{#if this.id}}
+          <button type="button" data-action="delete-item" data-item-id="{{this.id}}" data-item-name="{{this.name}}" title="Aus Inventar löschen"
+            style="background:rgba(233,69,96,0.15);border:1px solid rgba(233,69,96,0.5);color:#e94560;border-radius:3px;padding:1px 6px;font-size:11px;cursor:pointer;line-height:1.2">✕</button>
+          {{/if}}
         </div>
         {{/each}}
       </div>
@@ -380,8 +398,11 @@
           </div>
         </div>
         {{#each armor}}
-        <div style="font-size:14px;padding:2px 0">
-          {{this.name}} — RS {{this.rs}}, BE {{this.be}}
+        <div style="font-size:14px;padding:3px 6px;display:flex;align-items:center;gap:6px;border-radius:3px" class="armor-row">
+          <input type="checkbox" data-action="toggle-worn" data-item-id="{{this.id}}" {{#if this.worn}}checked{{/if}} title="Rüstung tragen/abnehmen" style="cursor:pointer">
+          <span style="flex:1;{{#unless this.worn}}opacity:0.5;text-decoration:line-through{{/unless}}">{{this.name}} — RS {{this.rs}}, BE {{this.be}}</span>
+          <button type="button" data-action="delete-item" data-item-id="{{this.id}}" data-item-name="{{this.name}}" title="Aus Inventar löschen"
+            style="background:rgba(233,69,96,0.15);border:1px solid rgba(233,69,96,0.5);color:#e94560;border-radius:3px;padding:1px 6px;font-size:11px;cursor:pointer;line-height:1.2">✕</button>
         </div>
         {{/each}}
         {{#each shields}}
@@ -488,6 +509,37 @@
       </div>
       {{/unless}}
 
+      {{!-- Beseelte Knochenkeule Quick-Block --}}
+      {{#if keuleData}}
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>🦴 Beseelte Knochenkeule</span>
+        <button type="button" data-action="open-keule"
+          style="background:rgba(216,168,104,0.15);border:1px solid rgba(216,168,104,0.5);color:#d8a868;
+                 border-radius:3px;padding:1px 8px;font-size:12px;cursor:pointer;line-height:1.4"
+          title="Keulen-Manager öffnen">⚙ Verwalten</button>
+      </div>
+      <div class="panel" style="background:rgba(216,168,104,0.04);border:1px solid rgba(216,168,104,0.2);padding:6px 10px">
+        <div style="font-size:12px;color:#c0a880;font-weight:600">{{keuleData.geistType}}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+          <div style="font-size:10px;color:#908070">LO:</div>
+          <div style="flex:1;height:12px;background:rgba(0,0,0,0.4);border:1px solid #4a3525;border-radius:6px;overflow:hidden;position:relative">
+            <div style="position:absolute;inset:0;width:{{keuleData.LOpercent}}%;background:linear-gradient(90deg,#5a3818 0%,#d8a868 100%)"></div>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#f0e0c8;font-weight:700">{{keuleData.LOcurrent}} / {{keuleData.LO}}</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:3px;font-size:10px">
+          {{#if keuleData.mTPbonus}}<span style="background:rgba(232,80,60,0.15);color:#ffb0a0;padding:1px 6px;border-radius:8px;border:1px solid rgba(232,80,60,0.3)">+{{keuleData.mTPbonus}} mTP</span>{{/if}}
+          {{#if keuleData.bfBonus}}<span style="background:rgba(160,160,200,0.15);color:#c0c0e0;padding:1px 6px;border-radius:8px;border:1px solid rgba(160,160,200,0.3)">+{{keuleData.bfBonus}} BF</span>{{/if}}
+          {{#if keuleData.magiegespuer}}<span style="background:rgba(160,220,240,0.15);color:#a0e0f0;padding:1px 6px;border-radius:8px;border:1px solid rgba(160,220,240,0.3)">Magiegespür {{keuleData.magiegespuer}}</span>{{/if}}
+          {{#if keuleData.hilfeMod}}<span style="background:rgba(255,215,112,0.15);color:#ffd770;padding:1px 6px;border-radius:8px;border:1px solid rgba(255,215,112,0.3)">{{keuleData.hilfeMod}} {{keuleData.hilfeFertigkeit}}</span>{{/if}}
+          {{#if keuleData.bannMod}}<span style="background:rgba(180,255,180,0.15);color:#a0e0a0;padding:1px 6px;border-radius:8px;border:1px solid rgba(180,255,180,0.3)">+{{keuleData.bannMod}} Geisterbann</span>{{/if}}
+        </div>
+        {{#if keuleData.gespeicherteSprueche.length}}
+        <div style="margin-top:5px;font-size:10px;color:#908070">📜 Gespeicherte Sprüche: {{keuleData.gespeicherteSprueche.length}}</div>
+        {{/if}}
+      </div>
+      {{/if}}
+
       <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
         <span>Ritualfertigkeiten</span>
         <div style="display:flex;gap:4px">
@@ -577,10 +629,14 @@
       </div>
       <div class="panel">
         {{#each items}}
-        <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+        <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);align-items:center">
           <span>{{this.name}}</span>
           <span class="dim">{{this.quantity}}x</span>
           <span class="dim">{{this.weight}} Stn</span>
+          {{#if this.id}}
+          <button type="button" data-action="delete-item" data-item-id="{{this.id}}" data-item-name="{{this.name}}" title="Aus Inventar löschen"
+            style="background:rgba(233,69,96,0.15);border:1px solid rgba(233,69,96,0.5);color:#e94560;border-radius:3px;padding:1px 6px;font-size:11px;cursor:pointer;line-height:1.2">✕</button>
+          {{/if}}
         </div>
         {{/each}}
       </div>

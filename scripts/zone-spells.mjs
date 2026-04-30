@@ -13,7 +13,7 @@
  *  - Auto-Despawn nach Wirkungsdauer
  */
 
-import { MODULE_ID, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds } from "./config.mjs";
+import { MODULE_ID, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, relayActorUpdate } from "./config.mjs";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -349,7 +349,7 @@ export async function castFesselranken(caster, spellData, zfpStar, options = {})
     const r = new Roll("1d6"); await r.evaluate();
     const sp = r.total;
     const cur = target.system?.LeP?.value ?? 0;
-    await target.update({ "system.LeP.value": Math.max(0, cur - sp) });
+    await relayActorUpdate(target, { "system.LeP.value": Math.max(0, cur - sp) });
     initialLine = `<div style="color:#e94560">🌹 Dornen: ${sp} SP initial</div>`;
   }
 
@@ -382,7 +382,7 @@ async function _fesselAutoTick(actor) {
   // Dornenfessel: +2 SP pro KR wenn Opfer aktiv ist (wir nehmen an: ja, solange gefesselt)
   if (state.dornen) {
     const cur = actor.system?.LeP?.value ?? 0;
-    await actor.update({ "system.LeP.value": Math.max(0, cur - 2) });
+    await relayActorUpdate(actor, { "system.LeP.value": Math.max(0, cur - 2) });
   }
 
   if (state.remainingRounds <= 0) {
@@ -430,11 +430,14 @@ globalThis.DSAFesselKK = async () => {
 
 export async function castAugeDesLimbus(caster, spellData, zfpStar, options = {}) {
   const radius = options.radius ?? 3;
-  const aspInvested = (new Roll("3d6").evaluate({async:false})?.total ?? 10) + 3 * radius;
+  // Foundry V12+: synchroner Roll deprecated, async pflicht
+  const aspRoll = new Roll("3d6");
+  await aspRoll.evaluate();
+  const aspInvested = (aspRoll.total ?? 10) + 3 * radius;
 
-  // AsP abziehen
+  // AsP abziehen via Relay (Player ohne Permission → GM-Relay)
   const curAsP = caster.system?.AsP?.value ?? 0;
-  await caster.update({ "system.AsP.value": Math.max(0, curAsP - aspInvested) });
+  await relayActorUpdate(caster, { "system.AsP.value": Math.max(0, curAsP - aspInvested) });
 
   const template = await _placeZoneTemplate(caster, radius, "#3a2a5a", "#8b6bd9");
   if (!template) return;
@@ -482,7 +485,7 @@ async function _aolRound(template, meta) {
     if (dist < 1) {
       const schaden = Math.floor(meta.aspInvested / 2);
       const cur = actor.system?.LeP?.value ?? 0;
-      await actor.update({ "system.LeP.value": Math.max(0, cur - schaden) });
+      await relayActorUpdate(actor, { "system.LeP.value": Math.max(0, cur - schaden) });
       ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor }),
         content: `<div class="dsa-pixel-chat">
@@ -570,7 +573,7 @@ export async function castSumpfstrudel(caster, spellData, zfpStar, options = {})
   const erdranken = options.erdranken === true;
 
   const curAsP = caster.system?.AsP?.value ?? 0;
-  await caster.update({ "system.AsP.value": Math.max(0, curAsP - aspCost) });
+  await relayActorUpdate(caster, { "system.AsP.value": Math.max(0, curAsP - aspCost) });
 
   const template = await _placeZoneTemplate(caster, radius, "#3a2a1a", "#6b5a3a");
   if (!template) return;
@@ -616,7 +619,7 @@ async function _sumpfRound(template, meta) {
       const rs = _getZoneRS(actor, "bauch"); // Dornen greifen am Koerper
       const sp = Math.max(0, r.total - rs);
       const cur = actor.system?.LeP?.value ?? 0;
-      await actor.update({ "system.LeP.value": Math.max(0, cur - sp) });
+      await relayActorUpdate(actor, { "system.LeP.value": Math.max(0, cur - sp) });
       ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor }),
         content: `<div class="dsa-pixel-chat"><div class="chat-title">🌊 Erdranken greifen ${actor.name}</div>
@@ -637,27 +640,52 @@ async function _sumpfFreeCheck(templateId) {
   let state = actor.getFlag(MODULE_ID, FLAG_SUMPF) ?? { templateId, tapAccumulated: 0, freed: false };
   if (state.freed) { ui.notifications.info(`${actor.name} ist bereits befreit.`); return; }
 
-  // Wir simulieren vereinfacht: Koerperbeherrschung (oder KO-Probe als Fallback)
-  const skill = actor.system?.skill?.Koerperbeherrschung ??
-                actor.system?.skill?.Reiten ??
-                actor.system?.skill?.["Fahrzeug Lenken"];
-  const taw = Number(skill?.value ?? 5);
-  const ko = actor.system?.KO?.value ?? 10;
+  // LCR S.276: Befreiungsprobe ist Talentprobe auf
+  // Körperbeherrschung (MU/IN/GE), Reiten (CH/GE/KK) oder Fahrzeug Lenken (CH/IN/FF).
+  // Wir nehmen Körperbeherrschung als primäre Wahl.
+  const talente = actor.system?.talente ?? {};
+  const skillMap = actor.system?.skill ?? {};
+  let talentName, probeAttrs, taw;
+  if (talente["Körperbeherrschung"]) {
+    talentName = "Körperbeherrschung";
+    probeAttrs = ["MU", "IN", "GE"];
+    taw = Number(talente["Körperbeherrschung"].value ?? 0);
+  } else if (skillMap.Koerperbeherrschung) {
+    talentName = "Körperbeherrschung";
+    probeAttrs = ["MU", "IN", "GE"];
+    taw = Number(skillMap.Koerperbeherrschung.value ?? 0);
+  } else if (talente.Reiten || skillMap.Reiten) {
+    talentName = "Reiten";
+    probeAttrs = ["CH", "GE", "KK"];
+    taw = Number((talente.Reiten ?? skillMap.Reiten)?.value ?? 0);
+  } else if (talente["Fahrzeug Lenken"] || skillMap["Fahrzeug Lenken"]) {
+    talentName = "Fahrzeug Lenken";
+    probeAttrs = ["CH", "IN", "FF"];
+    taw = Number((talente["Fahrzeug Lenken"] ?? skillMap["Fahrzeug Lenken"])?.value ?? 0);
+  } else {
+    talentName = "Körperbeherrschung (default)";
+    probeAttrs = ["MU", "IN", "GE"];
+    taw = 0;
+  }
 
-  // Vereinfachte 3W20-Probe auf KO/KO/KO mit Erschwernis = meta.tapErschwernis
-  const d1 = (await new Roll("1d20").evaluate()).total;
-  const d2 = (await new Roll("1d20").evaluate()).total;
-  const d3 = (await new Roll("1d20").evaluate()).total;
-  const t = ko - meta.tapErschwernis;
-  let tap = taw;
-  for (const d of [d1, d2, d3]) { if (d > t) tap -= (d - t); }
-  const success = tap >= 0;
+  // 3W20-Probe via resolveProbe (Variante A — TaW vor Probe um Erschwernis reduziert)
+  const { resolveProbe } = await import("./config.mjs");
+  const dice = [
+    (await new Roll("1d20").evaluate()).total,
+    (await new Roll("1d20").evaluate()).total,
+    (await new Roll("1d20").evaluate()).total,
+  ];
+  const attrs = probeAttrs.map(a => Number(actor.system?.[a]?.value ?? 10));
+  const result = resolveProbe(dice, attrs, taw, meta.tapErschwernis ?? 0);
+  const tap = result.tapStar;
+  const success = result.success;
+  const [d1, d2, d3] = dice;
 
   // 1W6 SP(A) — Ausdauer
   const spRoll = new Roll("1d6"); await spRoll.evaluate();
   const aup = actor.system?.AuP?.value ?? 0;
   const newAuP = Math.max(0, aup - spRoll.total);
-  await actor.update({ "system.AuP.value": newAuP });
+  await relayActorUpdate(actor, { "system.AuP.value": newAuP });
 
   if (success) {
     state.tapAccumulated += tap;

@@ -227,13 +227,8 @@ function triggerVFX(result) {
         if (mapping && !mapping.enchantArrow) {
           setTimeout(() => _triggerMappedEffect(actorToken, targetToken, mapping), 300);
         }
-        // Pfeil-Verzauberung: nur Status-Meldung, kein direkter VFX
-        if (mapping?.enchantArrow) {
-          ui.notifications.info(
-            `✨ ${result.spellName} gewirkt — nächster Schuss fliegt als ${mapping.label}!`,
-            { permanent: false }
-          );
-        }
+        // Pfeil-Verzauberung: castSpell() in magic.mjs setzt Map + zeigt
+        // Notification + re-rendert Sheet. Hier nur Sound, kein doppelter VFX.
       }
 
       if (result.fumble) {
