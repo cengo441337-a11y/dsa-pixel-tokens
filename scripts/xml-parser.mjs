@@ -1238,12 +1238,13 @@ export async function createActorFromImport(heroData, updateExisting = false) {
        || /Geweihter/i.test(s.name ?? "")
   ) || (heroData.profession ?? "").match(/Geweiht|Priester|Boron-|Praios-|Rondra-/i);
   // AsP-Formel (WdH S.46): (MU + IN + CH) / 2 (echt gerundet) + Modifikatoren.
-  // Astralmacht-Vorteil: +10 AsP/Punkt — wird IMMER addiert, nicht als Alternative
-  // (vorher: nur wenn !istZauberer, was Magier mit Astralmacht 40 AsP fehlten).
-  const astralmachtBonus = (parseInt(astralmacht?.value) || 0) * 10;
+  // Astralmacht (WdH S.247): 1 GP = 1 AsP, max 6 AsP (NICHT ×10 — vorher falsch).
+  // Helden-Software rechnet den Astralmacht-Bonus i.d.R. bereits in `mod` ein,
+  // deshalb sollen wir ihn NICHT zusätzlich addieren wenn istZauberer.
+  // Bei reinen Astralmacht-Bonus (kein Vollzauberer): nur Astralmacht-Wert geben.
   const aspMaxFormel = istZauberer
-    ? Math.round(((attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10)) / 2) + aspBonus + astralmachtBonus
-    : astralmachtBonus > 0 ? Math.round((attr.IN ?? 10) / 2) + astralmachtBonus + aspBonus
+    ? Math.round(((attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10)) / 2) + aspBonus
+    : astralmacht ? (parseInt(astralmacht.value) || 0) + aspBonus
     : aspBonus > 0 ? aspBonus : 0;
   // AsP-Override: User hat im Sheet einen Custom-Wert gesetzt (z.B. Aranien-Magier
   // mit nicht-standardisierter Akademie-Formel). Override hat höchste Priorität.
