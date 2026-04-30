@@ -484,6 +484,15 @@ export async function castLiturgie(actor, liturgieId) {
         .dsa-pixel-dialog .primaer-banner { background: linear-gradient(180deg, #b8841c 0%, #8a5f12 100%); color: #1a1612 !important; padding: 6px 10px; border-radius: 3px; font-weight: 700; margin: 8px 0; }
         .dsa-pixel-dialog .primaer-banner strong { color: #1a1612 !important; }
         .dsa-pixel-dialog .lkw-info { font-size: 11px; color: #999080; margin-bottom: 4px; }
+        /* Buttons (Wirken/Abbrechen) — Foundrys default ist auf hellem BG, gegen unsere Specs gewinnen wir nur mit hoher Spez. */
+        body .app.dialog.dsa-pixel-dialog .dialog-buttons { background: #1a1612 !important; padding: 8px !important; gap: 8px !important; border-top: 1px solid rgba(184,132,28,0.4) !important; }
+        body .app.dialog.dsa-pixel-dialog .dialog-buttons button { background: linear-gradient(180deg, #3a2a1c 0%, #2a1f14 100%) !important; color: #ffd770 !important; border: 1px solid #b8841c !important; font-family: "Crimson Text", Georgia, serif !important; font-weight: 700 !important; font-size: 14px !important; padding: 8px 16px !important; border-radius: 3px !important; text-shadow: 0 1px 2px rgba(0,0,0,0.6) !important; opacity: 1 !important; }
+        body .app.dialog.dsa-pixel-dialog .dialog-buttons button:hover { background: linear-gradient(180deg, #4a3525 0%, #3a2a1c 100%) !important; border-color: #ffd770 !important; box-shadow: 0 0 8px rgba(255,215,112,0.5) !important; color: #fff5c8 !important; }
+        body .app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"] { background: linear-gradient(180deg, #d4a032 0%, #a06f15 100%) !important; color: #1a1612 !important; border-color: #ffd770 !important; text-shadow: none !important; }
+        body .app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"]:hover { background: linear-gradient(180deg, #ffd770 0%, #b8841c 100%) !important; box-shadow: 0 0 12px rgba(255,215,112,0.7) !important; }
+        body .app.dialog.dsa-pixel-dialog .window-content { background: #1a1612 !important; padding: 0 !important; }
+        body .app.dialog.dsa-pixel-dialog .window-header { background: linear-gradient(180deg, #2a1f14 0%, #1a1612 100%) !important; border-bottom: 1px solid #b8841c !important; color: #ffd770 !important; }
+        body .app.dialog.dsa-pixel-dialog .window-header * { color: #ffd770 !important; }
       </style>
       <div class="dlg-title">${lit.name}</div>
       <div class="dlg-meta">Grad ${lit.grad} · Ziel ${lit.ziel} · ${lit.reichweite}</div>

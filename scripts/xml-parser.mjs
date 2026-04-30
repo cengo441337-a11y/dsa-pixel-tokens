@@ -1455,9 +1455,16 @@ export async function createActorFromImport(heroData, updateExisting = false) {
     : sfNames.includes("Regeneration II")                        ? 2
     : sfNames.includes("Regeneration I")                         ? 1 : 0;
   const astraleRegVorteil = heroData.advantages.find(a => a.name === "Astrale Regeneration");
+  const karmaleRegVorteil = heroData.advantages.find(a => a.name === "Karmale Regeneration");
+  // Karmale Regeneration als SF I/II/III analog zu allgemeiner Regeneration
+  const karmaleRegStufe = sfNames.includes("Karmale Regeneration III") ? 3
+    : sfNames.includes("Karmale Regeneration II")                       ? 2
+    : sfNames.includes("Karmale Regeneration I")                        ? 1 : 0;
   sys.regen = {
     regStufe,
     astraleReg: astraleRegVorteil ? (parseInt(astraleRegVorteil.value) || 0) : 0,
+    karmaleReg: karmaleRegVorteil ? (parseInt(karmaleRegVorteil.value) || 0) : 0,
+    karmaleRegStufe,
     hasMeditation: sfNames.some(s => s.toLowerCase().includes("meditation")),
   };
 

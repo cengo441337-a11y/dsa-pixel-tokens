@@ -1097,13 +1097,21 @@ export class PixelArtCharacterSheet extends ActorSheet {
         </div>`;
       }
 
-      // KaP: 1W6 (falls vorhanden)
+      // KaP: TÄGLICHE REGENERATION (WdG S.241)
+      // "Jeden Tag gewinnt er 1 KaP zurück (zur selben Zeit wie die normale
+      //  Regenerationsphase der Lebensenergie, also meist während des Schlafs)."
+      // KaP regenerieren NICHT mit 1W6 wie AsP — die Hauptregeneration läuft
+      // über MEDITATION (4 Stunden = 1 Mirakelprobe → LkP* KaP, WdG S.240).
+      // Optional kann SF "Karmale Regeneration I/II/III" oder Vorteil
+      // "Karmale Regeneration" einen kleinen Bonus addieren (Hausregel).
       if (sys.KaP?.max) {
-        const kapRoll = new Roll("1d6");
-        await kapRoll.evaluate();
-        const newKaP = Math.min(sys.KaP.max, (sys.KaP.value ?? 0) + kapRoll.total);
+        const karmaleBonus = (regen.karmaleReg ?? 0) + (regen.karmaleRegStufe ?? 0);
+        const kapGain = 1 + karmaleBonus;
+        const newKaP = Math.min(sys.KaP.max, (sys.KaP.value ?? 0) + kapGain);
         updates["system.KaP.value"] = newKaP;
-        chatLines += `<div class="result-line result-success">+${kapRoll.total} KaP → ${newKaP}/${sys.KaP.max}</div>`;
+        const bonusLabel = karmaleBonus > 0 ? ` (1 Tägl. + ${karmaleBonus} Karmale Reg.)` : " (Tägliche Reg., WdG S.241)";
+        chatLines += `<div class="result-line result-success">+${kapGain} KaP${bonusLabel} → ${newKaP}/${sys.KaP.max}</div>`;
+        chatLines += `<div style="font-size:10px;color:#779;margin-top:2px">Tipp: Voll-Regeneration via Meditation (4h, Mirakel-Probe → LkP* KaP) — Knopf "Meditation".</div>`;
       }
 
       await this.actor.update(updates);
@@ -1112,64 +1120,118 @@ export class PixelArtCharacterSheet extends ActorSheet {
         content: `<div class="dsa-pixel-chat"><div class="chat-title">🌙 Nachtschlaf</div>${chatLines}</div>`,
       });
 
-    // ── Meditation (Große Meditation / Regeneration I-III) ───────────
+    // ── Meditation (AsP via Regeneration I-III + KaP via Mirakelprobe) ───
     } else if (action === "regen-meditation") {
-      if (!sys.AsP?.max) {
-        ui.notifications.warn("Keine AsP vorhanden.");
-        return;
-      }
+      const hasAsp = !!sys.AsP?.max;
+      const hasKap = !!sys.KaP?.max;
       const regStufe = regen.regStufe ?? 0;
-      if (regStufe === 0) {
-        ui.notifications.warn("Keine Regenerations-SF vorhanden.");
+
+      if (!hasAsp && !hasKap) {
+        ui.notifications.warn("Keine AsP/KaP vorhanden.");
+        return;
+      }
+      if (hasAsp && !hasKap && regStufe === 0) {
+        ui.notifications.warn("Keine Regenerations-SF vorhanden (für AsP-Meditation).");
         return;
       }
 
-      // Meditation-Probe: KL/IN/CH (Selbstbeherrschung-ähnlich)
-      const stufeName = regStufe >= 3 ? "Meisterliche Regeneration"
-                      : regStufe === 2 ? "Regeneration II" : "Regeneration I";
-      const formula = `${regStufe}d6`;
-
-      // Probe würfeln (KL/IN/CH, TaW aus Selbstbeherrschung)
-      const klVal = sys.KL?.value ?? 10;
-      const inVal = sys.IN?.value ?? 10;
-      const chVal = sys.CH?.value ?? 10;
-      const attrs = [klVal, inVal, chVal];
-
-      const probeRoll = new Roll("3d20");
-      await probeRoll.evaluate();
-      const dice = probeRoll.terms[0].results.map(r => r.result);
-
-      // TaP*-Berechnung (vereinfacht: TaW = 14 Selbstbeherrschung als Basis)
-      const selfTaW = sys.talente?.Selbstbeherrschung?.value ?? 14;
-      let tap = selfTaW;
-      for (let i = 0; i < 3; i++) {
-        if (dice[i] > attrs[i]) tap -= (dice[i] - attrs[i]);
-      }
-      const success = tap >= 0;
-
+      const updates = {};
       let chatLines = "";
-      const diceHtml = dice.map((d, i) => {
-        const over = d > attrs[i];
-        const cls = d === 1 ? "crit" : d === 20 ? "fumble" : over ? "fail" : "success";
-        return `<div class="die ${cls}" title="KL/IN/CH ${attrs[i]}">${d}</div>`;
-      }).join("");
-      chatLines += `<div class="dice-row">${diceHtml}</div>`;
 
-      if (success) {
-        const aspRoll = new Roll(formula);
-        await aspRoll.evaluate();
-        const newAsP = Math.min(sys.AsP.max, (sys.AsP.value ?? 0) + aspRoll.total);
-        await this.actor.update({ "system.AsP.value": newAsP });
-        chatLines += `<div class="result-line result-success">Meditation gelungen (TaP* ${tap})</div>`;
-        chatLines += `<div class="result-line result-success">+${aspRoll.total} AsP (${formula}) → ${newAsP}/${sys.AsP.max}</div>`;
-      } else {
-        chatLines += `<div class="result-line result-fail">Meditation misslungen (TaP* ${tap})</div>`;
+      // ── Magier-Pfad: AsP-Regeneration via Regeneration I/II/III ────────
+      if (hasAsp && regStufe > 0) {
+        const stufeName = regStufe >= 3 ? "Meisterliche Regeneration"
+                        : regStufe === 2 ? "Regeneration II" : "Regeneration I";
+        const formula = `${regStufe}d6`;
+
+        // Probe: KL/IN/CH gegen Selbstbeherrschung
+        const klVal = sys.KL?.value ?? 10;
+        const inVal = sys.IN?.value ?? 10;
+        const chVal = sys.CH?.value ?? 10;
+        const attrs = [klVal, inVal, chVal];
+        const probeRoll = new Roll("3d20");
+        await probeRoll.evaluate();
+        const dice = probeRoll.terms[0].results.map(r => r.result);
+        const selfTaW = sys.talente?.Selbstbeherrschung?.value ?? 14;
+        let tap = selfTaW;
+        for (let i = 0; i < 3; i++) {
+          if (dice[i] > attrs[i]) tap -= (dice[i] - attrs[i]);
+        }
+        const success = tap >= 0;
+        const diceHtml = dice.map((d, i) => {
+          const over = d > attrs[i];
+          const cls = d === 1 ? "crit" : d === 20 ? "fumble" : over ? "fail" : "success";
+          return `<div class="die ${cls}" title="KL/IN/CH ${attrs[i]}">${d}</div>`;
+        }).join("");
+        chatLines += `<div class="chat-row" style="font-size:11px">AsP-Probe (${stufeName}) — KL/IN/CH ${klVal}/${inVal}/${chVal}, TaW Selbstbeherrschung ${selfTaW}</div>`;
+        chatLines += `<div class="dice-row">${diceHtml}</div>`;
+        if (success) {
+          const aspRoll = new Roll(formula);
+          await aspRoll.evaluate();
+          const newAsP = Math.min(sys.AsP.max, (sys.AsP.value ?? 0) + aspRoll.total);
+          updates["system.AsP.value"] = newAsP;
+          chatLines += `<div class="result-line result-success">AsP-Probe gelungen — +${aspRoll.total} AsP (${formula}) → ${newAsP}/${sys.AsP.max}</div>`;
+        } else {
+          chatLines += `<div class="result-line result-fail">AsP-Probe misslungen (TaP* ${tap})</div>`;
+        }
       }
 
+      // ── Geweihten-Pfad: KaP-Regeneration via Mirakelprobe (WdG S.240) ──
+      // 4 Stunden Meditation → Mirakelprobe (3W20 MU/IN/CH gegen LkW)
+      // Bei Erfolg: +LkP* KaP. Bonus durch Karmale Reg. I/II/III.
+      if (hasKap) {
+        const { getActorKult, getLkW } = await import("./liturgies.mjs");
+        const { resolveProbe, checkCritical } = await import("./config.mjs");
+        const kult = getActorKult(this.actor);
+        const lkw = kult ? getLkW(this.actor, kult) : 0;
+        if (lkw <= 0) {
+          chatLines += `<div class="result-line result-fail">Kein Kult/LkW gefunden — KaP-Regeneration nicht möglich.</div>`;
+        } else {
+          const muVal = sys.MU?.value ?? 10;
+          const inVal = sys.IN?.value ?? 10;
+          const chVal = sys.CH?.value ?? 10;
+          const attrs = [muVal, inVal, chVal];
+          const probeRoll = new Roll("3d20");
+          await probeRoll.evaluate();
+          const dice = probeRoll.terms[0].results.map(r => r.result);
+          const result = resolveProbe(dice, attrs, lkw, 0);
+          const crit = checkCritical(dice);
+          const erfolg = crit.gluecklich || (!crit.patzer && result.success);
+          const lkpStar = erfolg ? Math.max(1, result.tapStar) : 0;
+          const diceHtml = dice.map((d, i) => {
+            const over = d > attrs[i];
+            const cls = d === 1 ? "crit" : d === 20 ? "fumble" : over ? "fail" : "success";
+            return `<div class="die ${cls}" title="MU/IN/CH ${attrs[i]}">${d}</div>`;
+          }).join("");
+          chatLines += `<hr><div class="chat-row" style="font-size:11px">Mirakelprobe (KaP-Regen) — ${kult}, MU/IN/CH ${muVal}/${inVal}/${chVal}, LkW ${lkw}</div>`;
+          chatLines += `<div class="dice-row">${diceHtml}</div>`;
+          if (erfolg) {
+            const karmaleBonus = (regen.karmaleReg ?? 0) + (regen.karmaleRegStufe ?? 0);
+            const totalKap = lkpStar + karmaleBonus;
+            const newKaP = Math.min(sys.KaP.max, (sys.KaP.value ?? 0) + totalKap);
+            updates["system.KaP.value"] = newKaP;
+            const bonusLabel = karmaleBonus > 0 ? ` (LkP* ${lkpStar} + ${karmaleBonus} Karmale Reg.)` : ` (LkP*)`;
+            chatLines += `<div class="result-line result-success">Mirakelprobe gelungen — +${totalKap} KaP${bonusLabel} → ${newKaP}/${sys.KaP.max}</div>`;
+          } else {
+            // Misslingen: 1/5 = 1 KaP verloren
+            const newKaP = Math.max(0, (sys.KaP.value ?? 0) - 1);
+            updates["system.KaP.value"] = newKaP;
+            chatLines += `<div class="result-line result-fail">Mirakelprobe misslungen — 1 KaP verloren (${sys.KaP.value} → ${newKaP})</div>`;
+          }
+        }
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await this.actor.update(updates);
+      }
+
+      const titleIcon = (hasAsp && hasKap) ? "🧘🙏" : hasKap ? "🙏" : "🧘";
+      const titleName = (hasAsp && hasKap) ? "Meditation (AsP + KaP)"
+                      : hasKap ? "Karmale Meditation" : "Astrale Meditation";
       ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="dsa-pixel-chat">
-          <div class="chat-title">🧘 ${stufeName}</div>
+          <div class="chat-title">${titleIcon} ${titleName}</div>
           ${chatLines}
         </div>`,
       });
