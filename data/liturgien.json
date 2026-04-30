@@ -197,7 +197,7 @@
       "primaere_segnung": null,
       "hinweis": "Hochschamanen kennen KEINE primäre Segnung (Liber Liturgium S.9). Tairach-Priester hat parallel AsP-Pool (Schamanen-Rituale) + KaP-Pool (Liturgien)."
     },
-    "lastUpdate": "2026-04-30 v0.7.15 — Namenloser-Gott + pKaP-Fix",
+    "lastUpdate": "2026-04-30 v0.7.17 — Namenloser-Liturgien-Cleanup",
     "count": 306
   },
   "liturgien": [
@@ -4503,8 +4503,7 @@
       "id": "golgaris-zwielicht",
       "name": "Golgaris Zwielicht",
       "gott": [
-        "Boron",
-        "Namenloser"
+        "Boron"
       ],
       "grad": "II",
       "ziel": "G",
@@ -4702,7 +4701,7 @@
       "id": "heiliges-liebesspiel",
       "name": "Heiliges Liebesspiel",
       "gott": [
-        "Namenloser"
+        "Rahja"
       ],
       "grad": "II",
       "ziel": "P+P",
@@ -7300,7 +7299,7 @@
       "gott": [
         "Namenloser"
       ],
-      "grad": "II bis VI",
+      "grad": "II",
       "ziel": "Z oder P",
       "reichweite": "Berührung",
       "ritualdauer": "Stoßgebet (10 Aktionen)",
@@ -7627,6 +7626,28 @@
       "anmerkungen": "Diese Liturgie wird vor allem bei Königsweihen, Adelseiden und feudalen Treuegelübden verwendet. Sie ist die mächtigste Form des Eidsegens und beruht auf der Garantie des Götterfürsten Praios persönlich. Variante von 'Eidsegen' (Grad I).",
       "herkunftDetail": "Praios",
       "_quelle": "Wege der Götter S.57 (Praios Grad II)"
+    },
+    {
+      "id": "namenloser-zweifel",
+      "name": "Namenloser Zweifel",
+      "gott": [
+        "Namenloser"
+      ],
+      "grad": "IV",
+      "ziel": "P",
+      "reichweite": "Sicht",
+      "ritualdauer": "Gebet (1 Spielrunde)",
+      "wirkungsdauer": "1 Tag",
+      "art": "speziell",
+      "merkmale": [],
+      "effekt": "Die betroffene Person stellt innerhalb des Wirkungszeitraums ihre eigenen moralischen Vorstellungen in Frage und verliert den Glauben an ihre Götter oder ihre Prinzipien.",
+      "symboleGesten": "Der Priester des Namenlosen spricht ein Gebet, in welchem er die Vorzüge seines Kultes anpreist.",
+      "auswirkung": "Die betroffene Person stellt innerhalb des Wirkungszeitraums ihre eigenen moralischen Vorstellungen in Frage und verliert den Glauben an ihre Götter oder ihre Prinzipien. Während der Wirkungsdauer sind Op- fer der Liturgie bereit, Nachteile wie Prinzipientreue, Moralkodex, Speise- gebote und Verpflichtungen zu ignorieren oder ins Gegenteil zu verkehren. Überzeugte Vegetarier essen Fleisch, ehrenhafte Krieger kämpfen aus dem Hinterhalt und ein Novadi wird sich achtlos über jedes der 99 Gesetze hin- wegsetzen.",
+      "anmerkungen": "Besonders perfide ist, dass diese Liturgie dem Opfer häufig vorgaukelt, aus freiem Willen gegen seine Prinzipien verstoßen zu haben. Moralisch weniger gefestigte Charaktere können das göttliche Wirken aber auch als Befreiung empfinden ­ der erste Schritt in Richtung Zweifel an deren Ende die Abwendung von den Zwölfgöttern stehen mag. Namenloses Vergessen Diese Liturgie ist die alternative Bezeichnung der Namenlosen Erleuchtung.",
+      "herkunftDetail": "Namenlos; Variante von Namenlose Erleuchtung",
+      "ritualdauerDetail": "Gebet (1 Spielrunde)",
+      "wirkungsdauerDetail": "1 Tag",
+      "_quelle": "Liber Liturgium (PDF-Auto-Import)"
     }
   ]
 }
