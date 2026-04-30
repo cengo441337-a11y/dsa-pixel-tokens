@@ -250,6 +250,28 @@ export const COMBAT_MANEUVERS = {
     requiresSF: "Klingensturm",
   },
 
+  // WdS S.66: Stumpfer Schlag — TP werden in TP(A) (Ausdauerschaden)
+  // umgewandelt. Halbe TP(A) sind echte SP für Wunden-Berechnung.
+  // Wundschwelle ist um +2 erhöht (schwerer Wunden zu bekommen).
+  stumpfer_schlag: {
+    label: "Stumpfer Schlag",
+    atBase: -2, ansage: false,  // mit Kampfstab/Knüppel: AT-2; mit stumpfer Seite anderer Hiebw.: AT-4; sonst -8
+    effect: "stumpfer_schlag",
+    desc: "Schaden als TP(A) (Ausdauer). WS+2 für Wunden. AT−2 mit Kampfstab/Knüppel, −4 mit stumpfer Seite anderer Hiebwaffen, −8 mit anderen Waffen. WdS S.66",
+    requiresSF: null,
+  },
+
+  // WdS S.66: Betäubungsschlag — Stumpfer Schlag + Wuchtschlag-Kombination.
+  // Erzeugt nur AuP-Schaden, bei AuP-Verlust > WS Bewusstlosigkeitsprobe.
+  betaeubungsschlag: {
+    label: "Betäubungsschlag",
+    atBase: -2, ansage: true,
+    ansageMax: (at, taw) => Math.min(at, taw),
+    effect: "betaeubungsschlag",
+    desc: "AT−Ansage−2 (Kampfstab) /−4 /−8; TP→TP(A); WS+2; AuP-Verlust >WS → KO-Probe oder W6 SR bewusstlos. WdS S.66",
+    requiresSF: "Betäubungsschlag",
+  },
+
   // ── Passierschlag (Freie Aktion / Reaktion) ──────────────────────────────
 
   passierschlag: {
@@ -346,12 +368,168 @@ export const WS_MODIFIER_NAMES = {
   sf:         ["Hartgesotten", "Eisenhart"],
 };
 
+// WdS S.57: pro Wunde -2 auf alle Proben (NICHT -1 — vorher falsch).
+// Display-Fallback: für Wunden-Total wird auch dieser Wert genutzt.
 export const WOUND_PENALTIES = {
-  1: -1,  // 1 Wunde: -1 auf alle Proben
-  2: -2,
-  3: -3,
-  4: -4,  // etc.
+  1: -2,
+  2: -4,
+  3: -6,
+  4: -8,
+  5: -10,
 };
+
+/**
+ * Pro-Zone-Wundenmali (WdS S.110 / S.22450 Tabelle).
+ * Pro Wunde in einer Zone: Eigenschafts-/Kampfwert-Mali (1./2. Wunde,
+ * 3. = inkapazitiert).
+ *
+ * Format pro Zone:
+ *   { perWunde: { Eigenschaft: -N, ... }, dritteWunde: "beschreibung" }
+ *
+ * "perWunde" wird mit Anzahl Wunden multipliziert (max 2× — 3. Wunde
+ * triggert dritteWunde-Spezialeffekt).
+ */
+export const ZONE_WOUND_EFFECTS = {
+  kopf: {
+    perWunde: { MU: -2, KL: -2, IN: -2, INIBasis: -2 },
+    perWundeIni: -2, // zusätzlich -2W6 INI (1W6 als Erwartungswert ~3.5)
+    dritteWunde: "+2W6 SP, bewusstlos für W20 KR, -1 LeP/KR bis Wunde versorgt",
+    label: "Kopf",
+  },
+  brust: {
+    perWunde: { AT: -1, PA: -1, KO: -1, KK: -1 },
+    perWundeSp: 1, // +1W6 SP zusätzlich pro Wunde
+    dritteWunde: "Bewusstlos, Blutverlust",
+    label: "Brust",
+  },
+  ruecken: {
+    perWunde: { AT: -1, PA: -1, KO: -1, KK: -1 },
+    perWundeSp: 1,
+    dritteWunde: "Bewusstlos, Blutverlust",
+    label: "Rücken",
+  },
+  bauch: {
+    perWunde: { AT: -1, PA: -1, KO: -1, KK: -1, GS: -1, INIBasis: -1 },
+    perWundeSp: 1,
+    dritteWunde: "Bewusstlos, Blutverlust",
+    label: "Bauch",
+  },
+  rArm: {
+    perWunde: { AT: -2, PA: -2, KK: -2, FF: -2 },
+    armNote: "(nur mit diesem Arm)",
+    dritteWunde: "Arm handlungsunfähig",
+    label: "rechter Arm",
+  },
+  lArm: {
+    perWunde: { AT: -2, PA: -2, KK: -2, FF: -2 },
+    armNote: "(nur mit diesem Arm)",
+    dritteWunde: "Arm handlungsunfähig",
+    label: "linker Arm",
+  },
+  rBein: {
+    perWunde: { AT: -2, PA: -2, GE: -2, INIBasis: -2 },
+    perWundeGs: -1,
+    dritteWunde: "Sturz, kampfunfähig",
+    label: "rechtes Bein",
+  },
+  lBein: {
+    perWunde: { AT: -2, PA: -2, GE: -2, INIBasis: -2 },
+    perWundeGs: -1,
+    dritteWunde: "Sturz, kampfunfähig",
+    label: "linkes Bein",
+  },
+};
+
+/**
+ * Aggregiert die Wunden-Mali eines Aktors über alle Zonen.
+ * Liefert Gesamtwert pro betroffener Eigenschaft + globaler -2/Wunde Penalty.
+ *
+ * @param {object} woundsByZone - z.B. { brust: 2, lBein: 1 }
+ * @returns {object} { perAttr: { AT: -3, PA: -3, ... }, globalPenalty: -6, dritteWunden: ["..."] }
+ */
+export function aggregateWoundEffects(woundsByZone) {
+  const perAttr = {};
+  const dritteWunden = [];
+  let totalWounds = 0;
+
+  for (const [zone, count] of Object.entries(woundsByZone ?? {})) {
+    if (!count || count <= 0) continue;
+    totalWounds += count;
+    const eff = ZONE_WOUND_EFFECTS[zone];
+    if (!eff) continue;
+    const activeWunden = Math.min(2, count); // 1./2. Wunde geben Mali, 3. = Spezialeffekt
+    for (const [attr, mod] of Object.entries(eff.perWunde ?? {})) {
+      perAttr[attr] = (perAttr[attr] ?? 0) + mod * activeWunden;
+    }
+    if (count >= 3 && eff.dritteWunde) {
+      dritteWunden.push(`${eff.label}: ${eff.dritteWunde}`);
+    }
+  }
+
+  // Globaler -2/Wunde-Penalty (WdS S.57) auf alle Proben
+  const globalPenalty = -2 * totalWounds;
+
+  return { perAttr, globalPenalty, dritteWunden, totalWounds };
+}
+
+/**
+ * Berechnet LeP-Status laut WdS S.78 — inkl. Eisern und Zäher Hund Schwellen.
+ *
+ * - Normaler Held: kampfunfähig bei LeP ≤ 5, lebensbedrohlich bei ≤ 0,
+ *   unwiderruflich tot bei < -KO
+ * - Vorteil "Zäher Hund": Schwellen für lebensbedrohlich/unwiderruflich tot
+ *   nutzen 1.5×KO statt KO (WdS S.78)
+ * - Vorteil "Eisern": ist nicht kampfunfähig bei LeP ≤ 5 (WdS S.78)
+ * - Hohe Selbstbeherrschung: nicht kampfunfähig (siehe Sonderfertigkeit)
+ *
+ * @param {number} lep
+ * @param {number} ko
+ * @param {object} flags { eisern, zaeherHund, hoheSelbstbeherrschung }
+ * @returns {object} { status, label, color, isKampfunfaehig, isLebensbedrohlich, isTot }
+ */
+export function getLepStatus(lep, ko, flags = {}) {
+  const koTodEffective = flags.zaeherHund ? Math.ceil(ko * 1.5) : ko;
+
+  if (lep < -koTodEffective) {
+    return {
+      status: "tot",
+      label: "UNWIDERRUFLICH TOT",
+      color: "#ff0000",
+      isKampfunfaehig: true,
+      isLebensbedrohlich: true,
+      isTot: true,
+    };
+  }
+  if (lep <= 0) {
+    const todKR = `${Math.max(1, Math.ceil(koTodEffective))} KR`;
+    return {
+      status: "lebensbedrohlich",
+      label: `LEBENSBEDROHLICH (W6 × ${todKR} bis Tod)`,
+      color: "#ff2200",
+      isKampfunfaehig: true,
+      isLebensbedrohlich: true,
+      isTot: false,
+    };
+  }
+  if (lep <= 5 && !flags.eisern && !flags.zaeherHund && !flags.hoheSelbstbeherrschung) {
+    return {
+      status: "kampfunfaehig",
+      label: "KAMPFUNFÄHIG (LeP ≤ 5)",
+      color: "#ff4444",
+      isKampfunfaehig: true,
+      isLebensbedrohlich: false,
+      isTot: false,
+    };
+  }
+  return {
+    status: "normal",
+    label: "",
+    color: null,
+    isKampfunfaehig: false,
+    isLebensbedrohlich: false,
+    isTot: false,
+  };
+}
 
 // ─── Zauber → VFX Effekt-Mapping ────────────────────────────────────────────
 // Verknüpft DSA 4.1 Zaubernamen mit pixel-tokens.mjs EFFECT_PRESETS.

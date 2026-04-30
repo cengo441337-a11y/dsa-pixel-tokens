@@ -16,7 +16,8 @@ const RITUALE_DEFS = {
   "hilfe-der-keule":   { name: "Hilfe der Keule",   vor: "Geister binden 7", kosten: "3W6 AsP (1/3/5 perm)", stufen: 3, beschreibung: "Erleichterung -1/-2/-3 auf eine gewählte Geister-Fertigkeit beim Wirken mit der Keule (Stufe I/II/III)." },
   "kraft-der-keule":   { name: "Kraft der Keule",   vor: "Geister binden 7", kosten: "3W6 AsP (beliebig perm)", beschreibung: "Erhöht modifizierten TP (mTP) der Keule um beliebigen Wert." },
   "naehe-zur-natur":   { name: "Nähe zur Natur",    vor: "Geister binden 7", kosten: "3W6 AsP (2 perm)", stufen: 3, beschreibung: "Wirkt wie Druiden-Stab auf Tiere/Pflanzen. Sympathie-Boni mit Tieren, Tierkommunikation, Pflanzen reagieren." },
-  "opferkeule":        { name: "Opferkeule",        vor: "Ritualkenntnis (Schamane), SF Blutmagie", kosten: "4W6 AsP", beschreibung: "Erlaubt das Tränken der Keule mit Blut: 1 LeP-Opfer = 1 AsP-Erleichterung in laufenden Ritualen." }
+  "opferkeule":        { name: "Opferkeule",        vor: "Ritualkenntnis (Schamane), SF Blutmagie", kosten: "4W6 AsP", beschreibung: "Erlaubt das Tränken der Keule mit Blut: 1 LeP-Opfer = 1 AsP-Erleichterung in laufenden Ritualen." },
+  "zauber-der-keule":  { name: "Zauber der Keule",  vor: "Geister binden 9", kosten: "3W6 AsP (1/3/5 perm pro Stufe), Erschaffung +7/+10/+13", stufen: 3, beschreibung: "Senkt AsP-Kosten jedes Schamanenrituals um 1 (Stufe I/II/III stackbar, max -3, immer mind. 1 AsP). WdZ S.167" }
 };
 
 export class KeulenManagerApp extends Application {
@@ -236,6 +237,9 @@ export function getKeulenBoni(actor) {
     bannMod: r["bann-der-keule"]?.aktiv ? (r["bann-der-keule"].mod || -(r["bann-der-keule"].stufe || 1)) : 0,
     naturAktiv: r["naehe-zur-natur"]?.aktiv === true,
     opferkeuleAktiv: r["opferkeule"]?.aktiv === true,
+    // WdZ S.167: Zauber der Keule senkt AsP-Kosten jedes Schamanen-Rituals
+    // um die Stufe (1/2/3, immer mind. 1 AsP nach Abzug)
+    zauberAspReduktion: r["zauber-der-keule"]?.aktiv ? (r["zauber-der-keule"].stufe || 1) : 0,
   };
 }
 

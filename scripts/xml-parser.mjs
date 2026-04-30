@@ -813,13 +813,14 @@ function _parseEquipmentFull(held, result) {
 
     // 3. Fallback: normaler Gegenstand. Custom-Details aus <modallgemein>
     // (Sonnenscheibe-Beispiel: Amulett mit Custom-Name "Sonnenscheibe", Gewicht 2.0, Preis 400).
+    const slotAttr = el.getAttribute("slot");
     result.equipment.push({
       name,
       displayName: customDisplayName || null,
       quantity:    parseInt(el.getAttribute("anzahl")) || 1,
       weight:      customWeight ?? (parseFloat(el.getAttribute("gewicht")) || 0),
       price:       customPrice ?? 0,
-      slot,
+      slot:        slotAttr != null ? parseInt(slotAttr) : null,
     });
   }
 }
@@ -1204,8 +1205,10 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   ) || heroData.specialAbilities.some(s => s.name?.includes("Akademische Ausbildung"))
     || /^(elf|halbelf|hexe|druide|geode|schamane|schelm)/i.test(heroData.race ?? "")
     || (heroData.profession ?? "").match(/Magier|Hexe|Druide|Geode|Schelm|Schamane|Elf/i);
-  const aspMaxFormel = istZauberer ? (attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10) + aspBonus
-    : astralmacht   ? (attr.IN ?? 10) + (parseInt(astralmacht.value) || 0) * 10 + aspBonus
+  // AsP-Formel (WdH S.46): (MU + IN + CH) / 2 (echt gerundet) + Modifikatoren.
+  // Vorher fehlte das /2 — gab doppelte Werte. Astralmacht-Vorteil: +10 AsP/Punkt.
+  const aspMaxFormel = istZauberer ? Math.round(((attr.MU ?? 10) + (attr.IN ?? 10) + (attr.CH ?? 10)) / 2) + aspBonus
+    : astralmacht   ? Math.round((attr.IN ?? 10) / 2) + (parseInt(astralmacht.value) || 0) * 10 + aspBonus
     : aspBonus > 0  ? aspBonus : 0;
   // AsP-Override: User hat im Sheet einen Custom-Wert gesetzt (z.B. Aranien-Magier
   // mit nicht-standardisierter Akademie-Formel). Override hat höchste Priorität.
@@ -1214,8 +1217,9 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   const aspMax = (aspOverrideMax > 0) ? aspOverrideMax
                  : (dv.AsP?._finalMax > 0) ? dv.AsP._finalMax
                  : aspMaxFormel;
-  // AuP: GE + KO + KK/2 (rund) + Bonus
-  const aupMaxFormel = (attr.GE ?? 10) + (attr.KO ?? 10) + Math.ceil((attr.KK ?? 10) / 2) + aupBonus;
+  // AuP-Formel (WdH S.46): (MU + KO + GE) / 2 (echt gerundet) + Modifikatoren.
+  // Vorher: GE + KO + KK/2 — komplett falsch (war off-by-7+ je nach Werten).
+  const aupMaxFormel = Math.round(((attr.MU ?? 10) + (attr.KO ?? 10) + (attr.GE ?? 10)) / 2) + aupBonus;
   const aupMax = (dv.AuP?._finalMax > 0) ? dv.AuP._finalMax : aupMaxFormel;
   // Aktueller Wert: IMMER voll beim Import. Helden-Software trackt manchmal
   // mid-combat-states (z.B. Aytan AsP=4/61), aber beim Foundry-Import erwartet

@@ -3,7 +3,24 @@
  * Überschreibt das gdsa Standard-Sheet mit Pixel-Art Theme
  */
 
-import { MODULE_ID, ATTRIBUTES, DERIVED_FORMULAS, RACE_GS, SPELL_EFFECT_MAP, COMBAT_MANEUVERS, resolveProbe, checkCritical, resolveActorAsP, lookupSpellEffect, parseAspCost, ALL_ZONES, ZONE_LABELS, ZONE_KEY_MAP, HIT_ZONE_TABLE, parseBeFormula, getRuestungsgewoehnung, calcIniPenalty, getWoundThresholds, SF_MR_BONUSES, relayActorUpdate, relayTokenUpdate, broadcastVFX } from "./config.mjs";
+import { MODULE_ID, ATTRIBUTES, DERIVED_FORMULAS, RACE_GS, SPELL_EFFECT_MAP, COMBAT_MANEUVERS, resolveProbe, checkCritical, resolveActorAsP, lookupSpellEffect, parseAspCost, ALL_ZONES, ZONE_LABELS, ZONE_KEY_MAP, HIT_ZONE_TABLE, parseBeFormula, getRuestungsgewoehnung, calcIniPenalty, getWoundThresholds, SF_MR_BONUSES, relayActorUpdate, relayTokenUpdate, broadcastVFX, getLepStatus } from "./config.mjs";
+
+/**
+ * Helper: Liest Vorteile/SF und liefert die LeP-Status-Flags für getLepStatus.
+ */
+function _getLepStatusFlags(actor) {
+  const sys = actor?.system ?? {};
+  const vorteile = sys.vorteile ?? {};
+  const sfList = Array.isArray(sys.sf) ? sys.sf : Object.values(sys.sf ?? {}).map(v => v?.name ?? v);
+  const _has = (raw, n) => Array.isArray(raw)
+    ? raw.some(e => (typeof e === "string" ? e : e?.name ?? "").toLowerCase() === n.toLowerCase())
+    : Object.keys(raw).some(k => k.toLowerCase() === n.toLowerCase());
+  return {
+    eisern: _has(vorteile, "Eisern") || sfList.some(s => s === "Eisern"),
+    zaeherHund: _has(vorteile, "Zäher Hund") || _has(vorteile, "Zaeher Hund"),
+    hoheSelbstbeherrschung: (Number(sys.talente?.Selbstbeherrschung?.value ?? 0) >= 12),
+  };
+}
 import { castSpell } from "./magic.mjs";
 import { openDatabaseBrowser } from "./db-browser.mjs";
 
@@ -205,9 +222,12 @@ export class PixelArtCharacterSheet extends ActorSheet {
     let shieldSfLabel = "";
     if (equippedShields.length > 0) {
       const _sfHas = (n) => sfList.some(s => s === n);
-      if (_sfHas("Linkhand"))        { shieldSfBonus += 1; shieldSfLabel += " +1 Linkhand"; }
-      if (_sfHas("Schildkampf I"))   { shieldSfBonus += 2; shieldSfLabel += " +2 SK I"; }
-      if (_sfHas("Schildkampf II"))  { shieldSfBonus += 2; shieldSfLabel += " +2 SK II"; }
+      // WdS S.121: Voraussetzung für Schildkampf I/II ist die SF Linkhand.
+      // Ohne Linkhand: keine Bonus-Punkte (nur Schild-PA-WM allein).
+      const hasLinkhand = _sfHas("Linkhand");
+      if (hasLinkhand)               { shieldSfBonus += 1; shieldSfLabel += " +1 Linkhand"; }
+      if (hasLinkhand && _sfHas("Schildkampf I"))   { shieldSfBonus += 2; shieldSfLabel += " +2 SK I"; }
+      if (hasLinkhand && _sfHas("Schildkampf II"))  { shieldSfBonus += 2; shieldSfLabel += " +2 SK II"; }
       shieldPaMod += shieldSfBonus;
     }
     data.shieldAtMod = shieldAtMod;
@@ -242,16 +262,18 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const iniArmorMalus = Math.round(armorCalc.totalGBE) - (armorCalc.rg || 0);
     data.iniPenalty = Math.max(0, iniArmorMalus) + (shieldIniMod < 0 ? -shieldIniMod : 0) + iniNachteilMalus;
 
-    // ── AW reduzieren um eBE (WdS S.66): Rüstung mindert Ausweichen ──
-    // eBE wirkt direkt auf den AW-Wert (nicht erst bei der Probe). gerundet.
+    // ── AW: WdS S.66 — eBE wirkt auf AW. Wir speichern den ROHEN AW
+    // ohne eBE-Abzug; der eBE-Abzug erfolgt DEDIZIERT im Ausweichen-Dialog
+    // (½eBE bei normalem Ausweichen, volle eBE bei gezieltem Ausweichen).
+    // So vermeiden wir Doppel-Abzug (Finding WS-F22).
+    const awBaseRaw = computed.AW; // mit awSFBonus, awAkrobatikBonus, awNachteilMalus aber OHNE eBE
     const awBEMalus = Math.max(0, Math.round(armorCalc.eBE));
-    if (awBEMalus > 0) {
-      // Falls computed.AW noch nicht in sysClone.Dogde geschrieben war, nachziehen
-      const baseAW = computed.AW; // schon mit awSFBonus, awAkrobatikBonus, awNachteilMalus
-      const finalAW = Math.max(0, baseAW - awBEMalus);
-      sysClone.Dogde = finalAW;
-      computed.AW = finalAW; // damit data.derivedComputed.AW konsistent ist
-    }
+    sysClone.Dogde = awBaseRaw;          // raw AW im Sheet (eBE-Abzug erst im Dialog)
+    data.awBase = awBaseRaw;
+    data.awBEMalus = awBEMalus;          // für Tooltip: "AW 12 (−2 eBE bei normalem)"
+    data.awDisplayNormal = Math.max(0, awBaseRaw - Math.floor(awBEMalus / 2));
+    data.awDisplayGezielt = Math.max(0, awBaseRaw - awBEMalus);
+    computed.AW = awBaseRaw;
     data.zoneLabels = ZONE_LABELS;
     data.allZones   = ALL_ZONES;
 
@@ -1771,6 +1793,19 @@ export class PixelArtCharacterSheet extends ActorSheet {
           maneuverLine = `<div class="dsa-maneuver-effect" style="color:#e94560">🎯 Gezielter Stich: RS ignoriert, WS−2, auto +1 Wunde! → nächster Schadenswurf</div>`;
           break;
         }
+        case "stumpfer_schlag": {
+          // WdS S.66: TP→TP(A) (Ausdauerschaden). Wundschwelle für TP(A) +2.
+          // Nur die Hälfte der TP(A) zählt als echter SP für Wunden-Berechnung.
+          _pendingTpBonus.set(this.actor.id, { bonus: 0, label: "Stumpfer Schlag", asAuP: true, increaseWS: 2 });
+          maneuverLine = `<div class="dsa-maneuver-effect" style="color:#aaaa44">🥖 Stumpfer Schlag: TP→AuP, halbe TP(A) zählt als echter SP, WS+2</div>`;
+          break;
+        }
+        case "betaeubungsschlag": {
+          // WdS S.66: Wuchtschlag + Stumpfer Schlag. AuP-Verlust > WS → KO-Probe.
+          _pendingTpBonus.set(this.actor.id, { bonus: ansage, label: "Betäubungsschlag", asAuP: true, increaseWS: 2, betaeubung: true });
+          maneuverLine = `<div class="dsa-maneuver-effect" style="color:#cccc44">😵 Betäubungsschlag: TP→AuP, +${ansage} TP, WS+2, AuP&gt;WS → KO-Probe!</div>`;
+          break;
+        }
         case "knockdown": {
           if (ansage > 0)
             maneuverLine = `<div class="dsa-maneuver-effect" style="color:#4ad94a">💥 Niederwerfen: Gegner KK-Probe +${ansage} Erschwernis</div>`;
@@ -2393,17 +2428,15 @@ export class PixelArtCharacterSheet extends ActorSheet {
         </div>`;
       }
 
-      // WdS S.78: kampfunfähig ab LeP ≤ 5 (mind. 1), tot ab 0 oder darunter,
-      // unwiderruflich tot bei LeP < -KO. Vorteile Eisern/Zäher Hund verschieben
-      // diese Schwellen — hier vereinfacht nicht berücksichtigt im Display.
+      // WdS S.78: getLepStatus() berücksichtigt Eisern, Zäher Hund und
+      // hohe Selbstbeherrschung (≥12 = nicht kampfunfähig). Zäher Hund
+      // verschiebt Tod-Schwelle auf 1.5×KO.
       const koTarget = targetActor.system?.KO?.value ?? 10;
-      const status = newLeP <= -koTarget
-        ? `<span style="color:#ff0000;font-weight:bold"> — UNWIDERRUFLICH TOT!</span>`
-        : newLeP <= 0
-          ? `<span style="color:#ff2200;font-weight:bold"> — LEBENSBEDROHLICH (W6×KO KR bis Tod)!</span>`
-          : newLeP <= 5
-            ? `<span style="color:#ff4444;font-weight:bold"> — KAMPFUNFÄHIG (LeP ≤ 5)!</span>`
-            : "";
+      const lepFlags = _getLepStatusFlags(targetActor);
+      const lepStatus = getLepStatus(newLeP, koTarget, lepFlags);
+      const status = lepStatus.label
+        ? `<span style="color:${lepStatus.color};font-weight:bold"> — ${lepStatus.label}!</span>`
+        : "";
       lepLine = `<div style="font-size:13px;text-align:center;margin-top:4px;padding:3px 6px;background:rgba(233,69,96,0.15);border:1px solid rgba(233,69,96,0.3);border-radius:3px">
         💔 ${targetActor.name}: ${oldLeP} → <strong style="color:#e94560">${newLeP}</strong> LeP
         ${status}

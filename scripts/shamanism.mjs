@@ -309,7 +309,22 @@ export async function castRitual(actor, ritualId) {
 
             // AsP würfeln (1W6 pro Grad)
             const aspRoll = await new Roll(`${effMeta.dice}d6`).evaluate();
-            const aspKosten = aspRoll.total;
+            let aspKosten = aspRoll.total;
+            // WdZ S.167: Zauber der Keule senkt AsP-Kosten jedes Schamanen-
+            // Rituals um die Ritual-Stufe (1/2/3), nie unter 1 AsP gesamt.
+            const zauberRed = (() => {
+              try {
+                // boni wurde oben bereits gelesen; aber falls der Code-Block
+                // keinen direkten Zugriff darauf hat, lesen wir hier neu.
+                if (typeof boni !== "undefined" && boni?.zauberAspReduktion) {
+                  return boni.zauberAspReduktion;
+                }
+              } catch {}
+              return 0;
+            })();
+            if (zauberRed > 0) {
+              aspKosten = Math.max(1, aspKosten - zauberRed);
+            }
             // pAsP: 1/10 der GEWÜRFELTEN AsP, NICHT eine Konstante (WdZ S.155).
             // Bei aspKosten=23 → 2 pAsP, bei 8 → 1 pAsP, bei <5 → 0 pAsP.
             const aspPerm = effMeta.permFraction > 0

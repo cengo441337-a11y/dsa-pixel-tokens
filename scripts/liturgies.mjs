@@ -168,7 +168,29 @@ export async function rollMirakel(actor, modKey = "mirakelPlus") {
     return null;
   }
   const mods = LITURGIEN_META?._mirakel?.modifikatoren ?? { mirakelPlus: 0, ungelistet: 6, mirakelMinus: 18 };
-  const mod = mods[modKey] ?? 0;
+  const baseMod = mods[modKey] ?? 0;
+
+  // LL S.8: "Bei Mirakeln gelten jedoch nur die Hälfte der dort angegebenen
+  // Zuschläge." Situative Mods (Tempel, Feiertag, Notlage) werden halbiert.
+  // Mirakel±-Modifikator (0/+6/+18) bleibt voll.
+  const situativ = await new Promise((resolve) => {
+    new Dialog({
+      title: "Mirakel — Situativer Modifikator",
+      content: `<div class="dsa-mod-dialog" style="padding:10px;color-scheme:dark">
+        <div style="margin-bottom:6px">Optionaler situativer Modifikator (Tempel, Feiertag, Notlage):</div>
+        <div style="margin-bottom:8px"><label>Mod (Roh, wird halbiert): <input type="number" id="mir-mod" value="0" style="width:60px;background:#0d1b2e;color:#fff;border:1px solid #3a3a5e"/></label></div>
+        <div style="font-size:11px;color:#779">LL S.8: Bei Mirakeln zählen Tabellen-Mods nur zur Hälfte (gerundet).</div>
+      </div>`,
+      buttons: {
+        ok: { label: "Wirken", callback: (h) => resolve(parseInt(h.find("#mir-mod").val()) || 0) },
+        cancel: { label: "Ohne Mod", callback: () => resolve(0) },
+      },
+      default: "ok",
+      close: () => resolve(0),
+    }).render(true);
+  });
+  const halbierterSituativ = Math.round(situativ / 2);
+  const mod = baseMod + halbierterSituativ;
   const target = lkw - mod;
 
   const roll = await new Roll("1d20").evaluate();

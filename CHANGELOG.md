@@ -6,6 +6,71 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.7.0] — 2026-04-30 (15 TODOs + Importer-Critical-Fixes)
+
+Alle 15 verbleibenden TODOs aus dem v0.6.0 Audit-Report abgearbeitet, plus
+3 KRITISCHE Bugs im XML-Importer (User-Bericht: "hat nicht 1 mal richtig
+funktioniert") behoben.
+
+### 🚨 XML-Importer KRITISCHE Bugs
+
+**`xml-parser.mjs:822` — `slot is not defined` ReferenceError**
+Im equipment-Fallback wurde die Variable `slot` referenziert, aber niemals
+deklariert. → JEDER XML-Import schlug komplett fehl mit Parse-Error.
+Fix: `slotAttr = el.getAttribute("slot")` korrekt einlesen.
+
+**`xml-parser.mjs:1219` — AuP-Formel komplett falsch**
+War: `GE + KO + KK/2` (komplett ohne Halbierung, KK statt MU).
+Korrekt per WdH S.46: `(MU + KO + GE) / 2` (echt gerundet).
+
+**`xml-parser.mjs:1208` — AsP-Formel ohne Halbierung**
+War: `MU + IN + CH` (volle Summe).
+Korrekt per WdH S.46: `(MU + IN + CH) / 2` (echt gerundet). Astralmacht-
+Vorteil ergänzt zu Halb-Basis statt komplettem Ersatz.
+
+### 🔧 WdS/WdH Komfort-Fixes
+
+- **WS-F5: `getLepStatus()` mit Eisern/Zäher Hund/Selbstbeherrschung**
+  Eisern + Zäher Hund: nicht kampfunfähig bei LeP ≤ 5. Zäher Hund: Tod-
+  Schwelle 1.5×KO statt KO. Selbstbeherrschung ≥ 12: nicht kampfunfähig.
+- **WS-F9: Stumpfer Schlag + Betäubungsschlag-Manöver** in COMBAT_MANEUVERS
+  ergänzt. WS+2 für Wunden, TP→TP(A) (Ausdauerschaden).
+- **WS-F22: AW-eBE-Doppelabzug behoben.** Sheet zeigt jetzt rohen AW;
+  Dialog zieht eBE situativ ab (½ normal / volle gezielt).
+- **WS-F13: Schildkampf I/II nur mit Linkhand-Voraussetzung.** Ohne
+  Linkhand greift kein Schildkampf-Bonus mehr (WdS S.121).
+- **WS-F18: ZONE_WOUND_EFFECTS + aggregateWoundEffects()** Helper
+  in config.mjs. Pro-Zone-Mali (Kopf MU/KL/IN/INI−2; Brust AT/PA/KO/KK−1
+  +1W6 SP; Bauch GE/KK−1 +GS−1; Armwunden AT/PA/KK/FF−2; Beinwunde GS−1)
+  laut WdS S.110.
+
+### 🙏 Liturgien/Schamanen-Fixes
+
+- **LIT-F1: Mirakel mit Halbe-Mods-Dialog.** Situativer Modifikator
+  (Tempel/Feiertag/Notlage) wird halbiert vor Probe-Verrechnung
+  (LL S.8 "nur die Hälfte der dort angegebenen Zuschläge").
+- **LIT-F5: "Zauber der Keule" Ritual ergänzt** in keule.mjs RITUALE_DEFS
+  (WdZ S.167: senkt AsP-Kosten jedes Schamanen-Rituals um Stufe 1/2/3,
+  min 1 AsP).
+- **shamanism.mjs konsumiert `boni.zauberAspReduktion`** beim Ritual-
+  würfeln und reduziert die gewürfelten AsP-Kosten korrekt.
+
+### ⚡ Magie-Fixes
+
+- **MAG-F9: Beschwörung-Kontrollformel-Detection robuster.**
+  Statt String-Match auf "MU+IN+CH+CH" jetzt explizites Mapping per
+  `beschwoerungKategorie`: elementar* → (MU+IN+CH+CH+ZfW)/5;
+  daemon*/untot*/golem* → (MU+MU+KL+CH+ZfW)/5.
+
+### 📋 Status-Tracking
+
+- AUDIT-REPORT v0.7.0: Alle Findings aus dem Komplett-Audit jetzt erledigt
+  (außer F8 LO-Probe + F19 Karma-Regen + F22 Weihe-pAsP-Übernahme — als
+  v0.7.x-Followups dokumentiert, nicht-blockierend).
+- Importer-Audit läuft als Background-Agent für tieferen Stress-Test.
+
+---
+
 ## [0.6.0] — 2026-04-30 (Komplett-Audit: Regelkonformität gegen WdH/WdS/WdZ/LCR/LL)
 
 ### 🔍 Vollständiger Regel-Audit aller Module

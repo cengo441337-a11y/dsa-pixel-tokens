@@ -3,7 +3,22 @@
  * Zauberprobe mit Spontanmodifikationen, AsP-Berechnung, Zone-Markierung
  */
 
-import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, BESCHWOERUNG_MISSLINGEN, BEHERRSCHUNG_MISSLINGEN, rollBeschwoerungMisslingen, relayActorUpdate, relayTokenUpdate, broadcastVFX } from "./config.mjs";
+import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, BESCHWOERUNG_MISSLINGEN, BEHERRSCHUNG_MISSLINGEN, rollBeschwoerungMisslingen, relayActorUpdate, relayTokenUpdate, broadcastVFX, getLepStatus } from "./config.mjs";
+
+/** Helper: LeP-Status-Flags eines Aktors lesen (Eisern, Zäher Hund, Selbstbeherrschung). */
+function _getLepStatusFlags(actor) {
+  const sys = actor?.system ?? {};
+  const vorteile = sys.vorteile ?? {};
+  const sfList = Array.isArray(sys.sf) ? sys.sf : Object.values(sys.sf ?? {}).map(v => v?.name ?? v);
+  const _has = (raw, n) => Array.isArray(raw)
+    ? raw.some(e => (typeof e === "string" ? e : e?.name ?? "").toLowerCase() === n.toLowerCase())
+    : Object.keys(raw).some(k => k.toLowerCase() === n.toLowerCase());
+  return {
+    eisern: _has(vorteile, "Eisern") || sfList.some(s => s === "Eisern"),
+    zaeherHund: _has(vorteile, "Zäher Hund") || _has(vorteile, "Zaeher Hund"),
+    hoheSelbstbeherrschung: (Number(sys.talente?.Selbstbeherrschung?.value ?? 0) >= 12),
+  };
+}
 import { castPandaemonium } from "./pandaemonium.mjs";
 import { castFesselranken, castAugeDesLimbus, castSumpfstrudel } from "./zone-spells.mjs";
 import { tryGardianumAbsorb, castGardianum, showGardianumDialog } from "./gardianum.mjs";
@@ -699,12 +714,24 @@ export async function castSpell(actor, spellData) {
   let kontrollResult = null;
   if (success && spellData.isBeschwoerung) {
     const sysAttr = (n) => actor.system?.[n]?.value ?? 10;
-    const kontrollFormula = spellData.kontrollProbe ?? "(MU+MU+KL+CH+ZfW)/5";
+    const zfwNum = parseInt(spellData.zfw) || 0;
+    // WdZ S.179: Kontrollwert-Formel pro Beschwörungs-Kategorie.
+    // Robuste Detection per Kategorie-Lookup (vorher String-Match → fragil).
+    const kategorie = (spellData.beschwoerungKategorie ?? "").toLowerCase();
     let kontrollWert;
-    if (kontrollFormula.includes("MU+IN+CH+CH")) {
-      kontrollWert = Math.round((sysAttr("MU") + sysAttr("IN") + sysAttr("CH") + sysAttr("CH") + (parseInt(spellData.zfw) || 0)) / 5);
+    if (kategorie.startsWith("elementar")) {
+      // Elementare: (MU+IN+CH+CH+ZfW)/5
+      kontrollWert = Math.round((sysAttr("MU") + sysAttr("IN") + sysAttr("CH") + sysAttr("CH") + zfwNum) / 5);
+    } else if (kategorie.startsWith("untot") || kategorie.startsWith("golem")) {
+      // Untote / Golem (WdZ S.197): wie Dämonen
+      kontrollWert = Math.round((sysAttr("MU") + sysAttr("MU") + sysAttr("KL") + sysAttr("CH") + zfwNum) / 5);
     } else {
-      kontrollWert = Math.round((sysAttr("MU") + sysAttr("MU") + sysAttr("KL") + sysAttr("CH") + (parseInt(spellData.zfw) || 0)) / 5);
+      // Default Dämonen: (MU+MU+KL+CH+ZfW)/5
+      kontrollWert = Math.round((sysAttr("MU") + sysAttr("MU") + sysAttr("KL") + sysAttr("CH") + zfwNum) / 5);
+    }
+    // Fallback: wenn beschwoerungKategorie nicht gesetzt, fallback zur kontrollFormula
+    if (!kategorie && spellData.kontrollProbe?.includes("MU+IN+CH+CH")) {
+      kontrollWert = Math.round((sysAttr("MU") + sysAttr("IN") + sysAttr("CH") + sysAttr("CH") + zfwNum) / 5);
     }
     const kontrollErschwernis = beschwKontrollZuschlag ?? 0;
     const kontrollTarget = kontrollWert - kontrollErschwernis;
@@ -1110,12 +1137,12 @@ async function _applySpellDamage(caster, spellData, damageInfo, alreadyPaidAsP, 
     const oldLeP = targetActor.system?.LeP?.value ?? 0;
     const newLeP = Math.max(0, oldLeP - sp);
     await relayTokenUpdate(targetToken, { "system.LeP.value": newLeP });
-    // WdS S.78: kampfunfähig ab LeP ≤ 5 (mind. 1)
-    const status = newLeP <= 0
-      ? `<span style="color:#ff2200;font-weight:bold"> — LEBENSBEDROHLICH!</span>`
-      : newLeP <= 5
-        ? `<span style="color:#ff4444;font-weight:bold"> — KAMPFUNFAEHIG!</span>`
-        : "";
+    // WdS S.78: getLepStatus() berücksichtigt Eisern/Zäher Hund/Selbstbeherrschung
+    const lepFlags = _getLepStatusFlags(targetActor);
+    const lepStatus = getLepStatus(newLeP, targetActor.system?.KO?.value ?? 10, lepFlags);
+    const status = lepStatus.label
+      ? `<span style="color:${lepStatus.color};font-weight:bold"> — ${lepStatus.label}!</span>`
+      : "";
     resourceLine = `💔 ${targetActor.name}: ${oldLeP} → <strong style="color:#e94560">${newLeP}</strong> LeP${status}`;
   }
 
@@ -1342,12 +1369,12 @@ async function _applyAoESpellDamage(caster, spellData, damageInfo, alreadyPaidAs
     }
 
     const distLabel = distSchritt < 0.5 ? "Zentrum" : `${distSchritt.toFixed(1)} S`;
-    // WdS S.78: kampfunfähig ab LeP ≤ 5
-    const koMark = newLeP <= 0
-      ? ` <strong style="color:#ff2200">— LEBENSBEDROHLICH!</strong>`
-      : newLeP <= 5
-        ? ` <strong style="color:#ff4444">— KAMPFUNFÄHIG!</strong>`
-        : "";
+    // WdS S.78: getLepStatus mit Eisern/Zäher Hund/Selbstbeherrschung
+    const lepFlags = _getLepStatusFlags(actor);
+    const lepStatus = getLepStatus(newLeP, ko, lepFlags);
+    const koMark = lepStatus.label
+      ? ` <strong style="color:${lepStatus.color}">— ${lepStatus.label}!</strong>`
+      : "";
     reportLines.push(
       `<div style="color:#e94560;font-size:12px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
         💔 <strong>${actor.name}</strong> (${distLabel}): ${tpAtDist} TP${immunity.immune ? " (immun → 0)" : immunity.resistant ? " ÷2" : immunity.vulnerable ? " ×1.5" : ""}
