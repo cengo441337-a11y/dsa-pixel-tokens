@@ -188,7 +188,7 @@ function registerSheetOverride() {
 
 Hooks.once("init", () => {
   console.log(`[${MODULE_ID}] ═══════════════════════════════════════════`);
-  console.log(`[${MODULE_ID}] DSA Pixel-Art Tokens v0.3.0 — Init`);
+  console.log(`[${MODULE_ID}] DSA Pixel-Art Tokens ${game.modules.get(MODULE_ID)?.version ?? "?"} — Init`);
   console.log(`[${MODULE_ID}] ═══════════════════════════════════════════`);
 
   registerHelpers();

@@ -1213,9 +1213,10 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   //   Halbzauberer (Schamane, Schelm etc.): MU + IN + CH (gleiche Basis,
   //                 aber niedrigere Steigerungstabelle — wir kennen den Max-Wert
   //                 i.d.R. aus dem _finalMax-Snapshot der HS).
-  //   Astralmacht-Vorteil (Geweihte, Achaz): IN + Astralmacht*10
-  //   Achtung: Vorher hatte der Code "istElf → IN+MR+CH" — das war falsch
-  //   (Elfen sind Vollzauberer mit MU+IN+CH, MR statt MU war ein Tippfehler).
+  //   Astralmacht-Vorteil (selten — Achaz, einige Halbgott-Geweihte mit Magie):
+  //     1 GP = 1 AsP, max 6 AsP (WdH S.247). HS-Export rechnet diesen Bonus
+  //     i.d.R. bereits in den `mod`-Wert ein, daher nicht zusätzlich addieren
+  //     wenn istZauberer.
   const astralmacht   = heroData.advantages.find(a => a.name === "Astralmacht");
   // istZauberer: nur wenn AsP-Vorteil aktiv. Akademische Ausbildung (Tempel)
   // ≠ Magier-Akademie — Tempel-Akademien sind für Geweihte, ohne AsP.
@@ -1395,7 +1396,8 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   // gdsa schreibt dieses Feld als "Dogde" (Typo, aber API-Vertrag).
   // SF Ausweichen I/II/III geben +3/+6/+9 auf den Basiswert (regelkonform v0.4.10).
   // Akrobatik-TaW ≥ 12: +1, dann pro 3 weitere TaP +1.
-  // Nachteils-Mali: Behäbig/Tollpatsch −1, Schlechte Reflexe −2, Schwerfällig −1.
+  // Nachteils-Mali: Behäbig/Tollpatsch −1.
+  // "Schlechte Reflexe" und "Schwerfällig" existieren in DSA 4.1 nicht — entfernt.
   {
     const paFormula = Math.round(((attr.IN ?? 10) + (attr.GE ?? 10) + (attr.KK ?? 10)) / 5);
     const awSFBonus = sys.sf.includes("Ausweichen III") ? 9
@@ -1412,8 +1414,6 @@ export async function createActorFromImport(heroData, updateExisting = false) {
     let awNachteilMalus = 0;
     if (nachteilNamen.some(n => n.startsWith("behäbig") || n.startsWith("behaebig"))) awNachteilMalus -= 1;
     if (nachteilNamen.some(n => n.startsWith("tollpatsch"))) awNachteilMalus -= 1;
-    if (nachteilNamen.some(n => n.startsWith("schlechte reflexe") || n.startsWith("schlechter reflexe"))) awNachteilMalus -= 2;
-    if (nachteilNamen.some(n => n.startsWith("schwerfällig") || n.startsWith("schwerfaellig"))) awNachteilMalus -= 1;
     sys.Dogde = paFormula + awSFBonus + awAkrobatikBonus + awNachteilMalus;
   }
 

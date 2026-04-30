@@ -1161,7 +1161,7 @@ async function _applySpellDamage(caster, spellData, damageInfo, alreadyPaidAsP, 
       wounds[hitZone] = (wounds[hitZone] ?? 0) + newWounds;
       await relayTokenUpdate(targetToken, { [`flags.${MODULE_ID}.wounds`]: wounds });
       const total = Object.values(wounds).reduce((s, w) => s + (w || 0), 0);
-      woundLine = `<div style="color:#ff4444;margin-top:3px">💀 +${newWounds} Wunde${newWounds>1?"n":""} (${hitZoneLabel}) · Gesamt: ${total} · alle Proben −${total}</div>`;
+      woundLine = `<div style="color:#ff4444;margin-top:3px">💀 +${newWounds} Wunde${newWounds>1?"n":""} (${hitZoneLabel}) · Gesamt: ${total} · alle Proben −${total * 2}</div>`;
     }
   }
 

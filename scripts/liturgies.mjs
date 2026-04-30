@@ -182,7 +182,7 @@ export function getActorKult(actor) {
   const prof = actor?.system?.profession?.value || actor?.system?.profession || "";
   const lower = String(prof).toLowerCase();
   // Hochschamanen-Pantheons zuerst (wegen Tairach-Match-Konflikt mit Tairach-Priester)
-  if (lower.includes("kamaluq") || lower.includes("hochschamane") && (lower.includes("waldmensch") || lower.includes("utulu") || lower.includes("tocamuy"))) return "Kamaluq";
+  if (lower.includes("kamaluq") || (lower.includes("hochschamane") && (lower.includes("waldmensch") || lower.includes("utulu") || lower.includes("tocamuy")))) return "Kamaluq";
   if (lower.includes("tairach") && (lower.includes("hochschamane") || lower.includes("priester"))) return "Tairach";
   if (lower.includes("himmelswölfe") || lower.includes("himmelswolf") || (lower.includes("hochschamane") && lower.includes("nives"))) return "Himmelswölfe";
   for (const gott of ["Praios","Rondra","Efferd","Travia","Boron","Hesinde","Phex","Peraine","Ingerimm","Rahja","Tsa","Firun","Aves","Ifirn","Kor","Nandus","Swafnir","Marbo","Angrosch","H'Szint","H'Ranga","Gravesh"]) {

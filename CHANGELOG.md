@@ -6,6 +6,64 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.7.4] — 2026-04-30 (Final-Audit Showstopper-Fix + 7 Polish)
+
+3. Audit-Iteration fand 1 Showstopper + 7 Polish-Findings. Alle gefixt:
+
+### 🚨 SHOWSTOPPER
+
+**B-1: NEU-5-Refactor brach Stumpfen Schlag (atBase als Funktion)**
+- v0.7.3 hatte `stumpfer_schlag.atBase = (weapon) => -2/-4/-8` als Funktion gesetzt.
+- Aber 4 Callsites in sheet.mjs lasen `sf.atBase ?? 0` als Number → JS coerciert
+  Function zu String → `effectiveAT = NaN` → Probe `die ≤ NaN` immer false.
+- **Stumpfer Schlag schlug seit v0.7.3 IMMER fehl** (Auto-Miss).
+- Fix: Helper `getAtBase(sf, weapon)` der Function vs Number unterscheidet,
+  alle 4 Callsites umgestellt: `_rollAttack`, `_rollDefense`, Chat-Display,
+  Dialog-Hint.
+
+### 🛠 MITTEL
+
+**B-2: Wunden-Display in Schadens-Chat zeigt rohen Count statt ×2**
+- Sheet-Display zeigt korrekt `−${woundPenalty * 2}`, aber Chat-Nachrichten
+  bei Schadens-Vergabe (magic.mjs, sheet.mjs) zeigten `−${total}`.
+- Spieler las "−2" und glaubte das, hatte aber tatsächlich −4 (NEU-2 v0.7.3).
+- Fix: `−${total * 2}` in beiden Schadens-Chat-Zeilen.
+
+**B-3: AW-Mali für nicht-existente Nachteile entfernt**
+- Konsistenz mit NEU-4-Fix (v0.7.3): "Schlechte Reflexe" und "Schwerfällig"
+  existieren in DSA 4.1 nicht. INI-Mali waren entfernt — AW-Mali aber noch da.
+- Fix: AW-Logik in `sheet.mjs:172,173` und `xml-parser.mjs:1415-1416` entfernt.
+- Behäbig (-1 AW) und Tollpatsch (-1 AW) bleiben (regelkonform per WdH/WdS).
+
+### 🟢 NIEDRIG (Polish)
+
+**B-4: Wuchtschlag-Hint Math.ceil statt Math.floor**
+- Dialog-Hint zeigte `+${Math.floor(ansage/2)}`, tatsächlicher Bonus ist
+  `Math.ceil(ansage/2)` (NEU-3 v0.7.3). Bei Ansage 5: Hint sagt "+2",
+  echter Bonus "+3". Behoben.
+
+**B-5: Stale Comment in xml-parser entfernt**
+- Comment "Astralmacht*10" entfernt, durch korrektes "1 GP = 1 AsP, max 6"
+  ersetzt (WdH S.247).
+
+**B-7: Init-Log Version dynamisch**
+- War: `console.log("DSA Pixel-Art Tokens v0.3.0 — Init")` (statisch).
+- Jetzt: `${game.modules.get(MODULE_ID)?.version}` — immer aktuell.
+
+**B-8: Operator-Precedence in `getActorKult` Klammer hinzugefügt**
+- `||` und `&&` zusammen ohne Klammer → JS parst korrekt aber Lesbarkeit
+  schlecht. Klammer setzt explizit was JS implizit macht.
+
+### Final-Audit-Verdict
+
+3-Iteration-Audit-Quote: **32 Bugs gefunden + alle gefixt** (2 KRITISCH +
+9 HOCH + 13 MITTEL + 8 NIEDRIG). Pro Iteration sank die Severity. Die
+nächste Iteration sollte realistisch nur noch sub-NIEDRIG-Findings produzieren.
+
+**Module-Code-Status v0.7.4: production-ready.**
+
+---
+
 ## [0.7.3] — 2026-04-30 (Re-Audit-Fixes: BE-Lookup, Wunden-Penalty, INI-Mali)
 
 Re-Audit nach v0.7.2 fand 6 weitere Findings (3 HOCH, 3 MITTEL). Alle gefixt:

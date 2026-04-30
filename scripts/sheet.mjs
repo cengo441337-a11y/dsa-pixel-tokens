@@ -24,6 +24,19 @@ function _getLepStatusFlags(actor) {
 import { castSpell } from "./magic.mjs";
 import { openDatabaseBrowser } from "./db-browser.mjs";
 
+/**
+ * Helper: liest `sf.atBase` egal ob Number oder Function (mit Waffen-Kontext).
+ * Funktion bekommt das aktuell aktive Waffen-Objekt für kategorie-abhängige
+ * AT-Mali (z.B. Stumpfer Schlag −2 mit Stab, −4 mit Hieb, −8 mit Schwert).
+ */
+function getAtBase(sf, weapon = null) {
+  const v = sf?.atBase;
+  if (typeof v === "function") {
+    try { return Number(v(weapon) ?? 0); } catch { return 0; }
+  }
+  return Number(v ?? 0);
+}
+
 // Akteur-ID → aktive Pfeilverzauberung { effect, impact, label, color, spellName }
 // Geteilt mit magic.mjs via globalThis, damit Verzauberung bei Spruchwirkung
 // gesetzt und beim nächsten Bogen-Schuss konsumiert werden kann.
@@ -153,11 +166,14 @@ export class PixelArtCharacterSheet extends ActorSheet {
     //   Schlechter Reflexe → −2 AW
     const _nachteileMap = system.nachteile ?? {};
     const _nachteileNames = Object.keys(_nachteileMap).map(s => s.toLowerCase());
+    // AW-Mali laut WdH:
+    //   Behäbig (WdH S.250): -1 AW (zusätzlich zu GS-1)
+    //   Tollpatsch (WdH S.265): keine direkte AW-Mali; nur Patzer-Schwelle 19+
+    //     ABER WdS S.66 listet Tollpatsch explizit als AW-1 (Hausregel-konform)
+    // "Schlechte Reflexe" und "Schwerfällig" existieren nicht in DSA 4.1 — entfernt.
     let awNachteilMalus = 0;
     if (_nachteileNames.some(n => n.startsWith("behäbig") || n.startsWith("behaebig") || n.includes("behäbig"))) awNachteilMalus -= 1;
     if (_nachteileNames.some(n => n.startsWith("tollpatsch"))) awNachteilMalus -= 1;
-    if (_nachteileNames.some(n => n.startsWith("schlechte reflexe") || n.startsWith("schlechter reflexe"))) awNachteilMalus -= 2;
-    if (_nachteileNames.some(n => n.startsWith("schwerfällig") || n.startsWith("schwerfaellig"))) awNachteilMalus -= 1;
     const computed = {
       INIBasis: DERIVED_FORMULAS.INIBasis(rawAttrs),
       MR:       DERIVED_FORMULAS.MR(rawAttrs),
@@ -1703,7 +1719,9 @@ export class PixelArtCharacterSheet extends ActorSheet {
     }
 
     const zonePenalty = targetZone ? (PixelArtCharacterSheet.ZONE_PENALTIES[targetZone] ?? 0) : 0;
-    const effectiveAT = at + (sf.atBase ?? 0) - ansage - mod - zonePenalty;
+    // Aktiv geführte Waffe für Funktion-basierte atBase (z.B. Stumpfer Schlag)
+    const _activeWeapon = this.actor.items?.find(i => i.system?.kampftalent === talent || i.name?.toLowerCase().includes(talent.toLowerCase()));
+    const effectiveAT = at + getAtBase(sf, _activeWeapon) - ansage - mod - zonePenalty;
 
     // ── Erster Wurf ──────────────────────────────────────────────────
     const roll = new Roll("1d20");
@@ -1873,7 +1891,8 @@ export class PixelArtCharacterSheet extends ActorSheet {
     else                  { resultText = "Daneben!"; resultCls = "result-fail"; }
 
     const modParts = [];
-    if (sf.atBase) modParts.push(`${sf.label} ${sf.atBase}`);
+    const _atBaseDisplay = getAtBase(sf, _activeWeapon);
+    if (_atBaseDisplay !== 0) modParts.push(`${sf.label} ${_atBaseDisplay}`);
     if (ansage > 0) modParts.push(`Ansage −${ansage}`);
     if (mod !== 0)  modParts.push(`Mod ${mod >= 0 ? "+" : ""}${mod}`);
     if (zonePenalty > 0) modParts.push(`Zone −${zonePenalty}`);
@@ -2064,7 +2083,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
     }
 
     const sfPA = COMBAT_MANEUVERS[paManeuver];
-    const effectivePA = pa - paAnsage + (sfPA?.atBase ?? 0);
+    const effectivePA = pa - paAnsage + getAtBase(sfPA);
 
     const roll = new Roll("1d20");
     await roll.evaluate();
@@ -2425,7 +2444,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
           ${"💀".repeat(newWounds)} +${newWounds} Wunde${newWounds > 1 ? "n" : ""} (${hitZoneLabel})
           <span style="color:#aaa;font-size:11px">· Zone ${zoneTotal} · Gesamt ${totalWounds} · WS ${ws.ws1}/${ws.ws2}/${ws.ws3}</span>
           ${zoneTotal >= 3 ? `<div style="color:#ff0000;font-weight:bold;margin-top:2px">⛔ ${hitZoneLabel} UNBRAUCHBAR!</div>` : ""}
-          <div style="color:#e94560;font-size:11px;margin-top:1px">Alle Proben −${totalWounds}</div>
+          <div style="color:#e94560;font-size:11px;margin-top:1px">Alle Proben −${totalWounds * 2}</div>
         </div>`;
       }
 
@@ -2755,9 +2774,10 @@ export class PixelArtCharacterSheet extends ActorSheet {
             const m      = COMBAT_MANEUVERS[key] ?? COMBAT_MANEUVERS.normal;
             const ansage = parseInt(html.find("#dsa-ansage").val()) || 0;
             const mod    = parseInt(html.find("#dsa-mod").val()) || 0;
-            const effAT  = at + (m.atBase ?? 0) - ansage - mod;
+            const effAT  = at + getAtBase(m) - ansage - mod;
             let hint = `Effektive AT: ${effAT}`;
-            if (m.effect === "tp_bonus")  hint += ` | TP +${ansage} (od. +${Math.floor(ansage/2)} o. SF)`;
+            // B-4 Fix: Math.ceil statt Math.floor für Wuchtschlag-Halbierung (WdS S.65)
+            if (m.effect === "tp_bonus")  hint += ` | TP +${ansage} (od. +${Math.ceil(ansage/2)} o. SF)`;
             if (m.effect === "pa_reduce") hint += ` | gegn. PA −${ansage}`;
             if (m.effect === "knockdown") hint += ` | KK-Probe Erschwernis +${ansage}`;
             html.find("#dsa-ansage-hint").text(hint);
