@@ -15,6 +15,14 @@
  */
 
 import { MODULE_ID, broadcastVFX, relayActorUpdate, relayTokenUpdate } from "./config.mjs";
+import { addPersistentEffect, parseDuration } from "./persistent-effects.mjs";
+
+// VFX-Namen die als persistente Aura unterstützt werden (in vfx.mjs PERSISTENT_PALETTES)
+const PERSISTENT_CAPABLE = new Set([
+  "holy_aura", "holy_seal", "rondra_aura", "boron_seal", "hesinde_glow",
+  "travia_warm", "phex_dark", "peraine_heal", "ingerimm_forge", "rahja_love",
+  "efferd_wave", "firun_ice", "tsa_rainbow", "shaman_smoke", "curse_dark",
+]);
 
 // ─── Helper: Caster-Token finden ─────────────────────────────────────────────
 
@@ -556,6 +564,30 @@ function applyFormula(formula, lkpStar) {
   }
 }
 
+// ─── Persistent-Effect-Helper ────────────────────────────────────────────────
+
+/**
+ * Erstellt einen persistenten Effekt (ActiveEffect + Aura) wenn die Liturgie
+ * eine Wirkungsdauer >= 1 Spielrunde hat UND das VFX als persistent unterstützt
+ * wird. Gibt effectId zurück (oder null falls one-shot).
+ */
+async function maybePersist(targetActor, vfx, lit, lkpStar) {
+  if (!targetActor || !vfx) return null;
+  if (!PERSISTENT_CAPABLE.has(vfx)) return null;
+  const duration = parseDuration(lit.wirkungsdauer ?? lit.wirkungsdauerDetail, lkpStar);
+  if (!duration && !lit.wirkungsdauer?.toLowerCase()?.includes("permanent")) {
+    // augenblicklich → kein persistent effect
+    return null;
+  }
+  return await addPersistentEffect(targetActor, {
+    name: lit.name,
+    vfx,
+    duration,
+    lit,
+    lkpStar,
+  });
+}
+
 // ─── Haupt-Dispatcher ────────────────────────────────────────────────────────
 
 /**
@@ -564,7 +596,7 @@ function applyFormula(formula, lkpStar) {
  * @param {Actor} actor - Der wirkende Geweihte
  * @param {object} lit - Die Liturgie-Daten (id, name, grad, effekt, etc.)
  * @param {number} lkpStar - Die erwürfelten LkP*
- * @returns {Promise<object>} { vfx, mech, desc }
+ * @returns {Promise<object>} { vfx, mech, desc, persistentEffectId }
  */
 export async function applyLiturgyEffects(actor, lit, lkpStar) {
   if (!actor || !lit) return null;
@@ -603,6 +635,8 @@ export async function applyLiturgyEffects(actor, lit, lkpStar) {
           });
         }
       }
+      // Persistente Aura wenn Wirkungsdauer durativ
+      out.persistentEffectId = await maybePersist(actor, vfxName, lit, lkpStar);
       break;
     }
 
@@ -675,6 +709,8 @@ export async function applyLiturgyEffects(actor, lit, lkpStar) {
           const c = tokenCenter(casterToken);
           broadcastVFX({ kind: "effect", x: c.x, y: c.y, effect: vfxName });
           out.mech = "Antimagie-Zone aktiv";
+          // Antimagie-Zone ist persistent (LkP* SR)
+          out.persistentEffectId = await maybePersist(actor, vfxName, lit, lkpStar);
         }
       } else {
         for (const t of targets) {
@@ -692,6 +728,7 @@ export async function applyLiturgyEffects(actor, lit, lkpStar) {
 
     case "target_buff": {
       const tt = targets.length ? targets : (casterToken ? [casterToken] : []);
+      const persistentIds = [];
       for (const t of tt) {
         const c = tokenCenter(t);
         broadcastVFX({ kind: "effect", x: c.x, y: c.y, effect: vfxName });
@@ -705,8 +742,12 @@ export async function applyLiturgyEffects(actor, lit, lkpStar) {
             color: "#ffd770",
             fontSize: 20,
           });
+          // Persistente Aura auf Ziel-Actor
+          const eid = await maybePersist(t.actor, vfxName, lit, lkpStar);
+          if (eid) persistentIds.push({ actorId: t.actor.id, effectId: eid });
         }
       }
+      out.persistentEffectIds = persistentIds;
       out.mech = spec.buff?.desc ?? "Buff angewandt";
       break;
     }

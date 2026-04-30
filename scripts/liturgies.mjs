@@ -392,6 +392,39 @@ export async function rollMirakel(actor, modKey = "mirakelPlus") {
   return { roll: dice, erfolg, lkpStar, kapCost: cost };
 }
 
+// ─── Persistent-Effect-Button-Renderer ───────────────────────────────────────
+// Liefert HTML für den "🔚 Effekt beenden"-Button im Chat, wenn die Liturgie
+// einen persistenten Effekt erzeugt hat (Aura mit Wirkungsdauer).
+function _renderPersistentEffectButton(actor, effectInfo, lit) {
+  if (!effectInfo) return "";
+  const buttons = [];
+  // Self-Aura / Self-Cast
+  if (effectInfo.persistentEffectId) {
+    buttons.push({
+      actorId: actor.id,
+      effectId: effectInfo.persistentEffectId,
+      label: `🔚 ${lit.name} beenden`,
+    });
+  }
+  // Target-Buffs (Liste von { actorId, effectId })
+  if (Array.isArray(effectInfo.persistentEffectIds)) {
+    for (const e of effectInfo.persistentEffectIds) {
+      const targetActor = game.actors.get(e.actorId);
+      const tName = targetActor?.name ?? "Ziel";
+      buttons.push({
+        actorId: e.actorId,
+        effectId: e.effectId,
+        label: `🔚 ${lit.name} (${tName}) beenden`,
+      });
+    }
+  }
+  if (!buttons.length) return "";
+  return `<div class="dsa-active-effect-line" style="margin-top:6px;padding:6px 10px;background:rgba(255,215,112,0.08);border-left:2px solid #b8841c;border-radius:0 3px 3px 0">
+    <div style="font-size:10px;color:#aaa;margin-bottom:3px">⏳ Aktiver Effekt — Wirkungsdauer ${lit.wirkungsdauer}</div>
+    ${buttons.map(b => `<button class="dsa-end-effect-btn" data-actor-id="${b.actorId}" data-effect-id="${b.effectId}" style="background:#3a2a1c;color:#ffd770;border:1px solid #b8841c;padding:4px 10px;font-family:'Crimson Text',Georgia,serif;font-size:12px;border-radius:3px;cursor:pointer;margin-right:4px;margin-top:2px">${b.label}</button>`).join("")}
+  </div>`;
+}
+
 // ─── Liturgie-Probe ─────────────────────────────────────────────────────────
 
 const GRADE_ORDER = ["0","I","II","III","IV","V","VI","VII","VIII"];
@@ -683,6 +716,7 @@ export async function castLiturgie(actor, liturgieId) {
                    Wirkungsdauer: ${lit.wirkungsdauer}</div>
                    <div class="chat-row" style="font-size:11px">${lit.effekt}</div>
                    ${effectInfo?.mech ? `<div class="chat-row" style="font-size:11px;color:#ffd770">⚡ ${effectInfo.mech}</div>` : ""}
+                   ${_renderPersistentEffectButton(actor, effectInfo, lit)}
                    <div class="chat-row">KaP: ${kapCost} (${kap.current} → ${aspNeu})${pkapCost ? ` · pKaP: -${pkapCost}` : ""}</div>`
                 : `<div class="result-line result-fail">${resultHeader} — ${Math.max(1, Math.floor(kapCost/5))} KaP verloren (${kap.current} → ${aspNeu})</div>`
               }

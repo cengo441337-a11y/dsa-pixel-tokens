@@ -217,6 +217,8 @@ Hooks.once("ready", async () => {
   registerKeule();
   registerGmRelay();
   registerDialogTheme();
+  const { registerPersistentEffectHooks } = await import("./persistent-effects.mjs");
+  registerPersistentEffectHooks();
 
   // CSS-Cache-Buster: kritische Pixel-Würfel-Regeln per JS-Inject, damit sie
   // auch greifen wenn Foundry/Browser das Modul-CSS aggressiv cacht.

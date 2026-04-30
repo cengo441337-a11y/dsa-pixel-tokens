@@ -1849,6 +1849,110 @@ const VFX_PROJECTILE_MAP = {
   firuns_pfeil: (fx, fy, tx, ty, o) => vfxProjectileIceShard(fx, fy, tx, ty, { ...o, speed: 22 }),
 };
 
+// ─── Persistent Aura (folgt Token + läuft bis destroy()) ─────────────────────
+// Für Liturgien/Zauber mit längerer Wirkungsdauer (Goldene Rüstung, Argelions
+// Mantel, Schutzsegen, etc.). Aura folgt dem Token-Center, pulsiert dauerhaft,
+// kann jederzeit per handle.destroy() gestoppt werden.
+
+const PERSISTENT_PALETTES = {
+  holy_aura:   { color: 0xffd770, runeColor: 0xffffff, baseRadius: 56, runeCount: 6, withCross: true },
+  rondra_aura: { color: 0xff6644, runeColor: 0xffffff, baseRadius: 56, runeCount: 4 },
+  boron_seal:  { color: 0xaaaacc, runeColor: 0xeeeeff, baseRadius: 60, runeCount: 8 },
+  hesinde_glow:{ color: 0x88ccff, runeColor: 0xffffff, baseRadius: 50, runeCount: 6 },
+  travia_warm: { color: 0xffaa44, runeColor: 0xffeeaa, baseRadius: 50, runeCount: 4 },
+  phex_dark:   { color: 0x336633, runeColor: 0x88dd88, baseRadius: 45, runeCount: 5 },
+  peraine_heal:{ color: 0xaaff88, runeColor: 0xffffff, baseRadius: 50, runeCount: 6 },
+  ingerimm_forge:{ color: 0xff6600, runeColor: 0xffaa00, baseRadius: 50, runeCount: 4 },
+  rahja_love:  { color: 0xff88cc, runeColor: 0xffeeff, baseRadius: 50, runeCount: 6 },
+  efferd_wave: { color: 0x4488ff, runeColor: 0xaaccff, baseRadius: 56, runeCount: 6 },
+  firun_ice:   { color: 0xaaddff, runeColor: 0xffffff, baseRadius: 56, runeCount: 6 },
+  tsa_rainbow: { color: 0xff88ff, runeColor: 0xffffff, baseRadius: 50, runeCount: 7 },
+  shaman_smoke:{ color: 0x665544, runeColor: 0xaaaa88, baseRadius: 60, runeCount: 5 },
+  holy_seal:   { color: 0xffd770, runeColor: 0xffffff, baseRadius: 80, runeCount: 12, slow: true },
+  curse_dark:  { color: 0x663300, runeColor: 0xaa6622, baseRadius: 50, runeCount: 5 },
+};
+
+/**
+ * Spawnt eine persistente Aura auf einem Token. Läuft bis handle.destroy().
+ * @param {Token} token - Foundry Token-Objekt
+ * @param {string} effectName - Key aus PERSISTENT_PALETTES (oder Fallback holy_aura)
+ * @returns {{ destroy: () => void, active: boolean, effectName: string }}
+ */
+export function spawnPersistentAura(token, effectName, opts = {}) {
+  const palette = PERSISTENT_PALETTES[effectName] ?? PERSISTENT_PALETTES.holy_aura;
+  const col = opts.color ?? palette.color;
+  const runeColor = opts.runeColor ?? palette.runeColor;
+  const baseRadius = opts.radius ?? palette.baseRadius;
+  const runeCount = opts.runeCount ?? palette.runeCount;
+  const slow = opts.slow ?? palette.slow ?? false;
+
+  const container = makeContainer(false);
+  const ringG = new PIXI.Graphics();
+  const runeG = new PIXI.Graphics();
+  runeG.blendMode = PIXI.BLEND_MODES.ADD;
+  container.addChild(ringG);
+  container.addChild(runeG);
+
+  const handle = { active: true, container, effectName };
+  let phase = 0;
+
+  const tick = () => {
+    if (!handle.active) {
+      canvas.app.ticker.remove(tick);
+      cleanup(container);
+      return;
+    }
+    if (!token || token.destroyed) { handle.destroy(); return; }
+    const cx = token.center?.x ?? token.x;
+    const cy = token.center?.y ?? token.y;
+    phase += slow ? 0.012 : 0.025;
+
+    const pulse = 1 + Math.sin(phase * 1.4) * 0.05;
+    const r = baseRadius * pulse;
+
+    // Outer glow ring
+    ringG.clear();
+    ringG.lineStyle(10, col, 0.12);
+    ringG.drawCircle(cx, cy, r + 12);
+    // Main ring
+    ringG.lineStyle(3, col, 0.5);
+    ringG.drawCircle(cx, cy, r);
+    // Inner highlight
+    ringG.lineStyle(1.5, 0xffffff, 0.3);
+    ringG.drawCircle(cx, cy, r - 4);
+
+    // Rotating rune dots
+    runeG.clear();
+    for (let i = 0; i < runeCount; i++) {
+      const a = (i / runeCount) * TAU + phase * (slow ? 0.15 : 0.4);
+      const rx = cx + Math.cos(a) * r;
+      const ry = cy + Math.sin(a) * r;
+      const glow = Math.sin(phase * 2 + i) * 0.3 + 0.7;
+      runeG.beginFill(runeColor, glow * 0.85);
+      runeG.drawCircle(rx, ry, 3.5);
+      runeG.endFill();
+      runeG.beginFill(col, 0.4);
+      runeG.drawCircle(rx, ry, 7);
+      runeG.endFill();
+    }
+
+    // Optional cross (Praios-Sonnenrad)
+    if (palette.withCross) {
+      const crossA = phase * 0.3;
+      runeG.lineStyle(1.5, runeColor, 0.4);
+      for (let i = 0; i < 4; i++) {
+        const a = (i / 4) * TAU + crossA;
+        runeG.moveTo(cx, cy);
+        runeG.lineTo(cx + Math.cos(a) * (r - 6), cy + Math.sin(a) * (r - 6));
+      }
+    }
+  };
+  canvas.app.ticker.add(tick);
+
+  handle.destroy = () => { handle.active = false; };
+  return handle;
+}
+
 // ── Public API ───────────────────────────────────────────────────────────────
 
 /** Returns true if a dynamic VFX is registered for this effect name. */
