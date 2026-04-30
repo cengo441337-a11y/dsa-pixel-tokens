@@ -3,8 +3,9 @@
  * Hauptquelle: Liber Liturgium (C02), Wege der Götter
  *
  * Mechanik-Kern:
- *   - Geweihter wirft 1W20 ≤ Liturgiekenntnis(Kult) − Probenzuschlag(Grad) − Modifikatoren
- *   - LkP* = LkW − Wurfwert (analog ZfP* bei Magie)
+ *   - Geweihter würfelt 3W20-Probe (Mirakel-Probe, Standard MU/IN/CH) gegen LkW
+ *     − Probenzuschlag(Grad) − Modifikatoren (Variante A, WdH S.27)
+ *   - LkP* = LkW − Erschwernis − Σ(über-Eigenschaft) (analog TaP*/ZfP*)
  *   - Mirakel: 5 KaP fix, 1 Aktion, modifiziert nach Mirakel±/ungelistet
  *   - KaP-Tabelle 0/I…VIII, ab Grad V mit pKaP-Anteil
  *   - Aufstufung: 4 Kategorien (Ritualdauer/Reichweite/Wirkungsdauer/Ziel),
@@ -12,7 +13,7 @@
  *   - Wirkungsdauer-Tabelle nach Stufe (1=augenbl.) … 10=permanent)
  */
 
-import { MODULE_ID } from "./config.mjs";
+import { MODULE_ID, resolveProbe, checkCritical } from "./config.mjs";
 
 let LITURGIEN = null;
 let LITURGIEN_META = null;
@@ -314,28 +315,59 @@ export async function rollMirakel(actor, modKey = "mirakelPlus") {
       },
       default: "ok",
       close: () => resolve(0),
+    }, {
+      classes: ["dsa-pixel-dialog"],
     }).render(true);
   });
   const halbierterSituativ = Math.round(situativ / 2);
   const mod = baseMod + halbierterSituativ;
-  const target = lkw - mod;
 
-  const roll = await new Roll("1d20").evaluate();
-  const wurf = roll.total;
-  const erfolg = wurf <= target;
-  const lkpStar = erfolg ? Math.max(1, lkw - wurf) : 0;
+  // 3W20-Mirakel-Probe (Standard MU/IN/CH, WdG/LL S.8)
+  const probeAttrs = ["MU", "IN", "CH"];
+  const attrs = probeAttrs.map(a => actor.system?.[a]?.value ?? 10);
+  const roll = new Roll("3d20");
+  await roll.evaluate();
+  const dice = roll.terms[0].results.map(r => r.result);
+  const result = resolveProbe(dice, attrs, lkw, mod);
+  const crit = checkCritical(dice);
+  const erfolg = crit.gluecklich || (!crit.patzer && result.success);
+  const lkpStar = erfolg ? Math.max(1, result.tapStar) : 0;
   const aspNeu = erfolg ? Math.max(0, kap.current - cost) : Math.max(0, kap.current - 1);
   await setActorKaP(actor, aspNeu);
 
+  const diceHtml = dice.map((d, i) => {
+    const attr = attrs[i] ?? 0;
+    const over = d > attr;
+    const is1 = d === 1;
+    const is20 = d === 20;
+    const cls = is1 ? "crit" : is20 ? "fumble" : over ? "fail" : "success";
+    return `<div class="die ${cls}" title="${probeAttrs[i]} ${attr}">${d}</div>`;
+  }).join("");
+
+  const overSum = (result.details ?? []).reduce((s, d) => s + (d.consumed || 0), 0);
+  let breakdown = "";
+  if (erfolg && !crit.gluecklich) {
+    breakdown = `<div class="chat-row" style="font-size:10px;color:#779">LkW ${lkw} − ${mod} (Mod) − ${overSum} (über) = LkP* ${lkpStar}</div>`;
+  } else if (!erfolg && !crit.patzer) {
+    breakdown = `<div class="chat-row" style="font-size:10px;color:#a55">Verfehlt um ${-result.remainder} Punkte</div>`;
+  }
+
+  let resultHeader;
+  if (crit.patzer) resultHeader = "PATZER!";
+  else if (crit.gluecklich) resultHeader = "GLÜCKLICH!";
+  else if (erfolg) resultHeader = `Erfolg — LkP* ${lkpStar}`;
+  else resultHeader = "Fehlschlag";
+
   const html = `<div class="dsa-pixel-chat">
     <div class="chat-title">🙏 Mirakel — ${kult}${istHoch ? " (Hochschamane)" : ""}</div>
-    <div class="chat-row">${probeBezeichnung} ${lkw} − Mod ${mod} → Ziel ${target}</div>
-    <div class="chat-row"><strong>1W20:</strong> ${wurf} ${erfolg ? "✓" : "✗"}</div>
+    <div class="chat-row" style="font-size:11px">${probeBezeichnung} ${lkw} (${probeAttrs.join("/")}: ${attrs.join("/")})${mod !== 0 ? `, Mod ${mod >= 0 ? "+" : ""}${mod}` : ""}</div>
+    <div class="dice-row">${diceHtml}</div>
+    ${breakdown}
     ${erfolg
-      ? `<div class="result-line result-success">Erfolg — LkP* ${lkpStar}<br>
+      ? `<div class="result-line result-success">${resultHeader}<br>
          Effekt: +${Math.floor(lkpStar/2)+2} auf Eigenschaft/MR ODER +${Math.floor(lkpStar/2)+5} auf Talent/Gabe (1 Probe)</div>
          <div class="chat-row">KaP-Kosten: ${cost} (${kap.current} → ${aspNeu})</div>`
-      : `<div class="result-line result-fail">Fehlschlag — 1 KaP verloren (${kap.current} → ${aspNeu})</div>`
+      : `<div class="result-line result-fail">${resultHeader} — 1 KaP verloren (${kap.current} → ${aspNeu})</div>`
     }
   </div>`;
 
@@ -346,7 +378,7 @@ export async function rollMirakel(actor, modKey = "mirakelPlus") {
     type: CONST.CHAT_MESSAGE_TYPES.ROLL,
   });
 
-  return { roll: wurf, erfolg, lkpStar, kapCost: cost };
+  return { roll: dice, erfolg, lkpStar, kapCost: cost };
 }
 
 // ─── Liturgie-Probe ─────────────────────────────────────────────────────────
@@ -535,7 +567,6 @@ export async function castLiturgie(actor, liturgieId) {
             // Aufstufungs-Erschwernis (+2 pro Kategorie)
             const aufstufungMod = aufstufungCount * 2;
             const totalMod = probenZuschlag + modSum + customMod + mitbeterMod + aufstufungMod;
-            const target = lkw - totalMod;
 
             // KaP prüfen
             const kap = getActorKaP(actor);
@@ -548,11 +579,24 @@ export async function castLiturgie(actor, liturgieId) {
               resolve(null); return;
             }
 
-            // 1W20-Probe
-            const roll = await new Roll("1d20").evaluate();
-            const wurf = roll.total;
-            const erfolg = wurf <= target;
-            const lkpStar = erfolg ? Math.max(1, lkw - wurf) : 0;
+            // 3W20-Mirakel-Probe (Standard MU/IN/CH, optional per-Liturgie via lit.probe)
+            let probeAttrs = ["MU", "IN", "CH"];
+            if (Array.isArray(lit.probe) && lit.probe.length === 3) {
+              probeAttrs = lit.probe.map(s => String(s).trim());
+            } else if (typeof lit.probe === "string" && lit.probe.trim()) {
+              const split = lit.probe.split(/[\/,]/).map(s => s.trim()).filter(Boolean);
+              if (split.length === 3) probeAttrs = split;
+            }
+            const attrs = probeAttrs.map(a => actor.system?.[a]?.value ?? 10);
+
+            const roll = new Roll("3d20");
+            await roll.evaluate();
+            const dice = roll.terms[0].results.map(r => r.result);
+            const result = resolveProbe(dice, attrs, lkw, totalMod);
+            const crit   = checkCritical(dice);
+
+            const erfolg = crit.gluecklich || (!crit.patzer && result.success);
+            const lkpStar = erfolg ? Math.max(1, result.tapStar) : 0;
 
             // KaP abziehen
             let aspNeu = kap.current;
@@ -569,20 +613,46 @@ export async function castLiturgie(actor, liturgieId) {
             const wirkungsdauerMap = LITURGIEN_META?._wirkungsdauer ?? {};
             const wirkungsstaerkeMap = LITURGIEN_META?._wirkungsstaerke ?? {};
 
+            // Würfel-HTML mit Eigenschafts-Vergleich (Variante A: rot wenn d > attr)
+            const diceHtml = dice.map((d, i) => {
+              const attr = attrs[i] ?? 0;
+              const over = d > attr;
+              const is1 = d === 1;
+              const is20 = d === 20;
+              const cls = is1 ? "crit" : is20 ? "fumble" : over ? "fail" : "success";
+              return `<div class="die ${cls}" title="${probeAttrs[i]} ${attr}">${d}</div>`;
+            }).join("");
+
+            const overSum = (result.details ?? []).reduce((s, d) => s + (d.consumed || 0), 0);
+            let breakdown = "";
+            if (erfolg && !crit.gluecklich) {
+              breakdown = `<div class="chat-row" style="font-size:10px;color:#779">LkW ${lkw} − ${totalMod} (Erschw.) − ${overSum} (über) = LkP* ${lkpStar}</div>`;
+            } else if (!erfolg && !crit.patzer) {
+              const missing = -result.remainder;
+              breakdown = `<div class="chat-row" style="font-size:10px;color:#a55">Verfehlt um ${missing} Punkte (LkW ${lkw} − ${totalMod} (Erschw.) − ${overSum} (über))</div>`;
+            }
+
+            let resultHeader;
+            if (crit.patzer) resultHeader = "PATZER!";
+            else if (crit.gluecklich) resultHeader = "GLÜCKLICH!";
+            else if (erfolg) resultHeader = `Erfolg — LkP* ${lkpStar}`;
+            else resultHeader = "Fehlschlag";
+
             const html2 = `<div class="dsa-pixel-chat">
               <div class="chat-title">${isPrimaer ? "★ " : ""}🙏 ${lit.name} (${effGrad})</div>
               <div class="chat-row" style="font-size:11px;color:#aaa">${kult} · ${lit.ziel} · ${lit.reichweite}</div>
               <hr>
-              <div class="chat-row">LkW ${lkw} − Mod ${totalMod} → Ziel ${target}</div>
-              <div class="chat-row"><strong>1W20:</strong> ${wurf} ${erfolg ? "✓" : "✗"}</div>
+              <div class="chat-row" style="font-size:11px">Mirakel-Probe ${probeAttrs.join("/")} (${attrs.join("/")}) — LkW ${lkw}${totalMod !== 0 ? `, Mod ${totalMod >= 0 ? "+" : ""}${totalMod}` : ""}</div>
+              <div class="dice-row">${diceHtml}</div>
+              ${breakdown}
               ${aufstufungCount ? `<div class="chat-row">Aufstufung: ${aufstufungCount} Kategorie(n) → Grad ${effGrad}</div>` : ""}
               ${erfolg
-                ? `<div class="result-line result-success">Erfolg — LkP* ${lkpStar}<br>
+                ? `<div class="result-line result-success">${resultHeader}<br>
                    Wirkungsstärke: ${wirkungsstaerkeMap[lit.grad] ?? lit.grad}<br>
                    Wirkungsdauer: ${lit.wirkungsdauer}</div>
                    <div class="chat-row" style="font-size:11px">${lit.effekt}</div>
                    <div class="chat-row">KaP: ${kapCost} (${kap.current} → ${aspNeu})${pkapCost ? ` · pKaP: -${pkapCost}` : ""}</div>`
-                : `<div class="result-line result-fail">Fehlschlag — ${Math.max(1, Math.floor(kapCost/5))} KaP verloren (${kap.current} → ${aspNeu})</div>`
+                : `<div class="result-line result-fail">${resultHeader} — ${Math.max(1, Math.floor(kapCost/5))} KaP verloren (${kap.current} → ${aspNeu})</div>`
               }
             </div>`;
 

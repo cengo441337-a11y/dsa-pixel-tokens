@@ -14,6 +14,70 @@
   background: var(--fx-bg);
 }
 
+/* ─── Dialog-Buttons (Wirken / Abbrechen / etc.) ─────────────────────── */
+/* Foundrys default-buttons sind auf hellen Hintergrund gestylt und werden
+   auf unserem dunklen Dialog-Hintergrund unleserlich. Override via Class
+   am App-Window: classes:["dsa-pixel-dialog"] in Dialog-Options. */
+.dialog.dsa-pixel-dialog .dialog-buttons,
+.app.dialog.dsa-pixel-dialog .dialog-buttons {
+  background: #1a1612;
+  padding: 8px 10px;
+  gap: 8px;
+  border-top: 1px solid rgba(184, 132, 28, 0.3);
+}
+
+.dialog.dsa-pixel-dialog .dialog-buttons button,
+.app.dialog.dsa-pixel-dialog .dialog-buttons button {
+  background: linear-gradient(180deg, #3a2a1c 0%, #2a1f14 100%) !important;
+  color: #ffd770 !important;
+  border: 1px solid #b8841c !important;
+  font-family: "Crimson Text", Georgia, serif !important;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  padding: 6px 14px;
+  border-radius: 3px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.dialog.dsa-pixel-dialog .dialog-buttons button:hover,
+.app.dialog.dsa-pixel-dialog .dialog-buttons button:hover {
+  background: linear-gradient(180deg, #4a3525 0%, #3a2a1c 100%) !important;
+  border-color: #ffd770 !important;
+  box-shadow: 0 0 8px rgba(255, 215, 112, 0.4);
+  color: #fff5c8 !important;
+}
+
+.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"],
+.app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"] {
+  background: linear-gradient(180deg, #b8841c 0%, #8a5f12 100%) !important;
+  color: #1a1612 !important;
+  border-color: #ffd770 !important;
+  font-weight: 700;
+}
+
+.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"]:hover,
+.app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"]:hover {
+  background: linear-gradient(180deg, #d49a26 0%, #a06f15 100%) !important;
+  color: #1a1612 !important;
+  box-shadow: 0 0 10px rgba(255, 215, 112, 0.6);
+}
+
+/* Window-Header an Theme angleichen */
+.dialog.dsa-pixel-dialog .window-header,
+.app.dialog.dsa-pixel-dialog .window-header {
+  background: linear-gradient(180deg, #2a1f14 0%, #1a1612 100%);
+  border-bottom: 1px solid #b8841c;
+  color: #ffd770;
+}
+
+.dialog.dsa-pixel-dialog .window-content,
+.app.dialog.dsa-pixel-dialog .window-content {
+  background: #1a1612;
+  padding: 0;
+}
+
 /* ─── Probe Dialog ──────────────────────────────────────────────────── */
 
 .dsa-pixel-probe-dialog .probe-header {
