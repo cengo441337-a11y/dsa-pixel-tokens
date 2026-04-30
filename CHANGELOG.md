@@ -6,6 +6,51 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.7.5] — 2026-04-30 (Mirakel/LkW User-Bugfix Praiodun)
+
+User-Bug gemeldet: Praiodun Zornbrecht (Praios-Geweihter, Profession="Geweihter")
+zeigte im Sheet korrekt **Kult: Praios + LkW 18**, aber Mirakel-Button warnte
+**"Kein Kult gefunden — Mirakel braucht eine geweihte Profession."**
+
+### Bug-Ursache
+
+**Diskrepanz zwischen Sheet-Lookup und liturgies.mjs-Lookup:**
+
+`sheet.mjs::getData` nutzt eine 4-fache Fallback-Kette für den Kult
+(Flag → Liturgiekenntnis-Talent in `system.talente` → Liturgiekenntnis-Item
+→ Profession-Match). `liturgies.mjs::getActorKult` und `getLkW` schauten
+aber nur in **Profession** (für Kult) bzw. nur in **Items** + **Flags**
+(für LkW) — nicht im **`system.talente`-Map** wo der XML-Parser die
+Liturgiekenntnis als reguläres Talent ablegt.
+
+Praiodun hat `Liturgiekenntnis (Praios)` als Talent in `system.talente`,
+nicht als Item, und Profession ist nur generisches `"Geweihter"`. → beide
+Lookups schlugen fehl.
+
+### Fix
+
+**`getActorKult(actor)` jetzt mit identischer Lookup-Kette wie sheet.mjs:**
+1. Flag (höchste Priorität)
+2. `system.talente` "Liturgiekenntnis (Götter-Name)"
+3. Item-Liste "Liturgiekenntnis (...)"
+4. Profession-String mit Götter-Match
+5. Vorteil "Geweiht (XYZ)"
+
+**`getLkW(actor, kult)` jetzt mit `system.talente` als erste Quelle:**
+1. `system.talente["Liturgiekenntnis (Kult)"].value`
+2. Item-basiert
+3. Flag-Map
+
+### Verifiziert
+
+```
+Praiodun Zornbrecht → kult: "Praios", lkw: 18 ✅
+```
+
+(Vor Fix: kult: null, lkw: 0)
+
+---
+
 ## [0.7.4] — 2026-04-30 (Final-Audit Showstopper-Fix + 7 Polish)
 
 3. Audit-Iteration fand 1 Showstopper + 7 Polish-Findings. Alle gefixt:

@@ -159,35 +159,92 @@ export async function regenerateKaP(actor, modus = "meditation", opts = {}) {
 
 /** Liturgiekenntnis-Wert (LkW) für einen bestimmten Kult. */
 export function getLkW(actor, kult) {
-  // Erst Item-basiert (Talent oder SF)
+  if (!kult) return 0;
+  const kultLow = kult.toLowerCase();
+
+  // 1) system.talente (XML-Parser-Pfad — z.B. "Liturgiekenntnis (Praios)")
+  const talente = actor?.system?.talente ?? {};
+  for (const [tname, tdata] of Object.entries(talente)) {
+    const tnameLow = tname.toLowerCase();
+    if (tnameLow.includes("liturgiekenntnis") && tnameLow.includes(kultLow)) {
+      return Number(tdata?.value ?? tdata?.taw ?? 0);
+    }
+  }
+
+  // 2) Item-basiert (Talent oder SF im Item-Verzeichnis)
   const items = actor?.items ?? [];
   const item = [...items].find(i => {
     const n = (i.name || "").toLowerCase();
-    return n.includes("liturgiekenntnis") && n.includes((kult || "").toLowerCase());
+    return n.includes("liturgiekenntnis") && n.includes(kultLow);
   });
   if (item) {
     return Number(item.system?.value ?? item.system?.taw ?? item.system?.zfw ?? 0);
   }
-  // Flag-Fallback (vom XML-Parser gesetzt)
+
+  // 3) Flag-Fallback (vom XML-Parser bei explizitem Set)
   const flagMap = actor?.getFlag?.(MODULE_ID, "liturgiekenntnisse") ?? {};
   return Number(flagMap[kult] ?? 0);
 }
 
 /** Liefert den Hauskult/Gott des Charakters (aus profession/flag). */
 export function getActorKult(actor) {
-  // 1) Explizit gesetzt im Flag
+  // Identische Lookup-Kette wie sheet.mjs::getData (sonst Diskrepanz wie bei
+  // Praiodun-Bug: Sheet zeigt "Kult: Praios", Mirakel sagt "Kein Kult").
+  //
+  // 1) Explizit gesetzt im Flag (höchste Priorität)
   const flag = actor?.getFlag?.(MODULE_ID, "kult");
   if (flag) return flag;
-  // 2) Aus Profession lesen (gdsa)
-  const prof = actor?.system?.profession?.value || actor?.system?.profession || "";
-  const lower = String(prof).toLowerCase();
-  // Hochschamanen-Pantheons zuerst (wegen Tairach-Match-Konflikt mit Tairach-Priester)
-  if (lower.includes("kamaluq") || (lower.includes("hochschamane") && (lower.includes("waldmensch") || lower.includes("utulu") || lower.includes("tocamuy")))) return "Kamaluq";
-  if (lower.includes("tairach") && (lower.includes("hochschamane") || lower.includes("priester"))) return "Tairach";
-  if (lower.includes("himmelswölfe") || lower.includes("himmelswolf") || (lower.includes("hochschamane") && lower.includes("nives"))) return "Himmelswölfe";
-  for (const gott of ["Praios","Rondra","Efferd","Travia","Boron","Hesinde","Phex","Peraine","Ingerimm","Rahja","Tsa","Firun","Aves","Ifirn","Kor","Nandus","Swafnir","Marbo","Angrosch","H'Szint","H'Ranga","Gravesh"]) {
-    if (lower.includes(gott.toLowerCase())) return gott;
+
+  const _capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : null;
+  const _matchKult = (text) => {
+    if (!text) return null;
+    const lc = String(text).toLowerCase();
+    // Hochschamanen-Pantheons zuerst
+    if (lc.includes("kamaluq") || (lc.includes("hochschamane") && (lc.includes("waldmensch") || lc.includes("utulu") || lc.includes("tocamuy")))) return "Kamaluq";
+    if (lc.includes("tairach") && (lc.includes("hochschamane") || lc.includes("priester"))) return "Tairach";
+    if (lc.includes("himmelswölfe") || lc.includes("himmelswolf") || (lc.includes("hochschamane") && lc.includes("nives"))) return "Himmelswölfe";
+    for (const gott of ["Praios","Rondra","Efferd","Travia","Boron","Hesinde","Phex","Peraine","Ingerimm","Rahja","Tsa","Firun","Aves","Ifirn","Kor","Nandus","Swafnir","Marbo","Angrosch","H'Szint","H'Ranga","Gravesh"]) {
+      if (lc.includes(gott.toLowerCase())) return gott;
+    }
+    return null;
+  };
+
+  // 2) Aus Liturgiekenntnis-Talent (system.talente) — z.B. "Liturgiekenntnis (Praios)"
+  const talente = actor?.system?.talente ?? {};
+  for (const tname of Object.keys(talente)) {
+    if (/liturgiekenntnis/i.test(tname)) {
+      const m = tname.match(/liturgiekenntnis\s*[\(\[]?\s*([A-Za-zäöüÄÖÜß'-]+)/i);
+      if (m && m[1]) return _capitalize(m[1]);
+    }
   }
+
+  // 3) Aus Liturgiekenntnis-Item (z.B. SF-Item "Liturgiekenntnis (Boron)")
+  const items = actor?.items ?? [];
+  for (const it of items) {
+    if ((it.name || "").toLowerCase().includes("liturgiekenntnis")) {
+      const m = it.name.match(/liturgiekenntnis\s*[\(\[]?\s*([A-Za-zäöüÄÖÜß'-]+)/i);
+      if (m && m[1]) return _capitalize(m[1]);
+    }
+  }
+
+  // 4) Aus Profession-String
+  const prof = actor?.system?.profession?.value || actor?.system?.profession || "";
+  const profKult = _matchKult(prof);
+  if (profKult) return profKult;
+
+  // 5) Aus Vorteil "Geweiht (XYZ)" oder ähnlich
+  const vorteile = actor?.system?.vorteile ?? {};
+  for (const vname of Object.keys(vorteile)) {
+    if (/geweiht/i.test(vname)) {
+      const m = vname.match(/geweiht\s*[\(\[]?\s*([A-Za-zäöüÄÖÜß'-]+)/i);
+      if (m && m[1]) {
+        const kult = _capitalize(m[1]);
+        // Filtern auf bekannte Götter
+        if (_matchKult(kult)) return kult;
+      }
+    }
+  }
+
   return null;
 }
 
