@@ -14,68 +14,81 @@
   background: var(--fx-bg);
 }
 
-/* ─── Dialog-Buttons (Wirken / Abbrechen / etc.) ─────────────────────── */
-/* Foundrys default-buttons sind auf hellen Hintergrund gestylt und werden
-   auf unserem dunklen Dialog-Hintergrund unleserlich. Override via Class
-   am App-Window: classes:["dsa-pixel-dialog"] in Dialog-Options. */
-.dialog.dsa-pixel-dialog .dialog-buttons,
-.app.dialog.dsa-pixel-dialog .dialog-buttons {
-  background: #1a1612;
-  padding: 8px 10px;
-  gap: 8px;
-  border-top: 1px solid rgba(184, 132, 28, 0.3);
+/* ─── Dialog-Buttons (Wirken / Abbrechen) ─────────────────────────────── */
+/* HÖCHSTE SPECIFICITY + !important, schlägt jede Foundry-Default-Regel.
+   Selektor-Reihenfolge: html body .app.dialog.dsa-pixel-dialog ...
+   Specificity = (0,5,3) — Foundrys Default-Button-CSS hat (0,2,1). */
+
+html body .app.dialog.dsa-pixel-dialog .dialog-buttons {
+  background: #1a1612 !important;
+  padding: 8px !important;
+  gap: 8px !important;
+  border-top: 1px solid #b8841c !important;
 }
 
-.dialog.dsa-pixel-dialog .dialog-buttons button,
-.app.dialog.dsa-pixel-dialog .dialog-buttons button {
-  background: linear-gradient(180deg, #3a2a1c 0%, #2a1f14 100%) !important;
+/* Default-Button (Abbrechen): dunkler Background, Gold-Text */
+html body .app.dialog.dsa-pixel-dialog .dialog-buttons button {
+  background: #2a1f14 !important;
+  background-image: linear-gradient(180deg, #3a2a1c 0%, #2a1f14 100%) !important;
   color: #ffd770 !important;
   border: 1px solid #b8841c !important;
   font-family: "Crimson Text", Georgia, serif !important;
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  padding: 6px 14px;
-  border-radius: 3px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.5px !important;
+  padding: 8px 16px !important;
+  border-radius: 3px !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.7) !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+  text-transform: none !important;
+  flex: 1 !important;
 }
 
-.dialog.dsa-pixel-dialog .dialog-buttons button:hover,
-.app.dialog.dsa-pixel-dialog .dialog-buttons button:hover {
-  background: linear-gradient(180deg, #4a3525 0%, #3a2a1c 100%) !important;
+html body .app.dialog.dsa-pixel-dialog .dialog-buttons button:hover {
+  background: #4a3525 !important;
+  background-image: linear-gradient(180deg, #4a3525 0%, #3a2a1c 100%) !important;
   border-color: #ffd770 !important;
-  box-shadow: 0 0 8px rgba(255, 215, 112, 0.4);
   color: #fff5c8 !important;
+  box-shadow: 0 0 8px #ffd770 !important;
 }
 
-.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"],
-.app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"] {
-  background: linear-gradient(180deg, #b8841c 0%, #8a5f12 100%) !important;
-  color: #1a1612 !important;
-  border-color: #ffd770 !important;
-  font-weight: 700;
+/* Wirken-Button: GOLD-Background mit SCHWARZEM Text — max Kontrast */
+html body .app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"],
+html body .app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="ok"],
+html body .app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="yes"] {
+  background: #ffd770 !important;
+  background-image: linear-gradient(180deg, #ffd770 0%, #d4a032 100%) !important;
+  color: #000000 !important;
+  border: 2px solid #ffd770 !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
 }
 
-.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"]:hover,
-.app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"]:hover {
-  background: linear-gradient(180deg, #d49a26 0%, #a06f15 100%) !important;
-  color: #1a1612 !important;
-  box-shadow: 0 0 10px rgba(255, 215, 112, 0.6);
+html body .app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="cast"]:hover,
+html body .app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="ok"]:hover,
+html body .app.dialog.dsa-pixel-dialog .dialog-buttons button[data-button="yes"]:hover {
+  background: #fff5c8 !important;
+  background-image: linear-gradient(180deg, #fff5c8 0%, #ffd770 100%) !important;
+  color: #000000 !important;
+  box-shadow: 0 0 14px #ffd770 !important;
+  filter: brightness(1.1) !important;
 }
 
-/* Window-Header an Theme angleichen */
-.dialog.dsa-pixel-dialog .window-header,
-.app.dialog.dsa-pixel-dialog .window-header {
-  background: linear-gradient(180deg, #2a1f14 0%, #1a1612 100%);
-  border-bottom: 1px solid #b8841c;
-  color: #ffd770;
+/* Window-Header + Content auf Theme */
+html body .app.dialog.dsa-pixel-dialog .window-header {
+  background: #2a1f14 !important;
+  background-image: linear-gradient(180deg, #2a1f14 0%, #1a1612 100%) !important;
+  border-bottom: 1px solid #b8841c !important;
 }
 
-.dialog.dsa-pixel-dialog .window-content,
-.app.dialog.dsa-pixel-dialog .window-content {
-  background: #1a1612;
-  padding: 0;
+html body .app.dialog.dsa-pixel-dialog .window-header .window-title {
+  color: #ffd770 !important;
+}
+
+html body .app.dialog.dsa-pixel-dialog .window-content {
+  background: #1a1612 !important;
+  padding: 0 !important;
 }
 
 /* ─── Probe Dialog ──────────────────────────────────────────────────── */

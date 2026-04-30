@@ -314,8 +314,9 @@ Hooks.once("ready", async () => {
 // keine CSS-Regel mehr überschreiben.
 function registerDialogTheme() {
   Hooks.on("renderDialog", (app, html, data) => {
-    const $h = html instanceof jQuery ? html : $(html);
-    const root = $h.closest(".app.dialog");
+    // Foundry v12: Dialog-Outer hat Klassen 'app window-app dsa-pixel-dialog'
+    // (kein 'dialog' mehr!) — also über app.element gehen, nicht .closest(.app.dialog)
+    const root = app.element instanceof jQuery ? app.element : $(app.element);
     if (!root.length) return;
     if (!root.hasClass("dsa-pixel-dialog")) return; // nur unsere Dialoge
 
