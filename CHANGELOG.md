@@ -6,6 +6,60 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.7.3] — 2026-04-30 (Re-Audit-Fixes: BE-Lookup, Wunden-Penalty, INI-Mali)
+
+Re-Audit nach v0.7.2 fand 6 weitere Findings (3 HOCH, 3 MITTEL). Alle gefixt:
+
+### 🚨 HOCH
+
+**NEU-1: BE-Lookup für Talente schlug komplett fehl wegen Umlaut-Mismatch**
+- `data/armor-zones.json` hatte ASCII-Keys ("Koerperbeherrschung", "Saebel",
+  "Staebe", "Anderthalbhaender", "Kettenstabe") aber Talent-Namen aus HS-XML
+  und `talents.json` haben Umlaute → `physicalRules[name]` lieferte nie
+  einen Wert.
+- Fix: alle 6 Keys auf Umlaut-Schreibweise umgestellt (Säbel, Stäbe,
+  Anderthalbhänder, Kettenstäbe, Körperbeherrschung).
+
+**NEU-2: Wunden-Penalty halbiert auf allen Sheet-Proben**
+- `sheet.mjs::_getWoundPenalty()` lieferte `Σ wounds` statt `Σ wounds × 2`.
+  WdS S.57 fordert −2/Wunde auf alle Proben. INI-Tracker (combat.mjs) hatte
+  korrektes `wp*2`, Sheet-Proben (Talent/Eigenschaft/Spruch/Initiative/Ritual)
+  hatten nur `wp` — also halben Penalty.
+- Auswirkung: Held mit 2 Wunden bekam −2 statt −4 auf alle Sheet-Proben.
+- Fix: `return totalWounds * 2;`.
+
+**REG-1 (Doku): CHANGELOG-Eintrag v0.7.1 Astralmacht ×10 korrigiert**
+- War: "Astralmacht-Bonus IMMER on top, Aytan jetzt 79" (×10 impliziert)
+- Jetzt: WdH S.247 — 1 GP = 1 AsP, max 6 AsP. HS-mod enthält Astralmacht-
+  Bonus i.d.R. bereits, kein Doppel-Bonus.
+
+### 🛠 MITTEL
+
+**NEU-3: Wuchtschlag-Halbierung Math.ceil statt floor**
+- WdS S.65: "Ansage +5 → +3 TP (aufgerundet)". Code hatte `Math.floor(5/2)=2`.
+- Fix: `Math.ceil(ansage / 2)`.
+
+**NEU-4: Erfundene INI-Mali entfernt (Behäbig/Tollpatsch/Schwerfällig/Schl. Reflexe)**
+- Per WdH: Behäbig gibt nur GS−1 + AW−1 (KEIN INI-Mali). Tollpatsch verschiebt
+  nur Patzer-Schwelle auf 19+. "Schwerfällig" und "Schlechte Reflexe" sind
+  in DSA 4.1 nicht existent.
+- Fix: INI-Tracker (combat.mjs) und Sheet (sheet.mjs `iniNachteilMalus`)
+  entfernen die erfundenen Mali. Wer sie als Hausregel will, kann manuell
+  über System-Modifikatoren eintragen.
+
+**NEU-5: Stumpfer Schlag atBase als Funktion nach Waffenkategorie**
+- WdS S.66: −2 mit Stab/Knüppel, −4 mit stumpfer Seite anderer Hiebwaffen,
+  −8 mit allen anderen Waffen.
+- Vorher: fix `atBase: -2` für alle Waffen.
+- Fix: `atBase` ist jetzt Funktion `(weapon) => weapon.kampftalent`-basiert.
+
+### Re-Audit-Verifikation
+
+Alle 18 Bugs aus v0.6.0/0.7.x wurden vom Background-Agent re-validiert:
+**alle korrekt gefixt, keine Regression**. Re-Audit-Quote: 100%.
+
+---
+
 ## [0.7.1] — 2026-04-30 (Importer-Audit Fixes #1-#5 + #22)
 
 Background-Agent-Audit fand 25 Importer-Bugs. Top-5 davon waren game-breaking
@@ -33,11 +87,13 @@ Background-Agent-Audit fand 25 Importer-Bugs. Top-5 davon waren game-breaking
 - Dedup-Key erweitert: `name|anzahl|slot|customDisplayName`. Verschiedene
   Custom-Display-Names oder Slots → bleiben getrennt.
 
-**BUG #6: Astralmacht-Vorteil fehlte bei Vollzauberern**
-- Vorher: Astralmacht-Bonus nur als Alternative zur Vollzauberer-Formel
-  (either/or). Aytan (Magier + Astralmacht 4) bekam keine zusätzlichen 40 AsP.
-- Korrigiert: `astralmachtBonus` IMMER on top, sowohl für Vollzauberer als
-  auch ohne. Aytan jetzt AsP-max 79 statt 39.
+**BUG #6: Astralmacht-Vorteil — WdH-konformer 1:1-Bonus**
+- Per WdH S.247: Astralmacht = 1 GP für 1 AsP (max 6 AsP), NICHT 1:10.
+- Vorher fälschlich `value × 10` angesetzt — komplett falsch.
+- HS rechnet den Astralmacht-Bonus i.d.R. bereits in den `mod`-Wert ein,
+  daher addieren wir ihn bei Vollzauberern NICHT zusätzlich (sonst doppelt).
+- Bei Astralmacht ohne Vollzauberer-Vorteil: 1 AsP/GP wird addiert (selten
+  Edge-Case wie Achaz-Geweihte mit Astralmacht).
 
 **BUG #22: Schamanistisch/Liturgie-REP-Map fehlte**
 - Grog-Sprüche mit `repraesentation="Schamanistisch"` wurden im REP-Flag

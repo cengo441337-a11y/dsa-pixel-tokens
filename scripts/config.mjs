@@ -253,11 +253,24 @@ export const COMBAT_MANEUVERS = {
   // WdS S.66: Stumpfer Schlag — TP werden in TP(A) (Ausdauerschaden)
   // umgewandelt. Halbe TP(A) sind echte SP für Wunden-Berechnung.
   // Wundschwelle ist um +2 erhöht (schwerer Wunden zu bekommen).
+  // atBase ist Funktion: nimmt aktive Waffe und liefert AT-Mali nach Kategorie.
+  //   Stäbe / Hiebwaffen mit Knüppel-Charakter: −2
+  //   andere Hiebwaffen (stumpfe Seite): −4
+  //   alle anderen: −8
   stumpfer_schlag: {
     label: "Stumpfer Schlag",
-    atBase: -2, ansage: false,  // mit Kampfstab/Knüppel: AT-2; mit stumpfer Seite anderer Hiebw.: AT-4; sonst -8
+    atBase: (weapon) => {
+      const t = (weapon?.kampftalent ?? "").toLowerCase();
+      // Stäbe (mit Umlaut!) / Kampfstab / Knüppel: −2
+      if (/st(a|ä)b|kn(ü|ue)ppel/.test(t)) return -2;
+      // Andere Hiebwaffen / Kettenwaffen: −4 (stumpfe Seite)
+      if (/hiebwaffen|kettenwaffen/.test(t)) return -4;
+      // Schwerter, Säbel, Dolche etc.: −8 (kein stumpfer Teil)
+      return -8;
+    },
+    ansage: false,
     effect: "stumpfer_schlag",
-    desc: "Schaden als TP(A) (Ausdauer). WS+2 für Wunden. AT−2 mit Kampfstab/Knüppel, −4 mit stumpfer Seite anderer Hiebwaffen, −8 mit anderen Waffen. WdS S.66",
+    desc: "Schaden als TP(A) (Ausdauer). WS+2 für Wunden. AT−2 mit Stäben/Knüppeln, −4 mit stumpfer Seite anderer Hiebwaffen, −8 mit anderen Waffen. WdS S.66",
     requiresSF: null,
   },
 

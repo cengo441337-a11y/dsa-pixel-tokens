@@ -497,14 +497,11 @@ function _computeInitiative(actor) {
   const wp = Object.values(wounds).reduce((s, w) => s + (Number(w) || 0), 0);
   const woundIniMali = wp * 2;
 
-  // Nachteil-INI-Mali (WdS/WdH): Behäbig −1, Schwerfällig −1, Tollpatsch −1, Schlechte Reflexe −2
-  const nachteile = sys.nachteile ?? {};
-  const _nachteileNames = Object.keys(nachteile).map(n => n.toLowerCase());
-  let nachteilMali = 0;
-  if (_nachteileNames.some(n => n.startsWith("behäbi") || n.startsWith("behaebi"))) nachteilMali += 1;
-  if (_nachteileNames.some(n => n.startsWith("schwerf"))) nachteilMali += 1;
-  if (_nachteileNames.some(n => n.startsWith("tollpat"))) nachteilMali += 1;
-  if (_nachteileNames.some(n => n.startsWith("schlechte reflex"))) nachteilMali += 2;
+  // Nachteil-INI-Mali: Per WdH gibt es KEINE INI-Mali für Behäbig (nur GS-1
+  // und AW-1) oder Tollpatsch (nur Patzer-Schwelle 19+).
+  // "Schwerfällig" und "Schlechte Reflexe" existieren in DSA 4.1 nicht.
+  // Re-Audit-Finding NEU-4: vorherige Mali waren erfunden — entfernt.
+  const nachteilMali = 0;
 
   const ini = iniBasis + sfKR + sfKG + weaponIni - armorIni - shieldIni - woundIniMali - nachteilMali;
   const parts = [

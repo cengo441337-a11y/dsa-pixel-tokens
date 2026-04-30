@@ -254,11 +254,10 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // INI-Malus: Rüstung (gBE) + Schild + Nachteile
     // gBE wird mathematisch gerundet (BE 0.9 → -1 INI, nicht -0)
     // WdS S.57: pro vollem gBE-Punkt -1 INI (gerundet)
-    let iniNachteilMalus = 0;
-    if (_nachteileNames.some(n => n.startsWith("behäbig") || n.startsWith("behaebig"))) iniNachteilMalus += 1; // WdH: Behäbig -1 INI
-    if (_nachteileNames.some(n => n.startsWith("schlechte reflexe") || n.startsWith("schlechter reflexe"))) iniNachteilMalus += 2;
-    if (_nachteileNames.some(n => n.startsWith("schwerfällig") || n.startsWith("schwerfaellig"))) iniNachteilMalus += 1;
-    if (_nachteileNames.some(n => n.startsWith("tollpatsch"))) iniNachteilMalus += 1;
+    // Per WdH gibt es KEINE INI-Mali für Behäbig (nur GS-1, AW-1) oder Tollpatsch
+    // (nur Patzer-Schwelle 19+). "Schwerfällig" und "Schlechte Reflexe" existieren
+    // in DSA 4.1 nicht. Re-Audit-Finding NEU-4: vorherige Mali waren erfunden.
+    const iniNachteilMalus = 0;
     const iniArmorMalus = Math.round(armorCalc.totalGBE) - (armorCalc.rg || 0);
     data.iniPenalty = Math.max(0, iniArmorMalus) + (shieldIniMod < 0 ? -shieldIniMod : 0) + iniNachteilMalus;
 
@@ -1274,10 +1273,11 @@ export class PixelArtCharacterSheet extends ActorSheet {
     }).render(true);
   }
 
-  /** Aktuelle Wund-Penalty berechnen (Summe aller Wunden, −1 pro Wunde) */
+  /** Aktuelle Wund-Penalty berechnen — WdS S.57: −2 pro Wunde auf alle Proben. */
   _getWoundPenalty() {
     const wounds = this.actor.getFlag("dsa-pixel-tokens", "wounds") ?? {};
-    return Object.values(wounds).reduce((s, w) => s + (w || 0), 0);
+    const totalWounds = Object.values(wounds).reduce((s, w) => s + (w || 0), 0);
+    return totalWounds * 2;
   }
 
   /** Zeigt die Pixel-Wuerfel-Animation ueber dem Actor-Token. */
@@ -1763,9 +1763,10 @@ export class PixelArtCharacterSheet extends ActorSheet {
     if (hit && maneuver !== "normal" && sf.effect !== "none") {
       switch (sf.effect) {
         case "tp_bonus": {
-          // Wuchtschlag: +½Ansage TP (ohne SF), +Ansage TP (mit SF Wuchtschlag) — WdS S.66
+          // Wuchtschlag: +½Ansage TP (ohne SF), +Ansage TP (mit SF Wuchtschlag) — WdS S.65/66
+          // Beispiel +5 → +3 TP (aufgerundet, NICHT abgerundet → Math.ceil).
           const full = hasSF("Wuchtschlag");
-          const bonus = full ? ansage : Math.floor(ansage / 2);
+          const bonus = full ? ansage : Math.ceil(ansage / 2);
           if (bonus > 0) {
             const bLabel = full ? `+${bonus} TP Wuchtschlag` : `+${bonus} TP Wuchtschlag (½, keine SF)`;
             _pendingTpBonus.set(this.actor.id, { bonus, label: bLabel });
