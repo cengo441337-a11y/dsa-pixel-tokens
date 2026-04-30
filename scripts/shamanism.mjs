@@ -6,14 +6,15 @@
  * Mechanik-Kern:
  *   - Vier separate Geister-Fertigkeiten: rufen / bannen / binden / aufnehmen
  *     (jede ist ein eigenständiges Talent mit eigenem RkW)
- *   - 1W20-Probe ≤ RkW − Modifikator(Grad) − Mods
+ *   - 3W20-Probe (Variante A, WdH S.27) gegen die 3 Eigenschaften der jeweiligen
+ *     Schamanen-Fertigkeit, RkW als TaW-Pool, Mod als Erschwernis (WdZ S.155)
  *   - AsP-Kosten: 1W6/Grad (1W6/2W6/.../6W6), erst beim Ritualende bekannt
  *   - Ab Grad V: 1/10 permanente AsP
  *   - Misslingen = halbe AsP-Kosten verloren (niemals permanente AsP)
  *   - Verbotene Pforten (SF): LeP statt fehlender AsP
  */
 
-import { MODULE_ID } from "./config.mjs";
+import { MODULE_ID, resolveProbe, checkCritical } from "./config.mjs";
 
 let RITUALE = null;
 let RITUALE_META = null;
@@ -299,13 +300,18 @@ export async function castRitual(actor, ritualId) {
             } catch {}
 
             const totalMod = effMeta.mod + hilfsMod + rauschMod + customMod + aufstufungMod + keuleMod;
-            const target = rkw - totalMod;
 
-            // 1W20-Probe
-            const roll = await new Roll("1d20").evaluate();
-            const wurf = roll.total;
-            const erfolg = wurf <= target;
-            const rkpStar = erfolg ? Math.max(1, rkw - wurf) : 0;
+            // 3W20-Probe gegen die Fertigkeits-Eigenschaften (WdZ S.155, Variante A WdH S.27)
+            // Default MU/IN/CH falls keine Eigenschaften definiert sind
+            const fertProbeAttrs = (probeAttrs && probeAttrs.length === 3) ? probeAttrs : ["MU", "IN", "CH"];
+            const attrs = fertProbeAttrs.map(a => actor.system?.[a]?.value ?? 10);
+            const roll = new Roll("3d20");
+            await roll.evaluate();
+            const dice = roll.terms[0].results.map(r => r.result);
+            const result = resolveProbe(dice, attrs, rkw, totalMod);
+            const crit = checkCritical(dice);
+            const erfolg = crit.gluecklich || (!crit.patzer && result.success);
+            const rkpStar = erfolg ? Math.max(1, result.tapStar) : 0;
 
             // AsP würfeln (1W6 pro Grad)
             const aspRoll = await new Roll(`${effMeta.dice}d6`).evaluate();
@@ -358,18 +364,36 @@ export async function castRitual(actor, ritualId) {
               catch { await actor.setFlag(MODULE_ID, "lepCurrent", lepNeu); }
             }
 
+            // Würfel-HTML mit Eigenschaftsvergleich
+            const diceHtml = dice.map((d, i) => {
+              const attr = attrs[i] ?? 0;
+              const over = d > attr;
+              const is1 = d === 1, is20 = d === 20;
+              const cls = is1 ? "crit" : is20 ? "fumble" : over ? "fail" : "success";
+              return `<div class="die ${cls}" title="${fertProbeAttrs[i]} ${attr}">${d}</div>`;
+            }).join("");
+            const overSum = (result.details ?? []).reduce((s, d) => s + (d.consumed || 0), 0);
+            let breakdown = "";
+            if (erfolg && !crit.gluecklich) {
+              breakdown = `<div class="chat-row" style="font-size:10px;color:#779">RkW ${rkw} − ${totalMod} (Erschw.) − ${overSum} (über) = RkP* ${rkpStar}</div>`;
+            } else if (!erfolg && !crit.patzer) {
+              breakdown = `<div class="chat-row" style="font-size:10px;color:#a55">Verfehlt um ${-result.remainder} Punkte</div>`;
+            }
+            let resultHeader = crit.patzer ? "PATZER!" : crit.gluecklich ? "GLÜCKLICH!" : erfolg ? `Erfolg — RkP* ${rkpStar}` : "Fehlschlag";
+
             const html2 = `<div class="dsa-pixel-chat">
               <div class="chat-title">🪶 ${rit.name}${rit.subtitel ? ` <em>(${rit.subtitel})</em>` : ""}</div>
               <div class="chat-row" style="font-size:11px;color:#aaa">${fertLabel} · Grad ${effGrad}${aufstufungCount ? ` (Aufstufung +${aufstufungCount})` : ""}${keuleNote}</div>
               <hr>
-              <div class="chat-row">RkW ${rkw} − Mod ${totalMod} → Ziel ${target}</div>
-              <div class="chat-row"><strong>1W20:</strong> ${wurf} ${erfolg ? "✓" : "✗"}</div>
+              <div class="chat-row" style="font-size:11px">Probe ${fertProbeAttrs.join("/")} (${attrs.join("/")}) — RkW ${rkw}${totalMod !== 0 ? `, Mod ${totalMod >= 0 ? "+" : ""}${totalMod}` : ""}</div>
+              <div class="dice-row">${diceHtml}</div>
+              ${breakdown}
               <div class="chat-row"><strong>AsP-Wurf (${effMeta.dice}W6):</strong> ${aspKosten}${aspPerm ? ` (davon ${aspPerm} permanent)` : ""}</div>
               ${erfolg
-                ? `<div class="result-line result-success">Erfolg — RkP* ${rkpStar}<br>
+                ? `<div class="result-line result-success">${resultHeader}<br>
                    Wirkungsdauer: ${rit.wirkungsdauer}</div>
                    <div class="chat-row" style="font-size:11px">${rit.effekt}</div>`
-                : `<div class="result-line result-fail">Fehlschlag — halbe AsP-Kosten</div>`
+                : `<div class="result-line result-fail">${resultHeader} — halbe AsP-Kosten</div>`
               }
               <div class="chat-row">AsP: ${asp.current} → ${aspNeu}${lepAbzug ? ` · LeP: -${lepAbzug} (Verbotene Pforten)` : ""}${pAspAbzug ? ` · pAsP: -${pAspAbzug}` : ""}</div>
             </div>`;
