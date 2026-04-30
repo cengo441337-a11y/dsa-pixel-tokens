@@ -315,6 +315,7 @@ export async function rollMirakel(actor, modKey = "mirakelPlus") {
       },
       default: "ok",
       close: () => resolve(0),
+      render: (html) => _styleDialogButtons(html),
     }, {
       classes: ["dsa-pixel-dialog"],
     }).render(true);
@@ -701,11 +702,67 @@ export async function castLiturgie(actor, liturgieId) {
         cancel: { label: "Abbrechen", callback: () => resolve(null) }
       },
       default: "cast",
+      render: (html) => _styleDialogButtons(html),
     }, {
       classes: ["dsa-pixel-dialog"],
       width: 520,
     }).render(true);
   });
+}
+
+// ─── Helper: Inline-Styles auf Dialog-Buttons (bulletproof gegen CSS-Specificity) ─
+function _styleDialogButtons(html) {
+  try {
+    const $h = html instanceof jQuery ? html : $(html);
+    const root = $h.closest(".app.dialog");
+    const buttons = root.find(".dialog-buttons button");
+    buttons.each(function() {
+      const btn = this;
+      const isCast = btn.dataset.button === "cast" || btn.dataset.button === "ok";
+      // Container-Theme
+      const container = btn.parentElement;
+      if (container) {
+        container.style.cssText += "background:#1a1612;padding:8px;gap:8px;border-top:1px solid rgba(184,132,28,0.4);";
+      }
+      // Button-Theme
+      if (isCast) {
+        btn.style.cssText = "background:linear-gradient(180deg,#d4a032 0%,#a06f15 100%);color:#1a1612;border:1px solid #ffd770;font-family:'Crimson Text',Georgia,serif;font-weight:700;font-size:14px;padding:8px 16px;border-radius:3px;text-shadow:none;opacity:1;letter-spacing:0.5px;cursor:pointer;flex:1;";
+      } else {
+        btn.style.cssText = "background:linear-gradient(180deg,#3a2a1c 0%,#2a1f14 100%);color:#ffd770;border:1px solid #b8841c;font-family:'Crimson Text',Georgia,serif;font-weight:600;font-size:14px;padding:8px 16px;border-radius:3px;text-shadow:0 1px 2px rgba(0,0,0,0.6);opacity:1;letter-spacing:0.5px;cursor:pointer;flex:1;";
+      }
+      btn.addEventListener("mouseenter", () => {
+        if (isCast) {
+          btn.style.background = "linear-gradient(180deg,#ffd770 0%,#b8841c 100%)";
+          btn.style.boxShadow = "0 0 12px rgba(255,215,112,0.7)";
+        } else {
+          btn.style.background = "linear-gradient(180deg,#4a3525 0%,#3a2a1c 100%)";
+          btn.style.borderColor = "#ffd770";
+          btn.style.color = "#fff5c8";
+          btn.style.boxShadow = "0 0 8px rgba(255,215,112,0.5)";
+        }
+      });
+      btn.addEventListener("mouseleave", () => {
+        if (isCast) {
+          btn.style.background = "linear-gradient(180deg,#d4a032 0%,#a06f15 100%)";
+          btn.style.boxShadow = "none";
+        } else {
+          btn.style.background = "linear-gradient(180deg,#3a2a1c 0%,#2a1f14 100%)";
+          btn.style.borderColor = "#b8841c";
+          btn.style.color = "#ffd770";
+          btn.style.boxShadow = "none";
+        }
+      });
+    });
+    // Window-Header + Content auf Theme
+    const header = root.find(".window-header")[0];
+    if (header) {
+      header.style.cssText += "background:linear-gradient(180deg,#2a1f14 0%,#1a1612 100%);border-bottom:1px solid #b8841c;";
+      const headerTitle = header.querySelector(".window-title");
+      if (headerTitle) headerTitle.style.color = "#ffd770";
+    }
+    const content = root.find(".window-content")[0];
+    if (content) content.style.background = "#1a1612";
+  } catch (e) { console.warn("[dsa-pixel-tokens] _styleDialogButtons:", e); }
 }
 
 // ─── Liturgien-Browser-UI ───────────────────────────────────────────────────
