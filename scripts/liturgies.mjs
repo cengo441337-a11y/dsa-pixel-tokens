@@ -5,12 +5,12 @@
  * Mechanik-Kern:
  *   - Geweihter würfelt 3W20-Probe (Mirakel-Probe, Standard MU/IN/CH) gegen LkW
  *     − Probenzuschlag(Grad) − Modifikatoren (Variante A, WdH S.27)
- *   - LkP* = LkW − Erschwernis − Σ(über-Eigenschaft) (analog TaP*/ZfP*)
+ *   - LkP-Stern = LkW − Erschwernis − Summe(über-Eigenschaft) analog TaP/ZfP
  *   - Mirakel: 5 KaP fix, 1 Aktion, modifiziert nach Mirakel±/ungelistet
  *   - KaP-Tabelle 0/I…VIII, ab Grad V mit pKaP-Anteil
  *   - Aufstufung: 4 Kategorien (Ritualdauer/Reichweite/Wirkungsdauer/Ziel),
  *     je +1 Grad, +2 Erschwernis, max 1×/Kategorie, 3×Grad ≤ LkW
- *   - Wirkungsdauer-Tabelle nach Stufe (1=augenbl.) … 10=permanent)
+ *   - Wirkungsdauer-Tabelle nach Stufe (1=augenbl.) … 10=permanent
  */
 
 import { MODULE_ID, resolveProbe, checkCritical } from "./config.mjs";
