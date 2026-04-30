@@ -43,3 +43,8 @@ generate_missing_tokens.py
 # Private Kommunikation / Briefentwürfe (nicht public)
 email-*.md
 email-*.txt
+.tmp-*.mjs
+.tmp-*.json
+*-helden-import.xml
+tarvas-liturgie-descriptions.json
+liturgien-fulltext.json

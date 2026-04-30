@@ -6,6 +6,170 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.5.0] — 2026-04-30
+
+### 🙏 Neues System: Liturgien & Karma
+
+Komplettes Karma-/Liturgien-System für **Geweihte** mit Daten aus
+*Liber Liturgium* (Ulisses Spiele GmbH).
+
+**298 Liturgien aus dem Liber Liturgium**
+Vollständiger PDF-Import aller 267 Liturgien aus dem Regelbuch + 31
+House-Rule-Erweiterungen (Hochschamanen-Pantheons + Petromantie-Reskins).
+Pro Liturgie:
+- Symbole, Gesten, Gebete (Originaltext mit Litaneien/Gebetsformeln)
+- Auswirkung (Detail-Regelmechanik)
+- Anmerkungen (Sonderfälle, Einschränkungen)
+- Ritualdauer / Wirkungsdauer / Herkunft / Voraussetzung
+- KaP-Kosten + pKaP-Anteil nach Grad-Tabelle
+
+**Liturgien-Browser-UI** (`templates/liturgies.hbs` + `scripts/liturgies.mjs`)
+- Filter: Gott (alle 12 Götter + Halbgötter + Hochschamanen-Pantheons), Grad I-VIII, Volltextsuche
+- Liturgie-Karten mit Klappbereichen für Symbole/Auswirkung/Anmerkungen
+- Mirakel-Schnellbuttons (Mirakel+ / ungelistet / Mirakel−) direkt im Header
+- Wirken-Button mit Aufstufungs-Dialog (4 Kategorien: Ritualdauer/Reichweite/Wirkungsdauer/Ziel)
+- Mitbeter-System mit automatischer LkP-Aggregation
+- Modifikator-Tabelle (Notlage/Auftrag/eigener Tempel/Feiertag/Limbus etc.)
+
+**Karma-Mechanik**
+- KaP-Probe via `1W20 ≤ LkW − Probenzuschlag(Grad) − Modifikatoren`
+- Primäre Segnung mit −2 Erleichterung + 2 KaP für Heimatkult
+- Mirakel: 5 KaP fix, 1 Aktion, ±0/+6/+18 je nach Talent-Beziehung
+- pKaP-Anteil ab Grad V automatisch (1/3/5/7 nach Grad)
+- Misslingen: 1/5 KaP verloren (mind. 1)
+
+**Hochschamanen-Pantheons** (Kamaluq / Tairach / Himmelswölfe)
+- 33 Pantheon-spezifische Liturgien aus *Liber Liturgium* S.35-36/43-44/63-64
+- Sonderregeln (12 KaP fix, Mirakelprobe via *Geister aufnehmen*, keine primäre Segnung)
+- SF "Kontakt zum Großen Geist" (700 AP, 2. Initiation)
+
+### 🪶 Neues System: Schamanen-Rituale & Petromantie
+
+Vier-Geister-Fertigkeiten-System für **Schamanen** aus *Wege der Zauberei* + *Elementare Gewalten*.
+
+**72 Schamanen-Rituale** über 11 Kulturen
+- Wdm/Utu/Toc/Niv/Ork/Gob/Gja/Fer/Tzk/Ach/**Wuhl** (Wühlschrate)
+- Inkl. Tairach-Spezial-Rituale (Khurkachai/Ergochai), Wolfsruf-Familie
+  (8 Varianten Wolf/Wildschwein/Rind/Hai/Oger/Mammut/Schlinger/Seeschlange),
+  Reitender Geist, Tiergestalt, Element-Hauch
+
+**18 Petromantie-Rituale** (Erz-Reskins) für Wühlschrat-Schamanen
+- Echo der Steine, Erzkraft, Schutz der Höhle, Stimme des Felsens,
+  Nähre meine Sippe, Kraft der Berge, Trollruf u.v.m.
+
+**Vier Geister-Fertigkeiten** als eigenständige Talente:
+- Geister rufen (MU/IN/CH) — Kontakt + Herbeirufung
+- Geister bannen (MU/CH/KK) — Geistkampf, Vertreibung
+- Geister binden (KL/IN/CH) — Geist in Objekt halten
+- Geister aufnehmen (MU/IN/KO) — Geist als Buff einfahren
+
+**AsP-Würfel pro Grad**: 1W6 → 6W6 (Grad I-VI), ab V mit 1/10 permanent
+SF Verbotene Pforten erlaubt LeP-Zahlung bei AsP-Erschöpfung.
+
+**Schamanen-Browser-UI** (`templates/shamanism.hbs` + `scripts/shamanism.mjs`)
+- Filter: Kultur (11), Geister-Fertigkeit (4), Volltextsuche
+- Petromantie-Rituale optisch hervorgehoben (⛏ Marker, ocker Akzent)
+- RkW-Buttons pro Geister-Fertigkeit (klickbar zum Bearbeiten)
+- Knochenkeulen-Tabelle (5 Typen mit Kampfwerten) als Detail-Sektion
+- Knochenkeulen-Rituale-Tabelle (Bann/Geist/Hilfe/Kraft/Härte/Nähe der Keule)
+
+### 💎 Edelstein-Magie
+
+**Neue `data/edelsteine.json`** mit 38 Edelsteinen aus *Elementare Gewalten* S.154-155
+- Pro Edelstein: Merkmal-Affinität (AsP-Ersparnis 10-25%) + Element-Bonus (-1/-2)
+- Mapping für SF "Edelsteinmagie" (200 AP, Voraussetzung Merkmalskenntnis Elementar Erz)
+- 6-Elemente-Hexalogie: Feuer/Wasser/Luft/Erz/Humus/Eis
+
+### 🌿 Sonderfertigkeiten erweitert (135 → 176)
+
+- **20 Geweihten-SFs**: Liturgiestil, Karmale Senkung, Liturgie-Aufstufung,
+  Hausliturgie, Schein des Götterglaubens, Liturgie-Spezialisierung,
+  Bannstrahl-Beherrschung, Goldener Bann, Borons Friede, Schwarze Trauer,
+  Stählerne Stirn, Schlachtruf, Gabe der Schlange, Schemenhafter Schritt,
+  Heimstein-Bindung, Grüne Hand, Schmiedeglut-Bindung, Wilde Jagd,
+  Lebensfeuer, Rauschsegen-Bindung
+- **13 Schamanen-SFs**: Ritualkenntnis (Schamane), Weihe der Keule,
+  Schamanenrituale, Verbotene Pforten, Tabuzone (SF), Geist der Keule,
+  Bann/Gespür/Kraft/Härte/Nähe/Hilfe der Keule, Opferkeule
+- **5 Petromantie/Element-SFs**: Ritualkenntnis (Petromantie), Edelsteinmagie,
+  Glyphe des Elementaren Willens, Bann-/Schutzkreis gegen Element,
+  Zusatzzeichen Elementarquellenspeisung
+- **4 Hochschamanen-SFs**: Kontakt zum Großen Geist (700 AP),
+  Liturgiekenntnis (Kamaluq/Tairach/Himmelswölfe)
+
+### 🔥 Neue Elementare in `data/creatures.json`
+
+5 Eis-/Erz-Elementare aus *Elementare Gewalten*:
+- Elementarer Meister des Eises (Boss-Tier, AsP 120, Eishauch-Aura)
+- Hagelfalke (fliegender Eis-Elementar)
+- Elementarer Meister des Erzes (RS 12, TP 3W20+10)
+- Quecksilbergeist (Formlosigkeit, Hartes Schmelze)
+- Wühlschrat-Petromant (Schamanen-Spezies-Statblock)
+
+### 🪨 Wühlschrate als spielbare Spezies (House-Rule)
+
+- Spezies-Block: KK +3, KO +2, IN −1, GE −2, CH −3, LeP +20, RS 8 (natürliche Steinhaut), GS 3, MR +5
+- Steinfraß III, Lichtempfindlich, Nachtsicht
+- Profession Wühlschrat-Schamane (Petromantie automatisch)
+- Empfohlene GP-Kosten: 80 (House-Rule, anhand Halbtroll-Vergleich)
+
+### 🎨 UI-Verbesserungen
+
+- **Lesefreundliches Theme** für Liturgien-/Schamanen-Browser
+  (Off-White auf dunklem Holz/Stein-Hintergrund, klare Karten-Hierarchie,
+  Pills für Ziel/Reichweite/Merkmale, klappbare Detail-Sektionen)
+- **Karma-Tab im Sheet** für Geweihte (auto-detected via `isGeweiht`-Logik:
+  KaP-Pool ODER Liturgiekenntnis-Item ODER Liturgiekenntnis-Talent ODER
+  Profession matcht Gott ODER Vorteil "Geweiht [...]")
+- **🪶 Schamane / 🙏 Liturgien Buttons** im Magie-Tab des Sheets
+- **Sidebar-Tools** für Liturgien-/Schamanen-Browser (für GM ohne Sheet)
+- **Globale Helper**: `DSALiturgien(actor)`, `DSAMirakel(actor)`,
+  `DSASchamanen(actor)`, `DSARitual(actor, ritualId)`, `DSAImportXML(filename)`
+
+### 📅 Aventurischer Kalender
+
+`data/calendar.json` + `scripts/calendar.mjs`
+- 12 Götter-Monate, 7 Wochentage, Namenlose Tage, 8 Feiertage
+- GM-Steuerung (±Tag/Woche/Monat/Jahr) + Datum-Setzen-Dialog
+- World-Setting `calendarDate` (Default: 1. Praios 1043 BF)
+- Token-Tools-Sidebar-Button
+
+### 👹 Beschwörungs-Magie
+
+`data/daemons.json` + erweiterter Spell-Dialog
+- Misslingen-Tabellen für Anrufung (2W6 / 3W6 Blutmagie)
+  + Beherrschung (Kontrollprobe-Versagen)
+- Pakt-Mechanik: `actor.flags.pakt = {domaene, gpPool}`
+  → 3 GP = -1 Erleichterung
+- Wahrer-Name-Qualität (Q1/Q2) + "Ohne-Namen"-Toggle (+7 Anrufung)
+- Kontroll-Probe nach erfolgreicher Anrufung
+- Aufrechterhaltene-Zauber-Counter (persistent)
+
+### 🐛 Fixes
+
+- **isGeweiht-Detection robuster** (sucht jetzt auch in `system.talente`,
+  erkennt Profession "Geweihter" allein, Vorteile mit "Geweiht [...]")
+- **Variable Liturgie-Grade** ("II-VI", "P (Z)", "P oder G") werden jetzt
+  korrekt geparst (V2-Parser für `Liber Liturgium` PDF)
+- **pAsP-Berechnung Schamanen** (WdZ S.155): `Math.round(aspKosten × 0.1)`
+  statt fester Konstante 1
+- **`evaluate({async:true})`-Deprecation** in Foundry v12 entfernt
+- **Schattenlarve falsch zugeordnet**: war als Boron-Liturgie eingetragen,
+  korrigiert zu Phex (laut *Liber Liturgium* S.262-263)
+- **Komma-Splits in Liturgien-Namen** (PDF-Parsing-Artefakte) gefixt
+  (z.B. "Phexens wunderbare, Verständigung" → "Phexens wunderbare Verständigung")
+
+### 📊 Stats
+
+- Liturgien: 0 → **298**
+- Schamanen-Rituale: 0 → **72** (54 Standard + 18 Petromantie)
+- Sonderfertigkeiten: 135 → **176**
+- Edelsteine: 0 → **38**
+- Creatures: 150 → **155**
+- DSA-Daten total: 961 → **1.500+**
+
+---
+
 ## [0.4.15] — 2026-04-28
 
 ### XML-Parser-Bugs (Aytan/Dunya Re-Import)

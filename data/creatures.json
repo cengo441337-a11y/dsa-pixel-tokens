@@ -14650,5 +14650,404 @@
       "services": []
     },
     "items": []
+  },
+  "Elementarer Meister des Eises": {
+    "name": "Elementarer Meister des Eises",
+    "_source": "Elementare Gewalten.pdf",
+    "_kategorie": "elementarer-meister",
+    "_element": "Eis",
+    "_beschwoerung": 12,
+    "_beherrschung": 8,
+    "system": {
+      "MU": 14,
+      "KL": 12,
+      "IN": 12,
+      "CH": 10,
+      "FF": 12,
+      "GE": 12,
+      "KO": 14,
+      "KK": 14,
+      "LeP": {
+        "value": 60,
+        "max": 60
+      },
+      "AuP": {
+        "value": 0,
+        "max": 0
+      },
+      "AsP": {
+        "value": 120,
+        "max": 120
+      },
+      "KaP": {
+        "value": 0,
+        "max": 0
+      },
+      "GS": {
+        "value": 8,
+        "modi": 0,
+        "temp": 0,
+        "pen": 0
+      },
+      "MR": {
+        "value": 24,
+        "modi": 0,
+        "tempmodi": 0,
+        "buy": 0
+      },
+      "RS": 9,
+      "Dogde": 0,
+      "INIBasis": {
+        "value": 15,
+        "modi": 0,
+        "tempmodi": 0,
+        "sysModi": 0
+      },
+      "INIDice": "1d6",
+      "ATBasis": {
+        "value": 21,
+        "tempmodi": 0
+      },
+      "PABasis": {
+        "value": 10,
+        "tempmodi": 0
+      },
+      "FKBasis": {
+        "value": 0,
+        "tempmodi": 0
+      },
+      "skill": {
+        "Eishauch": {
+          "value": 21,
+          "atk": 21,
+          "def": 0,
+          "tp": "1 SP/KR",
+          "special": "Aura 10 Schritt"
+        },
+        "Eisangriff": {
+          "value": 21,
+          "atk": 21,
+          "def": 10,
+          "tp": "6W6+6",
+          "special": "Reichweite 7 Schritt"
+        }
+      },
+      "sonderkraft": "Eishauch 1 SP/KR auf 10 Schritt + Angriff mit Eis (7 Schritt)"
+    }
+  },
+  "Hagelfalke": {
+    "name": "Hagelfalke",
+    "_source": "Elementare Gewalten.pdf",
+    "_kategorie": "elementar",
+    "_element": "Eis",
+    "_beschwoerung": 4,
+    "_beherrschung": 2,
+    "system": {
+      "MU": 14,
+      "KL": 12,
+      "IN": 12,
+      "CH": 10,
+      "FF": 12,
+      "GE": 12,
+      "KO": 14,
+      "KK": 14,
+      "LeP": {
+        "value": 12,
+        "max": 12
+      },
+      "AuP": {
+        "value": 0,
+        "max": 0
+      },
+      "AsP": {
+        "value": 24,
+        "max": 24
+      },
+      "KaP": {
+        "value": 0,
+        "max": 0
+      },
+      "GS": {
+        "value": 8,
+        "modi": 0,
+        "temp": 0,
+        "pen": 0
+      },
+      "MR": {
+        "value": 0,
+        "modi": 0,
+        "tempmodi": 0,
+        "buy": 0
+      },
+      "RS": 3,
+      "Dogde": 0,
+      "INIBasis": {
+        "value": 20,
+        "modi": 0,
+        "tempmodi": 0,
+        "sysModi": 0
+      },
+      "INIDice": "1d6",
+      "ATBasis": {
+        "value": 16,
+        "tempmodi": 0
+      },
+      "PABasis": {
+        "value": 4,
+        "tempmodi": 0
+      },
+      "FKBasis": {
+        "value": 0,
+        "tempmodi": 0
+      },
+      "skill": {
+        "Hagelschnabel": {
+          "value": 16,
+          "atk": 16,
+          "def": 4,
+          "tp": "1W6+4",
+          "special": "Werte am Boden 6/in der Luft 16"
+        }
+      },
+      "sonderkraft": ""
+    }
+  },
+  "Elementarer Meister des Erzes": {
+    "name": "Elementarer Meister des Erzes",
+    "_source": "Elementare Gewalten.pdf",
+    "_kategorie": "elementarer-meister",
+    "_element": "Erz",
+    "_beschwoerung": 12,
+    "_beherrschung": 8,
+    "system": {
+      "MU": 14,
+      "KL": 12,
+      "IN": 12,
+      "CH": 10,
+      "FF": 12,
+      "GE": 12,
+      "KO": 14,
+      "KK": 14,
+      "LeP": {
+        "value": 60,
+        "max": 60
+      },
+      "AuP": {
+        "value": 0,
+        "max": 0
+      },
+      "AsP": {
+        "value": 120,
+        "max": 120
+      },
+      "KaP": {
+        "value": 0,
+        "max": 0
+      },
+      "GS": {
+        "value": 7,
+        "modi": 0,
+        "temp": 0,
+        "pen": 0
+      },
+      "MR": {
+        "value": 24,
+        "modi": 0,
+        "tempmodi": 0,
+        "buy": 0
+      },
+      "RS": 12,
+      "Dogde": 0,
+      "INIBasis": {
+        "value": 12,
+        "modi": 0,
+        "tempmodi": 0,
+        "sysModi": 0
+      },
+      "INIDice": "1d6",
+      "ATBasis": {
+        "value": 20,
+        "tempmodi": 0
+      },
+      "PABasis": {
+        "value": 8,
+        "tempmodi": 0
+      },
+      "FKBasis": {
+        "value": 0,
+        "tempmodi": 0
+      },
+      "skill": {
+        "Erzschmettern": {
+          "value": 20,
+          "atk": 20,
+          "def": 8,
+          "tp": "3W20+10",
+          "special": "Reichweite 7 Schritt"
+        }
+      },
+      "sonderkraft": "Angriff mit Erz (7 Schritt)"
+    }
+  },
+  "Quecksilbergeist": {
+    "name": "Quecksilbergeist",
+    "_source": "Elementare Gewalten.pdf",
+    "_kategorie": "elementar",
+    "_element": "Erz",
+    "_beschwoerung": 5,
+    "_beherrschung": 3,
+    "system": {
+      "MU": 14,
+      "KL": 12,
+      "IN": 12,
+      "CH": 10,
+      "FF": 12,
+      "GE": 12,
+      "KO": 14,
+      "KK": 14,
+      "LeP": {
+        "value": 12,
+        "max": 12
+      },
+      "AuP": {
+        "value": 0,
+        "max": 0
+      },
+      "AsP": {
+        "value": 28,
+        "max": 28
+      },
+      "KaP": {
+        "value": 0,
+        "max": 0
+      },
+      "GS": {
+        "value": 5,
+        "modi": 0,
+        "temp": 0,
+        "pen": 0
+      },
+      "MR": {
+        "value": 10,
+        "modi": 0,
+        "tempmodi": 0,
+        "buy": 0
+      },
+      "RS": 2,
+      "Dogde": 0,
+      "INIBasis": {
+        "value": 10,
+        "modi": 0,
+        "tempmodi": 0,
+        "sysModi": 0
+      },
+      "INIDice": "1d6",
+      "ATBasis": {
+        "value": 13,
+        "tempmodi": 0
+      },
+      "PABasis": {
+        "value": 0,
+        "tempmodi": 0
+      },
+      "FKBasis": {
+        "value": 0,
+        "tempmodi": 0
+      },
+      "skill": {
+        "Quecksilberhieb": {
+          "value": 13,
+          "atk": 13,
+          "def": 0,
+          "tp": "3W6",
+          "special": "Formlosigkeit I"
+        },
+        "Tropfenschuss": {
+          "value": 14,
+          "atk": 14,
+          "def": 0,
+          "tp": "1W6+4",
+          "special": "Reichweite Sicht"
+        }
+      },
+      "sonderkraft": "Formlosigkeit I, Regeneration I, HARTES SCHMELZE 7"
+    }
+  },
+  "Wühlschrat-Petromant": {
+    "name": "Wühlschrat-Petromant",
+    "_source": "Elementare Gewalten.pdf",
+    "_kategorie": "elementarwesen",
+    "_element": "Erz",
+    "_beschwoerung": null,
+    "_beherrschung": null,
+    "system": {
+      "MU": 14,
+      "KL": 12,
+      "IN": 12,
+      "CH": 10,
+      "FF": 12,
+      "GE": 12,
+      "KO": 14,
+      "KK": 14,
+      "LeP": {
+        "value": 40,
+        "max": 40
+      },
+      "AuP": {
+        "value": 0,
+        "max": 0
+      },
+      "AsP": {
+        "value": 22,
+        "max": 22
+      },
+      "KaP": {
+        "value": 0,
+        "max": 0
+      },
+      "GS": {
+        "value": 3,
+        "modi": 0,
+        "temp": 0,
+        "pen": 0
+      },
+      "MR": {
+        "value": 12,
+        "modi": 0,
+        "tempmodi": 0,
+        "buy": 0
+      },
+      "RS": 8,
+      "Dogde": 0,
+      "INIBasis": {
+        "value": 9,
+        "modi": 0,
+        "tempmodi": 0,
+        "sysModi": 0
+      },
+      "INIDice": "1d6",
+      "ATBasis": {
+        "value": 12,
+        "tempmodi": 0
+      },
+      "PABasis": {
+        "value": 7,
+        "tempmodi": 0
+      },
+      "FKBasis": {
+        "value": 0,
+        "tempmodi": 0
+      },
+      "skill": {
+        "Steinkeule": {
+          "value": 12,
+          "atk": 12,
+          "def": 7,
+          "tp": "2W6+4",
+          "special": "DK HN"
+        }
+      },
+      "sonderkraft": "Steinfraß III, Lichtempfindlich, Nachtsicht. Talente: Ritualkenntnis Petromantie + Geister rufen 9 / bannen 6 / binden 9 / aufnehmen 6. Zauber: Echo der Steine, Weckruf, Wegzeichen (I) / Erzkraft, Schutz der Höhle, Stimme des Felsens, Nähre meine Sippe (II) / Ruf des Schamanen (III)."
+    }
   }
 }

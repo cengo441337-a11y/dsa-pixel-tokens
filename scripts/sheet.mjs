@@ -314,6 +314,68 @@ export class PixelArtCharacterSheet extends ActorSheet {
       }
     }
 
+    // ── Liturgien / Schamanen-Erkennung ──
+    // Geweiht = hat KaP-Pool > 0 ODER Liturgiekenntnis (Item ODER system.talente)
+    //           ODER Profession matcht Gott ODER profession enthält "geweiht"
+    //           ODER Vorteil "Geweiht [...]"
+    const kapMax = Number(system.KaP?.max ?? 0);
+    const hasLiturgieItem = (this.actor.items ?? [])
+      .some(i => (i.name || "").toLowerCase().includes("liturgiekenntnis"));
+    const liturgieTalentEntry = Object.entries(system.talente ?? {})
+      .find(([k]) => /liturgiekenntnis/i.test(k));
+    const hasLiturgieTalent = !!liturgieTalentEntry;
+    const profStr = String(system.profession?.value ?? system.profession ?? "").toLowerCase();
+    const goetterCanon = ["praios","rondra","efferd","travia","boron","hesinde","phex","peraine","ingerimm","rahja","tsa","firun","aves","ifirn","kor","nandus","swafnir","marbo","kamaluq","tairach","himmelswölfe"];
+    const matchedGod = goetterCanon.find(g => profStr.includes(g));
+    const profSaysGeweiht = /geweiht|priester|tempel|ordens?priester/i.test(profStr);
+    // Vorteile-Check: "Geweiht [Kirche]" oder ähnliches
+    const vorteileNames = Object.keys(system.vorteile ?? {});
+    const vtSaysGeweiht = vorteileNames.some(v => /geweiht/i.test(v));
+    data.isGeweiht = kapMax > 0 || hasLiturgieItem || hasLiturgieTalent || !!matchedGod || profSaysGeweiht || vtSaysGeweiht;
+    // Kult ermitteln
+    if (data.isGeweiht) {
+      // 1) Flag explizit
+      const flagKult = this.actor.getFlag?.(MODULE_ID, "kult");
+      // 2) Aus Liturgiekenntnis-Talent extrahieren z.B. "Liturgiekenntnis (Phex)" → "Phex"
+      let talentKult = null;
+      if (liturgieTalentEntry) {
+        const m = liturgieTalentEntry[0].match(/liturgiekenntnis\s*[\(\[]?\s*([A-Za-zäöüÄÖÜß-]+)/i);
+        if (m && m[1]) talentKult = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+      }
+      // 3) Aus Item-Name analog
+      let itemKult = null;
+      const lkItem = (this.actor.items ?? []).find(i => (i.name || "").toLowerCase().includes("liturgiekenntnis"));
+      if (lkItem) {
+        const m = lkItem.name.match(/liturgiekenntnis\s*[\(\[]?\s*([A-Za-zäöüÄÖÜß-]+)/i);
+        if (m && m[1]) itemKult = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+      }
+      // 4) Aus Profession (Match)
+      const profKult = matchedGod ? matchedGod.charAt(0).toUpperCase() + matchedGod.slice(1) : null;
+      data.actorKult = flagKult || talentKult || itemKult || profKult || "—";
+    } else {
+      data.actorKult = "—";
+    }
+    // LkW: aus Item ODER system.talente
+    const lkItem = (this.actor.items ?? []).find(i => (i.name || "").toLowerCase().includes("liturgiekenntnis"));
+    if (lkItem) {
+      data.actorLkW = Number(lkItem.system?.value ?? lkItem.system?.taw ?? 0);
+    } else if (liturgieTalentEntry) {
+      const tdata = liturgieTalentEntry[1];
+      data.actorLkW = Number(tdata?.value ?? tdata?.taw ?? 0);
+    } else {
+      data.actorLkW = 0;
+    }
+
+    // Schamane = hat eine der 4 Geister-Fertigkeiten ODER Schamanen-Profession
+    const hasGeisterFert = (this.actor.items ?? [])
+      .some(i => {
+        const n = (i.name || "").toLowerCase();
+        return n.includes("geister") && (n.includes("rufen") || n.includes("bannen") || n.includes("binden") || n.includes("aufnehmen"));
+      });
+    const schamaneKeywords = ["schamane","kaskju","tairach","brenoch","nuransh","shochzul","medizinmann","geisterseher"];
+    const matchedSchamane = schamaneKeywords.some(k => profStr.includes(k));
+    data.isSchamane = hasGeisterFert || matchedSchamane;
+
     return data;
   }
 
@@ -714,6 +776,48 @@ export class PixelArtCharacterSheet extends ActorSheet {
 
     // Schild-Toggle (click → in Hand führen / wegstecken)
     html.find(".shield-toggle").on("click", this._onShieldToggle.bind(this));
+
+    // Liturgien & Mirakel
+    html.find("[data-action='open-liturgien']").on("click", async (ev) => {
+      ev.preventDefault();
+      try {
+        const { LiturgienApp } = await import("./liturgies.mjs");
+        new LiturgienApp(this.actor).render(true);
+      } catch (e) {
+        console.error(e);
+        ui.notifications.error("Liturgien-App konnte nicht geöffnet werden.");
+      }
+    });
+    html.find("[data-action='mirakel-plus']").on("click", async (ev) => {
+      ev.preventDefault();
+      const { rollMirakel } = await import("./liturgies.mjs");
+      await rollMirakel(this.actor, "mirakelPlus");
+      this.render();
+    });
+    html.find("[data-action='mirakel-mid']").on("click", async (ev) => {
+      ev.preventDefault();
+      const { rollMirakel } = await import("./liturgies.mjs");
+      await rollMirakel(this.actor, "ungelistet");
+      this.render();
+    });
+    html.find("[data-action='mirakel-minus']").on("click", async (ev) => {
+      ev.preventDefault();
+      const { rollMirakel } = await import("./liturgies.mjs");
+      await rollMirakel(this.actor, "mirakelMinus");
+      this.render();
+    });
+
+    // Schamanen-Rituale
+    html.find("[data-action='open-schamanen']").on("click", async (ev) => {
+      ev.preventDefault();
+      try {
+        const { SchamanenApp } = await import("./shamanism.mjs");
+        new SchamanenApp(this.actor).render(true);
+      } catch (e) {
+        console.error(e);
+        ui.notifications.error("Schamanen-App konnte nicht geöffnet werden.");
+      }
+    });
   }
 
   /** Schild aktivieren/deaktivieren — nur ein Schild gleichzeitig (Schildhand) */

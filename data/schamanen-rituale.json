@@ -1,0 +1,1691 @@
+{
+  "_meta": {
+    "_quelle": "DSA 4.1 — Wege der Zauberei S.149-168, S.331-342, S.426; Wege der Helden S.234-243",
+    "_verifiziert": true,
+    "_grade": {
+      "I": {
+        "asp": "1W6",
+        "modifikator": 0,
+        "ap": 50
+      },
+      "II": {
+        "asp": "2W6",
+        "modifikator": 2,
+        "ap": 100
+      },
+      "III": {
+        "asp": "3W6",
+        "modifikator": 4,
+        "ap": 150
+      },
+      "IV": {
+        "asp": "4W6",
+        "modifikator": 6,
+        "ap": 200
+      },
+      "V": {
+        "asp": "5W6",
+        "modifikator": 8,
+        "ap": 250,
+        "permanent": "1/10"
+      },
+      "VI": {
+        "asp": "6W6",
+        "modifikator": 10,
+        "ap": 300,
+        "permanent": "1/10"
+      }
+    },
+    "_fertigkeiten": {
+      "geister-rufen": {
+        "probe": [
+          "MU",
+          "IN",
+          "CH"
+        ],
+        "label": "Geister rufen",
+        "funktion": "Kontaktaufnahme, Aufspüren, Herbeirufen"
+      },
+      "geister-bannen": {
+        "probe": [
+          "MU",
+          "CH",
+          "KK"
+        ],
+        "label": "Geister bannen",
+        "funktion": "Geistkampf, Verbindung trennen, in andere Welt schicken"
+      },
+      "geister-binden": {
+        "probe": [
+          "KL",
+          "IN",
+          "CH"
+        ],
+        "label": "Geister binden",
+        "funktion": "Geist in Gegenstand/Person fahren lassen und halten"
+      },
+      "geister-aufnehmen": {
+        "probe": [
+          "MU",
+          "IN",
+          "KO"
+        ],
+        "label": "Geister aufnehmen",
+        "funktion": "Geist in sich selbst aufnehmen, Kräfte nutzen"
+      }
+    },
+    "_kulturen": {
+      "Wdm": "Waldmenschen",
+      "Utu": "Utulus",
+      "Toc": "Tocamuyac",
+      "Niv": "Nivesen",
+      "Ork": "Orks (Tairach-Priester / Brenoch-Dûn)",
+      "Gob": "Goblins",
+      "Gja": "Gjalskerländer",
+      "Fer": "Ferkina (Nuranshûr)",
+      "Tzk": "Trollzacker (Shochzul)",
+      "Ach": "Achaz",
+      "Wuhl": "Wühlschrate (Petromantie)"
+    },
+    "_misslingen": "halbe AsP-Kosten verloren (niemals permanente AsP). Bei zu wenig AsP: SF Verbotene Pforten erlaubt LeP-Zahlung, sonst Gefangenschaft in Geisterwelt.",
+    "_aufstufung": "+1 Grad und +2 Erschwernis pro veränderter Kategorie (Ritualdauer/Reichweite/Wirkungsdauer/Ziel)",
+    "_ritualdauer": [
+      "spontan",
+      "kurz",
+      "ritual",
+      "gross",
+      "zyklus"
+    ],
+    "_geistTypen": [
+      "mindergeist",
+      "schutzgeist",
+      "ahnengeist",
+      "tiergeist",
+      "naturgeist",
+      "elementargeist",
+      "dschinn",
+      "totengeist",
+      "daemon"
+    ],
+    "_petromantieAffinitaet": {
+      "Granit": [
+        "Härte",
+        "Ausdauer"
+      ],
+      "Tuffstein": [
+        "Versammlung",
+        "Auflösen"
+      ],
+      "Basalt": [
+        "Antimagie",
+        "Tabu"
+      ]
+    }
+  },
+  "rituale": [
+    {
+      "id": "khurkachai-tairachi",
+      "name": "Khurkachai Tairachi",
+      "subtitel": "Tairachs Krieger",
+      "grad": "III",
+      "ziel": "PP",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "bis nächster Sonnenaufgang",
+      "kulturen": [
+        "Ork"
+      ],
+      "merkmale": [
+        "Beschwörung",
+        "Dämonisch (Thargunitoth)"
+      ],
+      "effekt": "Tairach-Priester ruft Blutroten Mond, berührt Leichen mit Knochenkeule, lässt Totengeister einfahren. RkP*/3 Nephazzim in ebenso viele Leichen. Untote greifen benannte Gegner an. Andere Dienste +Kontrollprobe +1W6 AsP."
+    },
+    {
+      "id": "ergochai-tairachi",
+      "name": "Ergochai Tairachi",
+      "subtitel": "Tairachs Sklaven",
+      "grad": "IV",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Ork"
+      ],
+      "merkmale": [
+        "Eigenschaften",
+        "Verständigung"
+      ],
+      "effekt": "Tairach-Priester opfert Tier, Selbstgeißelung, Geist transferiert in Leichnam. Pro Meile Entfernung 1W6 AsP-Verlust. Variante an denkendem Wesen = Grad V."
+    },
+    {
+      "id": "brazoragh-ghorkai",
+      "name": "Brazoragh Ghorkai",
+      "subtitel": "Brazoraghs Hieb",
+      "grad": "III",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Stunden (max bis Sonnenaufgang)",
+      "kulturen": [
+        "Ork",
+        "Fer"
+      ],
+      "merkmale": [
+        "Eigenschaften"
+      ],
+      "effekt": "Tötet Stier, Tairach-Anrufung. RkP* frei auf AT/PA/TP, +RkP* Selbstbeherrschung, Hiebe = autom. Niederwerfen. Variante IV /PP für 2-3 Krieger."
+    },
+    {
+      "id": "rikais-verderben",
+      "name": "Rikais Verderben",
+      "grad": "IV",
+      "ziel": "Z",
+      "fertigkeit": "geister-bannen",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "RkP* SR",
+      "kulturen": [
+        "Ork",
+        "Gob"
+      ],
+      "merkmale": [
+        "Umwelt",
+        "Verfall"
+      ],
+      "effekt": "Vertreibt Erdgeister, lässt organisches Material verrotten. BF +RkP*, RS −RkP*/3, Lebensmittel +RkP* Wochen Verfall. Schamane ausgenommen."
+    },
+    {
+      "id": "exorzismus-schamane",
+      "name": "Exorzismus (schamanisch)",
+      "grad": "III",
+      "ziel": "P+P",
+      "fertigkeit": "geister-bannen",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "augenblicklich",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gob",
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Ach"
+      ],
+      "merkmale": [
+        "Antimagie"
+      ],
+      "effekt": "Hebt Hexenflüche, druidische Herrschaft, Besessenheit auf. Grad III=Geister, IV=mindere Dämonen, V=Gehörnte. Min. ebenso viele pAsP wie AsP-Kosten erforderlich."
+    },
+    {
+      "id": "grosser-geisterbann",
+      "name": "Großer Geisterbann",
+      "grad": "II-VI",
+      "gradVariabel": true,
+      "ziel": "P",
+      "fertigkeit": "geister-bannen",
+      "ritualdauer": "spontan",
+      "wirkungsdauer": "augenblicklich",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gob",
+        "Gja",
+        "Fer",
+        "Tzk"
+      ],
+      "merkmale": [
+        "Antimagie"
+      ],
+      "effekt": "Vertreibt freie Geister ohne Körperbesitz. II=Zauber/Umwelt, III=freie magische Kreaturen, IV=Geister, V=mindere Dämonen, VI=Gehörnte."
+    },
+    {
+      "id": "geisterkerker",
+      "name": "Geisterkerker",
+      "grad": "I",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP* Tage",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gob",
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Ach"
+      ],
+      "merkmale": [
+        "Antimagie"
+      ],
+      "effekt": "Versiegelt einen ausgetriebenen Geist in Gefäß. Variante: dauerhaft Grad IV / Großritual / bis Gefäß zerstört."
+    },
+    {
+      "id": "geistheilung",
+      "name": "Geistheilung",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-bannen",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "augenblicklich",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gob",
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Ach"
+      ],
+      "merkmale": [
+        "Heilung"
+      ],
+      "effekt": "Heilt Wunden, Krankheiten, Vergiftungen. Bei LeP <0 LeP dreifach. Wunde min. 7 LeP. Großer Geist (Krankheit/Zauber/Fluch) erfordert Exorzismus."
+    },
+    {
+      "id": "geleit-des-nipakau",
+      "name": "Geleit des Nipakau",
+      "grad": "I",
+      "ziel": "P",
+      "fertigkeit": "geister-bannen",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "permanent",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc"
+      ],
+      "merkmale": [
+        "Antimagie",
+        "Dämonisch"
+      ],
+      "effekt": "Macht Leichnam unbrauchbar für Nekromantie (+10 +RkP* erschwert). Ermöglicht Geisterkerker für Totengeist."
+    },
+    {
+      "id": "schutz-der-jurte",
+      "name": "Schutz der Jurte",
+      "grad": "II",
+      "ziel": "Z",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Wochen",
+      "kulturen": [
+        "Niv",
+        "Gja",
+        "Ork",
+        "Gob"
+      ],
+      "merkmale": [
+        "Antimagie",
+        "Geister",
+        "Einfluss"
+      ],
+      "effekt": "Pirtinaj-Geister halten Übelwollende fern (entspricht geweihtem Boden)."
+    },
+    {
+      "id": "schuetzende-rotte",
+      "name": "Schützende Rotte",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Tage",
+      "kulturen": [
+        "Gob",
+        "Ork",
+        "Niv",
+        "Ach"
+      ],
+      "merkmale": [
+        "Antimagie",
+        "Kraft"
+      ],
+      "effekt": "Tier-Bemalung auf Lederschild fängt RkP*/2 +6 TP magischer Angriffe pro Tier ab."
+    },
+    {
+      "id": "tabuzone",
+      "name": "Tabuzone",
+      "grad": "II-IV",
+      "gradVariabel": true,
+      "ziel": "Z",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "RkP* Wochen",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Ach",
+        "Fer"
+      ],
+      "merkmale": [
+        "Einfluss"
+      ],
+      "effekt": "MU-Probe für Eindringlinge (+RkP*, +Aberglaube). Bei 20 = Horriphobus."
+    },
+    {
+      "id": "blick-ins-geisterreich",
+      "name": "Blick ins Geisterreich",
+      "grad": "I",
+      "ziel": "S",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP* KR",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gob",
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Ach"
+      ],
+      "merkmale": [
+        "Hellsicht",
+        "Verständigung"
+      ],
+      "effekt": "Odem-Arcanum-Effekt ohne dortige Modifikatoren. Variante II spontan = RkP* SR. Variante III = Oculus-Astralis-Effekt."
+    },
+    {
+      "id": "rat-der-ahnen",
+      "name": "Rat der Ahnen",
+      "grad": "I",
+      "ziel": "P",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "Geist entscheidet",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Ach"
+      ],
+      "merkmale": [
+        "Geister",
+        "Verständigung"
+      ],
+      "effekt": "Lebender Nachkomme als Gefäß. Geist erteilt Rat, kann Besitz ergreifen. Schlimmstenfalls Exorzismus nötig. Wirkt nur für Seelen in Borons Hallen / 3.Sphäre / Limbus, NICHT Niederhöllen/Paradiese."
+    },
+    {
+      "id": "stimme-des-nipakau",
+      "name": "Stimme des Nipakau",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP* SR",
+      "kulturen": [
+        "Wdm",
+        "Toc",
+        "Utu"
+      ],
+      "merkmale": [
+        "Hellsicht",
+        "Objekt",
+        "Verständigung"
+      ],
+      "effekt": "Tiergedanken-Effekt bei Tieren, ObjectoVoco bei Objekten, Reize bei Pflanzen."
+    },
+    {
+      "id": "freie-seelenfahrt",
+      "name": "Freie Seelenfahrt",
+      "grad": "III",
+      "ziel": "S",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "längstens RkW SR",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gob",
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Ach"
+      ],
+      "merkmale": [
+        "Hellsicht",
+        "Verständigung"
+      ],
+      "effekt": "Schamane reist in Geisterwelt. RkP* manipulieren Realitätsdichte/eigene Werte. IV=Std, V=Tage, VI=Wochen."
+    },
+    {
+      "id": "hilferuf",
+      "name": "Hilferuf",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "spontan",
+      "wirkungsdauer": "10×RkP* KR",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gob",
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Ach"
+      ],
+      "merkmale": [
+        "Geister",
+        "Herbeirufung",
+        "Verständigung"
+      ],
+      "effekt": "Schrei in die Geisterwelt, ruft passendes Wesen. III=nur eine Gruppe, IV=konkretes bekanntes Wesen."
+    },
+    {
+      "id": "geisterbote",
+      "name": "Geisterbote",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "bis nächster Sonnenuntergang",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gob",
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Ach"
+      ],
+      "merkmale": [
+        "Verständigung"
+      ],
+      "effekt": "Beliebiges P-Ziel-Ritual auf Distanz via Voodoo-Puppe (Lehm + Körperteil). Folgendes Ritual stuft auf +1 Grad."
+    },
+    {
+      "id": "kraft-des-tieres",
+      "name": "Kraft des Tieres",
+      "grad": "II",
+      "ziel": "S",
+      "fertigkeit": "geister-aufnehmen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP* SR",
+      "kulturen": [
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Wdm",
+        "Niv"
+      ],
+      "merkmale": [
+        "Eigenschaften"
+      ],
+      "effekt": "Tiergeist beseelt Schamane. RkP* auf passende Werte (Ödän-Statwerte WdH). Pro Tierform separat lernen."
+    },
+    {
+      "id": "herz-des-tieres",
+      "name": "Herz des Tieres",
+      "grad": "IV",
+      "ziel": "PP",
+      "fertigkeit": "geister-aufnehmen",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "RkP* Tage",
+      "kulturen": [
+        "Gja",
+        "Wdm",
+        "Utu",
+        "Fer",
+        "Tzk",
+        "Ork"
+      ],
+      "merkmale": [
+        "Eigenschaften"
+      ],
+      "effekt": "Kessel mit Tier-Teilen. RkP* auf 4 Werte. Pro 3 LeP-Opfer +1 RkP."
+    },
+    {
+      "id": "reitender-geist",
+      "name": "Reitender Geist",
+      "grad": "III",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "RkP* Wochen",
+      "kulturen": [
+        "Gob",
+        "Ork",
+        "Fer",
+        "Tzk",
+        "Gja"
+      ],
+      "merkmale": [
+        "Einfluss",
+        "Eigenschaften"
+      ],
+      "effekt": "Tiergeist als Reiter. LO +RkP*, Tier zahm aber nicht abgerichtet. Variante Gharyak Maruki (Ork-Streitoger, Probe um doppelte MR erschwert)."
+    },
+    {
+      "id": "schlangengeist",
+      "name": "Schlangengeist",
+      "grad": "III",
+      "ziel": "S",
+      "fertigkeit": "geister-aufnehmen",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "bis nächster Neumond",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Ach",
+        "Gja",
+        "Tzk",
+        "Fer"
+      ],
+      "merkmale": [
+        "Einfluss",
+        "Form",
+        "Objekt"
+      ],
+      "effekt": "Schlangenherz essen. Bis zu RkP* mal/Tag eine Wirkung (Reptilea oder Holz→Schlange)."
+    },
+    {
+      "id": "schlangenfluch",
+      "name": "Schlangenfluch",
+      "grad": "IV",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Wochen",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Fer",
+        "Ach"
+      ],
+      "merkmale": [
+        "Einfluss",
+        "Form"
+      ],
+      "effekt": "Opfer verwandelt sich in Schlange. Variante Wolfsfluch (Niv), permanent Grad V."
+    },
+    {
+      "id": "wolfsruf",
+      "name": "Wolfsruf",
+      "grad": "II",
+      "ziel": "PP",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "bis Wölfe ankommen (max 10−RkP* SR)",
+      "kulturen": [
+        "Niv"
+      ],
+      "merkmale": [
+        "Herbeirufung",
+        "Verständigung"
+      ],
+      "effekt": "Ruft RkP* Wölfe. Varianten: Wildschweinruf II (Gob), Rinderruf III (Fer), Hairuf IV (Toc), Ogerruf IV (Ork), Mammutruf IV (Gja), Schlingerruf IV (Ach), Seeschlangenruf V (Ach)."
+    },
+    {
+      "id": "gesang-der-woelfe",
+      "name": "Gesang der Wölfe",
+      "grad": "I",
+      "ziel": "P",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP*×10 KR",
+      "kulturen": [
+        "Niv"
+      ],
+      "merkmale": [
+        "Verständigung"
+      ],
+      "effekt": "10×RkW Meilen Reichweite, Wolfssprache-Kommunikation."
+    },
+    {
+      "id": "zorn-des-bergloewen",
+      "name": "Zorn des Berglöwen",
+      "grad": "II",
+      "ziel": "S",
+      "fertigkeit": "geister-aufnehmen",
+      "ritualdauer": "spontan",
+      "wirkungsdauer": "RkP*×10 KR",
+      "kulturen": [
+        "Tzk",
+        "Gja",
+        "Fer",
+        "Niv"
+      ],
+      "merkmale": [
+        "Eigenschaften"
+      ],
+      "effekt": "Kampfrausch + Manöver Sturmangriff/Wuchtschlag/Niederwerfen. Selbstbeherrschungs-Probe gegen Blutrausch danach. Varianten: Schneelaurer (Gja), Khoramsbestie (Fer), Firunsbär (Niv)."
+    },
+    {
+      "id": "tiere-aus-farben",
+      "name": "Tiere aus Farben",
+      "grad": "IV",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Tage",
+      "kulturen": [
+        "Gob"
+      ],
+      "merkmale": [
+        "Hellsicht",
+        "Illusion"
+      ],
+      "effekt": "Lebensgroßes Tier-Bild aus Blut+Speichel+Asche-Farben, Tiergeist greift Ziel an. Pro Tierart separat."
+    },
+    {
+      "id": "aufmerksamer-waechter",
+      "name": "Aufmerksamer Wächter",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Gob",
+        "Wdm",
+        "Utu"
+      ],
+      "merkmale": [
+        "Hellsicht",
+        "Illusion"
+      ],
+      "effekt": "Tier-Bild als Wächter. Sieht durch Tieraugen, ruft Alarm."
+    },
+    {
+      "id": "hauch-des-elements",
+      "name": "Hauch des [Elements]",
+      "grad": "I",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP* SR",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gob",
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Ach"
+      ],
+      "merkmale": [
+        "Elementar",
+        "Objekt"
+      ],
+      "effekt": "Element-Essenz in Objekt. Feuer=leuchtend (FlimFlam), Wasser=formbar, Erz=+5%/RkP* Gewicht, Luft=−5%/RkP*, Humus=Wachstum, Eis=Kühlung. Einmal lernen für alle zugänglichen Elemente."
+    },
+    {
+      "id": "macht-der-elemente",
+      "name": "Macht der Elemente",
+      "grad": "III",
+      "ziel": "P",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "speziell",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gob",
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Ach"
+      ],
+      "merkmale": [
+        "Herbeirufung",
+        "Elementar"
+      ],
+      "effekt": "Elementarer-Diener (III, klein) bzw. Dschinnenruf-Effekt (V, groß). RkP* statt ZfP*."
+    },
+    {
+      "id": "regentanz",
+      "name": "Regentanz",
+      "grad": "IV",
+      "ziel": "ZZZ",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Fer",
+        "Tzk",
+        "Gob",
+        "Ork",
+        "Wdm",
+        "Utu"
+      ],
+      "merkmale": [
+        "Elementar (Wasser)",
+        "Umwelt"
+      ],
+      "effekt": "Windgeister bringen Regenwolken. Wüste +20."
+    },
+    {
+      "id": "arngrimms-hoehle",
+      "name": "Arngrimms Höhle",
+      "grad": "II",
+      "ziel": "Z",
+      "fertigkeit": "geister-bannen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Niv",
+        "Ach",
+        "Gja",
+        "Gob"
+      ],
+      "merkmale": [
+        "Elementar (Feuer)",
+        "Umwelt"
+      ],
+      "effekt": "Verzauberte Höhle/Mulde wird Wärme-Oase im Winter (Temp +1 Stufe). Variante höhere Stufen +1 Grad pro Stufe."
+    },
+    {
+      "id": "weg-des-windes",
+      "name": "Weg des Windes",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-aufnehmen",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Niv",
+        "Gja",
+        "Tzk"
+      ],
+      "merkmale": [
+        "Eigenschaften"
+      ],
+      "effekt": "Gabetaj-Zeichen, GS 10 dauerhaft auf Schnee/Eis, GS 20 für 1 Min/Std. Athletik+RkP*, Körperbeherrschung+RkP*."
+    },
+    {
+      "id": "schomas-kraft",
+      "name": "Schomas Kraft",
+      "grad": "II",
+      "ziel": "S",
+      "fertigkeit": "geister-aufnehmen",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "augenblicklich (KO bis Sonnenuntergang)",
+      "kulturen": [
+        "Tzk"
+      ],
+      "merkmale": [
+        "Eigenschaften",
+        "Heilung"
+      ],
+      "effekt": "Eingegrabener Schamane nimmt Blutgeister auf. +RkP* LeP-Regeneration, je 10 RkP* +1 KO."
+    },
+    {
+      "id": "macht-des-blutes",
+      "name": "Macht des Blutes",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-bannen",
+      "ritualdauer": "spontan",
+      "wirkungsdauer": "RkP* KR",
+      "kulturen": [
+        "Tzk"
+      ],
+      "merkmale": [
+        "Herrschaft"
+      ],
+      "effekt": "Wassergeister kontrollieren Blut des Opfers (Dienst Kampf-artig). Variante III für RkW/2 Personen."
+    },
+    {
+      "id": "farben-des-krieges",
+      "name": "Farben des Krieges",
+      "grad": "III",
+      "ziel": "PPP",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "RkP* Tage",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Tzk",
+        "Gob",
+        "Toc"
+      ],
+      "merkmale": [
+        "Eigenschaften",
+        "Einfluss"
+      ],
+      "effekt": "Luloa-Hautfarbe für RkW/2 Krieger. MU/AT/FK +2, Sinnenschärfe +4. Nur solange Kriegsziel verfolgt wird."
+    },
+    {
+      "id": "blutsbund",
+      "name": "Blutsbund",
+      "grad": "I",
+      "ziel": "P+P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "permanent",
+      "kulturen": [
+        "Niv",
+        "Gja",
+        "Tzk",
+        "Fer",
+        "Ork"
+      ],
+      "merkmale": [
+        "Eigenschaften",
+        "Hellsicht",
+        "Verständigung"
+      ],
+      "effekt": "Beide verlieren je 1W6 LeP (1 permanent). Empathie wie Elfen-Freundschaftslied. Heilkunde-Seele +RkP*."
+    },
+    {
+      "id": "kraft-der-tayas",
+      "name": "Kraft der Tayas",
+      "grad": "III",
+      "ziel": "PPP",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "RkP* Tage",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc"
+      ],
+      "merkmale": [
+        "Eigenschaften",
+        "Verständigung"
+      ],
+      "effekt": "Stammesversammlungs-Weihe. Sagen/Legenden +RkP*/3. Rat der Ahnen als Kurzritual während Wirkungsdauer."
+    },
+    {
+      "id": "blick-in-liskas-auge",
+      "name": "Blick in Liskas Auge",
+      "grad": "I",
+      "ziel": "S",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "Ritualdauer",
+      "kulturen": [
+        "Wdm",
+        "Utu",
+        "Toc",
+        "Niv",
+        "Ork",
+        "Gob",
+        "Gja",
+        "Fer",
+        "Tzk",
+        "Ach"
+      ],
+      "merkmale": [
+        "Eigenschaften",
+        "Hellsicht"
+      ],
+      "effekt": "Wolfsauge auf Stirn. Sterne lesen wie Prophezeien-Gabe RkP*/2."
+    },
+    {
+      "id": "pfad-der-blutrache",
+      "name": "Pfad der Blutrache",
+      "grad": "IV",
+      "ziel": "P",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "zyklus",
+      "wirkungsdauer": "RkP* Monate",
+      "kulturen": [
+        "Fer"
+      ],
+      "merkmale": [
+        "Eigenschaften",
+        "Hellsicht"
+      ],
+      "effekt": "Verfolgen einer Person mit persönlichem Gegenstand/Körperteil."
+    },
+    {
+      "id": "wegzeichen",
+      "name": "Wegzeichen",
+      "grad": "I",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Tage",
+      "kulturen": [
+        "Niv",
+        "Gja"
+      ],
+      "merkmale": [
+        "Eigenschaften",
+        "Hellsicht",
+        "Verständigung"
+      ],
+      "effekt": "Wegzeichen erkennbar nur dem Schamanen. Variante V permanent."
+    },
+    {
+      "id": "wild-finden",
+      "name": "Wild finden",
+      "grad": "III",
+      "ziel": "S",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "augenblicklich",
+      "kulturen": [
+        "Gob",
+        "Ork",
+        "Gja"
+      ],
+      "merkmale": [
+        "Eigenschaften",
+        "Hellsicht"
+      ],
+      "effekt": "Windgeister scouten Jagdwild im Tagesreise-Umkreis. Goblin-Variante: Gaben der Erde."
+    },
+    {
+      "id": "weidegruende-finden",
+      "name": "Weidegründe finden",
+      "grad": "II",
+      "ziel": "S",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "zyklus",
+      "wirkungsdauer": "augenblicklich",
+      "kulturen": [
+        "Fer",
+        "Ork",
+        "Gob",
+        "Niv"
+      ],
+      "merkmale": [
+        "Hellsicht"
+      ],
+      "effekt": "+1 pro Monat ohne Regen. Variante: Tränke meine Herde (Wasserstellen)."
+    },
+    {
+      "id": "heimfuehrung-der-herde",
+      "name": "Heimführung der Herde",
+      "grad": "III",
+      "ziel": "PPP",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Fer",
+        "Ork",
+        "Gob",
+        "Niv"
+      ],
+      "merkmale": [
+        "Einfluss",
+        "Verständigung"
+      ],
+      "effekt": "Vieh kommt eilig zum Schamanen. +1 pro Meile. Variante I=Einzeltier, III/V=Wildtierherde."
+    },
+    {
+      "id": "jagdfieber",
+      "name": "Jagdfieber",
+      "grad": "I",
+      "ziel": "S",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Tzk",
+        "Fer"
+      ],
+      "merkmale": [
+        "Eigenschaften"
+      ],
+      "effekt": "Fährtensuchen +RkP*, Ausdauer +2×RkP*. Selbstbeherrschungs-Probe um abzubrechen. Niv-Variante: Reissgrams Fährte."
+    },
+    {
+      "id": "fluch-der-verwirrung",
+      "name": "Fluch der Verwirrung",
+      "grad": "III",
+      "ziel": "P",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "spontan",
+      "wirkungsdauer": "RkP* KR",
+      "kulturen": [
+        "Utu"
+      ],
+      "voraussetzung": "Hochschamane",
+      "merkmale": [
+        "Beschwörung",
+        "Dämonisch (Amazeroth)"
+      ],
+      "effekt": "Beschwört Karunga (Dämon Amazeroth), Dienst Kampf (Verwirren)."
+    },
+    {
+      "id": "mailam-rekdais-segen",
+      "name": "Mailam Rekdais Segen",
+      "grad": "IV",
+      "ziel": "PPP",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Gob"
+      ],
+      "merkmale": [
+        "Eigenschaften",
+        "Einfluss"
+      ],
+      "effekt": "Goblin-Schamanin malt grüne Wildsau-Zeichen. Erhöhte Fruchtbarkeit + Paarungstrieb. Höhere Mehrlings-Chance."
+    },
+    {
+      "id": "reinigen-des-wassers",
+      "name": "Reinigen des Wassers",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-bannen",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "augenblicklich",
+      "kulturen": [
+        "Toc",
+        "Gja"
+      ],
+      "merkmale": [
+        "Objekt"
+      ],
+      "effekt": "Macht Meerwasser genießbar (Salz auf Perlmutt-Tafel). +2 pro 10 Maß."
+    },
+    {
+      "id": "tauschplatz",
+      "name": "Tauschplatz",
+      "grad": "III",
+      "ziel": "PP",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Wochen",
+      "kulturen": [
+        "Toc",
+        "Wdm"
+      ],
+      "merkmale": [
+        "Einfluss"
+      ],
+      "effekt": "Totempfähle als Geistwächter. Überreden/Übertölpeln +RkP*, Lügen +2×RkP*."
+    },
+    {
+      "id": "zeichen-setzen",
+      "name": "Zeichen setzen",
+      "grad": "II",
+      "ziel": "speziell",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "speziell",
+      "kulturen": [
+        "Toc"
+      ],
+      "merkmale": [
+        "Kraft",
+        "Metamagie",
+        "Umwelt"
+      ],
+      "effekt": "Unsichtbares Zeichen 'in der Geisterwelt'. Nur via Hellsichtmagie/Liturgien sichtbar."
+    },
+    {
+      "id": "weckruf",
+      "name": "Weckruf",
+      "grad": "I",
+      "ziel": "PP",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Stunden bis Auslösung",
+      "kulturen": [
+        "Ach"
+      ],
+      "merkmale": [
+        "Eigenschaften",
+        "Einfluss"
+      ],
+      "effekt": "Weckt schlafende Achaz. Variante III/PPP, Großzyklus, Achaz-Winterschlaf-Schutz."
+    },
+    {
+      "id": "ruf-des-schamanen",
+      "name": "Ruf des Schamanen",
+      "grad": "III",
+      "ziel": "PPP",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Ach"
+      ],
+      "merkmale": [
+        "Einfluss",
+        "Herbeirufung"
+      ],
+      "effekt": "Reptilea-Effekt. Ruft alle Achaz-Stammesmitglieder zusammen."
+    },
+    {
+      "id": "ogerruf",
+      "name": "Ogerruf",
+      "grad": "IV",
+      "ziel": "PP",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "10×RkP* KR",
+      "kulturen": [
+        "Ork"
+      ],
+      "merkmale": [
+        "Herbeirufung",
+        "Verständigung"
+      ],
+      "effekt": "Variante des Wolfsrufs für Oger."
+    },
+    {
+      "id": "m-char-utrak-rikai",
+      "name": "M'Char Utrak Rikai (Rikais Alchimie)",
+      "grad": "II",
+      "ziel": "Z",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "spontan",
+      "wirkungsdauer": "wenige KR (Auswirkungen permanent)",
+      "kulturen": [
+        "Ork",
+        "Gob"
+      ],
+      "merkmale": [
+        "Umwelt",
+        "Humus",
+        "Belzhorasch"
+      ],
+      "effekt": "Knochenkeule berührt Boden / wird geworfen. Pflanzen wachsen schlagartig (RkP* Wochen Wachstum)."
+    },
+    {
+      "id": "echo-der-steine",
+      "name": "Echo der Steine",
+      "subtitel": "Petromantie-Variante: Gesang der Wölfe",
+      "grad": "I",
+      "ziel": "P",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP*×10 KR",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Verständigung",
+        "Elementar (Erz)"
+      ],
+      "effekt": "Gesang der Wölfe als Echo durch Höhlensysteme. 10×RkW Meilen Reichweite, Stein-/Wühlschrat-Sprache."
+    },
+    {
+      "id": "hauch-des-erzes",
+      "name": "Hauch des Erzes",
+      "subtitel": "Petromantie-Variante: Hauch des Elements",
+      "grad": "I",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP* SR",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Elementar (Erz)",
+        "Objekt"
+      ],
+      "effekt": "Erz-Essenz in Objekt: +5%/RkP* Gewicht oder Härte (BF -1 pro RkP*)."
+    },
+    {
+      "id": "petromantie-weckruf",
+      "name": "Weckruf (Petromantie)",
+      "grad": "I",
+      "ziel": "PP",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Eigenschaften",
+        "Einfluss"
+      ],
+      "effekt": "Weckt schlafende Wühlschrate aus dem Steinschlaf binnen Augenblicken."
+    },
+    {
+      "id": "petromantie-wegzeichen",
+      "name": "Wegzeichen (Petromantie)",
+      "grad": "I",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Tage",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Eigenschaften",
+        "Hellsicht"
+      ],
+      "effekt": "Petromantische Wegzeichen in Stein, nur Wühlschrat-Schamanen sichtbar."
+    },
+    {
+      "id": "petromantie-aufmerksamer-waechter",
+      "name": "Aufmerksamer Wächter (Petromantie)",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Hellsicht",
+        "Illusion"
+      ],
+      "effekt": "Stein-Bild als Wächter, sieht durch Stein-Augen, ruft Alarm."
+    },
+    {
+      "id": "petromantie-geistheilung",
+      "name": "Geistheilung (Petromantie)",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-bannen",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "augenblicklich",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Heilung"
+      ],
+      "effekt": "Heilt Wunden, Krankheiten — bei Wühlschraten via Aufnahme von Heilstein-Splittern."
+    },
+    {
+      "id": "petromantie-kraft-des-tieres",
+      "name": "Kraft des Tieres (Petromantie)",
+      "grad": "II",
+      "ziel": "S",
+      "fertigkeit": "geister-aufnehmen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP* SR",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Eigenschaften"
+      ],
+      "effekt": "Erd-/Stein-Tiergeist beseelt Schamane: Steinbeißer, Höhlenwurm, Granit-Bär."
+    },
+    {
+      "id": "erzkraft",
+      "name": "Erzkraft",
+      "subtitel": "Petromantie-Variante: Schomas Kraft",
+      "grad": "II",
+      "ziel": "S",
+      "fertigkeit": "geister-aufnehmen",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "augenblicklich (KO bis Sonnenuntergang)",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Eigenschaften",
+        "Heilung",
+        "Elementar (Erz)"
+      ],
+      "effekt": "Eingegrabener Petromant nimmt Erzgeister auf. +RkP* LeP-Regeneration, je 10 RkP* +1 KK."
+    },
+    {
+      "id": "schutz-der-hoehle",
+      "name": "Schutz der Höhle",
+      "subtitel": "Petromantie-Variante: Schutz der Jurte",
+      "grad": "II",
+      "ziel": "Z",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Wochen",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Antimagie",
+        "Geister",
+        "Einfluss"
+      ],
+      "effekt": "Erzgeister halten Übelwollende fern (entspricht geweihtem Boden in der Höhle)."
+    },
+    {
+      "id": "stimme-des-felsens",
+      "name": "Stimme des Felsens",
+      "subtitel": "Petromantie-Variante: Stimme des Nipakau (nur Stein)",
+      "grad": "II",
+      "ziel": "P",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP* SR",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Hellsicht",
+        "Objekt",
+        "Verständigung"
+      ],
+      "effekt": "ObjectoVoco-Effekt nur auf steinerne Objekte (Steine erzählen ihre Geschichte)."
+    },
+    {
+      "id": "petromantie-tabuzone",
+      "name": "Tabuzone (Petromantie)",
+      "grad": "II",
+      "ziel": "Z",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "RkP* Wochen",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Einfluss"
+      ],
+      "effekt": "MU-Probe für Eindringlinge in markierter Steinzone."
+    },
+    {
+      "id": "naehre-meine-sippe",
+      "name": "Nähre meine Sippe",
+      "subtitel": "Petromantie-Variante: Weidegründe finden",
+      "grad": "II",
+      "ziel": "S",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "zyklus",
+      "wirkungsdauer": "augenblicklich",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Hellsicht",
+        "Elementar (Erz)"
+      ],
+      "effekt": "Spürt nahrhafte Steinvorkommen (Wühlschrate fressen Stein). +1 pro Monat ohne Steinbruch."
+    },
+    {
+      "id": "kraft-der-berge",
+      "name": "Kraft der Berge",
+      "subtitel": "Petromantie-Variante: Brazoragh Gorkai",
+      "grad": "III",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Eigenschaften"
+      ],
+      "effekt": "Opferung von Feinden / Steinen. RkP* frei auf AT/PA/TP, +RkP* Selbstbeherrschung, Hiebe = autom. Niederwerfen."
+    },
+    {
+      "id": "petromantie-farben-des-krieges",
+      "name": "Farben des Krieges (Petromantie)",
+      "grad": "III",
+      "ziel": "PPP",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "gross",
+      "wirkungsdauer": "RkP* Tage",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Eigenschaften",
+        "Einfluss"
+      ],
+      "effekt": "Stein-Pulver-Bemalung. MU/AT/FK +2, Sinnenschärfe +4."
+    },
+    {
+      "id": "macht-der-elemente-erz",
+      "name": "Macht der Elemente (Erz)",
+      "grad": "III",
+      "ziel": "P",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "speziell",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Herbeirufung",
+        "Elementar (Erz)"
+      ],
+      "effekt": "Elementarer-Diener-Erz / Dschinnenruf-Erz-Effekt. RkP* statt ZfP*."
+    },
+    {
+      "id": "petromantie-ruf-des-schamanen",
+      "name": "Ruf des Schamanen (Petromantie)",
+      "grad": "III",
+      "ziel": "PPP",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "RkP* Stunden",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Einfluss",
+        "Herbeirufung"
+      ],
+      "effekt": "Ruft alle Wühlschrat-Stammesmitglieder zusammen (Petromantie-Echo durch Höhlen)."
+    },
+    {
+      "id": "trollruf",
+      "name": "Trollruf",
+      "grad": "IV",
+      "ziel": "PP",
+      "fertigkeit": "geister-rufen",
+      "ritualdauer": "kurz",
+      "wirkungsdauer": "10×RkP* KR",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Herbeirufung",
+        "Verständigung"
+      ],
+      "effekt": "Variante des Wolfsrufs für Felstrolle / Höhlentrolle. Ruft RkP*/2 Trolle."
+    },
+    {
+      "id": "petromantie-tiere-aus-farben",
+      "name": "Tiere aus Farben (Petromantie)",
+      "grad": "IV",
+      "ziel": "P",
+      "fertigkeit": "geister-binden",
+      "ritualdauer": "ritual",
+      "wirkungsdauer": "RkP* Tage",
+      "kulturen": [
+        "Wuhl"
+      ],
+      "petromantie": true,
+      "merkmale": [
+        "Hellsicht",
+        "Illusion"
+      ],
+      "effekt": "Stein-Bild aus Mineralfarben + Steinmehl, Erdgeist greift Ziel an."
+    }
+  ],
+  "_keulenRituale": [
+    {
+      "id": "weihe-der-keule",
+      "name": "Weihe der Keule",
+      "vor": "—",
+      "probe": "binden",
+      "ap": 0,
+      "effekt": "Mondmonat von Neumond zu Neumond. Vererbbar. Probe für ererbte Keule um bereits gebundene pAsP erschwert."
+    },
+    {
+      "id": "bann-der-keule",
+      "name": "Bann der Keule",
+      "vor": "Geister binden 11",
+      "probe": "binden +9/+12/+15",
+      "kosten": "3W6 (1/2/3 perm)",
+      "ap": 150
+    },
+    {
+      "id": "geist-der-keule",
+      "name": "Geist der Keule",
+      "vor": "Geister binden 11",
+      "probe": "binden +Beschwörungs-Schwierigkeit",
+      "kosten": "4W6 (beliebig perm)",
+      "ap": 200
+    },
+    {
+      "id": "gespuer-der-keule",
+      "name": "Gespür der Keule",
+      "vor": "Geister binden 5",
+      "probe": "binden +Mod",
+      "kosten": "3W6 (1 perm)",
+      "ap": 100
+    },
+    {
+      "id": "haerte-der-keule",
+      "name": "Härte der Keule",
+      "vor": "Ritualkenntnis (Schamane)",
+      "probe": "binden +Mod",
+      "kosten": "speziell",
+      "ap": 50
+    },
+    {
+      "id": "hilfe-der-keule",
+      "name": "Hilfe der Keule",
+      "vor": "Geister binden 7",
+      "probe": "binden +5/+8/+12",
+      "kosten": "3W6 (1/3/5 perm)",
+      "ap": 100
+    },
+    {
+      "id": "kraft-der-keule",
+      "name": "Kraft der Keule",
+      "vor": "Geister binden 7",
+      "probe": "binden +3+mTP",
+      "kosten": "3W6 (beliebig perm)",
+      "ap": 75
+    },
+    {
+      "id": "naehe-zur-natur",
+      "name": "Nähe zur Natur",
+      "vor": "Geister binden 7",
+      "probe": "binden +5/+8/+12",
+      "kosten": "3W6 (2 perm)",
+      "ap": 100
+    },
+    {
+      "id": "opferkeule",
+      "name": "Opferkeule",
+      "vor": "Ritualkenntnis (Schamane), SF Blutmagie",
+      "probe": "binden +7",
+      "kosten": "4W6",
+      "ap": 100
+    }
+  ],
+  "_knochenkeulen": [
+    {
+      "typ": "klein",
+      "tp": "1W+2*",
+      "tpkk": "11/4",
+      "gew": 80,
+      "lg": 50,
+      "bf": "4*",
+      "ini": 0,
+      "wm": "−1/−1",
+      "dk": "N",
+      "talent": "Hiebwaffen"
+    },
+    {
+      "typ": "mittel",
+      "tp": "1W+3*",
+      "tpkk": "11/3",
+      "gew": 110,
+      "lg": 100,
+      "bf": "3*",
+      "ini": 0,
+      "wm": "0/−1",
+      "dk": "N",
+      "talent": "Hiebwaffen"
+    },
+    {
+      "typ": "gross",
+      "tp": "2W+2*",
+      "tpkk": "14/2",
+      "gew": 220,
+      "lg": 150,
+      "bf": "2*",
+      "ini": -2,
+      "wm": "−1/−3",
+      "dk": "N",
+      "talent": "Zh-Hiebwaffen",
+      "_hinweis": "ab KK 18 einhändig (TPKK 15/3)"
+    },
+    {
+      "typ": "saegefischschwert",
+      "tp": "1W+2*",
+      "tpkk": "12/3",
+      "gew": 60,
+      "lg": 110,
+      "bf": "5*",
+      "ini": -1,
+      "wm": "−2/+1",
+      "dk": "N",
+      "talent": "Schwerter",
+      "_hinweis": "Tocamuyac. Binden/Entwaffnen +2, bei 19 Verhakung"
+    },
+    {
+      "typ": "echsisches-szepter",
+      "tp": "1W+3*",
+      "tpkk": "11/3",
+      "gew": 120,
+      "lg": 90,
+      "bf": "4*",
+      "ini": -1,
+      "wm": "0/−1",
+      "dk": "N",
+      "talent": "Hiebwaffen",
+      "_hinweis": "Stammes-Achaz"
+    }
+  ]
+}

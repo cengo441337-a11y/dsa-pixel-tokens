@@ -1,0 +1,291 @@
+{
+  "_meta": {
+    "_quelle": "DSA 4.1 — Elementare Gewalten S.154-155",
+    "_verbrauch": "10 Karat / 4 Karat (Rundschliff) / 1 Karat (Brillant) — höherer Schliff = höherer Preis",
+    "_sf_voraussetzung": "SF Edelsteinmagie (200 AP, Verbreitung 3, Voraussetzung Merkmalskenntnis Elementar Erz)"
+  },
+  "edelsteine": [
+    {
+      "name": "Diamant",
+      "merkmal": "Objekt",
+      "aspErsparnis": 20,
+      "element": "Erz",
+      "elementBonus": -2
+    },
+    {
+      "name": "Rubin",
+      "merkmal": "Schaden",
+      "aspErsparnis": 20,
+      "element": "Feuer",
+      "elementBonus": -2
+    },
+    {
+      "name": "Aquamarin",
+      "merkmal": "Form",
+      "aspErsparnis": 20,
+      "element": "Wasser",
+      "elementBonus": -2
+    },
+    {
+      "name": "Lapislazuli",
+      "merkmal": "Bewegung",
+      "aspErsparnis": 20,
+      "element": "Luft",
+      "elementBonus": -2
+    },
+    {
+      "name": "Bergkristall",
+      "merkmal": "Umwelt",
+      "aspErsparnis": 20,
+      "element": "Eis",
+      "elementBonus": -2
+    },
+    {
+      "name": "Achat",
+      "merkmal": "Heilung",
+      "aspErsparnis": 20,
+      "element": "Humus",
+      "elementBonus": -2
+    },
+    {
+      "name": "Obsidian",
+      "merkmal": null,
+      "aspErsparnis": 0,
+      "element": "Erz",
+      "elementBonus": -2,
+      "sekundaer": {
+        "element": "Feuer",
+        "bonus": -1
+      }
+    },
+    {
+      "name": "Roter Obsidian",
+      "merkmal": null,
+      "aspErsparnis": 0,
+      "element": "Feuer",
+      "elementBonus": -2,
+      "sekundaer": {
+        "element": "Erz",
+        "bonus": -1
+      }
+    },
+    {
+      "name": "Granat",
+      "merkmal": "Objekt",
+      "aspErsparnis": 10,
+      "element": "Erz",
+      "elementBonus": -2
+    },
+    {
+      "name": "Topas",
+      "merkmal": "Telekinese",
+      "aspErsparnis": 10,
+      "element": "Luft",
+      "elementBonus": -2
+    },
+    {
+      "name": "Coelestin",
+      "merkmal": null,
+      "aspErsparnis": 0,
+      "element": "Luft",
+      "elementBonus": -2
+    },
+    {
+      "name": "Saphir",
+      "merkmal": "Illusion",
+      "aspErsparnis": 20,
+      "element": "Wasser",
+      "elementBonus": -2
+    },
+    {
+      "name": "Zirkon",
+      "merkmal": "Illusion",
+      "aspErsparnis": 20,
+      "element": "Erz",
+      "elementBonus": -2
+    },
+    {
+      "name": "Perle",
+      "merkmal": null,
+      "aspErsparnis": 0,
+      "element": "Wasser",
+      "elementBonus": -2
+    },
+    {
+      "name": "Smaragd",
+      "merkmal": "Herrschaft",
+      "aspErsparnis": 20,
+      "element": "Humus",
+      "elementBonus": -2
+    },
+    {
+      "name": "Albenkristall",
+      "merkmal": null,
+      "aspErsparnis": 0,
+      "element": "Eis",
+      "elementBonus": -2
+    },
+    {
+      "name": "Magnetit",
+      "merkmal": "Objekt",
+      "aspErsparnis": 10,
+      "element": "Erz",
+      "elementBonus": -1
+    },
+    {
+      "name": "Rauchquarz",
+      "merkmal": "Illusion",
+      "aspErsparnis": 10,
+      "element": "Feuer",
+      "elementBonus": -1,
+      "sekundaer": {
+        "element": "Luft",
+        "bonus": -1
+      }
+    },
+    {
+      "name": "Opal",
+      "merkmal": "Verständigung",
+      "aspErsparnis": 10,
+      "element": "Luft",
+      "elementBonus": -1
+    },
+    {
+      "name": "Feueropal",
+      "merkmal": "Verständigung",
+      "aspErsparnis": 10,
+      "element": "Feuer",
+      "elementBonus": -1
+    },
+    {
+      "name": "Malachit",
+      "merkmal": null,
+      "aspErsparnis": 0,
+      "element": "Humus",
+      "elementBonus": -1
+    },
+    {
+      "name": "Bernstein",
+      "merkmal": "Antimagie",
+      "aspErsparnis": 25,
+      "element": null,
+      "elementBonus": 0
+    },
+    {
+      "name": "Grüne Jade",
+      "merkmal": "Kraft",
+      "aspErsparnis": 10,
+      "element": "Humus",
+      "elementBonus": -1
+    },
+    {
+      "name": "Rosa Jade",
+      "merkmal": "Metamagie",
+      "aspErsparnis": 10,
+      "element": "Erz",
+      "elementBonus": -1
+    },
+    {
+      "name": "Mondstein",
+      "merkmal": "Kraft",
+      "aspErsparnis": 10,
+      "element": null,
+      "elementBonus": 0
+    },
+    {
+      "name": "Onyx",
+      "merkmal": "Herrschaft",
+      "aspErsparnis": 10,
+      "element": null,
+      "elementBonus": 0
+    },
+    {
+      "name": "Türkis",
+      "merkmal": "Einfluss",
+      "aspErsparnis": 10,
+      "element": "Luft",
+      "elementBonus": -1
+    },
+    {
+      "name": "Rosenquarz",
+      "merkmal": "Einfluss",
+      "aspErsparnis": 10,
+      "element": "Humus",
+      "elementBonus": -1
+    },
+    {
+      "name": "Aventurin",
+      "merkmal": "Bewegung",
+      "aspErsparnis": 10,
+      "element": null,
+      "elementBonus": 0
+    },
+    {
+      "name": "Karneol",
+      "merkmal": "Schaden",
+      "aspErsparnis": 10,
+      "element": null,
+      "elementBonus": 0
+    },
+    {
+      "name": "Amethyst",
+      "merkmal": "Herrschaft",
+      "aspErsparnis": 10,
+      "element": null,
+      "elementBonus": 0
+    },
+    {
+      "name": "Basalt",
+      "merkmal": "Antimagie",
+      "aspErsparnis": 20,
+      "element": null,
+      "elementBonus": 0
+    },
+    {
+      "name": "Marmor",
+      "merkmal": "Objekt",
+      "aspErsparnis": 20,
+      "element": null,
+      "elementBonus": 0
+    },
+    {
+      "name": "Feuerstein",
+      "merkmal": null,
+      "aspErsparnis": 0,
+      "element": "Feuer",
+      "elementBonus": -1
+    },
+    {
+      "name": "Tropfstein",
+      "merkmal": null,
+      "aspErsparnis": 0,
+      "element": "Wasser",
+      "elementBonus": -1
+    },
+    {
+      "name": "Lignolith",
+      "merkmal": null,
+      "aspErsparnis": 0,
+      "element": "Humus",
+      "elementBonus": -1
+    },
+    {
+      "name": "Korallen",
+      "merkmal": null,
+      "aspErsparnis": 0,
+      "element": "Humus",
+      "elementBonus": -1,
+      "sekundaer": {
+        "element": "Wasser",
+        "bonus": -1
+      }
+    },
+    {
+      "name": "Speckstein",
+      "merkmal": null,
+      "aspErsparnis": 0,
+      "element": "Humus",
+      "elementBonus": -1
+    }
+  ]
+}

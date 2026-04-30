@@ -11,9 +11,11 @@ import { registerMagicHooks } from "./magic.mjs";
 import { registerPandaemoniumHooks } from "./pandaemonium.mjs";
 import { registerZoneSpellHooks } from "./zone-spells.mjs";
 import { migrateActorFolders, deduplicateActors, moveActorToCategoryFolder } from "./actor-folders.mjs";
-import { registerXMLImporter, showImportDialog } from "./xml-parser.mjs";
+import { registerXMLImporter, showImportDialog, parseHeldenXML, createActorFromImport } from "./xml-parser.mjs";
 import { openDatabaseBrowser } from "./db-browser.mjs";
 import { registerCalendar, openCalendar } from "./calendar.mjs";
+import { registerLiturgies, loadLiturgien, LiturgienApp } from "./liturgies.mjs";
+import { registerShamanism, loadSchamanenRituale, SchamanenApp } from "./shamanism.mjs";
 
 // ─── Datenbanken (werden in ready geladen) ──────────────────────────────────
 
@@ -163,6 +165,8 @@ Hooks.once("ready", async () => {
 
   await registerPartials();
   await loadDataFiles();
+  await loadLiturgien();
+  await loadSchamanenRituale();
 
   registerDiceHooks();
   registerCombatHooks();
@@ -171,10 +175,14 @@ Hooks.once("ready", async () => {
   registerZoneSpellHooks();
   registerXMLImporter();
   registerCalendar();
+  registerLiturgies();
+  registerShamanism();
 
   // Globale Helper für Console / Macros
   globalThis.DSAPixelTokens = globalThis.DSAPixelTokens ?? {};
   globalThis.DSAPixelTokens.openCalendar = openCalendar;
+  globalThis.DSAPixelTokens.openLiturgien = (actor) => new LiturgienApp(actor || canvas.tokens?.controlled?.[0]?.actor || game.user.character).render(true);
+  globalThis.DSAPixelTokens.openSchamanen = (actor) => new SchamanenApp(actor || canvas.tokens?.controlled?.[0]?.actor || game.user.character).render(true);
 
   // One-shot-Migration: Alte Spell-Items (system.value) auf gdsa-Schema (system.zfw) umstellen
   if (game.user.isGM) {
@@ -188,6 +196,30 @@ Hooks.once("ready", async () => {
   globalThis.DSAKreaturen       = () => DSAPixelTokens?.showCreaturePicker?.();  // DSAKreaturen()
   globalThis.DSAPassierschlag   = rollPassierschlag;                             // DSAPassierschlag(actor)
   globalThis.DSADatenbank       = openDatabaseBrowser;                           // DSADatenbank(actor, "waffen")
+
+  /**
+   * Direkt-Import einer XML aus modules/dsa-pixel-tokens/data/.
+   * Nutzung: DSAImportXML("grog-helden-import.xml")
+   * Oder Kurzform für Grog: DSAImportGrog()
+   */
+  globalThis.DSAImportXML = async (filename) => {
+    try {
+      const url = `modules/${MODULE_ID}/data/${filename}`;
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status} — Datei nicht gefunden: ${url}`);
+      const xmlString = await resp.text();
+      const heroData = parseHeldenXML(xmlString);
+      const actor = await createActorFromImport(heroData, true);
+      ui.notifications.info(`✓ ${heroData.name || filename} importiert`);
+      console.log(`[${MODULE_ID}] Imported actor:`, actor);
+      return actor;
+    } catch (err) {
+      console.error(`[${MODULE_ID}] DSAImportXML failed:`, err);
+      ui.notifications.error(`Import fehlgeschlagen: ${err.message}`);
+      return null;
+    }
+  };
+  globalThis.DSAImportGrog = () => DSAImportXML("grog-helden-import.xml");
 
   // Effekt-Picker in den Settings integrieren
   Hooks.on("renderSettings", (_app, html) => {

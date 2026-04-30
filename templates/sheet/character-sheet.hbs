@@ -134,6 +134,11 @@
       <i class="fas fa-hat-wizard"></i> Magie
     </a>
     {{/if}}
+    {{#if isGeweiht}}
+    <a class="item" data-tab="karma" data-group="primary">
+      <i class="fas fa-praying-hands"></i> Karma
+    </a>
+    {{/if}}
     <a class="item" data-tab="equipment" data-group="primary">
       <i class="fas fa-shield-alt"></i> Inventar
     </a>
@@ -483,7 +488,23 @@
       </div>
       {{/unless}}
 
-      <div class="section-title">Ritualfertigkeiten</div>
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Ritualfertigkeiten</span>
+        <div style="display:flex;gap:4px">
+          {{#if isSchamane}}
+          <button type="button" data-action="open-schamanen"
+            style="background:rgba(160,208,224,0.15);border:1px solid rgba(160,208,224,0.5);color:#a0d0e0;
+                   border-radius:3px;padding:1px 8px;font-size:13px;cursor:pointer;line-height:1.4"
+            title="Schamanen-Rituale öffnen (Geister rufen/bannen/binden/aufnehmen)">🪶 Schamane</button>
+          {{/if}}
+          {{#if isGeweiht}}
+          <button type="button" data-action="open-liturgien"
+            style="background:rgba(255,215,112,0.15);border:1px solid rgba(255,215,112,0.5);color:#ffd770;
+                   border-radius:3px;padding:1px 8px;font-size:13px;cursor:pointer;line-height:1.4"
+            title="Liturgien & Karma öffnen">🙏 Liturgien</button>
+          {{/if}}
+        </div>
+      </div>
       <div class="panel">
         {{#each rituals}}
         <div class="rollable" data-roll="ritual" data-name="{{this.name}}" data-value="{{this.value}}"
@@ -493,8 +514,44 @@
           <span style="color:#ffd700;font-weight:bold">{{this.value}}</span>
         </div>
         {{/each}}
+        {{#unless rituals.length}}
+        <div style="text-align:center;color:#888;font-size:11px;padding:8px">Keine Ritualfertigkeiten</div>
+        {{/unless}}
       </div>
 
+    </div>
+    {{/if}}
+
+    {{!-- ─── TAB: KARMA / LITURGIEN (für Geweihte mit KaP) ─── --}}
+    {{#if isGeweiht}}
+    <div class="tab" data-tab="karma" data-group="primary">
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>🙏 Karma & Liturgien</span>
+        <button type="button" data-action="open-liturgien"
+          style="background:rgba(255,215,112,0.15);border:1px solid rgba(255,215,112,0.5);color:#ffd770;
+                 border-radius:3px;padding:1px 8px;font-size:13px;cursor:pointer;line-height:1.4"
+          title="Liturgien-Browser öffnen">📖 Liturgien-Browser</button>
+      </div>
+      <div class="panel" style="padding:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+          <div><strong>Kult:</strong> {{actorKult}}</div>
+          <div><strong>LkW:</strong> {{actorLkW}}</div>
+          <div><strong>KaP:</strong> {{system.KaP.value}} / {{system.KaP.max}}</div>
+          {{#if system.KaP.permanent}}<div><strong>perm. KaP:</strong> {{system.KaP.permanent}}</div>{{/if}}
+        </div>
+        <hr>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" data-action="mirakel-plus" title="Mirakel+ (5 KaP, ±0 für gefälliges Talent)">
+            ✨ Mirakel+ (5 KaP)
+          </button>
+          <button type="button" data-action="mirakel-mid" title="Ungelistetes Talent (+6)">
+            Mirakel ±0 (+6)
+          </button>
+          <button type="button" data-action="mirakel-minus" title="Mirakel− (zuwiderlaufend, +18)">
+            Mirakel− (+18)
+          </button>
+        </div>
+      </div>
     </div>
     {{/if}}
 

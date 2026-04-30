@@ -1,0 +1,521 @@
+{{!--
+  Schamanen-Rituale-Browser für DSA 4.1 — Lesefreundlich-Edition
+--}}
+<form class="dsa-sham-app">
+  <header class="dsa-sham-header">
+    <div class="dsa-sham-actor">
+      <h2><i class="fas fa-feather-alt"></i> {{actorName}}</h2>
+      <div class="dsa-sham-actor-meta">
+        <div class="dsa-sham-stat"><span class="lbl">Kultur</span><span class="val">{{kultur}}</span></div>
+        <div class="dsa-sham-stat"><span class="lbl">AsP</span><span class="val">{{asp.current}} / {{asp.max}}</span></div>
+        {{#if asp.permanent}}<div class="dsa-sham-stat"><span class="lbl">pAsP</span><span class="val">{{asp.permanent}}</span></div>{{/if}}
+      </div>
+    </div>
+    <div class="dsa-sham-fert">
+      {{#each fertigkeiten}}
+        <button type="button" class="fert-btn" data-action="set-rkw" data-fertigkeit="{{key}}" title="Klick zum Bearbeiten">
+          <span class="fert-name">{{label}}</span>
+          <span class="fert-rkw">{{rkw}}</span>
+          <span class="fert-probe">{{#each probe}}{{this}}{{#unless @last}}/{{/unless}}{{/each}}</span>
+        </button>
+      {{/each}}
+    </div>
+  </header>
+
+  <div class="dsa-sham-filters">
+    <label>
+      <span>Kultur</span>
+      <select name="kultur">
+        <option value="">Alle Kulturen</option>
+        {{#each kulturen}}
+          <option value="{{code}}" {{#if (eq code ../kultur)}}selected{{/if}}>{{code}} — {{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label>
+      <span>Fertigkeit</span>
+      <select name="fertigkeit">
+        <option value="">Alle</option>
+        <option value="geister-rufen"     {{#if (eq fertigkeitFilter "geister-rufen")}}selected{{/if}}>Geister rufen</option>
+        <option value="geister-bannen"    {{#if (eq fertigkeitFilter "geister-bannen")}}selected{{/if}}>Geister bannen</option>
+        <option value="geister-binden"    {{#if (eq fertigkeitFilter "geister-binden")}}selected{{/if}}>Geister binden</option>
+        <option value="geister-aufnehmen" {{#if (eq fertigkeitFilter "geister-aufnehmen")}}selected{{/if}}>Geister aufnehmen</option>
+      </select>
+    </label>
+    <label class="grow">
+      <span>Suche</span>
+      <input type="text" name="search" placeholder="Name oder Effekt durchsuchen…">
+    </label>
+  </div>
+
+  <div class="dsa-sham-list">
+    {{#each rituale}}
+      <article class="dsa-sham-card{{#if petromantie}} is-petromantie{{/if}}" data-id="{{id}}">
+        <header class="dsa-sham-card-head">
+          <h3>
+            {{#if petromantie}}<span class="petro-mark" title="Petromantie">⛏</span>{{/if}}
+            {{name}}
+          </h3>
+          <span class="grad-badge">Grad {{grad}}</span>
+        </header>
+        {{#if subtitel}}<p class="dsa-sham-subtitel"><em>{{subtitel}}</em></p>{{/if}}
+
+        <div class="dsa-sham-card-meta">
+          <span class="meta-pill"><i class="fas fa-bullseye"></i> {{ziel}}</span>
+          <span class="meta-pill"><i class="fas fa-hourglass-half"></i> {{ritualdauer}}</span>
+          <span class="fert-pill fert-{{fertigkeit}}">{{fertigkeit}}</span>
+          {{#if merkmale}}{{#each merkmale}}<span class="merkmal-pill">{{this}}</span>{{/each}}{{/if}}
+        </div>
+
+        <p class="dsa-sham-effekt">{{effekt}}</p>
+
+        <dl class="dsa-sham-info">
+          <div><dt>Wirkungsdauer</dt><dd>{{wirkungsdauer}}</dd></div>
+          {{#if kulturen}}<div><dt>Kulturen</dt><dd>{{#each kulturen}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</dd></div>{{/if}}
+          {{#if voraussetzung}}<div class="warn"><dt>Voraussetzung</dt><dd>{{voraussetzung}}</dd></div>{{/if}}
+        </dl>
+
+        <button type="button" class="cast-btn" data-action="cast-ritual" data-id="{{id}}">
+          <i class="fas fa-feather-alt"></i> Ritual durchführen
+        </button>
+      </article>
+    {{/each}}
+  </div>
+
+  {{#unless rituale.length}}
+    <div class="dsa-sham-empty">
+      <i class="fas fa-search"></i>
+      <p>Keine Rituale gefunden — Filter anpassen oder andere Kultur wählen.</p>
+    </div>
+  {{/unless}}
+
+  {{#if keulenRituale.length}}
+    <details class="dsa-sham-details">
+      <summary><i class="fas fa-bone"></i> Knochenkeulen-Rituale ({{keulenRituale.length}})</summary>
+      <table class="dsa-sham-table">
+        <thead><tr><th>Ritual</th><th>Voraussetzung</th><th>Probe</th><th>Kosten</th><th>AP</th></tr></thead>
+        <tbody>
+          {{#each keulenRituale}}
+            <tr>
+              <td><strong>{{name}}</strong></td>
+              <td>{{vor}}</td>
+              <td>{{probe}}</td>
+              <td>{{kosten}}</td>
+              <td>{{ap}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </details>
+  {{/if}}
+
+  {{#if knochenkeulen.length}}
+    <details class="dsa-sham-details">
+      <summary><i class="fas fa-hammer"></i> Knochenkeulen-Kampfwerte</summary>
+      <table class="dsa-sham-table">
+        <thead><tr><th>Typ</th><th>TP</th><th>TPKK</th><th>Gew.</th><th>BF</th><th>INI</th><th>WM</th><th>DK</th><th>Talent</th></tr></thead>
+        <tbody>
+          {{#each knochenkeulen}}
+            <tr>
+              <td><strong>{{typ}}</strong></td>
+              <td>{{tp}}</td>
+              <td>{{tpkk}}</td>
+              <td>{{gew}}</td>
+              <td>{{bf}}</td>
+              <td>{{ini}}</td>
+              <td>{{wm}}</td>
+              <td>{{dk}}</td>
+              <td>{{talent}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </details>
+  {{/if}}
+</form>
+
+<style>
+/* ─── DSA Schamanen-Browser, lesefreundlich ─── */
+.dsa-sham-app {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: #15181c;
+  color: #e8eef4;
+  font-family: "Crimson Text", Georgia, serif;
+  font-size: 14px;
+  line-height: 1.5;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Header */
+.dsa-sham-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #1f2530 0%, #1a1f28 100%);
+  border: 1px solid #2c3340;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.dsa-sham-actor h2 {
+  margin: 0 0 8px 0;
+  font-size: 22px;
+  color: #a0d0e8;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  border: none;
+}
+.dsa-sham-actor h2 i { color: #a0d0e8; margin-right: 6px; }
+.dsa-sham-actor-meta {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.dsa-sham-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dsa-sham-stat .lbl {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #8090a0;
+  font-weight: 600;
+}
+.dsa-sham-stat .val {
+  font-size: 17px;
+  font-weight: 700;
+  color: #e8eef4;
+}
+
+/* Geister-Fertigkeiten Buttons */
+.dsa-sham-fert {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 6px;
+}
+.fert-btn {
+  background: linear-gradient(180deg, #1c2530 0%, #161d26 100%);
+  border: 1px solid #2c3a4a;
+  border-radius: 4px;
+  color: #e8eef4;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.fert-btn:hover {
+  border-color: #a0d0e8;
+  background: linear-gradient(180deg, #243040 0%, #1c2530 100%);
+}
+.fert-btn .fert-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #a0d0e8;
+}
+.fert-btn .fert-rkw {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffd770;
+  line-height: 1;
+}
+.fert-btn .fert-probe {
+  font-size: 10px;
+  color: #8090a0;
+  letter-spacing: 0.5px;
+}
+
+/* Filter-Bar */
+.dsa-sham-filters {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid #232a35;
+  border-radius: 4px;
+}
+.dsa-sham-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #8090a0;
+}
+.dsa-sham-filters label.grow { flex: 1; }
+.dsa-sham-filters label span {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+}
+.dsa-sham-filters select,
+.dsa-sham-filters input {
+  background: #1c2530 !important;
+  color: #e8eef4 !important;
+  border: 1px solid #2c3a4a !important;
+  border-radius: 3px;
+  padding: 6px 10px;
+  font-size: 14px;
+  font-family: inherit;
+}
+.dsa-sham-filters select option {
+  background: #15181c !important;
+  color: #e8eef4 !important;
+  padding: 4px 8px;
+}
+.dsa-sham-filters select option:checked,
+.dsa-sham-filters select option:hover,
+.dsa-sham-filters select option:focus {
+  background: #2c3a4a !important;
+  color: #a0d0e8 !important;
+}
+.dsa-sham-filters select:focus,
+.dsa-sham-filters input:focus {
+  outline: none;
+  border-color: #a0d0e8 !important;
+  box-shadow: 0 0 6px rgba(160, 208, 232, 0.3);
+}
+
+/* Ritual-Karten */
+.dsa-sham-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 12px;
+}
+.dsa-sham-card {
+  background: linear-gradient(180deg, #1d242e 0%, #161c24 100%);
+  border: 1px solid #2a3340;
+  border-radius: 5px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: all 0.15s;
+}
+.dsa-sham-card:hover {
+  border-color: #4a5565;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.dsa-sham-card.is-petromantie {
+  border-color: #8a6a40;
+  background: linear-gradient(180deg, #2a2520 0%, #1f1c18 100%);
+}
+
+.dsa-sham-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: 8px;
+}
+.dsa-sham-card-head h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #a0d0e8;
+  line-height: 1.25;
+  border: none;
+  flex: 1;
+}
+.dsa-sham-card.is-petromantie .dsa-sham-card-head h3 { color: #e8c890; }
+.petro-mark {
+  color: #e8c890;
+  font-size: 16px;
+  margin-right: 4px;
+}
+.grad-badge {
+  background: #2a3848;
+  color: #a0d0e8;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  border: 1px solid #3a4a5e;
+}
+.dsa-sham-card.is-petromantie .grad-badge {
+  background: #3a2c1c;
+  color: #e8c890;
+  border-color: #5a4530;
+}
+
+.dsa-sham-subtitel {
+  margin: 0;
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}
+
+/* Meta-Pills */
+.dsa-sham-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.meta-pill {
+  background: rgba(160, 208, 232, 0.1);
+  color: #b8d8e8;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  border: 1px solid rgba(160, 208, 232, 0.2);
+}
+.meta-pill i { margin-right: 4px; opacity: 0.7; }
+.fert-pill {
+  background: rgba(180, 220, 140, 0.1);
+  color: #c8e0a0;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  border: 1px solid rgba(180, 220, 140, 0.25);
+  font-weight: 600;
+  text-transform: lowercase;
+}
+.merkmal-pill {
+  background: rgba(200, 160, 220, 0.1);
+  color: #d8b8e0;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  border: 1px solid rgba(200, 160, 220, 0.25);
+}
+
+/* Effekt-Text */
+.dsa-sham-effekt {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #e8eef4;
+  background: rgba(0,0,0,0.25);
+  padding: 10px 12px;
+  border-radius: 3px;
+  border-left: 3px solid #5078a0;
+}
+.dsa-sham-card.is-petromantie .dsa-sham-effekt { border-left-color: #8a6a40; }
+
+/* Info-Liste */
+.dsa-sham-info {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  font-size: 13px;
+}
+.dsa-sham-info > div { display: contents; }
+.dsa-sham-info > div > dt {
+  color: #8090a0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+  align-self: center;
+}
+.dsa-sham-info > div > dd {
+  margin: 0;
+  color: #e8eef4;
+  font-size: 13px;
+  align-self: center;
+}
+.dsa-sham-info > div.warn > dt { color: #e08070; }
+.dsa-sham-info > div.warn > dd { color: #ffb0a0; }
+
+/* Cast-Button */
+.cast-btn {
+  background: linear-gradient(180deg, #2a4060 0%, #1a2840 100%);
+  border: 1px solid #3a5070;
+  border-radius: 4px;
+  color: #a0d0e8;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.cast-btn:hover {
+  background: linear-gradient(180deg, #3a5070 0%, #2a4060 100%);
+  border-color: #a0d0e8;
+  box-shadow: 0 0 10px rgba(160, 208, 232, 0.4);
+}
+.cast-btn i { margin-right: 6px; }
+.dsa-sham-card.is-petromantie .cast-btn {
+  background: linear-gradient(180deg, #5a4030 0%, #3a2818 100%);
+  border-color: #6a4830;
+  color: #e8c890;
+}
+.dsa-sham-card.is-petromantie .cast-btn:hover {
+  border-color: #e8c890;
+  box-shadow: 0 0 10px rgba(232, 200, 144, 0.4);
+}
+
+/* Empty State */
+.dsa-sham-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #707888;
+  background: rgba(0,0,0,0.2);
+  border-radius: 4px;
+  border: 1px dashed #2a3340;
+}
+.dsa-sham-empty i {
+  font-size: 32px;
+  display: block;
+  margin-bottom: 12px;
+  color: #555a68;
+}
+.dsa-sham-empty p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Details/Tabellen */
+.dsa-sham-details {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid #2a3340;
+  border-radius: 4px;
+  padding: 8px;
+}
+.dsa-sham-details summary {
+  cursor: pointer;
+  padding: 6px;
+  font-weight: 700;
+  color: #a0d0e8;
+  font-size: 14px;
+}
+.dsa-sham-details summary i { margin-right: 6px; }
+.dsa-sham-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.dsa-sham-table th,
+.dsa-sham-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  text-align: left;
+}
+.dsa-sham-table th {
+  background: rgba(0,0,0,0.4);
+  color: #a0d0e8;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+</style>

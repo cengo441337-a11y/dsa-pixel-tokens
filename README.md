@@ -9,7 +9,10 @@
 [![Regeldaten](https://img.shields.io/badge/Regeldaten-ORC%20License-orange?style=for-the-badge)](https://paizo.com/orclicense)
 [![Rechte](https://img.shields.io/badge/DSA-Genehmigt%20von%20Ulisses-green?style=for-the-badge)](https://ulisses-spiele.de/)
 [![Spells](https://img.shields.io/badge/Zauber-298-purple?style=for-the-badge)]()
+[![Liturgies](https://img.shields.io/badge/Liturgien-298-gold?style=for-the-badge)]()
+[![Rituals](https://img.shields.io/badge/Schamanen--Rituale-72-teal?style=for-the-badge)]()
 [![Weapons](https://img.shields.io/badge/Waffen-167-red?style=for-the-badge)]()
+[![SFs](https://img.shields.io/badge/Sonderfertigkeiten-176-blueviolet?style=for-the-badge)]()
 [![Tokens](https://img.shields.io/badge/Tokens-700%2B-ff69b4?style=for-the-badge)]()
 
 > ⚠️ **Fan-Projekt / Nicht offiziell** — *Das Schwarze Auge* und *DSA* sind eingetragene Marken der **Ulisses Spiele GmbH**. Dieses Modul steht in keiner kommerziellen Verbindung zum Verlag.
@@ -66,7 +69,10 @@ Ein FoundryVTT-Modul das auf dem **gdsa** System (DSA 4.1) aufbaut und es um ein
 - 16-Bit JRPG-Heldenbogen mit Retro-Design
 - Automatische VFX bei Kampf und Magie
 - Proben-System mit Patzer/Gluecklich-Erkennung
-- 298 Zauber + 167 Waffen + 86 Talente direkt aus den Regelbuchern
+- 298 Zauber + 298 Liturgien + 72 Schamanen-Rituale + 167 Waffen + 86 Talente direkt aus den Regelbuchern
+- Komplettes Karma-System für Geweihte (Mirakel, Aufstufung, Karmale Senkung)
+- Schamanen mit 4 Geister-Fertigkeiten + Petromantie-Reskins für Wühlschrate
+- Hochschamanen-Pantheons (Kamaluq/Tairach/Himmelswölfe)
 - Helden-Software XML Import
 - Zonenzauber mit Grid-Markierung und automatischem Schaden
 
@@ -115,6 +121,40 @@ Ein FoundryVTT-Modul das auf dem **gdsa** System (DSA 4.1) aufbaut und es um ein
 - **Zone-Damage**: LeP-Abzug fuer alle Token in der Zone, AsP-Abzug beim Caster
 - **Floating Damage Numbers**: Rote/blaue Zahlen schweben ueber betroffenen Token
 
+### Liturgien & Karma-System (DSA 4.1 Liber Liturgium)
+
+- **298 Liturgien** mit komplettem PDF-Volltext (Symbole/Gesten/Gebete + Auswirkung + Anmerkungen)
+- **Liturgien-Browser** mit Filter (Gott / Grad I-VIII / Suche), klappbare Detail-Sektionen
+- **Mirakel-Schnellbuttons**: ±0 / +6 / +18 — Probe via 1W20 ≤ LkW
+- **Aufstufungs-Dialog**: 4 Kategorien (Ritualdauer/Reichweite/Wirkungsdauer/Ziel) mit automatischer KaP/pKaP-Berechnung und 3×Grad ≤ LkW Constraint
+- **Modifikatoren-Tabelle**: Notlage, eigener Tempel, Feiertag, Limbus, Mitbeter etc. (Liber Liturgium S.16-18)
+- **Primäre Segnung** mit -2 Erleichterung + 2 KaP für Heimatkult
+- **Hochschamanen-Pantheons**: Kamaluq, Tairach, Himmelswölfe — 33 Pantheon-Liturgien + 12 KaP fixe Pool + Mirakel via *Geister aufnehmen*
+
+### Schamanen-Rituale & Petromantie (DSA 4.1 Wege der Zauberei + Elementare Gewalten)
+
+- **72 Schamanen-Rituale** über 11 Kulturen (Wdm/Utu/Toc/Niv/Ork/Gob/Gja/Fer/Tzk/Ach/Wuhl)
+- **Vier Geister-Fertigkeiten**: Geister rufen / bannen / binden / aufnehmen
+- **AsP-Würfel pro Grad** (1W6 → 6W6, ab Grad V mit 1/10 permanent)
+- **Schamanen-Browser** mit Filter (Kultur/Fertigkeit/Suche)
+- **18 Petromantie-Rituale** (Erz-Reskins für Wühlschrate)
+- **Knochenkeulen-Tabelle** + 9 Keulen-Rituale (Bann/Geist/Hilfe/Kraft/Härte/Nähe/Hilfe der Keule + Opferkeule)
+- **38 Edelsteine** mit Element-Bonus-Mapping (Edelsteinmagie-SF)
+
+### Beschwörungs-Magie
+
+- **Misslingen-Tabellen** für Anrufung (2W6 / 3W6 Blutmagie) + Beherrschung
+- **Pakt-Mechanik** mit GP-Pool (3 GP = -1 Erleichterung)
+- **Wahrer-Name-Qualität** (Q1/Q2) + "Ohne-Namen"-Toggle (+7 Anrufung)
+- **Kontroll-Probe** nach erfolgreicher Anrufung (1W20 ≤ Kontrollwert)
+- **MR-Boni gegen Spruchmerkmal** (Eiserner Wille I/II, Gedankenschutz)
+
+### Aventurischer Kalender
+
+- 12 Götter-Monate, 7 Wochentage, Namenlose Tage, 8 Feiertage
+- GM-Steuerung (±Tag/Woche/Monat/Jahr) + Datum-Setzen-Dialog
+- Sidebar-Button für Token-Tools
+
 ### 34 Zaubereffekte (Pixel-Art Animationen)
 
 | Typ | Effekte |
@@ -160,20 +200,26 @@ Ein FoundryVTT-Modul das auf dem **gdsa** System (DSA 4.1) aufbaut und es um ein
 
 ---
 
-## Datenbank (961 Eintraege aus Regelbuchern)
+## Datenbank (1.500+ Eintraege aus Regelbuchern)
 
 Alle Daten direkt aus den offiziellen DSA 4.1 Regelbuchern extrahiert:
 
 | Datei | Eintraege | Quelle |
 |-------|-----------|--------|
 | `data/spells.json` | 298 Zauber | Liber Cantiones Remastered |
+| `data/liturgien.json` | **298 Liturgien** (mit Symbole/Auswirkung/Anmerkungen) | Liber Liturgium |
+| `data/schamanen-rituale.json` | **72 Schamanen-Rituale** (54 Standard + 18 Petromantie) | Wege der Zauberei + Elementare Gewalten |
+| `data/edelsteine.json` | **38 Edelsteine** (Element-Bonus-Mapping) | Elementare Gewalten S.154-155 |
+| `data/calendar.json` | Aventurischer Kalender | DSA 4.1 |
+| `data/daemons.json` | Daemon-Datenbank mit BS/Wahrer-Name | Tractatus Contra Daemones |
 | `data/talents.json` | 86 Talente | Wege der Helden |
 | `data/weapons.json` | 144 Nahkampf + 23 Fernkampf | Wege des Schwertes |
 | `data/weapons.json` | 17 Schilde + 45 Manoever | Wege des Schwertes |
 | `data/armor.json` | 42 Ruestungen + Helme | Wege des Schwertes |
 | `data/advantages.json` | 85 Vorteile | Wege der Helden |
 | `data/disadvantages.json` | 126 Nachteile | Wege der Helden |
-| `data/special-abilities.json` | 112 Sonderfertigkeiten | Wege der Helden + Schwertes |
+| `data/special-abilities.json` | **176 Sonderfertigkeiten** (inkl. 20 Liturgie-SFs + 13 Schamane-SFs + 5 Petromantie-SFs) | Wege der Helden + Schwertes + Götter + Zauberei |
+| `data/creatures.json` | 155 Kreaturen + Daemonen + Elementare | DSA-Bestiarien |
 
 ---
 
@@ -248,16 +294,28 @@ python assets/build_monsters.py
 
 ## Roadmap
 
+### Erledigt in 0.5.0
+- [x] **Liber Liturgium**: 298 Liturgien mit komplettem PDF-Volltext
+- [x] **Karma-System**: KaP-Pool, Mirakel, Aufstufung, Karmale Senkung
+- [x] **Schamanen**: 4 Geister-Fertigkeiten + 72 Rituale über 11 Kulturen
+- [x] **Petromantie**: 18 Reskins für Wühlschrat-Schamanen
+- [x] **Hochschamanen**: Kamaluq/Tairach/Himmelswölfe Pantheons
+- [x] **Edelsteinmagie**: 38 Edelsteine mit Element-Bonus
+- [x] **Tractatus Contra Daemones**: Daemonen-DB + Misslingen-Tabellen + Pakt-Mechanik
+- [x] **Elementare Gewalten**: Eis/Erz-Elementare-Statblocks
+- [x] **Aventurischer Kalender**: 12 Götter-Monate, Feiertage
+
+### Offen
 - [ ] Spontanmodifikationen auf ZfP-basiert korrigieren (WdZ-konform)
 - [ ] Wege der Alchimie: Zauberzeichen, Artefakt-Erschaffung, Traenke
-- [ ] Elementare Gewalten: Elementarzauber, Djinn-Stats
-- [ ] Tractatus Contra Daemones: Daemonen-Bestiarum
-- [ ] Von Toten und Untoten: Untote, Golems, Chimaeren
+- [ ] Von Toten und Untoten: Untote, Golems, Chimaeren (volle Stat-DBs)
 - [ ] Groessere Kreaturen (2x2, 3x3 Token)
 - [ ] Effekt-Vorschau-Dialog
 - [ ] Zauberproben-Hook (auto-trigger bei gdsa Spell Check)
 - [ ] Screen-Effects (Kamera-Shake, Fade-to-Black, LP-Vignette)
 - [ ] effect-mappings.json (Zauber -> VFX vollstaendig verknuepfen)
+- [ ] Wege der Götter: Hochschamanen-Liturgien-Volldaten
+- [ ] Liturgie-Aufstufung als SF pro Liturgie
 
 ---
 

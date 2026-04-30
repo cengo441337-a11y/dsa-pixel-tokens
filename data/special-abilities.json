@@ -957,5 +957,333 @@
     "verbreitung": "3",
     "kategorie": "merkmalskenntnis",
     "effekt": "Erleichterung auf alle Beschwoerungs-Sprueche (Elementar)."
+  },
+  {
+    "name": "Liturgiestil",
+    "ap": 0,
+    "voraussetzung": "Profession (geweiht)",
+    "verbreitung": "Hauskult",
+    "effekt": "Pendant zu Repräsentation für Magier. Bestimmt welche Liturgien und Kultmerkmale dem Geweihten zugänglich sind. Wird in der Profession festgelegt.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Karmale Senkung",
+    "ap": 1500,
+    "voraussetzung": "KaP-Pool, IN 13, KL 13",
+    "verbreitung": "alle Geweihte",
+    "effekt": "Permanente Erhöhung der pKaP gegen GP/AP-Kosten. Pro Senkung +1 pKaP, Kosten steigend (Standardraster wie pAsP-Kauf).",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Liturgie-Aufstufung",
+    "ap": 0,
+    "voraussetzung": "jeweilige Liturgie auf Grad I",
+    "verbreitung": "pro Liturgie separat",
+    "effekt": "Erhöht den maximal wirkbaren Grad einer einzelnen Liturgie um 1. Pro Aufstufungs-Stufe separate SF.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Hausliturgie",
+    "ap": 0,
+    "voraussetzung": "Profession (Hauskult)",
+    "verbreitung": "Profession-spezifisch",
+    "effekt": "Eine vom Kult ausgewählte Liturgie ist um -1 erleichtert und kostet keine GP beim Lernen. Pendant zum Hauszauber.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Schein des Götterglaubens",
+    "ap": 200,
+    "voraussetzung": "Geweiht, Liturgiekenntnis 8+",
+    "verbreitung": "alle Geweihte",
+    "effekt": "Geweihter kann eine Liturgie wirken, ohne dass Außenstehende es als Götterwirken erkennen. Analog Schein der Magie.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Liturgie-Spezialisierung",
+    "ap": 100,
+    "voraussetzung": "Liturgiekenntnis 7+",
+    "verbreitung": "pro Liturgie separat",
+    "effekt": "-1 Erleichterung auf Proben einer bestimmten Liturgie. Analog Zauberspezialisierung.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Bannstrahl-Beherrschung",
+    "ap": 200,
+    "voraussetzung": "Praios-Geweiht, Liturgiekenntnis (Praios) 10",
+    "verbreitung": "Praios",
+    "effekt": "Erleichterung -2 auf Praios Magiebann-Liturgie.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Goldener Bann",
+    "ap": 300,
+    "voraussetzung": "Praios-Geweiht, Hochgeweihter",
+    "verbreitung": "Praios",
+    "effekt": "Praios-Geweihter kann seine Magiebann-Liturgie auch auf magische Wesen anwenden, die normal immun wären (z.B. Halbgötter-Gefolge).",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Borons Friede",
+    "ap": 150,
+    "voraussetzung": "Boron-Geweiht",
+    "verbreitung": "Boron",
+    "effekt": "Geweihter kann Sterbenden ohne Probe einen friedlichen Tod gewähren (sanfte Erlösung). Reduziert Anzahl der Untoten in der Region.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Schwarze Trauer",
+    "ap": 100,
+    "voraussetzung": "Boron-Geweiht",
+    "verbreitung": "Boron",
+    "effekt": "Erleichterung -2 auf Hauch-Borons-Liturgie und ähnliche Furcht-/Trauer-Wirkungen.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Stählerne Stirn (SF)",
+    "ap": 100,
+    "voraussetzung": "Rondra-Geweiht, MU 14",
+    "verbreitung": "Rondra",
+    "effekt": "Erleichterung -2 auf alle Furcht-Proben und auf Stählerne-Stirn-Liturgie. SF-Variante zur Liturgie.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Schlachtruf",
+    "ap": 150,
+    "voraussetzung": "Rondra-Geweiht, CH 13",
+    "verbreitung": "Rondra",
+    "effekt": "Erleichterung -2 auf Thalionmels Schlachtgesang. Wirkungsdauer +1 Stufe.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Gabe der Schlange",
+    "ap": 250,
+    "voraussetzung": "Hesinde-Geweiht",
+    "verbreitung": "Hesinde",
+    "effekt": "Magie-Affinität: Geweihter kann Zauber wirken (begrenzte Liste hesindefälliger Sprüche), AsP separat von KaP. Verbreitet bei Magier-Geweihten.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Schemenhafter Schritt",
+    "ap": 100,
+    "voraussetzung": "Phex-Geweiht, GE 13",
+    "verbreitung": "Phex",
+    "effekt": "Erleichterung -2 auf Phexens Elsterflug. Schleichen +2.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Heimstein-Bindung",
+    "ap": 200,
+    "voraussetzung": "Travia-Geweiht, Liturgiekenntnis (Travia) 10",
+    "verbreitung": "Travia",
+    "effekt": "Erleichterung -2 auf Heimsteinsegen. Geweihter kann mehrere Heimsteine gleichzeitig pflegen.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Grüne Hand",
+    "ap": 200,
+    "voraussetzung": "Peraine-Geweiht",
+    "verbreitung": "Peraine",
+    "effekt": "Erleichterung -2 auf alle Heilungs-Liturgien. Pro LkP* +1 zusätzliche LeP-Wiederherstellung beim Heilungssegen.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Schmiedeglut-Bindung",
+    "ap": 150,
+    "voraussetzung": "Ingerimm-Geweiht, Schmiedearbeiten 7",
+    "verbreitung": "Ingerimm",
+    "effekt": "Erleichterung -2 auf Heilige-Schmiedeglut-Liturgie. Schmiedearbeiten-Probe +RkP*/2 (kumulativ mit Liturgie-Wirkung).",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Wilde Jagd",
+    "ap": 200,
+    "voraussetzung": "Firun-Geweiht, MU 14",
+    "verbreitung": "Firun",
+    "effekt": "Erleichterung -2 auf Firun-Tiergestalt-Liturgie. Tiergestalt-Wirkungsdauer +1 Stufe.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Lebensfeuer",
+    "ap": 250,
+    "voraussetzung": "Tsa-Geweiht",
+    "verbreitung": "Tsa",
+    "effekt": "Erleichterung -2 auf alle Tsa-Heil-Liturgien. Bei Tsas wundersamer Erneuerung +LkP*/2 zusätzliche LeP-Regeneration.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Rauschsegen-Bindung",
+    "ap": 100,
+    "voraussetzung": "Rahja-Geweiht",
+    "verbreitung": "Rahja",
+    "effekt": "Erleichterung -2 auf Rahjas Rauschsegen. Wirkungsdauer +1 Stufe.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Ritualkenntnis (Schamane)",
+    "ap": 0,
+    "voraussetzung": "Halbzauberer (Schamane)",
+    "verbreitung": "alle Schamanenkulturen",
+    "effekt": "Schamane erhält die vier Geister-Fertigkeiten (Geister rufen, Geister bannen, Geister binden, Geister aufnehmen) als steigerbare Talente. Startwerte je nach Kultur.",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Weihe der Keule",
+    "ap": 0,
+    "voraussetzung": "Schamane, Geister binden 4",
+    "verbreitung": "alle außer Tocamuyac",
+    "effekt": "Voraussetzung für alle weiteren Keulen-Rituale (Bann/Geist/Hilfe/Kraft/Härte/Nähe). Mondmonats-Zeremonie. Ererbte Keule erschwert um gebundene pAsP.",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Schamanenrituale",
+    "ap": 0,
+    "voraussetzung": "Halbzauberer (Schamane)",
+    "verbreitung": "alle Schamanenkulturen",
+    "effekt": "Erlaubt das Erlernen der Schamanen-Ritual-Liste. Kulturspezifisch (Wdm/Utu/Niv/Ork/etc.).",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Verbotene Pforten",
+    "ap": 200,
+    "voraussetzung": "Schamane, Geister rufen 7",
+    "verbreitung": "alle Schamanenkulturen",
+    "effekt": "Bei AsP-Erschöpfung kann der Schamane die fehlenden Punkte als LeP zahlen. Sonst droht Gefangenschaft in der Geisterwelt.",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Tabuzone (SF)",
+    "ap": 100,
+    "voraussetzung": "Schamane, Geister binden 8",
+    "verbreitung": "Wdm/Utu/Ach/Fer",
+    "effekt": "Erleichterung -2 auf Tabuzone-Ritual. Erlaubt permanente Tabuzonen mit Großritual.",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Geist der Keule (Ritual)",
+    "ap": 200,
+    "voraussetzung": "Geister binden 11, vorab Beschwörung",
+    "verbreitung": "alle Schamanenkulturen",
+    "effekt": "Bindet einen Elementar-/Ahnen-/(selten) Dämon-Geist in die Knochenkeule. Kosten 4W6 AsP (beliebig perm).",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Bann der Keule",
+    "ap": 150,
+    "voraussetzung": "Geister binden 11",
+    "verbreitung": "alle Schamanenkulturen",
+    "effekt": "Knochenkeule erhält Bonus auf Geisterbann-Proben. Erschwernis +9/+12/+15 für Stufe I/II/III. Kosten 3W6 AsP (1/2/3 perm).",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Gespür der Keule",
+    "ap": 100,
+    "voraussetzung": "Geister binden 5",
+    "verbreitung": "alle Schamanenkulturen",
+    "effekt": "Magiegespür-Wert RkP*/2 (max 18). Keule rasselt bei magischer Präsenz/Artefakt/Kraftlinie. Tarn-/Antimagie senkt um deren ZfP*.",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Kraft der Keule",
+    "ap": 75,
+    "voraussetzung": "Geister binden 7",
+    "verbreitung": "alle Schamanenkulturen",
+    "effekt": "Knochenkeule erhält +mTP (modifizierten TP). Kosten 3W6 AsP (beliebig perm).",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Härte der Keule",
+    "ap": 50,
+    "voraussetzung": "Ritualkenntnis (Schamane)",
+    "verbreitung": "alle Schamanenkulturen",
+    "effekt": "Erhöht den BF (Bruchfaktor) der Knochenkeule.",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Nähe zur Natur",
+    "ap": 100,
+    "voraussetzung": "Geister binden 7",
+    "verbreitung": "alle Schamanenkulturen",
+    "effekt": "Keule wirkt wie Druiden-Stab auf Tiere/Pflanzen. Kosten 3W6 AsP (2 perm).",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Hilfe der Keule",
+    "ap": 100,
+    "voraussetzung": "Geister binden 7",
+    "verbreitung": "alle Schamanenkulturen",
+    "effekt": "Keule unterstützt eine bestimmte Geister-Fertigkeit (Stufe I/II/III: Erleichterung -1/-2/-3). Kosten 3W6 AsP (1/3/5 perm).",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Opferkeule",
+    "ap": 100,
+    "voraussetzung": "Ritualkenntnis (Schamane), SF Blutmagie",
+    "verbreitung": "Tairach/Brenoch-Dûn",
+    "effekt": "Erlaubt das Tränken der Keule mit dem Blut von Opfern für zusätzliche Macht (1 LeP = 1 AsP-Erleichterung in laufenden Ritualen).",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Kontakt zum Großen Geist",
+    "ap": 700,
+    "voraussetzung": "Schamane (Niv/Wdm/Utu/Tairach-Priester), CH 15, alle 4 Geister-Fertigkeiten ≥ 10",
+    "verbreitung": "Niv/Wdm/Utu/Ork (Tairach)",
+    "effekt": "Zweite Initiation zum Hochschamanen. Charakter erhält 12 KaP Grundvorrat + jährliche Karmalqueste (floor(IN/5) + floor(LkP*/10)). Mirakelprobe via Geister aufnehmen (NICHT MU/IN/CH wie Zwölfgötter-Geweihte). Erlernen pro Liturgie 50 AP × Grad. Keine primäre Segnung.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Liturgiekenntnis (Kamaluq)",
+    "ap": 0,
+    "voraussetzung": "SF Kontakt zum Großen Geist (Waldmenschen/Utulus/Tocamuyac)",
+    "verbreitung": "Kamaluq",
+    "effekt": "Fertigkeit für Kamaluq-Liturgien. Probe MU/IN/CH wie Standard-Liturgiekenntnis.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Liturgiekenntnis (Tairach)",
+    "ap": 0,
+    "voraussetzung": "SF Kontakt zum Großen Geist (Tairach-Priester)",
+    "verbreitung": "Tairach",
+    "effekt": "Fertigkeit für Tairach-Liturgien. Probe MU/IN/CH. Tairach-Priester behält parallel AsP-Pool für Schamanen-Rituale.",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Liturgiekenntnis (Himmelswölfe)",
+    "ap": 0,
+    "voraussetzung": "SF Kontakt zum Großen Geist (Nivesen)",
+    "verbreitung": "Himmelswölfe",
+    "effekt": "Fertigkeit für Himmelswölfe-Liturgien. Probe MU/IN/CH. Pantheon einzelner Gott-Wölfe (Gorfang, Grispelz, Vaß, Gabetaj).",
+    "kategorie": "liturgie"
+  },
+  {
+    "name": "Ritualkenntnis (Petromantie)",
+    "ap": 200,
+    "voraussetzung": "Merkmalskenntnis Elementar (Erz)",
+    "verbreitung": "1 (frei lernbar nur bei Archorim Sohn des Arabax / NSC)",
+    "effekt": "Schaltet Petromantie-Rituale frei. Mechanik wie Schamanenrituale (4 Geister-Fertigkeiten + AsP-Würfel). Wühlschrat-Schamanen haben Petromantie als feste Profession (NICHT frei lernbar).",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Glyphe des Elementaren Willens",
+    "ap": 0,
+    "voraussetzung": "Schamane (Wdm/Utu/Zib)",
+    "verbreitung": "Wdm/Utu/Zib 2",
+    "effekt": "Element-spezifisches Zauberzeichen, gespeist aus elementarer Aura. Permanente Wirkung solange Glyphe intakt.",
+    "kategorie": "magisch"
+  },
+  {
+    "name": "Bann- und Schutzkreis gegen Element",
+    "ap": 0,
+    "voraussetzung": "Schamane / Geode",
+    "verbreitung": "Utu/Wdm/Zib je 1",
+    "effekt": "Erweiterung des Bann-/Schutzkreises auf elementare Wesen (Dschinne, Elementare, Geister-Element-Hybride). Pro Element separate SF.",
+    "kategorie": "schamane"
+  },
+  {
+    "name": "Zusatzzeichen Elementarquellenspeisung",
+    "ap": 0,
+    "voraussetzung": "Geode/Schamane mit Glyphenkenntnis",
+    "verbreitung": "Ach/Alc/Utu je 1",
+    "effekt": "Permanente Zauberzeichen, die aus einer elementaren Quelle (Vulkan, Gletscher, Wasserfall, Erdspalte) gespeist werden. Wirkt unbegrenzt solange Quelle aktiv ist.",
+    "kategorie": "magisch"
   }
 ]
