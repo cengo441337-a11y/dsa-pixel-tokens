@@ -120,8 +120,10 @@ export async function addPersistentEffect(actor, opts) {
 
   const aeData = {
     name: name ?? lit?.name ?? "Liturgie-Effekt",
-    icon,
+    img: icon,   // Foundry v12 uses 'img' (was 'icon' in v10/v11)
+    icon,        // Keep for backward-compat with older Foundry
     duration: duration ?? {},
+    description: `${lit?.name ?? "Liturgie"} (LkP* ${lkpStar}). Rechts-Klick auf Icon im Token-HUD zum Beenden.`,
     flags: {
       [MODULE_ID]: {
         liturgyId: lit?.id ?? null,
@@ -133,6 +135,7 @@ export async function addPersistentEffect(actor, opts) {
     },
     changes: [],
     transfer: false,
+    statuses: [`liturgy-${vfx}`],  // markiert als Status (Foundry-Token-HUD zeigt es)
   };
 
   let effect;

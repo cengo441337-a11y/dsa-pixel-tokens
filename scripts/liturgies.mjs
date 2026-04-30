@@ -206,6 +206,7 @@ export function getActorKult(actor) {
     if (lc.includes("kamaluq") || (lc.includes("hochschamane") && (lc.includes("waldmensch") || lc.includes("utulu") || lc.includes("tocamuy")))) return "Kamaluq";
     if (lc.includes("tairach") && (lc.includes("hochschamane") || lc.includes("priester"))) return "Tairach";
     if (lc.includes("himmelswölfe") || lc.includes("himmelswolf") || (lc.includes("hochschamane") && lc.includes("nives"))) return "Himmelswölfe";
+    if (lc.includes("namenlos")) return "Namenloser";
     for (const gott of ["Praios","Rondra","Efferd","Travia","Boron","Hesinde","Phex","Peraine","Ingerimm","Rahja","Tsa","Firun","Aves","Ifirn","Kor","Nandus","Swafnir","Marbo","Angrosch","H'Szint","H'Ranga","Gravesh"]) {
       if (lc.includes(gott.toLowerCase())) return gott;
     }
@@ -394,36 +395,16 @@ export async function rollMirakel(actor, modKey = "mirakelPlus") {
   return { roll: dice, erfolg, lkpStar, kapCost: cost };
 }
 
-// ─── Persistent-Effect-Button-Renderer ───────────────────────────────────────
-// Liefert HTML für den "🔚 Effekt beenden"-Button im Chat, wenn die Liturgie
-// einen persistenten Effekt erzeugt hat (Aura mit Wirkungsdauer).
+// ─── Persistent-Effect-Hinweis im Chat (klein, dezent) ──────────────────────
+// Großer Beenden-Button war zu unübersichtlich — jetzt nur eine kleine Zeile
+// die auf das Token-Status-Icon verweist (Rechtsklick darauf -> beenden).
 function _renderPersistentEffectButton(actor, effectInfo, lit) {
   if (!effectInfo) return "";
-  const buttons = [];
-  // Self-Aura / Self-Cast
-  if (effectInfo.persistentEffectId) {
-    buttons.push({
-      actorId: actor.id,
-      effectId: effectInfo.persistentEffectId,
-      label: `🔚 ${lit.name} beenden`,
-    });
-  }
-  // Target-Buffs (Liste von { actorId, effectId })
-  if (Array.isArray(effectInfo.persistentEffectIds)) {
-    for (const e of effectInfo.persistentEffectIds) {
-      const targetActor = game.actors.get(e.actorId);
-      const tName = targetActor?.name ?? "Ziel";
-      buttons.push({
-        actorId: e.actorId,
-        effectId: e.effectId,
-        label: `🔚 ${lit.name} (${tName}) beenden`,
-      });
-    }
-  }
-  if (!buttons.length) return "";
-  return `<div class="dsa-active-effect-line" style="margin-top:6px;padding:6px 10px;background:rgba(255,215,112,0.08);border-left:2px solid #b8841c;border-radius:0 3px 3px 0">
-    <div style="font-size:10px;color:#aaa;margin-bottom:3px">⏳ Aktiver Effekt — Wirkungsdauer ${lit.wirkungsdauer}</div>
-    ${buttons.map(b => `<button class="dsa-end-effect-btn" data-actor-id="${b.actorId}" data-effect-id="${b.effectId}" style="background:#3a2a1c;color:#ffd770;border:1px solid #b8841c;padding:4px 10px;font-family:'Crimson Text',Georgia,serif;font-size:12px;border-radius:3px;cursor:pointer;margin-right:4px;margin-top:2px">${b.label}</button>`).join("")}
+  const has = effectInfo.persistentEffectId
+           || (Array.isArray(effectInfo.persistentEffectIds) && effectInfo.persistentEffectIds.length > 0);
+  if (!has) return "";
+  return `<div class="dsa-active-effect-hint" style="margin-top:4px;font-size:10px;color:#a89a78;font-style:italic">
+    ⏳ Aktiver Effekt am Token — Rechts-Klick auf Status-Icon zum Beenden
   </div>`;
 }
 
@@ -824,7 +805,7 @@ export class LiturgienApp extends Application {
       liturgien,
       liturgienByGrad,
       isPrimaerMap: Object.fromEntries(liturgien.map(l => [l.id, Array.isArray(l.primaer) && l.primaer.includes(kult)])),
-      goetter: ["Praios","Rondra","Efferd","Travia","Boron","Hesinde","Phex","Peraine","Ingerimm","Rahja","Tsa","Firun","Aves","Ifirn","Kor","Nandus","Swafnir","Marbo","Kamaluq","Tairach","Himmelswölfe"],
+      goetter: ["Praios","Rondra","Efferd","Travia","Boron","Hesinde","Phex","Peraine","Ingerimm","Rahja","Tsa","Firun","Aves","Ifirn","Kor","Nandus","Swafnir","Marbo","Kamaluq","Tairach","Himmelswölfe","Namenloser","Angrosch","Gravesh","H'Szint","H'Ranga","Zsahh"],
       grade: ["I","II","III","IV","V","VI","VII","VIII"],
     };
   }
