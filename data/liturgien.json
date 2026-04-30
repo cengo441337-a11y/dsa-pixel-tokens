@@ -195,7 +195,9 @@
       "mirakelprobe_talent": "Geister aufnehmen",
       "primaere_segnung": null,
       "hinweis": "Hochschamanen kennen KEINE primäre Segnung (Liber Liturgium S.9). Tairach-Priester hat parallel AsP-Pool (Schamanen-Rituale) + KaP-Pool (Liturgien)."
-    }
+    },
+    "lastUpdate": "2026-04-30 v0.7.6 Praios-Liturgien-Fix",
+    "count": 306
   },
   "liturgien": [
     {
@@ -722,7 +724,9 @@
       "id": "goldener-blick",
       "name": "Goldener Blick",
       "gott": [
-        "Praios"
+        "Angrosch",
+        "Ingerimm",
+        "Gravesh"
       ],
       "grad": "III",
       "ziel": "G",
@@ -793,7 +797,7 @@
       "id": "goldene-ruestung",
       "name": "Goldene Rüstung",
       "gott": [
-        "Rondra"
+        "Praios"
       ],
       "grad": "II",
       "ziel": "G",
@@ -2120,21 +2124,9 @@
       "id": "schlaf-des-gesegneten",
       "name": "Schlaf des Gesegneten",
       "gott": [
-        "Praios",
         "Boron",
-        "Rondra",
-        "Hesinde",
-        "Travia",
-        "Phex",
-        "Peraine",
-        "Tsa",
-        "Ingerimm",
         "Rahja",
-        "Efferd",
-        "Firun",
-        "Kamaluq",
-        "Tairach",
-        "Himmelswölfe"
+        "Aves"
       ],
       "grad": "I",
       "ziel": "P",
@@ -2492,6 +2484,11 @@
       "id": "purgation",
       "name": "Purgation",
       "gott": [
+        "Praios",
+        "Rondra",
+        "Hesinde",
+        "Ingerimm",
+        "H'Szint",
         "Kamaluq",
         "Tairach"
       ],
@@ -2795,6 +2792,9 @@
       "id": "unverstellter-blick",
       "name": "Unverstellter Blick",
       "gott": [
+        "Hesinde",
+        "H'Szint",
+        "Praios",
         "Tairach"
       ],
       "grad": "III",
@@ -2887,6 +2887,12 @@
       "id": "weisung-des-himmels",
       "name": "Weisung des Himmels",
       "gott": [
+        "Praios",
+        "Efferd",
+        "Aves",
+        "Swafnir",
+        "Ifirn",
+        "Firun",
         "Himmelswölfe"
       ],
       "grad": "I",
@@ -3435,7 +3441,7 @@
     },
     {
       "id": "bannfluch-des-heiligen-khalid",
-      "name": "Bannfluch, des Heiligen Khalid",
+      "name": "Bannfluch des Heiligen Khalid",
       "gott": [
         "Boron",
         "Kamaluq"
@@ -3458,7 +3464,7 @@
     },
     {
       "id": "begehen-der-heiligen-wasser",
-      "name": "Begehen der, Heiligen Wasser",
+      "name": "Begehen der Heiligen Wasser",
       "gott": [
         "Efferd"
       ],
@@ -3750,7 +3756,7 @@
     },
     {
       "id": "das-schwarze-fell-durch-das-rote-blut",
-      "name": "Das schwarze Fell, durch das rote Blut",
+      "name": "Das schwarze Fell durch das rote Blut",
       "gott": [
         "Kor"
       ],
@@ -3772,7 +3778,7 @@
     },
     {
       "id": "der-ueber-das-schlachtfeld-schreitet",
-      "name": "Der über das, Schlachtfeld schreitet",
+      "name": "Der über das Schlachtfeld schreitet",
       "gott": [
         "Kor"
       ],
@@ -3794,7 +3800,7 @@
     },
     {
       "id": "des-einen-bezaubernder-sphaerenklang",
-      "name": "Des Einen bezaubernder, Sphärenklang",
+      "name": "Des Einen bezaubernder Sphärenklang",
       "gott": [
         "universell"
       ],
@@ -3951,7 +3957,7 @@
     },
     {
       "id": "ein-freund-in-zeiten-der-not",
-      "name": "Ein Freund in, Zeiten der Not",
+      "name": "Ein Freund in Zeiten der Not",
       "gott": [
         "Aves"
       ],
@@ -4045,7 +4051,7 @@
     },
     {
       "id": "erzieherische-massnahme-der-heiligen-yalsicena",
-      "name": "Erzieherische Massnahme, der Heiligen Yalsicena",
+      "name": "Erzieherische Massnahme der Heiligen Yalsicena",
       "gott": [
         "Travia"
       ],
@@ -4156,7 +4162,7 @@
     },
     {
       "id": "fluch-wider-die-unglaeubigen",
-      "name": "Fluch wider, die Ungläubigen",
+      "name": "Fluch wider die Ungläubigen",
       "gott": [
         "universell"
       ],
@@ -4223,7 +4229,7 @@
     },
     {
       "id": "fuenfte-lobpreisung-des-fruehlings",
-      "name": "Fünfte Lobpreisung, des Frühlings",
+      "name": "Fünfte Lobpreisung des Frühlings",
       "gott": [
         "Peraine",
         "Himmelswölfe"
@@ -4246,7 +4252,7 @@
     },
     {
       "id": "fuerbitten-des-heiligen-therb-n",
-      "name": "Fürbitten des, heiligen Therbûn",
+      "name": "Fürbitten des heiligen Therbûn",
       "gott": [
         "Peraine"
       ],
@@ -4268,7 +4274,7 @@
     },
     {
       "id": "garafans-gleissende-schwingen",
-      "name": "Garafans gleissende, Schwingen",
+      "name": "Garafans gleissende Schwingen",
       "gott": [
         "Praios"
       ],
@@ -4290,7 +4296,7 @@
     },
     {
       "id": "gebet-des-kristallklaren-blicks",
-      "name": "Gebet des, kristallklaren Blicks",
+      "name": "Gebet des kristallklaren Blicks",
       "gott": [
         "Efferd"
       ],
@@ -4334,7 +4340,7 @@
     },
     {
       "id": "gelaeutert-sei-erz-und-goldgestein",
-      "name": "Geläutert sei, Erz und Goldgestein",
+      "name": "Geläutert sei Erz und Goldgestein",
       "gott": [
         "Angrosch",
         "Gravesh"
@@ -4357,7 +4363,7 @@
     },
     {
       "id": "gemeinschaft-der-treuen-gefaehrten",
-      "name": "Gemeinschaft der, treuen Gefährten",
+      "name": "Gemeinschaft der treuen Gefährten",
       "gott": [
         "Travia"
       ],
@@ -5006,7 +5012,7 @@
     },
     {
       "id": "kleine-liturgie-des-heiligen-nemekath",
-      "name": "Kleine Liturgie, des heiligen Nemekath",
+      "name": "Kleine Liturgie des heiligen Nemekath",
       "gott": [
         "Boron",
         "Tairach"
@@ -5051,7 +5057,7 @@
     },
     {
       "id": "largorax-hammer-rufen",
-      "name": "Largorax', Hammer rufen",
+      "name": "Largorax' Hammer rufen",
       "gott": [
         "Angrosch"
       ],
@@ -5766,7 +5772,7 @@
     },
     {
       "id": "rondras-wundersame-ruestung",
-      "name": "Rondras, wundersame Rüstung",
+      "name": "Rondras wundersame Rüstung",
       "gott": [
         "Rondra"
       ],
@@ -6233,7 +6239,7 @@
     },
     {
       "id": "segnung-der-staehlernen-stirn",
-      "name": "Segnung der, stählernen Stirn",
+      "name": "Segnung der stählernen Stirn",
       "gott": [
         "Rondra"
       ],
@@ -6604,7 +6610,7 @@
     },
     {
       "id": "thalionmels-schlachtgesang",
-      "name": "Thalionmels, Schlachtgesang",
+      "name": "Thalionmels Schlachtgesang",
       "gott": [
         "Rondra"
       ],
@@ -6648,7 +6654,7 @@
     },
     {
       "id": "travias-gebet-der-sicheren-zuflucht",
-      "name": "Travias Gebet, der sicheren Zuflucht",
+      "name": "Travias Gebet der sicheren Zuflucht",
       "gott": [
         "Travia"
       ],
@@ -6738,7 +6744,7 @@
     },
     {
       "id": "tsas-segensreicher-neuanfang",
-      "name": "Tsas segensreicher, Neuanfang",
+      "name": "Tsas segensreicher Neuanfang",
       "gott": [
         "Tsa",
         "Ingerimm",
@@ -6762,7 +6768,7 @@
     },
     {
       "id": "tsas-wundersame-erneuerung",
-      "name": "Tsas wundersame, Erneuerung",
+      "name": "Tsas wundersame Erneuerung",
       "gott": [
         "Tsa",
         "Zsahh"
@@ -6785,7 +6791,7 @@
     },
     {
       "id": "tsas-wundersame-fruchtbarkeit",
-      "name": "Tsas wundersame, Fruchtbarkeit",
+      "name": "Tsas wundersame Fruchtbarkeit",
       "gott": [
         "Tsa",
         "Zsahh",
@@ -6831,7 +6837,7 @@
     },
     {
       "id": "unterpfand-des-heiligen-rh-s",
-      "name": "Unterpfand, des Heiligen Rhÿs",
+      "name": "Unterpfand des Heiligen Rhÿs",
       "gott": [
         "Ingerimm"
       ],
@@ -7105,7 +7111,7 @@
     },
     {
       "id": "wegzehrung-der-heiligen-selma",
-      "name": "Wegzehrung, der Heiligen Selma",
+      "name": "Wegzehrung der Heiligen Selma",
       "gott": [
         "Peraine"
       ],
@@ -7238,27 +7244,28 @@
     },
     {
       "id": "zerschmetternder-bannstrahl",
-      "name": "Zerschmetternder, Bannstrahl",
+      "name": "Zerschmetternder Bannstrahl",
       "gott": [
-        "Firun",
-        "Ifirn",
-        "Travia",
-        "Aves"
+        "Praios",
+        "Kamaluq"
       ],
       "grad": "V",
       "ziel": "P",
       "reichweite": "Sicht",
-      "ritualdauer": "Gebet (1 Spielrunde)",
-      "wirkungsdauer": "maximal LkP* in Stunden",
+      "ritualdauer": "Stoßgebet",
+      "wirkungsdauer": "augenblicklich",
       "art": "speziell",
-      "merkmale": [],
-      "effekt": "Durch diese Liturgie kann der Geweihte ohne weitere Proben eine sichere Zuflucht finden, in der er und seine Gefährten vor Wind und Wetter geschützt sind.",
-      "symboleGesten": "Der Geweihte weist mit dem Zeichen des Auges auf das Ziel und ruft: Herr Praios, ewige Sonne, Trenner von Recht und Un- recht! Gepriesen sei Deine Macht! Dein strafender Blick falle auf diesen Frevler! Es sei!",
-      "auswirkung": "Aus dem Himmel fährt ein gleißender Strahl auf das Ziel her- ab. Der Bannstrahl zerschmettert unheilige Wesen wie Chimären, Golems, Untote und (maximal fünfgehörnte) Dämonen zu Staub, andere Wesen ver- lieren das Bewusstsein. Magiebegabte oder Zauberwesen verlieren außer- dem sämtliche aktuell vorhandene Astralenergie. Paktierer erleiden darüber hinaus LkP*+15 SP. Der Schaden gilt immer als geweihter Schaden, gegen Paktierer außerdem als verletzend.",
-      "anmerkungen": "Auch am Körper mitgeführte magische oder unheilige Artefakte können nach Maßgabe des Meisters in Mitleidenschaft gezogen werden. Zuflucht finden",
-      "herkunftDetail": "Firun, Ifirn, Travia (Lowangen, Trallop, Travingen), Aves,",
-      "ritualdauerDetail": "Gebet (1 Spielrunde)",
-      "wirkungsdauerDetail": "maximal LkP* in Stunden",
+      "merkmale": [
+        "Antimagie",
+        "Schaden"
+      ],
+      "effekt": "Strahl aus Alveran zerschmettert unheilige Wesen (Chimären, Golems, Untote, max. 5-gehörnte Dämonen) zu Staub. Andere verlieren Bewusstsein. Magiebegabte verlieren alle aktuellen AsP. Paktierer: zusätzl. LkP*+5 SP geweihter und verletzender Schaden.",
+      "symboleGesten": "Der Geweihte weist mit dem Zeichen des Auges auf das Ziel und ruft: \"Herr Praios, ewige Sonne, Trenner von Recht und Unrecht! Gepriesen sei Deine Macht! Dein strafender Blick falle auf diesen Frevler! Es sei!\"",
+      "auswirkung": "Aus dem Himmel fährt ein gleißender Strahl auf das Ziel herab. Der Bannstrahl zerschmettert unheilige Wesen wie Chimären, Golems, Untote und (maximal fünfgehörnte) Dämonen zu Staub, andere Wesen verlieren das Bewusstsein. Magiebegabte oder Zauberwesen verlieren außerdem sämtliche aktuell vorhandene Astralenergie. Paktierer erleiden darüber hinaus LkP*+15 SP. Der Schaden gilt immer als geweihter Schaden, gegen Paktierer außerdem als verletzend.",
+      "anmerkungen": "Auch am Körper mitgeführte magische oder unheilige Artefakte können nach Maßgabe des Meisters in Mitleidenschaft gezogen werden.",
+      "herkunftDetail": "Praios, Kamaluq; Obarans Bannstrahl (Kamaluq)",
+      "ritualdauerDetail": "Stoßgebet (10 Aktionen)",
+      "wirkungsdauerDetail": "augenblicklich",
       "_quelle": "Liber Liturgium (PDF-Auto-Import)"
     },
     {
@@ -7593,6 +7600,30 @@
       "ritualdauerDetail": "Zyklus",
       "wirkungsdauerDetail": "LkP* Wochen, ein erneutes Auftreten ist jedoch möglich",
       "_quelle": "Liber Liturgium (Boron-Liste, Alias zu PDF: Segen der heiligen Noiona)"
+    },
+    {
+      "id": "heiliger-lehnseid",
+      "name": "Heiliger Lehnseid",
+      "gott": [
+        "Praios"
+      ],
+      "grad": "II",
+      "ziel": "P",
+      "reichweite": "Berührung",
+      "ritualdauer": "Gebet",
+      "ritualdauerDetail": "Gebet (1 Spielrunde)",
+      "wirkungsdauer": "permanent",
+      "wirkungsdauerDetail": "permanent (bis zum Bruch des Eides)",
+      "art": "speziell",
+      "merkmale": [
+        "Einfluss"
+      ],
+      "effekt": "Praios-Variante des Eidsegens (Grad I) mit deutlich mächtigerer Wirkung. Bei Bruch des heiligen Lehnseides erleidet der Schwörende schwere geistige und körperliche Konsequenzen (Reue, Auszehrung, Krankheit). Der Eid wird vor Praios und seinen Geweihten geschworen.",
+      "symboleGesten": "Der Geweihte schlägt das Sonnensymbol über dem Schwörenden und ruft Praios als Zeugen an. Der Schwörende legt einen Lehnseid auf eine heilige Stätte, eine Reliquie oder die Hand des Geweihten.",
+      "auswirkung": "Wie Eidsegen, aber als feudaler Lehnseid mit höherer Bindung. Bricht der Schwörende den Lehnseid, wird er von Praios persönlich gemahnt: -LkP* auf alle Proben für LkP* Wochen, dazu kann der Geweihte die Liturgie 'Praios' Mahnung' ohne Probe gegen den Eidbrüchigen einsetzen. Im Fall von Hoch- und Landesverrat (gegen einen rechtmäßig durch Praiosgeweihten gekrönten Herrscher) ist die Wirkung permanent.",
+      "anmerkungen": "Diese Liturgie wird vor allem bei Königsweihen, Adelseiden und feudalen Treuegelübden verwendet. Sie ist die mächtigste Form des Eidsegens und beruht auf der Garantie des Götterfürsten Praios persönlich. Variante von 'Eidsegen' (Grad I).",
+      "herkunftDetail": "Praios",
+      "_quelle": "Wege der Götter S.57 (Praios Grad II)"
     }
   ]
 }
