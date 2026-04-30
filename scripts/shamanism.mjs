@@ -411,36 +411,11 @@ export async function castRitual(actor, ritualId) {
         cancel: { label: "Abbrechen", callback: () => resolve(null) }
       },
       default: "cast",
-      render: (html) => _styleShamanismDialogButtons(html),
     }, {
       classes: ["dsa-pixel-dialog"],
       width: 540,
     }).render(true);
   });
-}
-
-// Inline-Styles für Schamanen-Dialog (gleicher Bulletproof-Pattern wie liturgies.mjs)
-function _styleShamanismDialogButtons(html) {
-  try {
-    const $h = html instanceof jQuery ? html : $(html);
-    const root = $h.closest(".app.dialog");
-    const buttons = root.find(".dialog-buttons button");
-    buttons.each(function() {
-      const btn = this;
-      const isCast = btn.dataset.button === "cast" || btn.dataset.button === "ok";
-      const container = btn.parentElement;
-      if (container) container.style.cssText += "background:#15181c;padding:8px;gap:8px;border-top:1px solid rgba(160,200,232,0.3);";
-      if (isCast) {
-        btn.style.cssText = "background:linear-gradient(180deg,#5588cc 0%,#2a4477 100%);color:#fff;border:1px solid #a0d0e8;font-family:'Crimson Text',Georgia,serif;font-weight:700;font-size:14px;padding:8px 16px;border-radius:3px;text-shadow:none;opacity:1;cursor:pointer;flex:1;";
-      } else {
-        btn.style.cssText = "background:linear-gradient(180deg,#2a3540 0%,#15181c 100%);color:#a0d0e8;border:1px solid #5588cc;font-family:'Crimson Text',Georgia,serif;font-weight:600;font-size:14px;padding:8px 16px;border-radius:3px;opacity:1;cursor:pointer;flex:1;";
-      }
-    });
-    const header = root.find(".window-header")[0];
-    if (header) header.style.cssText += "background:linear-gradient(180deg,#1a2030 0%,#15181c 100%);border-bottom:1px solid #5588cc;";
-    const content = root.find(".window-content")[0];
-    if (content) content.style.background = "#15181c";
-  } catch (e) { console.warn("[dsa-pixel-tokens] _styleShamanismDialogButtons:", e); }
 }
 
 // ─── Schamanen-Browser-UI ───────────────────────────────────────────────────

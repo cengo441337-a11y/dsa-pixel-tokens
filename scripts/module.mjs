@@ -216,6 +216,7 @@ Hooks.once("ready", async () => {
   registerShamanism();
   registerKeule();
   registerGmRelay();
+  registerDialogTheme();
 
   // CSS-Cache-Buster: kritische Pixel-Würfel-Regeln per JS-Inject, damit sie
   // auch greifen wenn Foundry/Browser das Modul-CSS aggressiv cacht.
@@ -305,6 +306,109 @@ Hooks.once("ready", async () => {
 
   console.log(`[${MODULE_ID}] ✓ Fully loaded`);
 });
+
+// ─── Dialog-Theme (Wirken/Abbrechen-Buttons lesbar machen) ───────────────────
+// Foundrys Default-Buttons haben dunkle Schrift auf hellem Background. Auf
+// unserem dunklen Theme = unsichtbar. Hooks.on("renderDialog") fired NACH dem
+// DOM-Insert, daher können wir hier Inline-Styles direkt setzen — die kann
+// keine CSS-Regel mehr überschreiben.
+function registerDialogTheme() {
+  Hooks.on("renderDialog", (app, html, data) => {
+    const $h = html instanceof jQuery ? html : $(html);
+    const root = $h.closest(".app.dialog");
+    if (!root.length) return;
+    if (!root.hasClass("dsa-pixel-dialog")) return; // nur unsere Dialoge
+
+    // Schamanen-Dialog hat blaues Theme (.dsa-pixel-sham-dialog im Inneren)
+    const isShaman = root.find(".dsa-pixel-sham-dialog").length > 0;
+    const palette = isShaman ? {
+      bg: "#15181c", border: "#5588cc", accent: "#a0d0e8",
+      castBg: "linear-gradient(180deg,#5588cc 0%,#2a4477 100%)",
+      castText: "#ffffff",
+      cancelBg: "linear-gradient(180deg,#2a3540 0%,#15181c 100%)",
+      cancelText: "#a0d0e8",
+    } : {
+      bg: "#1a1612", border: "#b8841c", accent: "#ffd770",
+      castBg: "linear-gradient(180deg,#ffd770 0%,#d4a032 100%)",
+      castText: "#000000",
+      cancelBg: "linear-gradient(180deg,#3a2a1c 0%,#2a1f14 100%)",
+      cancelText: "#ffd770",
+    };
+
+    // Window-Header
+    const header = root.find(".window-header")[0];
+    if (header) {
+      header.style.setProperty("background", `linear-gradient(180deg, #2a1f14 0%, ${palette.bg} 100%)`, "important");
+      header.style.setProperty("border-bottom", `1px solid ${palette.border}`, "important");
+      const title = header.querySelector(".window-title");
+      if (title) title.style.setProperty("color", palette.accent, "important");
+    }
+
+    // Window-Content
+    const content = root.find(".window-content")[0];
+    if (content) content.style.setProperty("background", palette.bg, "important");
+
+    // Dialog-Buttons-Container
+    const btnContainer = root.find(".dialog-buttons")[0];
+    if (btnContainer) {
+      btnContainer.style.setProperty("background", palette.bg, "important");
+      btnContainer.style.setProperty("padding", "8px", "important");
+      btnContainer.style.setProperty("gap", "8px", "important");
+      btnContainer.style.setProperty("border-top", `1px solid ${palette.border}`, "important");
+    }
+
+    // Buttons mit !important inline (überschreibt JEDE CSS-Regel)
+    root.find(".dialog-buttons button").each(function() {
+      const btn = this;
+      const isCast = btn.dataset.button === "cast" || btn.dataset.button === "ok" || btn.dataset.button === "yes";
+      const set = (k, v) => btn.style.setProperty(k, v, "important");
+
+      if (isCast) {
+        set("background", palette.castBg);
+        set("color", palette.castText);
+        set("border", `2px solid ${palette.accent}`);
+        set("font-weight", "700");
+        set("text-shadow", "none");
+      } else {
+        set("background", palette.cancelBg);
+        set("color", palette.cancelText);
+        set("border", `1px solid ${palette.border}`);
+        set("font-weight", "600");
+        set("text-shadow", "0 1px 2px rgba(0,0,0,0.6)");
+      }
+      set("font-family", "'Crimson Text', Georgia, serif");
+      set("font-size", "14px");
+      set("padding", "8px 16px");
+      set("border-radius", "3px");
+      set("opacity", "1");
+      set("letter-spacing", "0.5px");
+      set("cursor", "pointer");
+      set("flex", "1");
+      set("text-transform", "none");
+
+      // Hover-Effekte
+      btn.addEventListener("mouseenter", () => {
+        if (isCast) {
+          btn.style.setProperty("box-shadow", `0 0 14px ${palette.accent}`, "important");
+          btn.style.setProperty("filter", "brightness(1.15)", "important");
+        } else {
+          btn.style.setProperty("box-shadow", `0 0 8px ${palette.accent}`, "important");
+          btn.style.setProperty("color", "#fff5c8", "important");
+          btn.style.setProperty("border-color", palette.accent, "important");
+        }
+      });
+      btn.addEventListener("mouseleave", () => {
+        btn.style.removeProperty("box-shadow");
+        btn.style.removeProperty("filter");
+        if (!isCast) {
+          btn.style.setProperty("color", palette.cancelText, "important");
+          btn.style.setProperty("border-color", palette.border, "important");
+        }
+      });
+    });
+  });
+  console.log(`[${MODULE_ID}] Dialog-Theme registered (renderDialog hook)`);
+}
 
 // ─── Taverne-Szenen Setup ───────────────────────────────────────────────────
 
