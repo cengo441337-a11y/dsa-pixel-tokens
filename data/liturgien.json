@@ -179,7 +179,8 @@
       "Zsahh": "Heilungssegen",
       "Kamaluq": null,
       "Tairach": null,
-      "Himmelswölfe": null
+      "Himmelswölfe": null,
+      "Namenloser": "Namenloses Vergessen"
     },
     "_hochschamanen": {
       "pantheons": [
@@ -196,7 +197,7 @@
       "primaere_segnung": null,
       "hinweis": "Hochschamanen kennen KEINE primäre Segnung (Liber Liturgium S.9). Tairach-Priester hat parallel AsP-Pool (Schamanen-Rituale) + KaP-Pool (Liturgien)."
     },
-    "lastUpdate": "2026-04-30 v0.7.6 Praios-Liturgien-Fix",
+    "lastUpdate": "2026-04-30 v0.7.15 — Namenloser-Gott + pKaP-Fix",
     "count": 306
   },
   "liturgien": [
@@ -1278,7 +1279,8 @@
       "id": "schleichende-faeulnis",
       "name": "Schleichende Fäulnis",
       "gott": [
-        "Peraine"
+        "Peraine",
+        "Namenloser"
       ],
       "grad": "IV",
       "ziel": "P",
@@ -3802,7 +3804,7 @@
       "id": "des-einen-bezaubernder-sphaerenklang",
       "name": "Des Einen bezaubernder Sphärenklang",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "III",
       "ziel": "P",
@@ -3824,7 +3826,7 @@
       "id": "die-goldene-hand",
       "name": "Die goldene Hand",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "I",
       "ziel": "P",
@@ -4097,7 +4099,7 @@
       "id": "ewige-jugend",
       "name": "Ewige Jugend",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "V",
       "ziel": "P",
@@ -4164,7 +4166,7 @@
       "id": "fluch-wider-die-unglaeubigen",
       "name": "Fluch wider die Ungläubigen",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "V",
       "ziel": "Z",
@@ -4501,7 +4503,8 @@
       "id": "golgaris-zwielicht",
       "name": "Golgaris Zwielicht",
       "gott": [
-        "Boron"
+        "Boron",
+        "Namenloser"
       ],
       "grad": "II",
       "ziel": "G",
@@ -4699,7 +4702,7 @@
       "id": "heiliges-liebesspiel",
       "name": "Heiliges Liebesspiel",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "II",
       "ziel": "P+P",
@@ -4721,7 +4724,7 @@
       "id": "herbeirufung-der-heerscharen-des-rattenkindes",
       "name": "Herbeirufung der Heerscharen des Rattenkindes",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "III",
       "ziel": "PPP",
@@ -5240,7 +5243,7 @@
       "id": "namenlose-kaelte",
       "name": "Namenlose Kälte",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "II",
       "ziel": "P",
@@ -5262,7 +5265,7 @@
       "id": "namenlose-raserei",
       "name": "Namenlose Raserei",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "II",
       "ziel": "P",
@@ -5284,7 +5287,7 @@
       "id": "namenlose-erleuchtung",
       "name": "Namenlose Erleuchtung",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "IV",
       "ziel": "P",
@@ -5306,7 +5309,7 @@
       "id": "namenloses-vergessen",
       "name": "Namenloses Vergessen",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "I",
       "ziel": "P",
@@ -5441,7 +5444,7 @@
       "id": "pech-und-schwefel",
       "name": "Pech und Schwefel",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "II",
       "ziel": "P",
@@ -5976,7 +5979,7 @@
       "id": "schwindende-zauberkraft",
       "name": "Schwindende Zauberkraft",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "IV",
       "ziel": "Z",
@@ -6020,7 +6023,7 @@
       "id": "seelenbannung",
       "name": "Seelenbannung",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "IV",
       "ziel": "P",
@@ -6064,7 +6067,7 @@
       "id": "seelenschatten",
       "name": "Seelenschatten",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "IV",
       "ziel": "G",
@@ -7022,7 +7025,7 @@
       "id": "waffenfluch",
       "name": "Waffenfluch",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "III",
       "ziel": "P",
@@ -7295,7 +7298,7 @@
       "id": "gott-der-goetter",
       "name": "Gott der Götter",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "II bis VI",
       "ziel": "Z oder P",
@@ -7362,7 +7365,7 @@
       "id": "herbeirufung-der-diener-des-herrn",
       "name": "Herbeirufung der Diener des Herrn",
       "gott": [
-        "universell"
+        "Namenloser"
       ],
       "grad": "II",
       "ziel": "Z, P oder G",

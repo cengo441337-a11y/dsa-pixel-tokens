@@ -1799,6 +1799,8 @@ const VFX_MAP = {
   swafnir_wave: (x, y, o) => vfxWater(x, y, { ...o, color: 0x2266aa }),
   // Schamanen-Geistwirken (Tairach/Kamaluq)
   shaman_smoke: (x, y, o) => vfxShadow(x, y, { ...o, color: 0x665544, duration: 1300 }),
+  // Namenloser — finstere Anti-Magie-Wolke
+  namenloser_void: (x, y, o) => vfxShadow(x, y, { ...o, color: 0x220033, duration: 1800 }),
 };
 
 /** Maps projectile effect names to travel-VFX functions. */
@@ -1870,6 +1872,8 @@ const PERSISTENT_PALETTES = {
   shaman_smoke:{ color: 0x665544, runeColor: 0xaaaa88, baseRadius: 60, runeCount: 5 },
   holy_seal:   { color: 0xffd770, runeColor: 0xffffff, baseRadius: 80, runeCount: 12, slow: true },
   curse_dark:  { color: 0x663300, runeColor: 0xaa6622, baseRadius: 50, runeCount: 5 },
+  // Namenloser — schwarzes Loch / Anti-Aura
+  namenloser_void: { color: 0x220033, runeColor: 0x6633aa, baseRadius: 55, runeCount: 7, slow: true },
 };
 
 /**

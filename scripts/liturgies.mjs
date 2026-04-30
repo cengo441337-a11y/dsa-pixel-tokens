@@ -65,9 +65,11 @@ export function getActorKaP(actor) {
   // Standard gdsa-Pfade
   const cur = Number(sys.KaP?.value ?? sys.kap?.value ?? sys.karma?.value ?? 0);
   const max = Number(sys.KaP?.max ?? sys.kap?.max ?? sys.karma?.max ?? 0);
-  // Permanente KaP
-  const perm = Number(sys.KaP?.permanent ?? sys.kap?.permanent ?? actor?.getFlag?.(MODULE_ID, "kapPermanent") ?? 0);
-  return { current: cur, max, permanent: perm };
+  // In DSA 4.1 ist 'permanenter KaP-Pool' KEIN separates Feld — der MAX-Wert IST
+  // der permanente Pool (durch Karmalqueste erworben, WdG S.241). pKaP-Kosten
+  // reduzieren diesen MAX-Wert dauerhaft (bis zur nächsten Karmalqueste).
+  // Daher: permanent === max (für Pre-Cast-Check und Display).
+  return { current: cur, max, permanent: max };
 }
 
 /** Schreibt KaP zurück. Versucht erst gdsa-Schema, fallback Flag. */
@@ -659,9 +661,10 @@ export async function castLiturgie(actor, liturgieId) {
               // Misslingen = 1/5 Kosten, mind. 1
               aspNeu = Math.max(0, kap.current - Math.max(1, Math.floor(kapCost / 5)));
             }
-            await setActorKaP(actor, aspNeu, null,
-              erfolg && pkapCost > 0 ? Math.max(0, kap.permanent - pkapCost) : null
-            );
+            // pKaP-Kosten reduzieren den MAX-Wert dauerhaft (WdG S.240) —
+            // KEIN separates 'permanent'-Feld in DSA 4.1.
+            const newMax = (erfolg && pkapCost > 0) ? Math.max(0, kap.max - pkapCost) : null;
+            await setActorKaP(actor, aspNeu, newMax, null);
 
             const wirkungsdauerMap = LITURGIEN_META?._wirkungsdauer ?? {};
             const wirkungsstaerkeMap = LITURGIEN_META?._wirkungsstaerke ?? {};

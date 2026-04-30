@@ -45,6 +45,7 @@ const ICON_FOR_VFX = {
   shaman_smoke: "icons/magic/control/silhouette-grow-shrink-blue.webp",
   curse_dark:   "icons/magic/unholy/silhouette-evil-horned-grin-yellow.webp",
   divine_command:"icons/magic/control/voice-shout-orange.webp",
+  namenloser_void: "icons/magic/unholy/silhouette-robe-evil-power.webp",
 };
 
 // ─── Wirkungsdauer-Parser ────────────────────────────────────────────────────

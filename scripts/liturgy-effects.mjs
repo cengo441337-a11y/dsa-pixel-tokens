@@ -22,6 +22,7 @@ const PERSISTENT_CAPABLE = new Set([
   "holy_aura", "holy_seal", "rondra_aura", "boron_seal", "hesinde_glow",
   "travia_warm", "phex_dark", "peraine_heal", "ingerimm_forge", "rahja_love",
   "efferd_wave", "firun_ice", "tsa_rainbow", "shaman_smoke", "curse_dark",
+  "namenloser_void",
 ]);
 
 // ─── Helper: Caster-Token finden ─────────────────────────────────────────────
@@ -440,6 +441,59 @@ export const LITURGY_EFFECTS = {
     apply: "self_aura",
     vfx: "hesinde_glow",
     desc: "Sieht magische und geisterhafte Auras (Praios/Hesinde-Variante)",
+  },
+
+  // ─── NAMENLOSER (13. Gott / Anti-Liturgien) ──────────────────────────────
+  "namenloses-vergessen": {
+    apply: "command",
+    vfx: "namenloser_void",
+    desc: "Lässt das Ziel etwas vergessen (MR-Probe vs LkP*+5)",
+  },
+  "namenlose-kaelte": {
+    apply: "self_aura",
+    vfx: "namenloser_void",
+    buff: { type: "anti_kaelte", formula: "lkp", desc: "Strahlt eisige Anti-Aura aus, Verbündete erleiden LkP* SP/SR Kälte" },
+  },
+  "namenlose-raserei": {
+    apply: "command",
+    vfx: "curse_dark",
+    desc: "Verfällt in mörderische Raserei (MR-Probe vs LkP*+5)",
+  },
+  "namenlose-erleuchtung": {
+    apply: "self_aura",
+    vfx: "namenloser_void",
+    desc: "Frevelhafte Erkenntnis (Wahnsinn-Probe nach Anwendung)",
+  },
+  "schwindende-zauberkraft": {
+    apply: "target_dispel",
+    vfx: "namenloser_void",
+    aspDrain: "lkp_x2",
+    desc: "Drainiert AsP des Ziels permanent (Anti-Hesinde)",
+  },
+  "seelenbannung": {
+    apply: "command",
+    vfx: "namenloser_void",
+    desc: "Bannt eine Seele (Anti-Boron, MR-Probe)",
+  },
+  "seelenschatten": {
+    apply: "self_aura",
+    vfx: "namenloser_void",
+    desc: "Wirft einen Schatten der Seele",
+  },
+  "waffenfluch": {
+    apply: "target_dispel",
+    vfx: "curse_dark",
+    desc: "Verfluchte Waffe verliert Eigenschaftsbonus für LkP* SR",
+  },
+  "fluch-wider-die-unglaeubigen": {
+    apply: "target_dmg",
+    vfx: "curse_dark",
+    damage: { formula: "lkp", desc: "LkP* SP gegen Ungläubige (Anti-Praios)" },
+  },
+  "pech-und-schwefel": {
+    apply: "target_dispel",
+    vfx: "curse_dark",
+    desc: "Ziel hat -LkP* auf alle Glücksproben für 1 Tag",
   },
 
   // ─── 12-Götter universelle Segnungen (Default-Glow) ──────────────────────
