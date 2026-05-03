@@ -57,8 +57,12 @@
       <div class="bar-label">LeP</div>
       <div class="bar-track">
         <div class="bar-fill" style="width: {{percent system.LeP.value system.LeP.max}}%"></div>
-        <div class="bar-text clickable-bar" data-res="lep" data-path="system.LeP.value" data-max="{{system.LeP.max}}" title="Klick: bearbeiten">
-          {{system.LeP.value}} / {{system.LeP.max}}
+        <div class="bar-text clickable-bar" data-res="lep" data-path="system.LeP.value" data-max="{{system.LeP.max}}"
+             title="Klick: LeP bearbeiten | Formel: (KO+KO+KK)/2 = {{formulaLeP}} + Rasse/SF-Boni">
+          {{system.LeP.value}} /
+          <input class="res-max-input" type="number" name="system.LeP.max"
+                 value="{{system.LeP.max}}" min="1"
+                 title="LeP-Maximum — direkt bearbeitbar (Formel: (KO+KO+KK)/2 + Rasse/SF-Boni)">
         </div>
       </div>
       <div class="bar-btns">
@@ -68,11 +72,15 @@
     </div>
     {{#if system.AsP.max}}
     <div class="resource-bar asp">
-      <div class="bar-label rollable" data-roll="asp-override" style="cursor:pointer" title="Klicken: AsP-Max-Override (für spezielle Akademien)">AsP</div>
+      <div class="bar-label">AsP</div>
       <div class="bar-track">
         <div class="bar-fill" style="width: {{percent system.AsP.value system.AsP.max}}%"></div>
-        <div class="bar-text clickable-bar" data-res="asp" data-path="system.AsP.value" data-max="{{system.AsP.max}}" title="Klick: bearbeiten">
-          {{system.AsP.value}} / {{system.AsP.max}}
+        <div class="bar-text clickable-bar" data-res="asp" data-path="system.AsP.value" data-max="{{system.AsP.max}}"
+             title="Klick: AsP bearbeiten | Formel: (MU+IN+CH)/2 = {{formulaAsP}} + SF-Boni">
+          {{system.AsP.value}} /
+          <input class="res-max-input" type="number" name="system.AsP.max"
+                 value="{{system.AsP.max}}" min="1"
+                 title="AsP-Maximum — direkt bearbeitbar (Formel: (MU+IN+CH)/2 + Hohe Astralkraft etc.)">
         </div>
       </div>
       <div class="bar-btns">
@@ -86,8 +94,12 @@
       <div class="bar-label">KaP</div>
       <div class="bar-track">
         <div class="bar-fill" style="width: {{percent system.KaP.value system.KaP.max}}%"></div>
-        <div class="bar-text clickable-bar" data-res="kap" data-path="system.KaP.value" data-max="{{system.KaP.max}}" title="Klick: bearbeiten">
-          {{system.KaP.value}} / {{system.KaP.max}}
+        <div class="bar-text clickable-bar" data-res="kap" data-path="system.KaP.value" data-max="{{system.KaP.max}}"
+             title="Klick: KaP bearbeiten | Formel: (MU+IN+CH)/2 = {{formulaAsP}} + Liturgiekenntnis/Grad">
+          {{system.KaP.value}} /
+          <input class="res-max-input" type="number" name="system.KaP.max"
+                 value="{{system.KaP.max}}" min="1"
+                 title="KaP-Maximum — direkt bearbeitbar (Formel: (MU+IN+CH)/2 + Liturgiekenntnis/Grad, WdG S.220)">
         </div>
       </div>
       <div class="bar-btns">
@@ -100,8 +112,12 @@
       <div class="bar-label">AuP</div>
       <div class="bar-track">
         <div class="bar-fill" style="width: {{percent system.AuP.value system.AuP.max}}%"></div>
-        <div class="bar-text clickable-bar" data-res="aup" data-path="system.AuP.value" data-max="{{system.AuP.max}}" title="Klick: bearbeiten">
-          {{system.AuP.value}} / {{system.AuP.max}}
+        <div class="bar-text clickable-bar" data-res="aup" data-path="system.AuP.value" data-max="{{system.AuP.max}}"
+             title="Klick: AuP bearbeiten | Formel: (MU+KO+GE)/2 = {{formulaAuP}}">
+          {{system.AuP.value}} /
+          <input class="res-max-input" type="number" name="system.AuP.max"
+                 value="{{system.AuP.max}}" min="1"
+                 title="AuP-Maximum — direkt bearbeitbar (Formel: (MU+KO+GE)/2, WdH S.1440)">
         </div>
       </div>
       <div class="bar-btns">
@@ -153,15 +169,62 @@
     {{!-- ─── TAB: WERTE (Eigenschaften + Abgeleitete) ─── --}}
     <div class="tab active" data-tab="attributes" data-group="primary">
 
-      <div class="section-title">Eigenschaften</div>
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Eigenschaften</span>
+        {{#if hasAnyAttrMod}}
+        <button type="button" data-action="reset-all-temp"
+          style="background:rgba(233,69,96,0.15);border:1px solid rgba(233,69,96,0.5);color:#e94560;
+                 border-radius:3px;padding:1px 8px;font-size:11px;cursor:pointer;line-height:1.4"
+          title="Alle temporären Modifier zurücksetzen">✕ Alle Debuffs zurücksetzen</button>
+        {{/if}}
+      </div>
       <div class="attr-grid">
         {{#each attributes as |attr key|}}
-        <div class="attr-box rollable" data-roll="attribute" data-attr="{{key}}" title="{{attr.label}}: Probe würfeln">
-          <div class="attr-label">{{attr.short}}</div>
-          <div class="attr-value">{{attr.value}}</div>
+        <div class="attr-box {{#if attr.hasTemp}}has-temp-mod{{/if}}" data-attr="{{key}}">
+          {{!-- Label: klickbar für Probe --}}
+          <div class="attr-label rollable" data-roll="attribute" data-attr="{{key}}"
+               title="{{attr.label}} ({{attr.effective}}): 1W20 ≤ {{attr.effective}} — Klick: Probe würfeln">
+            {{attr.short}}
+          </div>
+          {{!-- Basis-Wert editierbar --}}
+          <input class="attr-base-input" type="number"
+                 data-attr-key="{{key}}"
+                 value="{{attr.base}}"
+                 min="1" max="25"
+                 title="{{attr.label}} Grundwert — Wert eingeben + Enter zum Speichern (Steigerung/Senkung cascadiert auf LeP, AsP, MR etc.)">
+          {{!-- Effektivwert bei Modifier --}}
+          {{#if attr.hasTemp}}
+          <div class="attr-effective {{#if attr.tempNeg}}debuff{{else}}buff{{/if}}"
+               title="Effektiv: {{attr.effective}} (Basis {{attr.base}} + Mod {{attr.temp}})">
+            → <strong>{{attr.effective}}</strong>
+          </div>
+          {{/if}}
+          {{!-- Temp-Modifier Zeile --}}
+          <div class="attr-mod-row">
+            <button class="attr-temp-btn" type="button"
+                    data-attr="{{key}}" data-delta="-1"
+                    title="−1 temporärer Debuff (Trank, Zauber, Erschöpfung)">−</button>
+            {{#if attr.hasTemp}}
+            <span class="attr-temp-badge {{#if attr.tempNeg}}neg{{else}}pos{{/if}}"
+                  data-attr="{{key}}"
+                  title="Temporärer Modifier: {{attr.temp}} — Klick zum Zurücksetzen">
+              {{#if attr.tempPos}}+{{/if}}{{attr.temp}}
+            </span>
+            {{else}}
+            <span class="attr-temp-zero">0</span>
+            {{/if}}
+            <button class="attr-temp-btn" type="button"
+                    data-attr="{{key}}" data-delta="1"
+                    title="+1 temporärer Buff">+</button>
+          </div>
         </div>
         {{/each}}
       </div>
+      {{#if hasAnyAttrMod}}
+      <div style="margin-bottom:6px;padding:4px 8px;background:rgba(233,69,96,0.06);border:1px solid rgba(233,69,96,0.25);border-radius:3px;font-size:11px;color:#e94560;font-family:'VT323',monospace">
+        ⚠ Aktive Attribute-Modifier — abgeleitete Werte (LeP-Max, AsP-Max, MR, AT, PA etc.) spiegeln Effektivwerte wider
+      </div>
+      {{/if}}
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         {{!-- VORTEILE --}}
@@ -175,7 +238,14 @@
               <div class="advantage-entry" style="color:#c8e6c9">
                 <span class="tag success" style="background:#2e7d32;color:#fff">✓</span>
                 <span>{{this.name}}</span>
-                {{#if this.value}}<span class="dim">({{this.value}})</span>{{/if}}
+                {{#if this.value}}
+                <span class="dim">(</span>
+                <input class="vn-value-input" type="number" data-vn-key="vorteile"
+                       data-vn-name="{{this.name}}" value="{{this.value}}" min="1" max="30"
+                       style="color:#c8e6c9"
+                       title="Stufenwert — DSA 4.1: manche Vorteile haben Stufen (z.B. Hohe Astralkraft)">
+                <span class="dim">)</span>
+                {{/if}}
               </div>
               {{/each}}
             {{else}}
@@ -198,7 +268,14 @@
                    style="color:#ffcdd2;{{#if this.value}}cursor:pointer{{/if}}">
                 <span class="tag fail" style="background:#c62828;color:#fff">✗</span>
                 <span>{{this.name}}</span>
-                {{#if this.value}}<span class="dim" style="color:#ff8a80">({{this.value}}) 🎲</span>{{/if}}
+                {{#if this.value}}
+                <span class="dim" style="color:#ff8a80">(</span>
+                <input class="vn-value-input" type="number" data-vn-key="nachteile"
+                       data-vn-name="{{this.name}}" value="{{this.value}}" min="1" max="30"
+                       style="color:#ff8a80"
+                       title="Stufenwert — DSA 4.1: Nachteil-Triggerwert (1W20-Probe, WdH S.137)">
+                <span class="dim" style="color:#ff8a80">) 🎲</span>
+                {{/if}}
               </div>
               {{/each}}
             {{else}}
@@ -211,8 +288,16 @@
       <div class="section-title">Sonderfertigkeiten</div>
       <div class="panel">
         {{#each specialAbilities}}
-        <span class="sf-tag">{{this.name}}</span>
+        <span class="sf-tag">
+          {{this.name}}
+          <button type="button" class="sf-del-btn" data-sf-name="{{this.name}}"
+                  title="SF entfernen">×</button>
+        </span>
         {{/each}}
+        <div class="sf-add-row">
+          <input type="text" class="sf-add-input" placeholder="SF-Name eingeben..." maxlength="80">
+          <button type="button" class="sf-add-btn" title="SF hinzufügen">+ SF</button>
+        </div>
       </div>
 
     </div>
@@ -240,7 +325,13 @@
               {{this.name}}
             </td>
             <td class="talent-probe">{{this.probeDisplay}}</td>
-            <td class="talent-taw">{{this.taw}}</td>
+            <td class="talent-taw">
+              <input class="taw-input" type="number"
+                     data-talent-name="{{this.name}}"
+                     value="{{this.taw}}"
+                     min="-1" max="21"
+                     title="TaW {{this.name}} — bearbeiten + Enter (max. 21 mit Lehrmeister)">
+            </td>
             {{#if (eq @../key "koerper")}}
             <td style="text-align:center;color:{{#if this.bePenalty}}#e94560{{else}}#556{{/if}};font-size:12px">
               {{#if this.bePenalty}}+{{this.bePenalty}}{{else}}-{{/if}}
@@ -304,7 +395,13 @@
             <td class="talent-tp" style="color:#ffd700;font-size:11px;white-space:nowrap">
               {{#if this.tp}}{{this.tp}}{{else}}<span style="color:#445">—</span>{{/if}}
             </td>
-            <td class="talent-taw">{{this.taw}}</td>
+            <td class="talent-taw">
+              <input class="combat-taw-input" type="number"
+                     data-skill-name="{{this.name}}"
+                     value="{{this.taw}}"
+                     min="-1" max="21"
+                     title="TaW {{this.name}} — bearbeiten + Enter. AT/PA werden automatisch neu berechnet.">
+            </td>
             <td class="talent-ebe" style="color:{{#if this.eBE}}#e94560{{else}}#556{{/if}};text-align:center">
               {{this.eBE}}
             </td>
@@ -498,7 +595,9 @@
           {{this.name}}
         </span>
         <span class="spell-probe">{{this.probeDisplay}}</span>
-        <span class="spell-zfw">{{this.zfw}}</span>
+        <input class="spell-zfw-input" type="number" data-item-id="{{this.id}}"
+               value="{{this.zfw}}" min="-1" max="30"
+               title="ZfW editieren (DSA 4.1: Zauberfertigkeitswert, WdH S.256 — Steigerung kostet AP)">
         <span class="spell-cost">{{this.kosten}} AsP</span>
       </div>
       {{/each}}

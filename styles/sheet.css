@@ -313,6 +313,36 @@
   text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
   pointer-events: none;
 }
+/* Inputs inside bar-text need pointer events back */
+.dsa-pixel-sheet .resource-bar .bar-text input {
+  pointer-events: auto;
+}
+
+/* ─── Res-Max editable input (LeP/AsP/KaP/AuP maximum) ───────────────── */
+.dsa-pixel-sheet .res-max-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed rgba(200,151,42,0.4);
+  color: inherit;
+  font-family: var(--fx-font);
+  font-size: 12px;
+  font-weight: bold;
+  text-shadow: inherit;
+  width: 36px;
+  text-align: center;
+  padding: 0;
+  margin: 0 1px;
+  /* no spin buttons */
+  -moz-appearance: textfield;
+}
+.dsa-pixel-sheet .res-max-input::-webkit-inner-spin-button,
+.dsa-pixel-sheet .res-max-input::-webkit-outer-spin-button { display: none; }
+.dsa-pixel-sheet .res-max-input:focus {
+  outline: none;
+  border-bottom-color: var(--fx-gold-bright);
+  background: rgba(200,151,42,0.12);
+  border-radius: 2px 2px 0 0;
+}
 
 /* ─── Attribute Grid ──────────────────────────────────────────────────── */
 
@@ -327,28 +357,159 @@
   background: linear-gradient(180deg, #0c0c18, #07070e);
   border: 1px solid var(--fx-border);
   border-radius: var(--fx-radius);
-  padding: 6px 4px;
+  padding: 4px 4px 3px;
   text-align: center;
-  cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
+  cursor: default;
 }
 .dsa-pixel-sheet .attr-box:hover {
   border-color: var(--fx-gold);
   box-shadow: 0 0 10px rgba(200,151,42,0.2), inset 0 0 4px rgba(200,151,42,0.05);
 }
+.dsa-pixel-sheet .attr-box.has-temp-mod {
+  border-color: rgba(233,69,96,0.5);
+  background: linear-gradient(180deg, #1a080e, #0d0509);
+}
+
+/* Attribut-Label bleibt rollbar/clickbar */
 .dsa-pixel-sheet .attr-box .attr-label {
   font-size: 10px;
   color: var(--fx-text-dim);
   text-transform: uppercase;
   letter-spacing: 1.5px;
   font-family: var(--fx-font-title);
+  cursor: pointer;
+  padding-bottom: 1px;
 }
-.dsa-pixel-sheet .attr-box .attr-value {
-  font-size: 28px;
+.dsa-pixel-sheet .attr-box .attr-label:hover {
+  color: var(--fx-gold);
+}
+
+/* Basis-Wert Input */
+.dsa-pixel-sheet .attr-base-input {
+  width: 100%;
+  font-size: 26px;
   font-weight: bold;
   color: var(--fx-text);
-  line-height: 1.1;
+  line-height: 1;
   text-shadow: 0 0 8px rgba(200,151,42,0.2);
+  text-align: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  -moz-appearance: textfield;
+  cursor: text;
+}
+.dsa-pixel-sheet .attr-base-input::-webkit-outer-spin-button,
+.dsa-pixel-sheet .attr-base-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.dsa-pixel-sheet .attr-base-input:focus {
+  outline: 1px solid var(--fx-gold);
+  border-radius: 2px;
+  background: rgba(200,151,42,0.08);
+}
+.dsa-pixel-sheet .has-temp-mod .attr-base-input {
+  color: #aaa;
+  font-size: 20px;
+  text-decoration: line-through;
+  text-decoration-color: rgba(233,69,96,0.5);
+}
+
+/* Effektivwert-Anzeige bei aktiven Modifiern */
+.dsa-pixel-sheet .attr-effective {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1.1;
+  margin: -2px 0 1px;
+}
+.dsa-pixel-sheet .attr-effective.debuff { color: #e94560; }
+.dsa-pixel-sheet .attr-effective.buff   { color: #4caf50; }
+
+/* Temp-Modifier Zeile */
+.dsa-pixel-sheet .attr-mod-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  margin-top: 2px;
+}
+.dsa-pixel-sheet .attr-temp-btn {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #666;
+  border-radius: 2px;
+  width: 16px;
+  height: 16px;
+  font-size: 13px;
+  line-height: 14px;
+  text-align: center;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--fx-font);
+  transition: all 0.1s;
+}
+.dsa-pixel-sheet .attr-temp-btn:hover {
+  border-color: var(--fx-gold);
+  color: var(--fx-gold);
+}
+.dsa-pixel-sheet .attr-temp-badge {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 0 3px;
+  border-radius: 2px;
+  cursor: pointer;
+  min-width: 18px;
+  text-align: center;
+  transition: opacity 0.1s;
+}
+.dsa-pixel-sheet .attr-temp-badge.neg {
+  color: #e94560;
+  background: rgba(233,69,96,0.12);
+  border: 1px solid rgba(233,69,96,0.3);
+}
+.dsa-pixel-sheet .attr-temp-badge.pos {
+  color: #4caf50;
+  background: rgba(76,175,80,0.12);
+  border: 1px solid rgba(76,175,80,0.3);
+}
+.dsa-pixel-sheet .attr-temp-badge:hover { opacity: 0.7; }
+.dsa-pixel-sheet .attr-temp-zero {
+  font-size: 11px;
+  color: #333;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* TaW Input in Talent-Tabelle */
+.dsa-pixel-sheet .taw-input,
+.dsa-pixel-sheet .combat-taw-input {
+  width: 36px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--fx-text);
+  font-family: var(--fx-font);
+  font-size: 15px;
+  padding: 0 2px;
+  -moz-appearance: textfield;
+  cursor: text;
+  transition: border-color 0.15s;
+}
+.dsa-pixel-sheet .taw-input::-webkit-outer-spin-button,
+.dsa-pixel-sheet .taw-input::-webkit-inner-spin-button,
+.dsa-pixel-sheet .combat-taw-input::-webkit-outer-spin-button,
+.dsa-pixel-sheet .combat-taw-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.dsa-pixel-sheet .taw-input:hover,
+.dsa-pixel-sheet .combat-taw-input:hover {
+  border-bottom-color: var(--fx-border-lit);
+}
+.dsa-pixel-sheet .taw-input:focus,
+.dsa-pixel-sheet .combat-taw-input:focus {
+  outline: none;
+  border-bottom-color: var(--fx-gold);
+  background: rgba(200,151,42,0.06);
+  border-radius: 2px 2px 0 0;
 }
 
 /* ─── Talent Liste ────────────────────────────────────────────────────── */
@@ -502,6 +663,28 @@
 .dsa-pixel-sheet .spell-probe { color: var(--fx-text-dim); font-size: 14px; }
 .dsa-pixel-sheet .spell-zfw   { text-align: center; font-weight: bold; color: var(--fx-asp); }
 .dsa-pixel-sheet .spell-cost  { color: var(--fx-text-dim); font-size: 13px; }
+
+/* ZfW editable input (DSA 4.1: Zauberfertigkeitswert, WdH S.256) */
+.dsa-pixel-sheet .spell-zfw-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(68,136,255,0.4);
+  color: var(--fx-asp);
+  font-family: var(--fx-font);
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  width: 36px;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+.dsa-pixel-sheet .spell-zfw-input::-webkit-inner-spin-button,
+.dsa-pixel-sheet .spell-zfw-input::-webkit-outer-spin-button { display: none; }
+.dsa-pixel-sheet .spell-zfw-input:focus {
+  outline: none;
+  border-bottom-color: var(--fx-asp);
+  background: rgba(68,136,255,0.1);
+}
 
 /* ─── Equipment ───────────────────────────────────────────────────────── */
 
@@ -974,17 +1157,84 @@
   border-bottom: none;
 }
 
-/* Sonderfertigkeit badge */
+/* Sonderfertigkeit badge (DSA 4.1 WdH: SF haben keinen numerischen Wert) */
 .dsa-pixel-sheet .sf-tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background: rgba(60,40,10,0.45);
   border: 1px solid var(--fx-border-lit);
   color: var(--fx-gold);
   font-size: 13px;
-  padding: 2px 8px;
+  padding: 2px 4px 2px 8px;
   border-radius: 2px;
   margin: 2px 2px;
   font-family: var(--fx-font);
+}
+.dsa-pixel-sheet .sf-del-btn {
+  background: transparent;
+  border: none;
+  color: rgba(200,48,60,0.55);
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1;
+  padding: 0 2px;
+  font-family: monospace;
+}
+.dsa-pixel-sheet .sf-del-btn:hover { color: #e94560; }
+.dsa-pixel-sheet .sf-add-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.dsa-pixel-sheet .sf-add-input {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--fx-border);
+  color: var(--fx-text);
+  font-family: var(--fx-font);
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  flex: 1;
+}
+.dsa-pixel-sheet .sf-add-input:focus {
+  outline: none;
+  border-color: var(--fx-gold);
+}
+.dsa-pixel-sheet .sf-add-btn {
+  background: rgba(200,151,42,0.2);
+  border: 1px solid rgba(200,151,42,0.5);
+  color: var(--fx-gold);
+  font-family: var(--fx-font);
+  font-size: 14px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.dsa-pixel-sheet .sf-add-btn:hover {
+  background: rgba(200,151,42,0.35);
+  border-color: var(--fx-gold-bright);
+}
+
+/* Vor-/Nachteil numeric value editable (DSA 4.1: manche VN haben Stufen, z.B. "Hohe Astralkraft 3") */
+.dsa-pixel-sheet .vn-value-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed rgba(255,255,255,0.3);
+  color: inherit;
+  font-family: var(--fx-font);
+  font-size: 14px;
+  width: 28px;
+  text-align: center;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+.dsa-pixel-sheet .vn-value-input::-webkit-inner-spin-button,
+.dsa-pixel-sheet .vn-value-input::-webkit-outer-spin-button { display: none; }
+.dsa-pixel-sheet .vn-value-input:focus {
+  outline: none;
+  border-bottom-color: currentColor;
 }
 
 /* Notes textarea */
@@ -1038,10 +1288,7 @@
 }
 
 /* Generic gold glow on hover for rollable stat-value */
-.dsa-pixel-sheet .attr-box.rollable:hover .attr-value {
-  color: var(--fx-gold-bright);
-  text-shadow: 0 0 10px rgba(200,151,42,0.45);
-}
+/* (attr-box.rollable entfernt — Label ist jetzt der klickbare Teil) */
 
 /* ─── Schild-Toggle: aktiv/inaktiv ───────────────────────────────────── */
 .dsa-pixel-sheet .shield-toggle {

@@ -119,26 +119,40 @@ export class PixelArtCharacterSheet extends ActorSheet {
     data.system = system;
     data.actor  = this.actor;
 
-    // ── Eigenschaften mit Labels ──
+    // ── Eigenschaften mit Labels + Temp-Modifier (Debuffs/Buffs) ──
+    // Temp-Modifier werden in Flags gespeichert, nicht im system-Schema,
+    // damit der XML-Import sie nicht überschreibt.
+    const attrTemp = this.actor.getFlag(MODULE_ID, "attrTemp") ?? {};
     data.attributes = {};
     for (const [key, meta] of Object.entries(ATTRIBUTES)) {
+      const base = system[key]?.value ?? 0;
+      const temp = Number(attrTemp[key] ?? 0);
       data.attributes[key] = {
         ...meta,
-        value: system[key]?.value ?? 0,
-        temp:  system[key]?.temp ?? 0,
+        base,                       // gespeicherter Grundwert (editierbar)
+        temp,                       // temporärer Modifier (±, aus Flags)
+        effective: base + temp,     // effektiver Wert für Proben & Ableitungen
+        value: base + temp,         // alias für Template-Kompatibilität
+        hasTemp: temp !== 0,
+        tempNeg: temp < 0,
+        tempPos: temp > 0,
+        tempAbs: Math.abs(temp),
       };
     }
+    data.attrTemp = attrTemp;
 
     // ── Abgeleitete Werte (INI, MR, WS, AT, PA, FK, AW, GS) ───────────────────
     // gdsa aktualisiert diese Felder nicht automatisch nach XML-Import oder
     // manueller Eigenschafts-Änderung. Wir berechnen sie aus den Attributen
     // und benutzen sie als Fallback, falls der Actor-Wert 0 ist — so bleibt
     // ein vom GM bewusst überschriebener Wert (z.B. SF-Boni) erhalten.
+    // rawAttrs verwendet effective (base + temp) für alle abgeleiteten Berechnungen
+    // → Debuffs auf Attribute kaskadieren automatisch auf LeP, AuP, MR, AT, PA usw.
     const rawAttrs = {
-      MU: data.attributes.MU.value, KL: data.attributes.KL.value,
-      IN: data.attributes.IN.value, CH: data.attributes.CH.value,
-      FF: data.attributes.FF.value, GE: data.attributes.GE.value,
-      KO: data.attributes.KO.value, KK: data.attributes.KK.value,
+      MU: data.attributes.MU.effective, KL: data.attributes.KL.effective,
+      IN: data.attributes.IN.effective, CH: data.attributes.CH.effective,
+      FF: data.attributes.FF.effective, GE: data.attributes.GE.effective,
+      KO: data.attributes.KO.effective, KK: data.attributes.KK.effective,
     };
     // Race-based GS override (Waldelf = 9, Zwerg = 6, etc.)
     const raceGS = RACE_GS[system.race?.trim?.()] ?? RACE_GS[system.rasse?.trim?.()] ?? 8;
@@ -186,27 +200,30 @@ export class PixelArtCharacterSheet extends ActorSheet {
     };
     // Clone + override so we don't mutate the live actor.system reference.
     const sysClone = foundry.utils.deepClone(system);
-    // Object-shaped fields (gdsa: { value, mod }) — fallback when stored <= 0
+    // Abgeleitete Kampfbasiswerte IMMER aus Formel — damit Attribut-Änderungen
+    // und Temp-Modifier sofort kaskadieren (nicht nur als Fallback bei 0).
     for (const key of ["INIBasis", "MR", "ATBasis", "PABasis", "FKBasis"]) {
-      const existing = sysClone[key]?.value ?? 0;
-      if (existing <= 0 && computed[key] > 0) {
+      if (computed[key] > 0) {
         sysClone[key] = { ...(sysClone[key] ?? {}), value: computed[key] };
       }
     }
-    // Scalar fields WS / Dogde — gdsa stores these as plain numbers and
-    // misspells "Dodge" as "Dogde".
-    if (!sysClone.WS || sysClone.WS <= 0) sysClone.WS = computed.WS;
-    if (!sysClone.Dogde || sysClone.Dogde <= 0) sysClone.Dogde = computed.AW;
-    // GS: gdsa always stores 8 (Mensch default) even for non-human races.
-    // Override with the race-specific value whenever the stored GS matches
-    // the default AND the race-lookup disagrees (so GMs who deliberately
-    // hand-edit the field to non-8 keep their override).
+    // Scalar fields WS / Dogde — immer aus Formel
+    sysClone.WS    = computed.WS;
+    sysClone.Dogde = computed.AW;
+    // GS: race-override
     const storedGS = sysClone.GS?.value ?? 0;
     if (storedGS <= 0 || (storedGS === 8 && raceGS !== 8)) {
       sysClone.GS = { ...(sysClone.GS ?? {}), value: raceGS };
     }
     data.system = sysClone;
     data.derivedComputed = computed; // exposed for debug / tooltip display
+
+    // ── Formel-Zielwerte für LeP/AuP/AsP (für Tooltip: "Formel sagt X") ──
+    data.formulaLeP = Math.floor((rawAttrs.KO * 2 + rawAttrs.KK) / 2);
+    data.formulaAuP = Math.round((rawAttrs.MU + rawAttrs.KO + rawAttrs.GE) / 2);
+    data.formulaAsP = Math.round((rawAttrs.MU + rawAttrs.IN + rawAttrs.CH) / 2);
+    // hasAttrMod: true wenn irgendein Attribut einen Temp-Modifier hat
+    data.hasAnyAttrMod = Object.values(attrTemp).some(v => v !== 0);
 
     // ── Waffen, Rüstung, Schilde, Gegenstände ──
     const { weapons, armor, shields, items } = this._prepareItems();
@@ -875,6 +892,154 @@ export class PixelArtCharacterSheet extends ActorSheet {
     return String(probe);
   }
 
+  // ─── Attribut-Änderung mit Kaskadenberechnung ────────────────────────
+
+  /**
+   * Speichert neuen Basiswert für ein Attribut und berechnet alle
+   * abhängigen abgeleiteten Werte neu (LeP/AuP/AsP max, MR, AT, PA, FK, INI, AW).
+   * Verwendet Delta-Ansatz damit Rassen-/SF-Boni erhalten bleiben.
+   *
+   * @param {string} attrKey - z.B. "KO", "MU", "GE"
+   * @param {number} newBase - neuer Basiswert
+   */
+  async _applyAttrChange(attrKey, newBase) {
+    const sys = this.actor.system;
+    const oldBase = sys[attrKey]?.value ?? 0;
+    newBase = Number(newBase);
+    if (isNaN(newBase) || oldBase === newBase) return;
+
+    // Aktuelle Basis-Attribute (ungekürzt, ohne Temp)
+    const oldA = {};
+    for (const k of Object.keys(ATTRIBUTES)) oldA[k] = sys[k]?.value ?? 0;
+    const newA = { ...oldA, [attrKey]: newBase };
+
+    const updates = { [`system.${attrKey}.value`]: newBase };
+
+    // ── Abgeleitete Formeln (WdH S.1440/1579) ──
+    // LE = (KO+KO+KK)/2  ← floor (ganzzahlige Division)
+    const oldLE = Math.floor((oldA.KO * 2 + oldA.KK) / 2);
+    const newLE = Math.floor((newA.KO * 2 + newA.KK) / 2);
+    if (newLE !== oldLE) {
+      const newLePMax = Math.max(1, (sys.LeP?.max ?? 10) + (newLE - oldLE));
+      updates["system.LeP.max"] = newLePMax;
+      if ((sys.LeP?.value ?? 0) > newLePMax) updates["system.LeP.value"] = newLePMax;
+    }
+
+    // AU = (MU+KO+GE)/2
+    const oldAU = Math.round((oldA.MU + oldA.KO + oldA.GE) / 2);
+    const newAU = Math.round((newA.MU + newA.KO + newA.GE) / 2);
+    if (newAU !== oldAU) {
+      const newAuPMax = Math.max(1, (sys.AuP?.max ?? 10) + (newAU - oldAU));
+      updates["system.AuP.max"] = newAuPMax;
+      if ((sys.AuP?.value ?? 0) > newAuPMax) updates["system.AuP.value"] = newAuPMax;
+    }
+
+    // AE = (MU+IN+CH)/2 — nur für Magier (WdH S.1440)
+    if (sys.AsP?.max) {
+      const oldAE = Math.round((oldA.MU + oldA.IN + oldA.CH) / 2);
+      const newAE = Math.round((newA.MU + newA.IN + newA.CH) / 2);
+      if (newAE !== oldAE) {
+        const newAsPMax = Math.max(1, (sys.AsP?.max ?? 0) + (newAE - oldAE));
+        updates["system.AsP.max"] = newAsPMax;
+        if ((sys.AsP?.value ?? 0) > newAsPMax) updates["system.AsP.value"] = newAsPMax;
+      }
+    }
+    // KE = (MU+IN+CH)/2 — nur für Geweihte (WdG S.220, gleiche Formel wie AE)
+    if (sys.KaP?.max) {
+      const oldKE = Math.round((oldA.MU + oldA.IN + oldA.CH) / 2);
+      const newKE = Math.round((newA.MU + newA.IN + newA.CH) / 2);
+      if (newKE !== oldKE) {
+        const newKaPMax = Math.max(1, (sys.KaP?.max ?? 0) + (newKE - oldKE));
+        updates["system.KaP.max"] = newKaPMax;
+        if ((sys.KaP?.value ?? 0) > newKaPMax) updates["system.KaP.value"] = newKaPMax;
+      }
+    }
+
+    // MR = (MU+KL+KO)/5
+    const newMR = Math.round((newA.MU + newA.KL + newA.KO) / 5);
+    updates["system.MR.value"] = newMR;
+
+    // AT = (MU+GE+KK)/5
+    const newAT = Math.round((newA.MU + newA.GE + newA.KK) / 5);
+    updates["system.ATBasis.value"] = newAT;
+
+    // PA = (IN+GE+KK)/5
+    const newPA = Math.round((newA.IN + newA.GE + newA.KK) / 5);
+    updates["system.PABasis.value"] = newPA;
+
+    // FK = (IN+FF+KK)/5
+    const newFK = Math.round((newA.IN + newA.FF + newA.KK) / 5);
+    updates["system.FKBasis.value"] = newFK;
+
+    // INI = (MU+MU+IN+GE)/5
+    const newINI = Math.round((newA.MU * 2 + newA.IN + newA.GE) / 5);
+    updates["system.INIBasis.value"] = newINI;
+
+    // AW = PA-Basis (WdS S.66)
+    updates["system.Dogde"] = newPA;
+
+    await this.actor.update(updates);
+    this.render();
+  }
+
+  /**
+   * Setzt oder verändert den temporären Modifier eines Attributs (±Delta).
+   * Speichert in flags.dsa-pixel-tokens.attrTemp.
+   *
+   * @param {string} attrKey - z.B. "MU", "KO"
+   * @param {number} delta   - positive oder negative Zahl
+   */
+  async _applyAttrTemp(attrKey, delta) {
+    const current = this.actor.getFlag(MODULE_ID, "attrTemp") ?? {};
+    const newVal = (current[attrKey] ?? 0) + delta;
+    await this.actor.setFlag(MODULE_ID, "attrTemp", {
+      ...current,
+      [attrKey]: newVal,
+    });
+    this.render();
+  }
+
+  /**
+   * Setzt den Temp-Modifier eines Attributs auf 0 zurück.
+   */
+  async _resetAttrTemp(attrKey) {
+    const current = this.actor.getFlag(MODULE_ID, "attrTemp") ?? {};
+    const updated = { ...current };
+    delete updated[attrKey];
+    await this.actor.setFlag(MODULE_ID, "attrTemp", updated);
+    this.render();
+  }
+
+  /**
+   * Alle Temp-Modifier zurücksetzen.
+   */
+  async _resetAllAttrTemp() {
+    await this.actor.setFlag(MODULE_ID, "attrTemp", {});
+    this.render();
+  }
+
+  /**
+   * Ändert den TaW eines normalen Talents (system.talente[name].value).
+   */
+  async _applyTaWChange(talentName, newTaW) {
+    newTaW = Number(newTaW);
+    if (isNaN(newTaW)) return;
+    newTaW = Math.max(-1, Math.min(21, newTaW));
+    await this.actor.update({ [`system.talente.${talentName}.value`]: newTaW });
+    this.render();
+  }
+
+  /**
+   * Ändert den TaW eines Kampftalents (system.skill[name].value).
+   */
+  async _applyCombatTaWChange(skillName, newTaW) {
+    newTaW = Number(newTaW);
+    if (isNaN(newTaW)) return;
+    newTaW = Math.max(-1, Math.min(21, newTaW));
+    await this.actor.update({ [`system.skill.${skillName}.value`]: newTaW });
+    this.render();
+  }
+
   // ─── Event Listeners ──────────────────────────────────────────────────
 
   /** @override */
@@ -1006,6 +1171,163 @@ export class PixelArtCharacterSheet extends ActorSheet {
       const newWorn = ev.currentTarget.checked;
       await item.update({ "system.worn": newWorn });
       this.render();
+    });
+
+    // ── Attribute direkt bearbeiten (Steigerung/Senkung) ──────────────────
+    // Attribut-Basis-Input: Enter oder blur → speichern + Kaskade neu berechnen
+    html.find(".attr-base-input").on("change blur", async (ev) => {
+      ev.stopPropagation();
+      const key = ev.currentTarget.dataset.attrKey;
+      const val = parseInt(ev.currentTarget.value);
+      if (!key || isNaN(val)) return;
+      await this._applyAttrChange(key, val);
+    });
+    html.find(".attr-base-input").on("keydown", (ev) => {
+      if (ev.key === "Enter") { ev.currentTarget.blur(); }
+      if (ev.key === "Escape") { this.render(); }
+    });
+
+    // Temp-Modifier Buttons (±1 pro Klick)
+    html.find(".attr-temp-btn").on("click", async (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const key   = ev.currentTarget.dataset.attr;
+      const delta = parseInt(ev.currentTarget.dataset.delta);
+      if (!key || isNaN(delta)) return;
+      await this._applyAttrTemp(key, delta);
+    });
+
+    // Temp-Reset (Klick auf Modifier-Badge)
+    html.find(".attr-temp-badge").on("click", async (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const key = ev.currentTarget.dataset.attr;
+      if (!key) return;
+      await this._resetAttrTemp(key);
+    });
+
+    // Alle Temp-Modi zurücksetzen
+    html.find("[data-action='reset-all-temp']").on("click", async (ev) => {
+      ev.preventDefault();
+      await this._resetAllAttrTemp();
+    });
+
+    // ── Talent-TaW inline editieren ────────────────────────────────────────
+    html.find(".taw-input").on("change blur", async (ev) => {
+      ev.stopPropagation();
+      const name = ev.currentTarget.dataset.talentName;
+      const val  = parseInt(ev.currentTarget.value);
+      if (!name || isNaN(val)) return;
+      await this._applyTaWChange(name, val);
+    });
+    html.find(".taw-input").on("keydown", (ev) => {
+      if (ev.key === "Enter") { ev.currentTarget.blur(); }
+      if (ev.key === "Escape") { this.render(); }
+    });
+
+    // ── Kampftalent-TaW inline editieren ──────────────────────────────────
+    html.find(".combat-taw-input").on("change blur", async (ev) => {
+      ev.stopPropagation();
+      const name = ev.currentTarget.dataset.skillName;
+      const val  = parseInt(ev.currentTarget.value);
+      if (!name || isNaN(val)) return;
+      await this._applyCombatTaWChange(name, val);
+    });
+    html.find(".combat-taw-input").on("keydown", (ev) => {
+      if (ev.key === "Enter") { ev.currentTarget.blur(); }
+      if (ev.key === "Escape") { this.render(); }
+    });
+
+    // ── Ressourcen-Maximum inline editieren (LeP/AsP/KaP/AuP) ──────────────
+    html.find(".res-max-input").on("change blur", async (ev) => {
+      ev.stopPropagation();
+      const path = ev.currentTarget.name; // e.g. "system.LeP.max"
+      const val  = parseInt(ev.currentTarget.value);
+      if (!path || isNaN(val) || val < 1) return;
+      await this.actor.update({ [path]: val });
+      this.render();
+    });
+    html.find(".res-max-input").on("keydown", (ev) => {
+      if (ev.key === "Enter")  { ev.currentTarget.blur(); }
+      if (ev.key === "Escape") { this.render(); }
+    });
+
+    // ── Zauber-ZfW inline editieren (DSA 4.1: Zauberfertigkeitswert, WdH S.256) ──
+    html.find(".spell-zfw-input").on("change blur", async (ev) => {
+      ev.stopPropagation();
+      const id  = ev.currentTarget.dataset.itemId;
+      const val = parseInt(ev.currentTarget.value);
+      if (!id || isNaN(val)) return;
+      const item = this.actor.items.get(id);
+      if (!item) return;
+      await item.update({ "system.zfw": val });
+      this.render();
+    });
+    html.find(".spell-zfw-input").on("keydown", (ev) => {
+      if (ev.key === "Enter")  { ev.currentTarget.blur(); }
+      if (ev.key === "Escape") { this.render(); }
+    });
+
+    // ── Vorteil/Nachteil-Stufenwert editieren ──────────────────────────────
+    html.find(".vn-value-input").on("change blur", async (ev) => {
+      ev.stopPropagation();
+      const key  = ev.currentTarget.dataset.vnKey;   // "vorteile" or "nachteile"
+      const name = ev.currentTarget.dataset.vnName;
+      const val  = parseInt(ev.currentTarget.value);
+      if (!key || !name || isNaN(val)) return;
+      const current = this.actor.system?.[key] ?? {};
+      await this.actor.update({ [`system.${key}`]: { ...current, [name]: val } });
+      this.render();
+    });
+    html.find(".vn-value-input").on("keydown", (ev) => {
+      if (ev.key === "Enter")  { ev.currentTarget.blur(); }
+      if (ev.key === "Escape") { this.render(); }
+    });
+
+    // ── SF entfernen ────────────────────────────────────────────────────────
+    html.find(".sf-del-btn").on("click", async (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const name = ev.currentTarget.dataset.sfName;
+      if (!name) return;
+      const sf = this.actor.system?.sf ?? [];
+      let newSf;
+      if (Array.isArray(sf)) {
+        newSf = sf.filter(s => s !== name);
+      } else {
+        newSf = { ...sf };
+        delete newSf[name];
+      }
+      await this.actor.update({ "system.sf": newSf });
+      this.render();
+    });
+
+    // ── SF hinzufügen ───────────────────────────────────────────────────────
+    html.find(".sf-add-btn").on("click", async (ev) => {
+      ev.preventDefault();
+      const input = html.find(".sf-add-input");
+      const name  = (input.val() ?? "").trim();
+      if (!name) return;
+      const sf = this.actor.system?.sf ?? [];
+      let newSf;
+      if (Array.isArray(sf)) {
+        if (sf.includes(name)) return;
+        newSf = [...sf, name];
+      } else {
+        if (name in sf) return;
+        newSf = { ...sf, [name]: true };
+      }
+      await this.actor.update({ "system.sf": newSf });
+      input.val("");
+      this.render();
+    });
+    html.find(".sf-add-input").on("keydown", (ev) => {
+      if (ev.key === "Enter") { html.find(".sf-add-btn").trigger("click"); }
+    });
+
+    // Verhindern dass Inputs das Foundry-Default-Submit triggern
+    html.find(".attr-base-input, .taw-input, .combat-taw-input, .res-max-input, .spell-zfw-input, .vn-value-input").on("click", (ev) => {
+      ev.stopPropagation();
     });
   }
 
@@ -1255,8 +1577,8 @@ export class PixelArtCharacterSheet extends ActorSheet {
 
   /** Eiserner Wille toggle: 2 Aktionen + 1 Erschöpfung, MU/2 SR Wirkungsdauer.
    *  Aktiviert: +3 (Stufe I) bzw. +7 (Stufe II) MR vs Einfluss/Hellsicht/
-   *  Herrschaft/Verständigung. Während aktiv: Talent-/Zauberproben −3,
-   *  Eigenschafts-/Kampfproben −1 (Konzentrations-Penalty, WdZ S.31).
+   *  Herrschaft/Verständigung. Während aktiv: Talent-/Zauberproben +3,
+   *  Eigenschafts-/Kampfproben +1 (Erschwernis, WdZ S.31).
    */
   async _toggleEisernerWille(event) {
     event?.preventDefault?.();
@@ -1289,7 +1611,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="dsa-pixel-chat"><div class="chat-title">⚔ Eiserner Wille ${stufe} AKTIVIERT</div>
           <div class="result-line result-success">Wirkungsdauer: ${muHalf} Spielrunden (MU/2)</div>
-          <div style="font-size:11px;color:#aaa;margin-top:3px">−1 AuP (Konzentration). Während aktiv: Talent-/Zauberproben −3, Eigenschafts-/Kampfproben −1.</div></div>`,
+          <div style="font-size:11px;color:#aaa;margin-top:3px">−1 AuP (Konzentration). Während aktiv: Talent-/Zauberproben +3, Eigenschafts-/Kampfproben +1 (Erschwernis, WdZ S.31).</div></div>`,
       });
     }
     this.render();
