@@ -62,6 +62,8 @@ const DSA_DISADVANTAGES = new Set([
   "Krankheitsanfaellig", "Krankheitsanfällig", "Schlafstoerung", "Schlafstörung",
   "Schlechter Geruchssinn", "Schlechtes Gedaechtnis", "Schlechtes Gedächtnis",
   "Schwaches Gehoer", "Schwaches Gehör", "Tollpatsch", "Unstet",
+  // Bewegungs-Nachteile (WdH S.250)
+  "Behäbig", "Behaebig", "Behäbigkeit",
   // Soziale Nachteile
   "Niedrige Geburt", "Unfrei", "Randgruppe", "Schulden",
   "Moralkodex", "Ehrenkodex", "Prinzipientreue", "Pazifismus",
@@ -89,7 +91,7 @@ function _isDisadvantage(name) {
   }
   // Prefix match (fuer parametrisierte Nachteile wie "Angst vor [X]")
   const prefixes = ["angst vor", "vorurteile gegen", "unfaehigkeit fuer", "unfähigkeit für",
-                    "behinderung", "schulden", "moralkodex"];
+                    "behinderung", "schulden", "moralkodex", "behäbig", "behaebig"];
   for (const p of prefixes) {
     if (nLow.startsWith(p)) return true;
   }
@@ -155,7 +157,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       KO: data.attributes.KO.effective, KK: data.attributes.KK.effective,
     };
     // Race-based GS override (Waldelf = 9, Zwerg = 6, etc.)
-    const raceGS = RACE_GS[system.race?.trim?.()] ?? RACE_GS[system.rasse?.trim?.()] ?? 8;
+    const raceGSBase = RACE_GS[system.race?.trim?.()] ?? RACE_GS[system.rasse?.trim?.()] ?? 8;
     // SF-Liste normalisieren (kann Array-of-Strings oder Object-Map sein, je
     // nach Quelle: gdsa-Item-Set vs unsere Flag-Struktur).
     const _rawSf = system.sf ?? {};
@@ -178,16 +180,27 @@ export class PixelArtCharacterSheet extends ActorSheet {
     //   Glasknochen        → −1 AW (zusätzlich zu WS-Bonus aus getWoundThresholds)
     //   Tollpatsch         → −1 AW
     //   Schlechter Reflexe → −2 AW
-    const _nachteileMap = system.nachteile ?? {};
-    const _nachteileNames = Object.keys(_nachteileMap).map(s => s.toLowerCase());
-    // AW-Mali laut WdH:
-    //   Behäbig (WdH S.250): -1 AW (zusätzlich zu GS-1)
-    //   Tollpatsch (WdH S.265): keine direkte AW-Mali; nur Patzer-Schwelle 19+
-    //     ABER WdS S.66 listet Tollpatsch explizit als AW-1 (Hausregel-konform)
-    // "Schlechte Reflexe" und "Schwerfällig" existieren nicht in DSA 4.1 — entfernt.
+    // Nachteils-Lookup: robust auch wenn gdsa alles in system.vorteile schreibt.
+    // Gleiche Strategie wie _prepareVorteile — prüft beide Maps.
+    const _nachteileMap  = system.nachteile ?? {};
+    const _vorteileMap   = system.vorteile  ?? {};
+    // Alle Nachteilsnamen sammeln: primär system.nachteile PLUS system.vorteile-Einträge
+    // die als Nachteile erkannt werden (gdsa schreibt manchmal alles in vorteile).
+    // Union beider Maps — kein Entweder/oder mehr.
+    const _nachteileFromNachteile = Object.keys(_nachteileMap);
+    const _nachteileFromVorteile  = Object.keys(_vorteileMap).filter(n => _isDisadvantage(n));
+    const _nachteileNames = Array.from(new Set([..._nachteileFromNachteile, ..._nachteileFromVorteile]))
+      .map(s => s.toLowerCase());
+    // AW-Mali laut DSA 4.1 WdH/WdS:
+    //   Behäbig (WdH S.261):   −1 AW + GS −1 + Sprung-Grundwert −1
+    //   Tollpatsch (WdS S.66): −1 AW
     let awNachteilMalus = 0;
-    if (_nachteileNames.some(n => n.startsWith("behäbig") || n.startsWith("behaebig") || n.includes("behäbig"))) awNachteilMalus -= 1;
+    const hasBehaebig = _nachteileNames.some(n => n.startsWith("behäbig") || n.startsWith("behaebig") || n.includes("behäbig"));
+    if (hasBehaebig) awNachteilMalus -= 1;
     if (_nachteileNames.some(n => n.startsWith("tollpatsch"))) awNachteilMalus -= 1;
+    // Behäbig reduziert auch GS um 1 (WdH S.261)
+    const raceGS = hasBehaebig ? Math.max(1, raceGSBase - 1) : raceGSBase;
+    data.behaebigActive = hasBehaebig; // für Tooltip/UI
     const computed = {
       INIBasis: DERIVED_FORMULAS.INIBasis(rawAttrs),
       MR:       DERIVED_FORMULAS.MR(rawAttrs),
@@ -294,16 +307,17 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const iniArmorMalus = Math.round(armorCalc.totalGBE) - (armorCalc.rg || 0);
     data.iniPenalty = Math.max(0, iniArmorMalus) + (shieldIniMod < 0 ? -shieldIniMod : 0) + iniNachteilMalus;
 
-    // ── AW: WdS S.66 — eBE wirkt auf AW. Wir speichern den ROHEN AW
-    // ohne eBE-Abzug; der eBE-Abzug erfolgt DEDIZIERT im Ausweichen-Dialog
-    // (½eBE bei normalem Ausweichen, volle eBE bei gezieltem Ausweichen).
-    // So vermeiden wir Doppel-Abzug (Finding WS-F22).
+    // ── AW: WdS S.66 — "Behinderung +BE" auf JEDE Ausweichen-Probe (volle BE).
+    // Was sich bei Gezieltem Ausweichen unterscheidet ist die DK-Modifikation
+    // (verdoppelt), NICHT die BE. Wir speichern den ROHEN AW ohne BE-Abzug;
+    // der volle BE-Abzug erfolgt im Ausweichen-Dialog (gleicher Wert in beiden
+    // Modi). So vermeiden wir Doppel-Abzug.
     const awBaseRaw = computed.AW; // mit awSFBonus, awAkrobatikBonus, awNachteilMalus aber OHNE eBE
     const awBEMalus = Math.max(0, Math.round(armorCalc.eBE));
     sysClone.Dogde = awBaseRaw;          // raw AW im Sheet (eBE-Abzug erst im Dialog)
     data.awBase = awBaseRaw;
-    data.awBEMalus = awBEMalus;          // für Tooltip: "AW 12 (−2 eBE bei normalem)"
-    data.awDisplayNormal = Math.max(0, awBaseRaw - Math.floor(awBEMalus / 2));
+    data.awBEMalus = awBEMalus;          // für Tooltip: "AW 12 (−2 eBE)"
+    data.awDisplayNormal  = Math.max(0, awBaseRaw - awBEMalus);
     data.awDisplayGezielt = Math.max(0, awBaseRaw - awBEMalus);
     computed.AW = awBaseRaw;
     data.zoneLabels = ZONE_LABELS;
@@ -362,7 +376,12 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // ── Talente nach Kategorien gruppieren (mit BE-Penalty für körperliche Talente) ──
     data.talentCategories = this._prepareTalents(data.eBE, data.woundPenalty);
 
-    // ── Kampftalente (mit eBE-Penalty + Schild AT/PA-Mods + Wund-Penalty) ──
+    // ── Waffen: mit Kampf-AT/PA aus Talent-TaW anreichern (Haupt-Combat-UI) ──
+    data.weapons = this._prepareWeaponCombat(
+      data.weapons, data.eBE, data.woundPenalty, shieldAtMod, shieldPaMod
+    );
+
+    // ── Kampftalente (vereinfacht: nur TaW-Editor + eBE-Referenz) ──
     data.combatTalents = this._prepareCombatTalents(data.eBE, shieldAtMod, shieldPaMod, data.woundPenalty);
 
     // ── Zauber ──
@@ -577,34 +596,74 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // BE-Regeln für Kampftalente aus armor-zones.json
     const combatBeRules = globalThis.DSAPixelData?.armorZones?.beRules?.combatTalents ?? {};
 
-    // gdsa speichert Kampftalente in system.skill[name]
+    // Alle kanonischen DSA 4.1 Waffentalente (WdS) — immer anzeigen, auch TaW 0.
+    // Exakte gdsa-System-Namen (aus system.skill-Keys verifiziert).
+    const ALL_COMBAT_TALENTS = [
+      // ── Nahkampf (WdS) ─────────────────────────────────────────────
+      "Raufen", "Ringen",
+      "Dolche", "Fechtwaffen", "Schwerter", "Säbel", "Anderthalbhänder",
+      "Zweihandschwerter / -säbel",
+      "Hiebwaffen", "Zweihand-Hiebwaffen", "Zweihandflegel",
+      "Speere", "Infanteriewaffen",
+      "Stäbe", "Kettenstäbe", "Kettenwaffen", "Peitsche",
+      "Lanzenreiten", "Belagerungswaffen",
+      // ── Fernkampf (WdS) ────────────────────────────────────────────
+      "Bogen", "Armbrust", "Schleuder", "Diskus", "Blasrohr",
+      "Wurfbeile", "Wurfmesser", "Wurfspeere",
+    ];
     const RANGED = new Set(["Armbrust", "Blasrohr", "Bogen", "Diskus", "Schleuder",
                             "Wurfbeile", "Wurfmesser", "Wurfspeere"]);
+    // Talente die explizite Grundausbildung brauchen — bei TaW 0 komplett gesperrt (WdS).
+    // Lanzenreiten: nur zu Pferd + Ausbildung. Belagerungswaffen: nur mit Kriegsmaschine.
+    const ACTIVATION_REQUIRED = new Set(["Lanzenreiten", "Belagerungswaffen"]);
     const skillMap = sys.skill ?? {};
 
+    // Basis-Map: alle kanonischen Talente mit Default-TaW 0
+    const mergedSkills = new Map();
+    for (const name of ALL_COMBAT_TALENTS) {
+      mergedSkills.set(name, { value: 0, atk: "", def: "" });
+    }
+    // Akteur-Daten drüber schreiben (überschreibt Default + ergänzt unbekannte Talente)
     for (const [name, data] of Object.entries(skillMap)) {
-      // Skip ritual keys
       if (name.startsWith("rit") || name === "liturgy") continue;
       if (!data || typeof data !== "object") continue;
+      mergedSkills.set(name, data);
+    }
+
+    for (const [name, data] of mergedSkills) {
       const taw = data.value === "" ? 0 : (Number(data.value) || 0);
-      if (taw === 0) continue; // nur Talente mit echtem Wert
-
       const isRanged = RANGED.has(name);
+      const aktivierungsPflichtig = ACTIVATION_REQUIRED.has(name) && taw === 0;
+      const ungelernt = taw === 0;
 
-      // DSA 4.1: Fernkampf AT = FK-Basis + TAW (voll), Nahkampf AT/PA = Basis + TAW/2
-      // DSA 4.1: Explizite AT/PA-Werte nur verwenden wenn > 0,
-      // sonst Basiswert + halber TAW berechnen (WdS S.61)
+      // WM (Waffenmodifikator) — aus sys.skill[talent] wenn Waffe verknüpft.
+      // Achtung: explizite atk/def-Werte von Helden-Software haben WM bereits eingerechnet.
+      const wmAt = data.wmAt ?? 0;
+      const wmPa = data.wmPa ?? 0;
+      const bf   = data.bf   ?? null;  // Bruchfaktor der aktuell eingetragenen Waffe
+
+      // AT/PA Berechnung (WdS S.61):
+      //   Explizite HS-Werte → direkt verwenden (WM bereits enthalten)
+      //   Formel-Pfad        → ATBasis + TaW/2 + WM
+      // Bei TaW 0 untrained NK: AT = ATBasis (keine Parade möglich, WdS)
       const explicitAt = data.atk !== "" && data.atk != null && Number(data.atk) > 0;
-      let at = explicitAt
-        ? Number(data.atk)
-        : isRanged
-          ? fkBase + taw                      // FK: volles TAW addieren
-          : atBase + Math.floor(taw / 2);     // NK: halbes TAW
+      let at = aktivierungsPflichtig ? 0
+        : explicitAt ? Number(data.atk)
+        : isRanged   ? fkBase + taw + wmAt
+        :              atBase + Math.floor(taw / 2) + wmAt;
+
       const explicitPa = data.def !== "" && data.def != null && Number(data.def) > 0;
-      let pa = isRanged ? "-"
-        : explicitPa
-          ? Number(data.def)
-          : paBase + Math.floor(taw / 2);
+      let pa;
+      if (isRanged || aktivierungsPflichtig) {
+        pa = "-";
+      } else if (ungelernt && !explicitPa) {
+        // Ohne Kampftalent: Parieren nicht möglich (WdS: "ungelernte Waffe → kein Parieren")
+        pa = "-";
+      } else if (explicitPa) {
+        pa = Number(data.def);           // HS-Wert, WM schon drin
+      } else {
+        pa = paBase + Math.floor(taw / 2) + wmPa;  // Formel + WM
+      }
 
       // ── eBE-Penalty auf AT/PA anwenden (WdS Rüstungsbehinderung) ──
       // Berechne talent-spezifische eBE aus beRules
@@ -637,9 +696,18 @@ export class PixelArtCharacterSheet extends ActorSheet {
       at -= woundPenalty;
       if (typeof pa === "number") pa -= woundPenalty;
 
+      // WM-Label für Tooltip: "WM +1/−1", leer wenn beide 0
+      const wmLabel = (wmAt !== 0 || wmPa !== 0)
+        ? `WM ${wmAt >= 0 ? "+" : ""}${wmAt}/${wmPa >= 0 ? "+" : ""}${wmPa}`
+        : "";
+
       talents.push({
         name, taw,
+        ungelernt,
+        aktivierungsPflichtig,
         at, pa,
+        // Hilfsflag: PA nicht würfelbar (ungelernt / Fernkampf / gesperrt)
+        paIsNA: typeof pa !== "number",
         // atBase/paBase = Wert ohne eBE-Penalty und ohne Schild-Mod (reiner Basiswert)
         atBase: at + atPenalty - atShieldApplied + woundPenalty,
         paBase: typeof pa === "number" ? pa + paPenalty - paShieldApplied + woundPenalty : pa,
@@ -648,12 +716,88 @@ export class PixelArtCharacterSheet extends ActorSheet {
         shieldAtMod: atShieldApplied,
         shieldPaMod: paShieldApplied,
         eBE: talentEBE,
-        tp:      data.tp      ?? "",   // Trefferpunkte/Schaden (Kreaturwaffen)
-        special: data.special ?? "",   // Sondereigenschaften
+        // WM (Waffenmodifikator, WdS) — 0 wenn keine Waffe oder AT/PA 0/0
+        wmAt, wmPa, wmLabel,
+        // BF (Bruchfaktor, WdS) — null wenn kein BF bekannt
+        bf,
+        tp:      data.tp      ?? "",
+        special: data.special ?? "",
       });
     }
 
     return talents.sort((a, b) => a.name.localeCompare(b.name, "de"));
+  }
+
+  // ─── Waffen mit Kampfwerten anreichern (Haupt-Combat-UI) ─────────────
+  //
+  // Rechnet für jede Waffe AT/PA aus dem verknüpften Talent (TaW),
+  // wendet eBE, Schild-Mods und Wund-Penalty an.
+  // Ergebnis ersetzt data.weapons — die Waffenzeilen werden danach
+  // direkt als Kampf-Interface (AT/PA/Schaden klickbar) gerendert.
+
+  _prepareWeaponCombat(weapons, eBE = 0, woundPenalty = 0, shieldAtMod = 0, shieldPaMod = 0) {
+    const sys    = this.actor.system;
+    const atBase = sys.ATBasis?.value ?? 10;
+    const paBase = sys.PABasis?.value ?? 10;
+    const fkBase = sys.FKBasis?.value ?? 9;
+    const combatBeRules = globalThis.DSAPixelData?.armorZones?.beRules?.combatTalents ?? {};
+
+    const RANGED   = PixelArtCharacterSheet.RANGED_TALENTS;
+    const THROWING = PixelArtCharacterSheet.THROWING_TALENTS;
+
+    return weapons.map(wep => {
+      const talent    = wep.talent ?? "";
+      const skillData = sys.skill?.[talent] ?? {};
+      const taw       = skillData.value === "" ? 0 : (Number(skillData.value) || 0);
+      const isRanged   = RANGED.has(talent);
+      const isThrowing = THROWING.has(talent);
+      const wmAt = wep.wmAt ?? 0;
+      const wmPa = wep.wmPa ?? 0;
+
+      // AT-Basis (WdS): FK für Fernkampf, sonst ATBasis + TaW/2 + WM
+      let at = isRanged
+        ? fkBase + taw + wmAt
+        : atBase + Math.floor(taw / 2) + wmAt;
+
+      // PA: Fernkampf & ungelernt NK → kein Parieren (WdS)
+      let pa = (isRanged || taw === 0) ? "-"
+        : paBase + Math.floor(taw / 2) + wmPa;
+
+      // eBE-Penalty (talent-spezifisch aus beRules)
+      const beFormula = combatBeRules[talent];
+      const talentEBE = beFormula ? parseBeFormula(beFormula, eBE) : eBE;
+      const intEBE = Math.floor(talentEBE);
+      if (intEBE > 0) {
+        const atP = Math.floor(intEBE / 2);
+        const paP = Math.ceil(intEBE / 2);
+        at -= atP;
+        if (typeof pa === "number") pa -= paP;
+      }
+
+      // Schild-Mods (nur NK, WdS)
+      const atShield = isRanged ? 0 : shieldAtMod;
+      const paShield = isRanged ? 0 : shieldPaMod;
+      at += atShield;
+      if (typeof pa === "number") pa += paShield;
+
+      // Wund-Penalty: −2 pro Wunde (WdS S.57)
+      at -= woundPenalty;
+      if (typeof pa === "number") pa -= woundPenalty;
+
+      const paIsNA   = typeof pa !== "number";
+      const ungelernt = taw === 0;
+      const wmLabel  = (wmAt !== 0 || wmPa !== 0)
+        ? `WM ${wmAt >= 0 ? "+" : ""}${wmAt}/${wmPa >= 0 ? "+" : ""}${wmPa}` : "";
+
+      return {
+        ...wep,
+        taw, talent,
+        at, pa, paIsNA, ungelernt,
+        isRanged, isThrowing,
+        wmAt, wmPa, wmLabel,
+        talentEBE,
+      };
+    });
   }
 
   // ─── Zauber vorbereiten ───────────────────────────────────────────────
@@ -708,7 +852,11 @@ export class PixelArtCharacterSheet extends ActorSheet {
             reichweite: itemType === "range"
               ? `${wep.range1 ?? ""}/${wep.range2 ?? ""}/${wep.range3 ?? ""} m`
               : (wep.DK ?? ""),
-            talent: wep.type ?? "",
+            talent:     wep.type        ?? "",
+            kkSchwelle: wep.kk          ?? null,   // KK-Schwelle (WdS): unter/über → TP-Bonus/-Malus
+            bf:         wep.bf          ?? null,   // Bruchfaktor (WdS)
+            wmAt:       wep.atMod       ?? 0,      // WM AT
+            wmPa:       wep.paMod       ?? 0,      // WM PA
           });
         } else if (itemType === "armor") {
           const armor_data = sys.armor ?? {};
@@ -740,10 +888,15 @@ export class PixelArtCharacterSheet extends ActorSheet {
         }
       } else if (type === "weapon" || type === "waffe") {
         weapons.push({
-          id: item.id, name: item.name,
-          tp: sys.tp ?? sys.damage ?? "",
+          id:         item.id,
+          name:       item.name,
+          tp:         sys.tp ?? sys.damage ?? "",
           reichweite: sys.reichweite ?? sys.range ?? "",
-          talent: sys.talent ?? "",
+          talent:     sys.talent ?? "",
+          kkSchwelle: sys.kkSchwelle ?? sys.kk ?? null,
+          bf:         sys.bf ?? null,
+          wmAt:       sys.wmAt ?? sys.atMod ?? 0,
+          wmPa:       sys.wmPa ?? sys.paMod ?? 0,
         });
       } else if (type === "armor" || type === "rüstung" || type === "ruestung") {
         armor.push({
@@ -1268,13 +1421,15 @@ export class PixelArtCharacterSheet extends ActorSheet {
       if (ev.key === "Escape") { this.render(); }
     });
 
-    // ── Vorteil/Nachteil-Stufenwert editieren ──────────────────────────────
+    // ── Vorteil/Nachteil-Wert editieren (Zahl ODER Text, z.B. "Feuer", "Körper") ──
     html.find(".vn-value-input").on("change blur", async (ev) => {
       ev.stopPropagation();
       const key  = ev.currentTarget.dataset.vnKey;   // "vorteile" or "nachteile"
       const name = ev.currentTarget.dataset.vnName;
-      const val  = parseInt(ev.currentTarget.value);
-      if (!key || !name || isNaN(val)) return;
+      const raw  = ev.currentTarget.value.trim();
+      if (!key || !name || raw === "") return;
+      // Zahl wenn möglich, sonst String (Begabung für Feuer, Unfähigkeit für Körper etc.)
+      const val = raw !== "" && !isNaN(Number(raw)) ? Number(raw) : raw;
       const current = this.actor.system?.[key] ?? {};
       await this.actor.update({ [`system.${key}`]: { ...current, [name]: val } });
       this.render();
@@ -1399,102 +1554,294 @@ export class PixelArtCharacterSheet extends ActorSheet {
 
     // ── Nachtschlaf ──────────────────────────────────────────────────
     } else if (action === "regen-nacht") {
-      // AuP: voll
-      const newAuP = sys.AuP.max;
-      const updates = { "system.AuP.value": newAuP };
-      let chatLines = `<div class="result-line result-success">AuP voll → ${newAuP}/${sys.AuP.max}</div>`;
+      const regStufe    = regen.regStufe    ?? 0;
+      const astraleBonus = regen.astraleReg ?? 0;
+      const koVal = sys.KO?.value ?? 10;
+      const inVal = sys.IN?.value ?? 10;
 
-      // AsP: 1W6 + Astrale Regeneration Stufe
-      if (sys.AsP?.max) {
-        const astraleBonus = regen.astraleReg ?? 0;
-        const formula = astraleBonus > 0 ? `1d6+${astraleBonus}` : "1d6";
-        const aspRoll = new Roll(formula);
-        await aspRoll.evaluate();
-        const newAsP = Math.min(sys.AsP.max, (sys.AsP.value ?? 0) + aspRoll.total);
-        updates["system.AsP.value"] = newAsP;
-        const dieVal = aspRoll.terms[0].total ?? aspRoll.terms[0].results?.[0]?.result ?? aspRoll.total;
-        chatLines += `<div class="result-line result-success">
-          +${aspRoll.total} AsP (1W6${astraleBonus > 0 ? `+${astraleBonus} Astr.Reg.` : ""})
-          → ${newAsP}/${sys.AsP.max}
-        </div>`;
+      // ── Dialog: Schlafqualität ──────────────────────────────────────
+      const regSFLabel = regStufe >= 3 ? " (Meisterliche Reg., WdZ)"
+                       : regStufe === 2 ? " (Reg. II, WdH)" : regStufe === 1 ? " (Reg. I, WdH)" : "";
+      const schlafWahl = await new Promise((resolve) => {
+        new Dialog({
+          title: "🌙 Nachtschlaf",
+          content: `
+            <div class="dsa-mod-dialog" style="padding:10px;color-scheme:dark">
+              <div class="dsa-mod-title">Schlafqualität wählen</div>
+              <div style="margin:8px 0">
+                <select id="schlaf-qual" style="width:100%;font-family:'VT323',monospace;font-size:15px;
+                  background:#0d1b2e;border:2px solid #3a3a5e;color:#e0e0e0;color-scheme:dark;padding:4px">
+                  <option value="gut">🌟 Erholsamer Schlaf (+1 LeP Bonus)</option>
+                  <option value="normal" selected>😴 Normaler Schlaf</option>
+                  <option value="schlecht">😩 Unruhiger Schlaf (−1 LeP Malus)</option>
+                  <option value="kein">💤 Kein Schlaf / Wache (kein LeP, halbe AuP)</option>
+                </select>
+              </div>
+              <div style="font-size:11px;color:#668;font-family:'VT323',monospace;margin-top:6px;line-height:1.5">
+                LeP: 1W6 + KO-Probe → +1 LeP<br>
+                AsP: 1W6${astraleBonus > 0 ? `+${astraleBonus} (Astr.Reg.)` : ""}${regStufe > 0 ? `+${regStufe}${regSFLabel}` : ""} + IN-Probe → +1 AsP<br>
+                AuP: vollständig wiederhergestellt
+              </div>
+            </div>`,
+          buttons: {
+            roll: {
+              icon:  '<i class="fas fa-moon"></i>',
+              label: "Schlafen",
+              callback: (html) => resolve(html.find("#schlaf-qual").val()),
+            },
+            cancel: { label: "Abbruch", callback: () => resolve(null) },
+          },
+          default: "roll",
+          close: () => resolve(null),
+        }).render(true);
+      });
+      if (!schlafWahl) return;
+
+      const keinSchlaf = schlafWahl === "kein";
+      const lepQualBonus = schlafWahl === "gut" ? 1 : schlafWahl === "schlecht" ? -1 : 0;
+      const updates = {};
+      let chatLines = "";
+
+      // ── AuP ──────────────────────────────────────────────────────────
+      const newAuP = keinSchlaf ? Math.floor((sys.AuP.max ?? 0) / 2) : (sys.AuP.max ?? 0);
+      updates["system.AuP.value"] = newAuP;
+      chatLines += `<div class="result-line result-success">AuP ${keinSchlaf ? `halbiert (Wache)` : "voll"} → ${newAuP}/${sys.AuP.max}</div>`;
+
+      // ── LeP: 1W6 Basis + KO-Probe + Qualitätsmod ─────────────────────
+      // Reg I/II/Meisterliche Reg (WdZ) betreffen NUR AsP, nicht LeP.
+      // KO-Probe (1W20 vs KO): bei Erfolg +1 LeP.
+      if (sys.LeP?.max && !keinSchlaf) {
+        const lepRoll = new Roll("1d6");
+        await lepRoll.evaluate();
+
+        // KO-Probe
+        const koRoll = new Roll("1d20");
+        await koRoll.evaluate();
+        const koSuccess = koRoll.total <= koVal;
+        const koBonus   = koSuccess ? 1 : 0;
+
+        const lepGainRaw = lepRoll.total + lepQualBonus + koBonus;
+        const lepGain    = Math.max(0, lepGainRaw);
+        const newLeP     = Math.min(sys.LeP.max, (sys.LeP.value ?? 0) + lepGain);
+        updates["system.LeP.value"] = newLeP;
+
+        const qualLabel = lepQualBonus !== 0 ? ` ${lepQualBonus > 0 ? "+" : ""}${lepQualBonus} Schlaf` : "";
+        const koLabel   = koSuccess
+          ? `<span style="color:#a5d6a7"> +1 (KO-Probe ✓ ${koRoll.total}/${koVal})</span>`
+          : `<span style="color:#777"> KO-Probe ✗ ${koRoll.total}/${koVal}</span>`;
+        const dieHtml   = `<div class="die ${lepRoll.total >= 5 ? "success" : lepRoll.total <= 2 ? "fail" : ""}">${lepRoll.total}</div>`;
+
+        chatLines += `<div class="dice-row" style="margin:4px 0">${dieHtml}</div>`;
+        chatLines += `<div class="result-line result-success">+${lepGain} LeP (1W6=${lepRoll.total}${qualLabel})${koLabel} → ${newLeP}/${sys.LeP.max}</div>`;
+      } else if (keinSchlaf) {
+        chatLines += `<div class="result-line" style="color:#888">Kein Schlaf — keine LeP-Regeneration</div>`;
       }
 
-      // KaP: TÄGLICHE REGENERATION (WdG S.241)
-      // "Jeden Tag gewinnt er 1 KaP zurück (zur selben Zeit wie die normale
-      //  Regenerationsphase der Lebensenergie, also meist während des Schlafs)."
-      // KaP regenerieren NICHT mit 1W6 wie AsP — die Hauptregeneration läuft
-      // über MEDITATION (4 Stunden = 1 Mirakelprobe → LkP* KaP, WdG S.240).
-      // Optional kann SF "Karmale Regeneration I/II/III" oder Vorteil
-      // "Karmale Regeneration" einen kleinen Bonus addieren (Hausregel).
+      // ── AsP: 1W6 + astraleReg + regStufe (Reg I/II/Mstr.Reg, WdZ) + IN-Probe ──
+      // regStufe 1/2/3 = Reg I / Reg II / Meisterliche Reg: geben je +1/+2/+3 AsP/Nacht
+      if (sys.AsP?.max) {
+        const aspRoll = new Roll("1d6");
+        await aspRoll.evaluate();
+
+        // IN-Probe
+        const inRoll = new Roll("1d20");
+        await inRoll.evaluate();
+        const inSuccess = inRoll.total <= inVal;
+        const inBonus   = inSuccess ? 1 : 0;
+
+        const aspGain = Math.max(0, aspRoll.total + astraleBonus + regStufe + inBonus);
+        const newAsP  = Math.min(sys.AsP.max, (sys.AsP.value ?? 0) + aspGain);
+        updates["system.AsP.value"] = newAsP;
+
+        const inLabel    = inSuccess
+          ? `<span style="color:#90caf9"> +1 (IN-Probe ✓ ${inRoll.total}/${inVal})</span>`
+          : `<span style="color:#777"> IN-Probe ✗ ${inRoll.total}/${inVal}</span>`;
+        const astrLabel  = astraleBonus > 0 ? ` +${astraleBonus} Astr.Reg.` : "";
+        const regLabel   = regStufe > 0 ? ` +${regStufe}${regSFLabel}` : "";
+        chatLines += `<div class="result-line result-success">+${aspGain} AsP (1W6=${aspRoll.total}${astrLabel}${regLabel})${inLabel} → ${newAsP}/${sys.AsP.max}</div>`;
+      }
+
+      // ── KaP: 1/Tag (WdG S.241) ─────────────────────────────────────
       if (sys.KaP?.max) {
         const karmaleBonus = (regen.karmaleReg ?? 0) + (regen.karmaleRegStufe ?? 0);
         const kapGain = 1 + karmaleBonus;
-        const newKaP = Math.min(sys.KaP.max, (sys.KaP.value ?? 0) + kapGain);
+        const newKaP  = Math.min(sys.KaP.max, (sys.KaP.value ?? 0) + kapGain);
         updates["system.KaP.value"] = newKaP;
-        const bonusLabel = karmaleBonus > 0 ? ` (1 Tägl. + ${karmaleBonus} Karmale Reg.)` : " (Tägliche Reg., WdG S.241)";
+        const bonusLabel = karmaleBonus > 0 ? ` (1 tägl.+${karmaleBonus} Karm.Reg.)` : " (tägl., WdG S.241)";
         chatLines += `<div class="result-line result-success">+${kapGain} KaP${bonusLabel} → ${newKaP}/${sys.KaP.max}</div>`;
-        chatLines += `<div style="font-size:10px;color:#779;margin-top:2px">Tipp: Voll-Regeneration via Meditation (4h, Mirakel-Probe → LkP* KaP) — Knopf "Meditation".</div>`;
+        chatLines += `<div style="font-size:10px;color:#779;margin-top:2px">Voll-Reg via Meditation (4h, Mirakelprobe → LkP* KaP)</div>`;
       }
+
+      const schlafTitel = schlafWahl === "gut" ? "🌟 Erholsamer Schlaf"
+                        : schlafWahl === "schlecht" ? "😩 Unruhiger Schlaf"
+                        : schlafWahl === "kein" ? "💤 Wache / kein Schlaf" : "🌙 Nachtschlaf";
 
       await this.actor.update(updates);
       ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-        content: `<div class="dsa-pixel-chat"><div class="chat-title">🌙 Nachtschlaf</div>${chatLines}</div>`,
+        content: `<div class="dsa-pixel-chat"><div class="chat-title">${schlafTitel}</div>${chatLines}</div>`,
       });
 
-    // ── Meditation (AsP via Regeneration I-III + KaP via Mirakelprobe) ───
+    // ── Astrale Meditation (WdZ S.9) ─────────────────────────────────────
+    // WdZ korrekte Regel: LeP in AsP umwandeln (NICHT AuP, NICHT direkte Regen!).
+    // Probe IN/CH/KO auf Selbstbeherrschung, erleichtert um floor(RkW/2).
+    // Startkosten: 1 AsP. TaP* = max LeP die in AsP gewandelt werden koennen.
+    // Danach: 1W3-1 LeP Erschoepfung. Patzer: Meditation gescheitert.
     } else if (action === "regen-meditation") {
       const hasAsp = !!sys.AsP?.max;
       const hasKap = !!sys.KaP?.max;
-      const regStufe = regen.regStufe ?? 0;
 
       if (!hasAsp && !hasKap) {
         ui.notifications.warn("Keine AsP/KaP vorhanden.");
         return;
       }
-      if (hasAsp && !hasKap && regStufe === 0) {
-        ui.notifications.warn("Keine Regenerations-SF vorhanden (für AsP-Meditation).");
+      if (!hasAsp) {
+        ui.notifications.warn("Astrale Meditation: keine AsP vorhanden (nur für Magier).");
         return;
       }
 
       const updates = {};
       let chatLines = "";
 
-      // ── Magier-Pfad: AsP-Regeneration via Regeneration I/II/III ────────
-      if (hasAsp && regStufe > 0) {
-        const stufeName = regStufe >= 3 ? "Meisterliche Regeneration"
-                        : regStufe === 2 ? "Regeneration II" : "Regeneration I";
-        const formula = `${regStufe}d6`;
+      // -- Magier-Pfad: Astrale Meditation (WdZ S.9) --------------------
+      // Probe = Ritualkenntnis-Probe (3W20 vs. RK-Talent-Eigenschaften)
+      // mit TaW = vollem RkW. KEIN Selbstbeherrschung, KEIN IN/CH/KO.
+      // 1 AsP Startkosten, 1 LeP -> 1 AsP pro SR. 1W3-1 LeP Erschoepfung.
+      if (hasAsp) {
+        // Probe-Eigenschaften pro Ritualkenntnis-Schule (DSA 4.1 WdZ)
+        const RIT_ATTRS = {
+          ritgild: { name: "Gildenmagie",     attrs: ["MU","KL","IN"] },
+          ritscha: { name: "Scharlatanerie",  attrs: ["MU","IN","CH"] },
+          ritalch: { name: "Alchimie",        attrs: ["MU","KL","FF"] },
+          ritkris: { name: "Kristallomantie", attrs: ["MU","KL","IN"] },
+          rithexe: { name: "Hexerei",         attrs: ["MU","IN","CH"] },
+          ritdrui: { name: "Druidenritual",   attrs: ["MU","IN","CH"] },
+          ritgeod: { name: "Geodenritual",    attrs: ["MU","IN","KO"] },
+          ritzibi: { name: "Zibilja",         attrs: ["MU","IN","CH"] },
+          ritdurr: { name: "Durrorkhum",      attrs: ["MU","IN","CH"] },
+          ritderw: { name: "Derwische",       attrs: ["MU","IN","CH"] },
+          rittanz: { name: "Tanzteufel",      attrs: ["MU","IN","CH"] },
+          ritbard: { name: "Bardenmusik",     attrs: ["IN","CH","CH"] },
+        };
+        const skillMap = sys.skill ?? {};
+        let bestKey = null, bestVal = 0;
+        for (const k of Object.keys(RIT_ATTRS)) {
+          const v = Number(skillMap[k]?.value) || 0;
+          if (v > bestVal) { bestVal = v; bestKey = k; }
+        }
+        if (!bestKey || bestVal <= 0) {
+          ui.notifications.warn("Astrale Meditation: keine Ritualkenntnis vorhanden.");
+          return;
+        }
+        const ritSchule       = RIT_ATTRS[bestKey];
+        const rkw             = bestVal;
+        const probeAttrs      = ritSchule.attrs.map(a => Number(sys[a]?.value) || 10);
+        const probeAttrLabels = ritSchule.attrs;
 
-        // Probe: KL/IN/CH gegen Selbstbeherrschung
-        const klVal = sys.KL?.value ?? 10;
-        const inVal = sys.IN?.value ?? 10;
-        const chVal = sys.CH?.value ?? 10;
-        const attrs = [klVal, inVal, chVal];
+        const curAsP   = sys.AsP.value ?? 0;
+        const curLeP   = sys.LeP.value ?? 0;
+        const aspGap   = sys.AsP.max - curAsP;
+        const availLeP = Math.max(0, curLeP - 1); // mind. 1 LeP behalten
+        const dialogMax = Math.max(0, Math.min(availLeP, aspGap));
+
+        if (dialogMax <= 0) {
+          ui.notifications.warn("Astrale Meditation: keine LeP zum Umwandeln oder AsP voll.");
+          return;
+        }
+        if (curAsP < 1) {
+          ui.notifications.warn("Astrale Meditation: Startkosten 1 AsP nicht verfuegbar.");
+          return;
+        }
+
+        // -- Dialog: Wieviele LeP umwandeln? --
+        const wunsch = await new Promise((resolve) => {
+          new Dialog({
+            title: "Astrale Meditation",
+            content: `
+              <div class="dsa-mod-dialog" style="padding:10px;color-scheme:dark">
+                <div class="dsa-mod-title">Wieviele LeP in AsP umwandeln?</div>
+                <div style="margin:8px 0;display:flex;align-items:center;gap:8px">
+                  <input type="number" id="med-amount" value="${Math.max(1, Math.min(rkw, dialogMax))}" min="1" max="${dialogMax}"
+                    style="width:60px;text-align:center;font-family:'VT323',monospace;font-size:18px;
+                           background:rgba(0,0,0,0.4);border:2px solid #4a90d9;color:#4a90d9;padding:4px" />
+                  <span style="font-family:'VT323',monospace;color:#888;font-size:13px">
+                    (max ${dialogMax}: ${availLeP} LeP frei, ${aspGap} AsP-Luecke)
+                  </span>
+                </div>
+                <div style="font-size:11px;color:#667;font-family:'VT323',monospace;line-height:1.5;margin-top:6px">
+                  Ritualkenntnis-Probe ${ritSchule.name} (${probeAttrLabels.join("/")}) TaW ${rkw}<br>
+                  Eigenschaften: ${probeAttrLabels.map((l,i) => `${l} ${probeAttrs[i]}`).join(" / ")}<br>
+                  Startkosten: 1 AsP -- Pro SR: 1 LeP -> 1 AsP -- Nachkosten: 1W3-1 LeP<br>
+                  Bei TaP* &lt; gewuenscht: nur TaP* werden umgewandelt.
+                </div>
+              </div>`,
+            buttons: {
+              roll: { icon: '<i class="fas fa-spa"></i>', label: "Meditieren",
+                callback: (html) => resolve(parseInt(html.find("#med-amount").val()) || 0) },
+              cancel: { label: "Abbruch", callback: () => resolve(null) },
+            },
+            default: "roll",
+            close: () => resolve(null),
+          }).render(true);
+        });
+
+        if (wunsch === null) return; // Abbruch
+        const requested = Math.max(0, Math.min(wunsch, dialogMax));
+        if (requested <= 0) return;
+
         const probeRoll = new Roll("3d20");
         await probeRoll.evaluate();
         const dice = probeRoll.terms[0].results.map(r => r.result);
-        const selfTaW = sys.talente?.Selbstbeherrschung?.value ?? 14;
-        let tap = selfTaW;
+
+        const allOnes     = dice.every(d => d === 1);
+        const allTwenties = dice.every(d => d === 20);
+
+        let tapStar = rkw;
         for (let i = 0; i < 3; i++) {
-          if (dice[i] > attrs[i]) tap -= (dice[i] - attrs[i]);
+          if (dice[i] > probeAttrs[i]) tapStar -= (dice[i] - probeAttrs[i]);
         }
-        const success = tap >= 0;
+        const success = tapStar >= 0;
+
         const diceHtml = dice.map((d, i) => {
-          const over = d > attrs[i];
-          const cls = d === 1 ? "crit" : d === 20 ? "fumble" : over ? "fail" : "success";
-          return `<div class="die ${cls}" title="KL/IN/CH ${attrs[i]}">${d}</div>`;
+          const over = d > probeAttrs[i];
+          const cls  = d === 1 ? "crit" : d === 20 ? "fumble" : over ? "fail" : "success";
+          return `<div class="die ${cls}" title="${probeAttrLabels[i]} ${probeAttrs[i]}">${d}</div>`;
         }).join("");
-        chatLines += `<div class="chat-row" style="font-size:11px">AsP-Probe (${stufeName}) — KL/IN/CH ${klVal}/${inVal}/${chVal}, TaW Selbstbeherrschung ${selfTaW}</div>`;
+
+        chatLines += `<div class="chat-row" style="font-size:11px">
+          Astrale Meditation -- Ritualkenntnis ${ritSchule.name} ${probeAttrLabels.join("/")}
+          ${probeAttrs.join("/")}, TaW ${rkw} -- gewuenscht: ${requested} LeP
+        </div>`;
         chatLines += `<div class="dice-row">${diceHtml}</div>`;
-        if (success) {
-          const aspRoll = new Roll(formula);
-          await aspRoll.evaluate();
-          const newAsP = Math.min(sys.AsP.max, (sys.AsP.value ?? 0) + aspRoll.total);
+
+        if (allTwenties) {
+          chatLines += `<div class="result-line result-fail">
+            PATZER -- Konzentration bricht, Meditation gescheitert
+          </div>`;
+        } else if (allOnes || success) {
+          const cap    = allOnes ? Math.max(tapStar * 2, requested) : tapStar;
+          const gained = Math.max(0, Math.min(requested, cap, availLeP, aspGap));
+
+          const afterRoll = new Roll("1d3");
+          await afterRoll.evaluate();
+          const afterLeP = Math.max(0, afterRoll.total - 1);
+
+          const newAsP = Math.max(0, Math.min(sys.AsP.max, curAsP - 1 + gained));
+          const newLeP = Math.max(0, curLeP - gained - afterLeP);
           updates["system.AsP.value"] = newAsP;
-          chatLines += `<div class="result-line result-success">AsP-Probe gelungen — +${aspRoll.total} AsP (${formula}) → ${newAsP}/${sys.AsP.max}</div>`;
+          updates["system.LeP.value"] = newLeP;
+
+          const kritLabel = allOnes ? "GLUECKLICH -- " : "";
+          const partial   = (gained < requested) ? ` (TaP* ${tapStar} reicht nur fuer ${gained})` : ` (TaP* ${tapStar})`;
+          chatLines += `<div class="result-line ${allOnes ? "result-crit" : "result-success"}">
+            ${kritLabel}Gelungen -- ${gained} LeP in ${gained} AsP verwandelt${partial}
+            -- Startkosten: 1 AsP -- Erschoepfung: ${afterLeP} LeP (1W3=${afterRoll.total})
+            -- Dauer: ${gained} SR -- AsP ${newAsP}/${sys.AsP.max} -- LeP ${newLeP}/${sys.LeP.max}
+          </div>`;
         } else {
-          chatLines += `<div class="result-line result-fail">AsP-Probe misslungen (TaP* ${tap})</div>`;
+          chatLines += `<div class="result-line result-fail">
+            Misslungen (TaP* ${tapStar}) -- keine AsP gewonnen
+          </div>`;
         }
       }
 
@@ -2057,6 +2404,11 @@ export class PixelArtCharacterSheet extends ActorSheet {
     "Wurfbeile","Wurfmesser","Wurfspeere"
   ]);
 
+  // Wurfwaffen (Untergruppe von RANGED) — fliegen als Projektil, aber kein Bogen-Sound
+  static THROWING_TALENTS = new Set([
+    "Wurfbeile","Wurfmesser","Wurfspeere"
+  ]);
+
   // DSA 4.1 Trefferzone (W20)
   static ZONE_TABLE = [
     "", "Kopf","Kopf","Kopf",
@@ -2084,11 +2436,13 @@ export class PixelArtCharacterSheet extends ActorSheet {
   ];
 
   async _rollAttack(dataset) {
-    const talent   = dataset.talent;
-    const at       = parseInt(dataset.at) || 0;
-    const taw      = parseInt(dataset.taw) || 0;
-    const isRanged = PixelArtCharacterSheet.RANGED_TALENTS.has(talent);
-    const icon     = isRanged ? "🏹" : "⚔";
+    const talent     = dataset.talent;
+    const at         = parseInt(dataset.at) || 0;
+    const taw        = parseInt(dataset.taw) || 0;
+    const isRanged   = PixelArtCharacterSheet.RANGED_TALENTS.has(talent);
+    const isThrowing = PixelArtCharacterSheet.THROWING_TALENTS.has(talent);
+    // Icon: Wurfwaffe 🗡, Fernkampf 🏹, Nahkampf ⚔
+    const icon       = isThrowing ? "🗡" : isRanged ? "🏹" : "⚔";
 
     const opts = await this._askAttackOptions(`${icon} ${talent}`, at, taw);
     if (opts === null) return;
@@ -2317,6 +2671,31 @@ export class PixelArtCharacterSheet extends ActorSheet {
       ? `<div class="dsa-fumble-outcome">⚠ ${fumbleOutcome}</div>`
       : "";
 
+    // ── BF-Prüfung (WdS) ────────────────────────────────────────────────
+    // Krit bestätigt: Verteidiger muss Waffenbruch-Probe für seine Waffe ablegen
+    // Patzer bestätigt: Angreifer muss Waffenbruch-Probe für eigene Waffe ablegen
+    // Probe: 1W6 ≤ BF → Waffe bricht (aus dem Spiel)
+    const ownBF = dataset.bf != null && dataset.bf !== "null" && dataset.bf !== ""
+      ? parseInt(dataset.bf) : null;
+    let bfLine = "";
+    if (confirmedFumble && ownBF != null) {
+      // Automatisch eigene Waffe würfeln
+      const bfRoll = new Roll("1d6");
+      await bfRoll.evaluate();
+      const bfBreaks = bfRoll.total <= ownBF;
+      bfLine = `<div style="font-size:12px;text-align:center;margin-top:3px;padding:2px 6px;
+        background:${bfBreaks ? "rgba(233,69,96,0.2)" : "rgba(100,100,150,0.15)"};
+        border:1px solid ${bfBreaks ? "rgba(233,69,96,0.5)" : "rgba(100,100,150,0.3)"};border-radius:3px">
+        🗡 Waffenbruch-Probe (BF ${ownBF}): 1W6 = <strong>${bfRoll.total}</strong>
+        ${bfBreaks ? "→ <span style='color:#e94560;font-weight:bold'>WAFFE BRICHT!</span>" : "→ <span style='color:#7fdd7f'>Waffe hält</span>"}
+      </div>`;
+    } else if (confirmedCrit) {
+      // Hinweis: Verteidiger prüft seine Waffe (BF unbekannt)
+      bfLine = `<div style="font-size:11px;color:#9be;text-align:center;margin-top:2px">
+        🛡 Gegner: Waffenbruch-Probe (1W6 ≤ BF seiner Waffe)
+      </div>`;
+    }
+
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: `<div class="dsa-pixel-chat">
@@ -2324,7 +2703,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
         <div class="dice-row"><div class="die ${dieClass}">${die}</div></div>
         ${modLine}${confirmLine}
         <div class="result-line ${resultCls}">${resultText}</div>
-        ${zoneLine}${maneuverLine}${fumbleLine}${passierschlagBtn}
+        ${zoneLine}${maneuverLine}${fumbleLine}${bfLine}${passierschlagBtn}
       </div>`,
     });
 
@@ -2350,16 +2729,18 @@ export class PixelArtCharacterSheet extends ActorSheet {
         DSAPixelTokens.spawnEffect(srcToken.center.x, srcToken.center.y, "schadenflash");
 
     } else if (isRanged && srcToken && tgtToken) {
-      // Fernkampf: Abschuss-Sound sofort, Einschlag-Sound verzögert nach Flugzeit
-      SND("arrow_release.wav", 0.6);
-      const dist      = Math.hypot(tgtToken.center.x - srcToken.center.x, tgtToken.center.y - srcToken.center.y);
-      const travelMs  = Math.max(120, Math.round((dist / 10) * (1000 / 60)));
+      // Fernkampf/Wurfwaffe: Abschuss-Sound sofort, Einschlag verzögert nach Flugzeit
+      // Wurfwaffen klingen anders als Bögen (kein Sehnen-Schnapp)
+      SND(isThrowing ? "hit_impact.wav" : "arrow_release.wav", 0.6);
+      const dist     = Math.hypot(tgtToken.center.x - srcToken.center.x, tgtToken.center.y - srcToken.center.y);
+      const travelMs = Math.max(120, Math.round((dist / 10) * (1000 / 60)));
       if (hit) {
         setTimeout(() => SND(confirmedCrit ? "hit_armor.wav" : "hit_impact.wav", 0.8), travelMs);
       }
-      // VFX
+      // VFX: Projektil spawnen
+      // Wurfwaffe → "wurf"-Effekt (Messer/Beil); Bogen/Armbrust/Bezauberung → "pfeil"
       if (typeof DSAPixelTokens !== "undefined") {
-        const projEffect = enchant?.effect ?? "pfeil";
+        const projEffect = enchant?.effect ?? (isThrowing ? "wurf" : "pfeil");
         const hitImpact  = hit ? (enchant?.impact ?? "schadenflash") : null;
         DSAPixelTokens.spawnProjectile(srcToken, tgtToken, projEffect, hitImpact);
         if (confirmedCrit) setTimeout(() =>
@@ -2494,6 +2875,10 @@ export class PixelArtCharacterSheet extends ActorSheet {
       resultText = "GLÜCKLICHE PARADE! (Freie Aktion)";
       resultCls  = "result-crit";
       extraLine  = `<div class="dsa-maneuver-effect" style="color:#ffd700">✨ Freie Aktion bleibt erhalten!</div>`;
+      // BF-Hinweis: Angreifer-Waffe könnte brechen (WdS — BF der Angreifer-Waffe unbekannt)
+      extraLine += `<div style="font-size:11px;color:#9be;text-align:center;margin-top:2px">
+        🗡 Angreifer: Waffenbruch-Probe (1W6 ≤ BF seiner Waffe)
+      </div>`;
     } else if (luckyPA) {
       resultText = "1 gewürfelt – aber nicht bestätigt, normaler Erfolg";
     }
@@ -2539,11 +2924,12 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const armorCalc = this._prepareArmorZones(armor);
     const eBE = armorCalc.eBE;
 
-    // eBE-Penalty:
-    //   Normales Ausweichen (Freie Aktion):  eBE/2 abgerundet — WdH S.182
-    //   Gezieltes Ausweichen (Volle Aktion): volle eBE abgerundet
-    const eBEPenaltyNormal  = Math.floor(eBE / 2);
-    const eBEPenaltyGezielt = Math.floor(eBE);
+    // eBE-Penalty (WdS S.66): "Behinderung +BE" auf JEDE Ausweichen-Probe.
+    // Volle BE bei BEIDEN Modi (normal und gezielt). Was sich bei gezielt
+    // verdoppelt ist die DK-Modifikation, NICHT die BE.
+    // Math.round (statt floor) damit Display und Roll-Target uebereinstimmen.
+    const eBEPenaltyNormal  = Math.max(0, Math.round(eBE));
+    const eBEPenaltyGezielt = Math.max(0, Math.round(eBE));
 
     // Default-Modus aus Klick-Kontext (normaler Button vs. gezielter Button)
     const defaultMode = dataset.dodgeMode ?? "normal";
@@ -2572,7 +2958,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
               </div>
             </div>
             <div style="margin-top:8px;font-size:12px;color:#667;font-family:'VT323',monospace;line-height:1.5">
-              Normal: AW − ½eBE (freie Aktion) · Gezielt: AW + Ansage − eBE (volle Aktion)<br>
+              Normal: AW − eBE (freie Aktion) · Gezielt: AW + Ansage − eBE (volle Aktion, DK x2)<br>
               <span style="color:#e94560">Sehr große Gegner (GK II+): Parade ohne Schild nicht möglich → nur Ausweichen!</span>
             </div>
           </div>
@@ -2715,11 +3101,31 @@ export class PixelArtCharacterSheet extends ActorSheet {
   // ─── Schadenswurf ─────────────────────────────────────────────────────
 
   async _rollDamage(dataset) {
-    const weaponName = dataset.weapon;
-    const rawTp = dataset.tp || "1d6";
+    const weaponName  = dataset.weapon;
+    const rawTp       = dataset.tp || "1d6";
     // DSA "3W6+8" → Foundry "3d6+8", "1W+4" → "1d6+4", "2W20" → "2d20"
     const tp = rawTp.replace(/(\d*)W(\d*)([+-]\d+)?/gi, (_, count, sides, bonus) =>
       `${count || "1"}d${sides || "6"}${bonus || ""}`);
+
+    // ── KK-TP Bonus/Malus (WdS) ─────────────────────────────────────────
+    // Jede Waffe hat eine KK-Schwelle. Pro 5 Punkte über/unter der Schwelle
+    // gibt es +1 / −1 TP flachen Bonus/Malus (ganzzahlig).
+    // Formel: kkBonus = floor((KK − Schwelle) / 5)
+    const kkSchwelle = dataset.kkSchwelle != null && dataset.kkSchwelle !== "null" && dataset.kkSchwelle !== ""
+      ? parseInt(dataset.kkSchwelle) : null;
+    const kkVal  = this.actor.system?.KK?.value ?? 0;
+    let kkBonus  = 0;
+    let kkLine   = "";
+    if (kkSchwelle != null && !isNaN(kkSchwelle)) {
+      kkBonus = Math.floor((kkVal - kkSchwelle) / 5);
+      if (kkBonus !== 0) {
+        const kkColor  = kkBonus > 0 ? "#7fdd7f" : "#e94560";
+        const kkSign   = kkBonus > 0 ? "+" : "";
+        kkLine = `<div style="font-size:12px;text-align:center;margin-top:2px;color:${kkColor}">
+          KK ${kkVal} / Schwelle ${kkSchwelle} → ${kkSign}${kkBonus} TP
+        </div>`;
+      }
+    }
 
     // Ausstehenden TP-Bonus (Wuchtschlag, Sturmangriff, Todesstoß etc.) verbrauchen
     const pending = _pendingTpBonus.get(this.actor.id);
@@ -2732,7 +3138,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // Manöver-Effekt setzt tpMultiplier ≥ 2.
     const tpMul     = pending?.tpMultiplier     ?? 1;
     const ansageMul = pending?.ansageMultiplier ?? 1;
-    const total = (roll.total * tpMul) + (bonusTP * ansageMul);
+    const total = (roll.total * tpMul) + (bonusTP * ansageMul) + kkBonus;
 
     // ── Trefferzone würfeln (1W20) ──────────────────────────────────────
     const zoneRoll = new Roll("1d20");
@@ -2883,6 +3289,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       <div class="chat-title">⚔ Schaden: ${weaponName}</div>
       <div class="result-line"><span style="font-size:22px;color:var(--fx-accent-red)">${total} TP</span></div>
       ${bonusLine}
+      ${kkLine}
       ${zoneLine}
       ${rsLine}
       ${lepLine}

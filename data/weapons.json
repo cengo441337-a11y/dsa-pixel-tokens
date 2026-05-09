@@ -1937,7 +1937,10 @@
       "reichweiten": "2/5/10/20/40",
       "tpPlus": "(0/0/0/0/-2)",
       "talent": "Blasrohr",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 12
     },
     {
       "name": "Borndorn",
@@ -1946,7 +1949,10 @@
       "reichweiten": "2/4/6/8/15",
       "tpPlus": "(+1/0/0/0/-1)",
       "talent": "Wurfmesser",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 1
     },
     {
       "name": "Dolch",
@@ -1955,7 +1961,10 @@
       "reichweiten": "1/3/5/7/10",
       "tpPlus": "(0/0/0/-1/-1)",
       "talent": "Wurfmesser",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 2
     },
     {
       "name": "Wurfdolch",
@@ -1964,7 +1973,10 @@
       "reichweiten": "2/4/6/8/15",
       "tpPlus": "(+1/0/0/0/-1)",
       "talent": "Wurfmesser",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 1,
+      "paMod": 0,
+      "bf": 1
     },
     {
       "name": "Wurfmesser",
@@ -1973,7 +1985,10 @@
       "reichweiten": "2/4/6/8/15",
       "tpPlus": "(+1/0/0/0/-1)",
       "talent": "Wurfmesser",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 3
     },
     {
       "name": "Wurfscheibe, -ring",
@@ -1982,7 +1997,10 @@
       "reichweiten": "2/4/8/12/20",
       "tpPlus": "(+1/0/0/0/0)",
       "talent": "Wurfmesser",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 0
     },
     {
       "name": "Dschadra",
@@ -1991,7 +2009,10 @@
       "reichweiten": "5/10/15/25/40",
       "tpPlus": "(+3/+2/+1/0/0)",
       "talent": "Wurfspeer",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 2
     },
     {
       "name": "Efferdbart",
@@ -2000,7 +2021,10 @@
       "reichweiten": "3/6/10/15/25",
       "tpPlus": "(+2/+1/0/-1/-2)",
       "talent": "Wurfspeer",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 3
     },
     {
       "name": "Granatapfel",
@@ -2009,7 +2033,10 @@
       "reichweiten": "0/5/10/15/20",
       "tpPlus": "(-/-/-/-/-)",
       "talent": "Wurfspeer",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 0
     },
     {
       "name": "Holzspeer",
@@ -2018,7 +2045,10 @@
       "reichweiten": "5/10/15/25/40",
       "tpPlus": "(+1/0/0/-1/-2)",
       "talent": "Wurfspeer",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 8
     },
     {
       "name": "Speer",
@@ -2027,7 +2057,10 @@
       "reichweiten": "5/10/15/25/40",
       "tpPlus": "(+1/0/0/-1/-2)",
       "talent": "Wurfspeer",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 4
     },
     {
       "name": "Stabschleuder",
@@ -2036,7 +2069,10 @@
       "reichweiten": "0/5/20/40/60",
       "tpPlus": "(-/0/0/0/0)",
       "talent": "Wurfspeer",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 12
     },
     {
       "name": "Schneidzahn",
@@ -2045,7 +2081,10 @@
       "reichweiten": "0/5/10/15/30",
       "tpPlus": "(-/+1/+1/0/-1)",
       "talent": "Wurfbeil",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 1
     },
     {
       "name": "Wurfbeil",
@@ -2054,7 +2093,10 @@
       "reichweiten": "0/5/10/15/25",
       "tpPlus": "(-/+1/+1/0/-1)",
       "talent": "Wurfbeil",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 1
     },
     {
       "name": "Wurfkeule",
@@ -2063,7 +2105,10 @@
       "reichweiten": "0/5/15/25/40",
       "tpPlus": "(-/+1/+1/+1/0)",
       "talent": "Wurfbeil",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 2
     },
     {
       "name": "Balestrina",
@@ -2072,7 +2117,10 @@
       "reichweiten": "2/4/8/15/25",
       "tpPlus": "(+2/+1/0/0/-1)",
       "talent": "Armbrust",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 3
     },
     {
       "name": "Balläster",
@@ -2081,7 +2129,10 @@
       "reichweiten": "10/20/30/60/100",
       "tpPlus": "(+3/+1/0/-1/-1)",
       "talent": "Armbrust",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 2
     },
     {
       "name": "Granatapfel",
@@ -2090,7 +2141,10 @@
       "reichweiten": "0/5/10/15/20",
       "tpPlus": "(-/-/-/-/-)",
       "talent": "Schleuder",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 0
     },
     {
       "name": "Kettenkugel",
@@ -2099,7 +2153,10 @@
       "reichweiten": "0/2/5/8/15",
       "tpPlus": "(-/+1/0/0/0)",
       "talent": "Schleuder",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 0
     },
     {
       "name": "Schleuder",
@@ -2108,7 +2165,10 @@
       "reichweiten": "0/5/15/25/40",
       "tpPlus": "(-/0/0/0/0)",
       "talent": "Schleuder",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 12
     },
     {
       "name": "Diskus",
@@ -2117,7 +2177,10 @@
       "reichweiten": "5/10/20/30/60",
       "tpPlus": "(+1/0/0/0/-1)",
       "talent": "Diskus",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 0
     },
     {
       "name": "Jagddiskus",
@@ -2126,7 +2189,10 @@
       "reichweiten": "5/10/20/30/60",
       "tpPlus": "(+1/0/0/0/-1)",
       "talent": "Diskus",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 0
     },
     {
       "name": "Stein, Flasche",
@@ -2135,7 +2201,10 @@
       "reichweiten": "1/2/4/8/12",
       "tpPlus": "(0/0/0/-1/-1)",
       "talent": "Improvisiert",
-      "typ": "fernkampf"
+      "typ": "fernkampf",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 0
     },
     {
       "name": "Kurzbogen",
@@ -2147,7 +2216,10 @@
       "preis": 40,
       "typ": "fernkampf",
       "ladezeit": 1,
-      "description": "Einfacher hölzerner Bogen, weit verbreitet"
+      "description": "Einfacher hölzerner Bogen, weit verbreitet",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 8
     },
     {
       "name": "Langbogen",
@@ -2159,7 +2231,10 @@
       "preis": 75,
       "typ": "fernkampf",
       "ladezeit": 1,
-      "description": "Langer hölzerner Bogen, große Reichweite (WdS S.79)"
+      "description": "Langer hölzerner Bogen, große Reichweite (WdS S.79)",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 6
     },
     {
       "name": "Elfenbogen",
@@ -2171,7 +2246,10 @@
       "preis": 280,
       "typ": "fernkampf",
       "ladezeit": 1,
-      "description": "Eleganter Elfenbogen, ausgezeichnete Reichweite"
+      "description": "Eleganter Elfenbogen, ausgezeichnete Reichweite",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 4
     },
     {
       "name": "Kompositbogen",
@@ -2183,7 +2261,10 @@
       "preis": 120,
       "typ": "fernkampf",
       "ladezeit": 1,
-      "description": "Aus mehreren Materialien geschichteter Bogen"
+      "description": "Aus mehreren Materialien geschichteter Bogen",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 4
     },
     {
       "name": "Reflexbogen",
@@ -2195,7 +2276,10 @@
       "preis": 250,
       "typ": "fernkampf",
       "ladezeit": 1,
-      "description": "Stark gespannter Bogen mit hoher Durchschlagskraft"
+      "description": "Stark gespannter Bogen mit hoher Durchschlagskraft",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 6
     },
     {
       "name": "Doppelbogen",
@@ -2207,7 +2291,10 @@
       "preis": 180,
       "typ": "fernkampf",
       "ladezeit": 1,
-      "description": "Bogen mit Doppellauf-Konstruktion"
+      "description": "Bogen mit Doppellauf-Konstruktion",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 8
     },
     {
       "name": "Hornbogen",
@@ -2219,7 +2306,10 @@
       "preis": 160,
       "typ": "fernkampf",
       "ladezeit": 1,
-      "description": "Mit Horn verstärkter Reiterbogen"
+      "description": "Mit Horn verstärkter Reiterbogen",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 6
     },
     {
       "name": "Mittellanger Bogen",
@@ -2231,7 +2321,10 @@
       "preis": 60,
       "typ": "fernkampf",
       "ladezeit": 1,
-      "description": "Mittellang, ausgewogen"
+      "description": "Mittellang, ausgewogen",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 6
     },
     {
       "name": "Leichte Armbrust",
@@ -2243,7 +2336,10 @@
       "preis": 140,
       "typ": "fernkampf",
       "ladezeit": 4,
-      "description": "Standard-Armbrust für Schützen"
+      "description": "Standard-Armbrust für Schützen",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 2
     },
     {
       "name": "Schwere Armbrust",
@@ -2255,7 +2351,10 @@
       "preis": 230,
       "typ": "fernkampf",
       "ladezeit": 8,
-      "description": "Hohe Durchschlagskraft, lange Ladezeit"
+      "description": "Hohe Durchschlagskraft, lange Ladezeit",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 2
     },
     {
       "name": "Hetzarmbrust",
@@ -2267,7 +2366,10 @@
       "preis": 110,
       "typ": "fernkampf",
       "ladezeit": 3,
-      "description": "Leichte Jagdarmbrust"
+      "description": "Leichte Jagdarmbrust",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 2
     },
     {
       "name": "Repetierarmbrust",
@@ -2279,7 +2381,10 @@
       "preis": 380,
       "typ": "fernkampf",
       "ladezeit": 1,
-      "description": "Magazingespeiste Armbrust, Mehrfachschuss"
+      "description": "Magazingespeiste Armbrust, Mehrfachschuss",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 1
     },
     {
       "name": "Wallarmbrust",
@@ -2291,7 +2396,10 @@
       "preis": 1200,
       "typ": "fernkampf",
       "ladezeit": 12,
-      "description": "Belagerungsgerät, fest installiert"
+      "description": "Belagerungsgerät, fest installiert",
+      "atMod": 0,
+      "paMod": 0,
+      "bf": 1
     }
   ],
   "schilde": [

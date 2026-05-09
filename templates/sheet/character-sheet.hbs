@@ -43,10 +43,10 @@
         <div class="stat-label">FK</div>
         <div class="stat-value">{{system.FKBasis.value}}</div>
       </div>
-      <div class="derived-stat rollable" data-roll="dodge" data-aw="{{system.Dogde}}"
-           title="Ausweichen würfeln (AW {{system.Dogde}})">
+      <div class="derived-stat rollable" data-roll="dodge" data-aw="{{awBase}}"
+           title="Ausweichen würfeln (AW {{awBase}}{{#if awBEMalus}} − eBE {{awBEMalus}} = {{awDisplayNormal}}{{/if}})">
         <div class="stat-label">AW</div>
-        <div class="stat-value">{{system.Dogde}}</div>
+        <div class="stat-value">{{awDisplayNormal}}</div>
       </div>
     </div>
   </header>
@@ -128,7 +128,7 @@
     {{!-- Regenerations-Buttons --}}
     <div class="regen-row">
       <button class="regen-btn" data-action="regen-rast" title="Kurze Rast (10 min): +1W6 AuP">⏸ Rast</button>
-      <button class="regen-btn regen-med" data-action="regen-meditation" title="Meditation (4h): AsP via Reg I/II/III Probe (KL/IN/CH) UND/ODER KaP via Mirakelprobe (3W20 MU/IN/CH gegen LkW) → +LkP* KaP (WdG S.240)">🧘 Meditation</button>
+      <button class="regen-btn regen-med" data-action="regen-meditation" title="Astrale Meditation (WdZ): AuP→AsP Tausch via Probe IN/CH/KO auf Selbstbeherrschung, erleichtert um regStufe/2 durch Reg I/II/Meisterl.Reg. TaP* = umgewandelte Punkte. 1 SR pro Punkt.">🧘 Meditation</button>
       <button class="regen-btn" data-action="regen-nacht" title="Nachtschlaf: volle AuP + 1W6+Astr.Reg AsP + 1 KaP (Tägliche Regeneration WdG S.241)">🌙 Nacht</button>
       <button class="regen-btn regen-full" data-action="regen-voll" title="Vollständige Regeneration">★ Voll</button>
     </div>
@@ -240,10 +240,10 @@
                 <span>{{this.name}}</span>
                 {{#if this.value}}
                 <span class="dim">(</span>
-                <input class="vn-value-input" type="number" data-vn-key="vorteile"
-                       data-vn-name="{{this.name}}" value="{{this.value}}" min="1" max="30"
+                <input class="vn-value-input" type="text" data-vn-key="vorteile"
+                       data-vn-name="{{this.name}}" value="{{this.value}}"
                        style="color:#c8e6c9"
-                       title="Stufenwert — DSA 4.1: manche Vorteile haben Stufen (z.B. Hohe Astralkraft)">
+                       title="Wert — DSA 4.1: Zahl (Stufe) oder Text (z.B. Begabung für Feuer)">
                 <span class="dim">)</span>
                 {{/if}}
               </div>
@@ -270,10 +270,10 @@
                 <span>{{this.name}}</span>
                 {{#if this.value}}
                 <span class="dim" style="color:#ff8a80">(</span>
-                <input class="vn-value-input" type="number" data-vn-key="nachteile"
-                       data-vn-name="{{this.name}}" value="{{this.value}}" min="1" max="30"
+                <input class="vn-value-input" type="text" data-vn-key="nachteile"
+                       data-vn-name="{{this.name}}" value="{{this.value}}"
                        style="color:#ff8a80"
-                       title="Stufenwert — DSA 4.1: Nachteil-Triggerwert (1W20-Probe, WdH S.137)">
+                       title="Wert — DSA 4.1: Zahl (Triggerwert) oder Text (z.B. Unfähigkeit für Körper)">
                 <span class="dim" style="color:#ff8a80">) 🎲</span>
                 {{/if}}
               </div>
@@ -362,49 +362,44 @@
       </div>
       {{/if}}
 
-      <div class="section-title">Kampftalente</div>
-      <table class="talent-list">
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Kampftalente</span>
+        <span style="font-size:10px;color:#556;font-family:'VT323',monospace">TaW-Editor · AT/PA oben in Waffen</span>
+      </div>
+      <table class="talent-list combat-taw-editor">
         <thead>
           <tr>
-            <th>Waffentalent</th>
-            <th>AT</th>
-            <th>PA</th>
-            <th>TP</th>
+            <th style="text-align:left">Waffentalent</th>
             <th>TaW</th>
             <th title="effektive Behinderung">eBE</th>
           </tr>
         </thead>
         <tbody>
           {{#each combatTalents}}
-          <tr>
-            <td class="talent-name rollable" data-roll="attack" data-talent="{{this.name}}"
-                data-at="{{this.at}}" data-pa="{{this.pa}}" data-taw="{{this.taw}}"
-                title="{{#if this.special}}{{this.special}}{{else}}Angriff mit {{this.name}} würfeln{{/if}}">
+          <tr class="{{#if this.ungelernt}}combat-ungelernt{{/if}}">
+
+            {{!-- Talentname --}}
+            <td class="talent-name"
+                title="{{#if this.aktivierungsPflichtig}}Gesperrt: erfordert Ausbildung (Lanzenreiten/Belagerungswaffen){{else}}{{#if this.ungelernt}}Ungelernt (TaW 0){{else}}TaW {{this.taw}}{{/if}}{{/if}}{{#if this.special}} · {{this.special}}{{/if}}"
+                style="{{#if this.aktivierungsPflichtig}}color:#334;font-style:italic{{/if}}">
               {{this.name}}
+              {{#if this.aktivierungsPflichtig}}<span style="color:#445;font-size:10px"> ⛔</span>{{/if}}
             </td>
-            <td class="rollable combat-at" data-roll="attack" data-talent="{{this.name}}"
-                data-at="{{this.at}}" data-pa="{{this.pa}}" data-taw="{{this.taw}}"
-                title="{{#if this.atPenalty}}Basis {{this.atBase}}, BE-Malus -{{this.atPenalty}}{{else}}AT {{this.at}}{{/if}}">
-              {{this.at}}
-            </td>
-            <td class="rollable combat-pa" data-roll="parry" data-talent="{{this.name}}"
-                data-pa="{{this.pa}}"
-                title="{{#if this.paPenalty}}Basis {{this.paBase}}, BE-Malus -{{this.paPenalty}}{{else}}PA {{this.pa}}{{/if}}">
-              {{this.pa}}
-            </td>
-            <td class="talent-tp" style="color:#ffd700;font-size:11px;white-space:nowrap">
-              {{#if this.tp}}{{this.tp}}{{else}}<span style="color:#445">—</span>{{/if}}
-            </td>
+
+            {{!-- TaW: editierbares Input --}}
             <td class="talent-taw">
               <input class="combat-taw-input" type="number"
                      data-skill-name="{{this.name}}"
                      value="{{this.taw}}"
                      min="-1" max="21"
-                     title="TaW {{this.name}} — bearbeiten + Enter. AT/PA werden automatisch neu berechnet.">
+                     title="TaW {{this.name}} — bearbeiten + Enter">
             </td>
-            <td class="talent-ebe" style="color:{{#if this.eBE}}#e94560{{else}}#556{{/if}};text-align:center">
-              {{this.eBE}}
+
+            {{!-- eBE: Referenz --}}
+            <td class="talent-ebe" style="color:{{#if this.eBE}}#e94560{{else}}#556{{/if}};text-align:center;font-size:11px">
+              {{#if this.ungelernt}}<span style="color:#334">—</span>{{else}}{{#if this.eBE}}{{this.eBE}}{{else}}0{{/if}}{{/if}}
             </td>
+
           </tr>
           {{/each}}
         </tbody>
@@ -415,57 +410,158 @@
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <div style="display:flex;align-items:center;gap:10px">
             <span style="font-family:'VT323',monospace;font-size:13px;color:#888">AW</span>
-            <span style="font-family:'VT323',monospace;font-size:20px;color:#4a90d9;font-weight:bold">{{system.Dogde}}</span>
-            {{#if eBE}}<span style="font-size:11px;color:#e94560;font-family:'VT323',monospace">eBE −{{eBEDisplay}}</span>{{/if}}
+            <span style="font-family:'VT323',monospace;font-size:20px;color:#4a90d9;font-weight:bold"
+                  title="AW {{awBase}}{{#if awBEMalus}} − eBE {{awBEMalus}}{{/if}}">{{awDisplayNormal}}</span>
+            {{#if awBEMalus}}<span style="font-size:11px;color:#888;font-family:'VT323',monospace">(roh {{awBase}}, −{{awBEMalus}} eBE)</span>{{/if}}
           </div>
           <div style="display:flex;gap:6px">
             <button type="button" class="rollable"
-              data-roll="dodge" data-aw="{{system.Dogde}}"
+              data-roll="dodge" data-aw="{{awBase}}"
               data-dodge-mode="normal"
               style="background:rgba(74,144,217,0.15);border:1px solid rgba(74,144,217,0.6);color:#4a90d9;
                      border-radius:3px;padding:2px 10px;font-family:'VT323',monospace;font-size:14px;cursor:pointer"
-              title="Normales Ausweichen (Freie Aktion) — 1W20 ≤ AW−½eBE">
+              title="Normales Ausweichen (Freie Aktion) — 1W20 ≤ AW − eBE">
               🏃 Ausweichen
             </button>
             <button type="button" class="rollable"
-              data-roll="dodge" data-aw="{{system.Dogde}}"
+              data-roll="dodge" data-aw="{{awBase}}"
               data-dodge-mode="gezielt"
               style="background:rgba(74,144,217,0.08);border:1px solid rgba(74,144,217,0.35);color:#7eb8ff;
                      border-radius:3px;padding:2px 10px;font-family:'VT323',monospace;font-size:14px;cursor:pointer"
-              title="Gezieltes Ausweichen (Volle Aktion) — +Ansage, eBE voll">
+              title="Gezieltes Ausweichen (Volle Aktion) — +Ansage, DK x2">
               🎯 Gezielt
             </button>
           </div>
         </div>
         <div style="font-size:11px;color:#556;font-family:'VT323',monospace;margin-top:4px;line-height:1.5">
-          Normal: freie Aktion, AW−½eBE · Gezielt: volle Aktion, AW+Ansage−eBE
+          Normal: freie Aktion, AW−eBE · Gezielt: volle Aktion, AW+Ansage−eBE, DK-Mod x2
           <span style="color:#8a3a4a"> | Sehr große Gegner (GK II+): Parade ohne Schild verboten!</span>
         </div>
       </div>
 
       <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
-        <span>Waffen</span>
+        <span>Waffen &amp; Kampf</span>
         <button type="button" data-action="open-db" data-db-tab="waffen"
           style="background:rgba(200,151,42,0.15);border:1px solid rgba(200,151,42,0.5);color:#c8972a;
                  border-radius:3px;padding:1px 8px;font-size:13px;cursor:pointer;line-height:1.4"
           title="Waffe aus Datenbank hinzufügen">⚔️ +</button>
       </div>
-      <div class="panel">
-        {{#each weapons}}
-        <div class="weapon-entry" style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);align-items:center">
-          <span class="weapon-name">{{this.name}}</span>
-          <span class="dim" title="Trefferpunkte">{{this.tp}}</span>
-          <span class="dim" title="Reichweite">{{this.reichweite}}</span>
-          <span class="rollable" data-roll="damage" data-weapon="{{this.name}}"
-                data-tp="{{this.tp}}" title="Schaden würfeln">
-            <i class="fas fa-dice-d6"></i>
-          </span>
-          {{#if this.id}}
-          <button type="button" data-action="delete-item" data-item-id="{{this.id}}" data-item-name="{{this.name}}" title="Aus Inventar löschen"
-            style="background:rgba(233,69,96,0.15);border:1px solid rgba(233,69,96,0.5);color:#e94560;border-radius:3px;padding:1px 6px;font-size:11px;cursor:pointer;line-height:1.2">✕</button>
-          {{/if}}
+      <div class="panel weapon-combat-panel" style="padding:4px 0">
+        {{#if weapons.length}}
+        <table class="weapon-combat-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding-left:4px">Waffe</th>
+              <th title="Talentwert">TaW</th>
+              <th title="Angriffswert — klicken zum Würfeln" style="color:#e94560">AT</th>
+              <th title="Paradewert — klicken zum Würfeln" style="color:#4caf50">PA</th>
+              <th title="Trefferpunkte">TP</th>
+              <th title="Waffenmodifikator AT/PA (WdS)">WM</th>
+              <th title="Bruchfaktor (WdS): 1W6 ≤ BF → Waffenbruch">BF</th>
+              <th title="KK-Schwelle (WdS): ±1 TP pro 5 KK-Punkte">KK</th>
+              <th title="Schaden würfeln">🎲</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each weapons}}
+            <tr class="weapon-row{{#if this.ungelernt}} weapon-ungelernt{{/if}}">
+
+              {{!-- ── Name + Typ-Icon ──────────────────────────────── --}}
+              <td class="weapon-name-cell"
+                  title="Talent: {{#if this.talent}}{{this.talent}}{{else}}unbekannt{{/if}}{{#if this.wmLabel}} · {{this.wmLabel}}{{/if}}{{#if this.bf}} · BF {{this.bf}}{{/if}}{{#if this.kkSchwelle}} · KK-Schwelle {{this.kkSchwelle}}{{/if}}{{#if this.reichweite}} · {{this.reichweite}}{{/if}}">
+                {{this.name}}
+                {{#if this.isRanged}}
+                  <span style="font-size:9px;margin-left:2px;opacity:0.7">{{#if this.isThrowing}}🗡{{else}}🏹{{/if}}</span>
+                {{/if}}
+              </td>
+
+              {{!-- ── TaW (Referenz) ────────────────────────────────── --}}
+              <td class="wc-taw" title="Talentwert {{this.talent}}">
+                <span style="color:{{#if this.ungelernt}}#445{{else}}#c8972a{{/if}}">{{this.taw}}</span>
+              </td>
+
+              {{!-- ── AT: rollable ──────────────────────────────────── --}}
+              <td class="wc-at rollable combat-at"
+                  data-roll="attack"
+                  data-talent="{{this.talent}}"
+                  data-at="{{this.at}}"
+                  data-pa="{{this.pa}}"
+                  data-taw="{{this.taw}}"
+                  data-bf="{{this.bf}}"
+                  data-tp="{{this.tp}}"
+                  title="Angriff würfeln · AT {{this.at}}{{#if this.wmAt}} (WM {{this.wmAt}}){{/if}}{{#if this.ungelernt}} · ungelernt (ATBasis){{/if}}">
+                <span style="color:#e94560;font-weight:bold">{{this.at}}</span>
+              </td>
+
+              {{!-- ── PA: rollable oder "—" ────────────────────────── --}}
+              {{#if this.paIsNA}}
+              <td class="wc-pa" title="{{#if this.isRanged}}Fernkampf: kein Parieren{{else}}Ungelernt: kein Parieren (WdS){{/if}}">
+                <span style="color:#334">—</span>
+              </td>
+              {{else}}
+              <td class="wc-pa rollable combat-pa"
+                  data-roll="parry"
+                  data-talent="{{this.talent}}"
+                  data-pa="{{this.pa}}"
+                  title="Parade würfeln · PA {{this.pa}}{{#if this.wmPa}} (WM {{this.wmPa}}){{/if}}">
+                <span style="color:#4caf50;font-weight:bold">{{this.pa}}</span>
+              </td>
+              {{/if}}
+
+              {{!-- ── TP ─────────────────────────────────────────────── --}}
+              <td class="wc-tp" title="Trefferpunkte">
+                {{#if this.tp}}<span style="color:#ffd700">{{this.tp}}</span>{{else}}<span style="color:#334">—</span>{{/if}}
+              </td>
+
+              {{!-- ── WM ─────────────────────────────────────────────── --}}
+              <td class="wc-wm" title="{{#if this.wmLabel}}{{this.wmLabel}} (WdS Waffenmodifikator){{else}}Kein WM{{/if}}">
+                {{#if this.wmLabel}}<span style="color:#9be;font-size:10px">{{this.wmLabel}}</span>{{else}}<span style="color:#334">—</span>{{/if}}
+              </td>
+
+              {{!-- ── BF ─────────────────────────────────────────────── --}}
+              <td class="wc-bf" title="{{#if this.bf}}BF {{this.bf}}: 1W6 ≤ BF → Waffenbruch bei Krit/Patzer/Gl.Parade{{else}}Kein BF bekannt{{/if}}">
+                {{#if this.bf}}<span style="color:#e0a060">{{this.bf}}</span>{{else}}<span style="color:#334">—</span>{{/if}}
+              </td>
+
+              {{!-- ── KK-Schwelle ──────────────────────────────────── --}}
+              <td class="wc-kk" title="{{#if this.kkSchwelle}}KK-Schwelle {{this.kkSchwelle}}: über/unter der Schwelle ±1 TP pro 5 KK-Punkte (WdS){{else}}Keine KK-Schwelle{{/if}}">
+                {{#if this.kkSchwelle}}<span style="color:#aaa;font-size:10px">{{this.kkSchwelle}}</span>{{else}}<span style="color:#334">—</span>{{/if}}
+              </td>
+
+              {{!-- ── Schadenswurf ──────────────────────────────────── --}}
+              <td class="wc-dmg">
+                <span class="rollable"
+                      data-roll="damage"
+                      data-weapon="{{this.name}}"
+                      data-tp="{{this.tp}}"
+                      data-kk-schwelle="{{this.kkSchwelle}}"
+                      data-bf="{{this.bf}}"
+                      style="cursor:pointer;color:#c8972a;font-size:14px"
+                      title="Schaden würfeln: {{this.tp}}{{#if this.kkSchwelle}} · KK-Schwelle {{this.kkSchwelle}}{{/if}}">
+                  <i class="fas fa-dice-d6"></i>
+                </span>
+              </td>
+
+              {{!-- ── Löschen ───────────────────────────────────────── --}}
+              <td class="wc-del">
+                {{#if this.id}}
+                <button type="button" data-action="delete-item" data-item-id="{{this.id}}" data-item-name="{{this.name}}"
+                  title="Aus Inventar löschen"
+                  style="background:rgba(233,69,96,0.1);border:1px solid rgba(233,69,96,0.4);color:#e94560;
+                         border-radius:3px;padding:1px 5px;font-size:10px;cursor:pointer;line-height:1.2">✕</button>
+                {{/if}}
+              </td>
+
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+        {{else}}
+        <div class="dim" style="padding:8px 6px;font-style:italic;text-align:center;font-size:13px">
+          Keine Waffen — über ⚔️ + aus der Datenbank hinzufügen
         </div>
-        {{/each}}
+        {{/if}}
       </div>
 
       <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">

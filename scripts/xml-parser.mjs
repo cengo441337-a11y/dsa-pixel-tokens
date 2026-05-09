@@ -863,7 +863,14 @@ function _extractWeaponData(name, dataEl, parentEl) {
     wmAt = parseInt(wmRaw, 10) || 0;
     wmPa = wmAt;
   }
-  return { name, tp, wmAt, wmPa, kampftalent };
+  // BF: Bruchfaktor (WdS) — aus Inline-XML oder DB-Fallback
+  const bfRaw = dataEl.getAttribute("bf") || parentEl?.getAttribute("bf") || null;
+  const bf = bfRaw != null ? (parseInt(bfRaw, 10) || null) : null;
+  // KK-Schwelle aus Inline-XML
+  const kkRaw = dataEl.getAttribute("kk") || parentEl?.getAttribute("kk") || null;
+  const kkSchwelle = kkRaw != null ? (parseInt(kkRaw, 10) || null) : null;
+
+  return { name, tp, wmAt, wmPa, kampftalent, bf, kkSchwelle };
 }
 
 /**
@@ -1353,9 +1360,11 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   for (const w of heroData.weapons) {
     const talent = w.kampftalent;
     if (talent && sys.skill[talent]) {
-      sys.skill[talent].tp    = w.tp;       // z.B. "1W+4"
-      sys.skill[talent].wmAt  = w.wmAt;     // AT-Modifikator als Integer
-      sys.skill[talent].wmPa  = w.wmPa;     // PA-Modifikator als Integer
+      sys.skill[talent].tp         = w.tp;              // z.B. "1W+4"
+      sys.skill[talent].wmAt       = w.wmAt;            // AT-Modifikator (WdS)
+      sys.skill[talent].wmPa       = w.wmPa;            // PA-Modifikator (WdS)
+      sys.skill[talent].bf         = w.bf ?? null;      // Bruchfaktor (WdS)
+      sys.skill[talent].kkSchwelle = w.kkSchwelle ?? null; // KK-Schwelle (WdS)
       // Waffe selbst auch als Referenz hinterlegen
       sys.skill[talent].weapon = w.name;
     }
@@ -1451,7 +1460,9 @@ export async function createActorFromImport(heroData, updateExisting = false) {
 
   // ── 7. Regen-Werte aus SF/Vorteilen ableiten ─────────────────────────────
   const sfNames = sys.sf;
-  const regStufe = sfNames.includes("Meisterliche Regeneration") ? 3
+  // Helden-Software exportiert "Regeneration (Stufe III)" → nach Normalisierung "Regeneration III".
+  // DSA 4.1 nennt Stufe III auch "Meisterliche Regeneration" (WdZ) — beide Namen fangen.
+  const regStufe = (sfNames.includes("Meisterliche Regeneration") || sfNames.includes("Regeneration III")) ? 3
     : sfNames.includes("Regeneration II")                        ? 2
     : sfNames.includes("Regeneration I")                         ? 1 : 0;
   const astraleRegVorteil = heroData.advantages.find(a => a.name === "Astrale Regeneration");
@@ -1470,7 +1481,7 @@ export async function createActorFromImport(heroData, updateExisting = false) {
 
   // ── 8. Meta ──────────────────────────────────────────────────────────────
   sys.race       = heroData.race;    // gdsa-Feld heißt 'race', nicht 'rasse'
-  sys.kultur     = heroData.culture;
+  sys.kulture    = heroData.culture; // gdsa-Feld heißt 'kulture' (mit e) — HBS: {{system.kulture}}
   sys.profession = heroData.profession;
   sys.AP         = { value: heroData.ap.total, free: heroData.ap.free, spent: heroData.ap.spent };
 

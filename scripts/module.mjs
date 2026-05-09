@@ -230,6 +230,14 @@ Hooks.once("ready", async () => {
   globalThis.DSAPixelTokens.openLiturgien = (actor) => new LiturgienApp(actor || canvas.tokens?.controlled?.[0]?.actor || game.user.character).render(true);
   globalThis.DSAPixelTokens.openSchamanen = (actor) => new SchamanenApp(actor || canvas.tokens?.controlled?.[0]?.actor || game.user.character).render(true);
 
+  // Neue PlayerCharakter-Akteure automatisch mit actorLink=true anlegen,
+  // damit Token und Actor-Sheet immer dieselben Daten teilen.
+  Hooks.on("preCreateActor", (actor, data) => {
+    if (data.type === "PlayerCharakter") {
+      actor.updateSource({ "prototypeToken.actorLink": true });
+    }
+  });
+
   // One-shot-Migration: Alte Spell-Items (system.value) auf gdsa-Schema (system.zfw) umstellen
   if (game.user.isGM) {
     await _migrateSpellItems();

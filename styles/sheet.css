@@ -1217,7 +1217,7 @@
   border-color: var(--fx-gold-bright);
 }
 
-/* Vor-/Nachteil numeric value editable (DSA 4.1: manche VN haben Stufen, z.B. "Hohe Astralkraft 3") */
+/* Vor-/Nachteil value editable — Zahl (Stufe) oder Text (Begabung/Unfähigkeit für X) */
 .dsa-pixel-sheet .vn-value-input {
   background: transparent;
   border: none;
@@ -1225,10 +1225,9 @@
   color: inherit;
   font-family: var(--fx-font);
   font-size: 14px;
-  width: 28px;
+  width: 70px;
   text-align: center;
   padding: 0;
-  -moz-appearance: textfield;
 }
 .dsa-pixel-sheet .vn-value-input::-webkit-inner-spin-button,
 .dsa-pixel-sheet .vn-value-input::-webkit-outer-spin-button { display: none; }
@@ -1272,7 +1271,137 @@
 .dsa-pixel-sheet .combat-at:hover { color: #ff6677; text-shadow: 0 0 5px rgba(200,48,64,0.5); }
 .dsa-pixel-sheet .combat-pa:hover { color: #88bbff; text-shadow: 0 0 5px rgba(68,136,255,0.5); }
 
-/* Weapon name */
+/* Ungelernte Kampftalente (TaW 0) — grau, nicht klickbar */
+.dsa-pixel-sheet tr.combat-ungelernt td {
+  color: #445;
+  font-style: italic;
+}
+.dsa-pixel-sheet tr.combat-ungelernt .talent-name {
+  color: #445;
+  cursor: default;
+}
+.dsa-pixel-sheet tr.combat-ungelernt:hover td {
+  background: transparent;
+}
+.dsa-pixel-sheet tr.combat-ungelernt .combat-taw-input {
+  opacity: 0.5;
+}
+
+/* ─── Weapon Combat Table (primary combat UI) ──────────────────── */
+
+.dsa-pixel-sheet .weapon-combat-panel {
+  padding: 2px 0 4px;
+}
+
+.dsa-pixel-sheet .weapon-combat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--fx-font);
+  font-size: 14px;
+}
+
+.dsa-pixel-sheet .weapon-combat-table thead tr {
+  border-bottom: 1px solid rgba(200,151,42,0.3);
+}
+
+.dsa-pixel-sheet .weapon-combat-table th {
+  padding: 2px 4px;
+  font-size: 11px;
+  color: var(--fx-text-mid);
+  text-align: center;
+  font-family: var(--fx-font-title);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.dsa-pixel-sheet .weapon-combat-table td {
+  padding: 3px 4px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+
+/* Name-Zelle links-aligned */
+.dsa-pixel-sheet .weapon-name-cell {
+  text-align: left !important;
+  padding-left: 6px !important;
+  font-size: 15px;
+  color: var(--fx-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+/* AT/PA rollbar hervorheben */
+.dsa-pixel-sheet .wc-at.rollable,
+.dsa-pixel-sheet .wc-pa.rollable {
+  cursor: pointer;
+  font-size: 15px;
+  border-radius: 3px;
+  transition: background 0.12s;
+}
+.dsa-pixel-sheet .wc-at.rollable:hover {
+  background: rgba(233,69,96,0.15);
+}
+.dsa-pixel-sheet .wc-pa.rollable:hover {
+  background: rgba(76,175,80,0.15);
+}
+
+/* TaW-Zelle */
+.dsa-pixel-sheet .wc-taw {
+  font-size: 13px;
+  min-width: 28px;
+}
+
+/* TP-Zelle */
+.dsa-pixel-sheet .wc-tp {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* WM/BF/KK-Zellen: kleiner */
+.dsa-pixel-sheet .wc-wm,
+.dsa-pixel-sheet .wc-bf,
+.dsa-pixel-sheet .wc-kk {
+  font-size: 10px;
+  white-space: nowrap;
+  min-width: 28px;
+}
+
+/* Schaden/Delete-Zellen */
+.dsa-pixel-sheet .wc-dmg,
+.dsa-pixel-sheet .wc-del {
+  min-width: 24px;
+}
+
+/* Ungelernte Zeile (TaW 0) */
+.dsa-pixel-sheet .weapon-row.weapon-ungelernt td {
+  opacity: 0.6;
+  font-style: italic;
+}
+.dsa-pixel-sheet .weapon-row.weapon-ungelernt:hover td {
+  opacity: 0.8;
+}
+
+/* Row hover */
+.dsa-pixel-sheet .weapon-row:hover td {
+  background: rgba(255,255,255,0.025);
+}
+
+/* Vereinfachte Kampftalent-Tabelle (TaW-Editor) */
+.dsa-pixel-sheet .combat-taw-editor th,
+.dsa-pixel-sheet .combat-taw-editor td {
+  font-size: 13px;
+}
+.dsa-pixel-sheet .combat-taw-editor .talent-name {
+  font-size: 14px;
+}
+.dsa-pixel-sheet .combat-taw-editor .talent-ebe {
+  min-width: 32px;
+}
+
+/* Weapon name (legacy, für Kreatur-Anzeige) */
 .dsa-pixel-sheet .weapon-name {
   font-size: 16px;
   color: var(--fx-text);
