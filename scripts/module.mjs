@@ -298,8 +298,16 @@ Hooks.once("ready", async () => {
   // Actor-Cleanup: Duplikate entfernen + in Ordner einsortieren
   if (game.user.isGM) {
     try {
-      const dedupCount = await deduplicateActors();
-      if (dedupCount > 0) console.log(`[${MODULE_ID}] ✓ ${dedupCount} Duplikate entfernt`);
+      // Nur zaehlen, nicht loeschen. Bis v0.7.18 loeschte diese Zeile beim
+      // Weltstart ungefragt Aktoren — siehe deduplicateActors().
+      const dedup = await deduplicateActors();
+      if (dedup.gefunden > 0) {
+        console.log(`[${MODULE_ID}] ${dedup.gefunden} doppelte Kreatur(en) gefunden — Aufräumen mit DSADedupActors()`);
+        ui.notifications?.info(
+          `[DSA Pixel] ${dedup.gefunden} doppelte Kreatur(en) in der Welt. ` +
+          `Zum Aufräumen im Makro oder in der Konsole DSADedupActors() aufrufen.`
+        );
+      }
       await migrateActorFolders();
     } catch (err) {
       console.warn(`[${MODULE_ID}] Actor-Cleanup-Fehler:`, err);

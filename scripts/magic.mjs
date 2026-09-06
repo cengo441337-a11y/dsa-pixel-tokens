@@ -3,7 +3,7 @@
  * Zauberprobe mit Spontanmodifikationen, AsP-Berechnung, Zone-Markierung
  */
 
-import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, BESCHWOERUNG_MISSLINGEN, BEHERRSCHUNG_MISSLINGEN, rollBeschwoerungMisslingen, relayActorUpdate, relayTokenUpdate, broadcastVFX, getLepStatus } from "./config.mjs";
+import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, applyCrit, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, BESCHWOERUNG_MISSLINGEN, BEHERRSCHUNG_MISSLINGEN, rollBeschwoerungMisslingen, relayActorUpdate, relayTokenUpdate, broadcastVFX, getLepStatus } from "./config.mjs";
 
 /** Helper: LeP-Status-Flags eines Aktors lesen (Eisern, Zäher Hund, Selbstbeherrschung). */
 function _getLepStatusFlags(actor) {
@@ -675,16 +675,24 @@ export async function castSpell(actor, spellData) {
   const crit = checkCritical(dice);
 
   // 5. Ergebnis-Flags
-  let success = result.success;
+  // Probe und Kritischer werden zentral in applyCrit verrechnet. Vorher stand
+  // das hier von Hand — mit dem Fehler, dass ein glücklicher Wurf zwar
+  // `success = true` setzte, der Zauber aber weiter mit dem ZfP* der
+  // misslungenen Rechnung arbeitete, also mit 0. Der Chat meldete "Maximale
+  // Wirkung", der Gegner nahm keinen Schaden.
+  const final = applyCrit(result, crit, effectiveZfw);
+  let success = final.success;
+  const zfpStar = final.tapStar;
   let resultLabel, resultClass;
 
   if (crit.patzer) {
-    success = false;
     resultLabel = "PATZER! Spruchstörung!";
     resultClass = "result-fail";
+  } else if (crit.meisterhaft) {
+    resultLabel = "MEISTERHAFT! Volle Wirkung!";
+    resultClass = "result-crit";
   } else if (crit.gluecklich) {
-    success = true;
-    resultLabel = "GLÜCKLICH! Maximale Wirkung!";
+    resultLabel = "GLÜCKLICH! Probe gelingt automatisch";
     resultClass = "result-crit";
   } else if (success) {
     resultLabel = "Gelungen";
@@ -718,20 +726,29 @@ export async function castSpell(actor, spellData) {
     // WdZ S.179: Kontrollwert-Formel pro Beschwörungs-Kategorie.
     // Robuste Detection per Kategorie-Lookup (vorher String-Match → fragil).
     const kategorie = (spellData.beschwoerungKategorie ?? "").toLowerCase();
+    // Die verwendete Formel wird als Text mitgeführt, damit im Chat nachvollziehbar
+    // ist, welcher Rechenweg galt. Vorher stand an dieser Stelle eine Variable
+    // `kontrollFormula`, die nirgends deklariert war — der Wurf stürzte damit ab,
+    // bevor die AsP abgezogen wurden.
     let kontrollWert;
+    let kontrollFormel;
     if (kategorie.startsWith("elementar")) {
       // Elementare: (MU+IN+CH+CH+ZfW)/5
       kontrollWert = Math.round((sysAttr("MU") + sysAttr("IN") + sysAttr("CH") + sysAttr("CH") + zfwNum) / 5);
+      kontrollFormel = "(MU+IN+CH+CH+ZfW)/5";
     } else if (kategorie.startsWith("untot") || kategorie.startsWith("golem")) {
       // Untote / Golem (WdZ S.197): wie Dämonen
       kontrollWert = Math.round((sysAttr("MU") + sysAttr("MU") + sysAttr("KL") + sysAttr("CH") + zfwNum) / 5);
+      kontrollFormel = "(MU+MU+KL+CH+ZfW)/5";
     } else {
       // Default Dämonen: (MU+MU+KL+CH+ZfW)/5
       kontrollWert = Math.round((sysAttr("MU") + sysAttr("MU") + sysAttr("KL") + sysAttr("CH") + zfwNum) / 5);
+      kontrollFormel = "(MU+MU+KL+CH+ZfW)/5";
     }
-    // Fallback: wenn beschwoerungKategorie nicht gesetzt, fallback zur kontrollFormula
+    // Fallback: ohne gesetzte Kategorie entscheidet der Formeltext des Zaubers.
     if (!kategorie && spellData.kontrollProbe?.includes("MU+IN+CH+CH")) {
       kontrollWert = Math.round((sysAttr("MU") + sysAttr("IN") + sysAttr("CH") + sysAttr("CH") + zfwNum) / 5);
+      kontrollFormel = "(MU+IN+CH+CH+ZfW)/5";
     }
     const kontrollErschwernis = beschwKontrollZuschlag ?? 0;
     const kontrollTarget = kontrollWert - kontrollErschwernis;
@@ -746,7 +763,7 @@ export async function castSpell(actor, spellData) {
       kontrollWert,
       erschwernis: kontrollErschwernis,
       success: kontrollSuccess,
-      formula: kontrollFormula,
+      formula: kontrollFormel,
     };
     if (!kontrollSuccess) {
       // Beherrschung misslungen → Misslingen-Tabelle würfeln (WdZ S.191)
@@ -845,7 +862,7 @@ export async function castSpell(actor, spellData) {
   }
   if (success) zfpBreakdownParts.push(`− ${overSum} (über)`);
   const zfpBreakdownLine = (success && zfpBreakdownParts.length > 0)
-    ? `<div style="text-align:center;font-size:10px;color:#779;margin-top:-4px">${zfpBreakdownParts.join(" ")} = ${result.tapStar}</div>`
+    ? `<div style="text-align:center;font-size:10px;color:#779;margin-top:-4px">${zfpBreakdownParts.join(" ")} = ${zfpStar}</div>`
     : "";
 
   // Misserfolg: zeige um wieviel verfehlt + Komplett-Breakdown
@@ -869,7 +886,7 @@ export async function castSpell(actor, spellData) {
     ${variantLine}
     <div class="dice-row">${diceHtml}</div>
     <div class="result-line ${resultClass}">${resultLabel}</div>
-    ${success ? `<div class="tap-star">ZfP*: <span>${result.tapStar}</span></div>${zfpBreakdownLine}` : failureBreakdown}
+    ${success ? `<div class="tap-star">ZfP*: <span>${zfpStar}</span></div>${zfpBreakdownLine}` : failureBreakdown}
     ${kontrollLine}
     ${anrufungMisslingenLine}
     <div style="text-align:center;font-size:13px;color:#4a90d9">
@@ -913,7 +930,7 @@ export async function castSpell(actor, spellData) {
         spellName: effectiveName,
         // ZfP* × 10 KR Wirkungsdauer: für Anzeige, Cleanup nicht nötig
         // weil Verzauberung sowieso nur 1 Schuss hält.
-        zfpStar:   result.tapStar ?? 1,
+        zfpStar:   zfpStar,
       });
       ui.notifications.info(
         `✨ ${mapping.label} bereit — nächster Fernkampf-Schuss fliegt verzaubert!`,
@@ -937,22 +954,22 @@ export async function castSpell(actor, spellData) {
     const spellLow = spellData.name.toLowerCase();
     if (/pandaemonium|pandämonium/.test(spellLow)) {
       const borVariant = /borbaradian/.test(spellLow) || spellData.rep === "borbaradianisch";
-      await castPandaemonium(actor, spellData, result.tapStar ?? 0, borVariant);
+      await castPandaemonium(actor, spellData, zfpStar, borVariant);
       return { success, result, crit, aspCost: actualCost };
     }
     if (/fesselranken/.test(spellLow)) {
       const dornen = /dornen/.test(spellLow);
       const stabil = /stabil/.test(spellLow);
-      await castFesselranken(actor, spellData, result.tapStar ?? 0, { dornen, stabil });
+      await castFesselranken(actor, spellData, zfpStar, { dornen, stabil });
       return { success, result, crit, aspCost: actualCost };
     }
     if (/auge.*limbus|limbusauge/.test(spellLow)) {
-      await castAugeDesLimbus(actor, spellData, result.tapStar ?? 0, { radius: 3 });
+      await castAugeDesLimbus(actor, spellData, zfpStar, { radius: 3 });
       return { success, result, crit, aspCost: actualCost };
     }
     if (/sumpfstrudel|sumpf-strudel/.test(spellLow)) {
       const erdranken = /erdranken/.test(spellLow);
-      await castSumpfstrudel(actor, spellData, result.tapStar ?? 0, { radius: 3, erdranken });
+      await castSumpfstrudel(actor, spellData, zfpStar, { radius: 3, erdranken });
       return { success, result, crit, aspCost: actualCost };
     }
     if (/^gardianum/i.test(spellData.name) || /gardianum/i.test(spellLow)) {
@@ -963,8 +980,7 @@ export async function castSpell(actor, spellData) {
       else if (/zauber/.test(nameLow))         variant = "zauber";
       else if (/persoenlich|persönlich/.test(nameLow)) variant = "persoenlich";
 
-      // Dialog fuer AsP-Invest (ZfP* kommt aus der Probe)
-      const zfpStar = result.tapStar ?? 0;
+      // Dialog fuer AsP-Invest — ZfP* kommt aus der oben verrechneten Probe.
       return new Promise((resolve) => {
         new Dialog({
           title: `🛡 Gardianum — ${actor.name}`,
@@ -1009,7 +1025,7 @@ export async function castSpell(actor, spellData) {
   if (success && !crit.patzer) {
     const damageInfo = _lookupSpellDamageFuzzy(spellData.name);
     if (damageInfo) {
-      await _applySpellDamage(actor, spellData, damageInfo, actualCost ?? 0, result.tapStar ?? 0);
+      await _applySpellDamage(actor, spellData, damageInfo, actualCost ?? 0, zfpStar);
     }
   }
 

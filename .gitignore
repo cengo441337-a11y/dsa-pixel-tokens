@@ -48,3 +48,6 @@ email-*.txt
 *-helden-import.xml
 tarvas-liturgie-descriptions.json
 liturgien-fulltext.json
+
+# Laufzeit-Protokolle
+*.log

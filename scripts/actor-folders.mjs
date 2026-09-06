@@ -55,6 +55,14 @@ export function categorizeActor(actor) {
   const name = (actor.name ?? "").toLowerCase();
   const sys = actor.system ?? {};
 
+  // ── 0. Spielercharaktere niemals verschieben ─────────────────────────────
+  // Die Stichwortsuche weiter unten arbeitet nur mit dem Namen. Sie schob
+  // deshalb jeden Helden, in dessen Namen "Schatten", "Knochen" oder "Ghul"
+  // vorkommt, nach "DSA Untote" — "Rhondara Schattenwind" landete dort
+  // zuverlaessig. Die Pruefung auf das Kreatur-Kennfeld stand erst NACH den
+  // Stichworten und kam damit zu spaet.
+  if (_hatSpielerBesitzer(actor)) return null;
+
   // ── 1. Pandaemonium-Cluster (eigener Marker) ─────────────────────────────
   if (actor.getFlag(MODULE_ID, "pandaemoniumActor")?.isPdCluster ||
       name.includes("pandaemonium")) {
@@ -88,14 +96,20 @@ export function categorizeActor(actor) {
   }
 
   // ── 3. Untote (via Namen / Abilities) ────────────────────────────────────
-  for (const [subFolder, kws] of Object.entries(UNDEAD_KEYWORDS)) {
-    if (_matchesAny(name, kws)) {
-      return { topFolder: "DSA Untote", subFolder };
+  // Nur fuer Aktoren, die das Modul selbst als Kreatur angelegt hat. Der
+  // Namensabgleich allein ist zu grob: "Schatten" oder "Knochen" stecken auch
+  // in Heldennamen, und ein von Hand gebauter NSC soll nicht wandern, bloss
+  // weil er "Moorleiche" heisst.
+  if (creatureFlag) {
+    for (const [subFolder, kws] of Object.entries(UNDEAD_KEYWORDS)) {
+      if (_matchesAny(name, kws)) {
+        return { topFolder: "DSA Untote", subFolder };
+      }
     }
-  }
-  // Weitere Untote-Stichworte
-  if (_matchesAny(name, ["untot", "schatten", "alagrimm", "blutbestie", "moorleich", "yaq hai"])) {
-    return { topFolder: "DSA Untote", subFolder: "Sonstige" };
+    // Weitere Untote-Stichworte
+    if (_matchesAny(name, ["untot", "schatten", "alagrimm", "blutbestie", "moorleich", "yaq hai"])) {
+      return { topFolder: "DSA Untote", subFolder: "Sonstige" };
+    }
   }
 
   // ── 4. Monster (Fallback fuer alles andere mit Kreatur-Flag) ──────────────
@@ -218,22 +232,45 @@ globalThis.DSASortiereActors = async () => {
 // ─── Duplikat-Entfernung ────────────────────────────────────────────────────
 
 /**
- * Findet Duplikate (gleicher Name + Typ) und loescht alle ausser einem.
- * Behalten wird der Actor mit den meisten Items (= vollstaendigster).
- * Token-Referenzen werden vor dem Loeschen auf den Master umgeleitet.
+ * Sucht Aktoren, die sich Name und Typ teilen.
+ *
+ * WICHTIG — WARUM DIESE FUNKTION NICHTS MEHR VON SELBST LOESCHT:
+ * Bis v0.7.18 lief sie bei JEDEM Weltstart und loeschte sofort. Ein zweiter
+ * Import desselben Helden legte einen zweiten Aktor an (die Rueckfrage
+ * "Bestehenden Held aktualisieren" ist standardmaessig aus), und beim naechsten
+ * Start verschwand einer der beiden endgueltig — behalten wurde der mit mehr
+ * Gegenstaenden, was auch der frische, noch leere sein konnte. Kein Dialog,
+ * keine Warnung, kein Weg zurueck.
+ *
+ * Jetzt gilt: Loeschen passiert nur, wenn der Aufrufer es ausdruecklich
+ * verlangt. Wer den Schalter vergisst, bekommt eine Liste — nicht den Verlust.
+ * Spielercharaktere sind zusaetzlich generell ausgenommen: Duplikate werden nur
+ * unter Aktoren gesucht, die das Modul selbst als Kreatur angelegt hat.
+ *
+ * @param {{ wirklichLoeschen?: boolean }} optionen
+ * @returns {Promise<{ gefunden: number, geloescht: number, gruppen: Array }>}
  */
-export async function deduplicateActors() {
-  // Gruppiere nach Name+Typ (case-insensitive)
+export async function deduplicateActors({ wirklichLoeschen = false } = {}) {
+  // Gruppiere nach Name+Typ (case-insensitive) — aber nur ueber Aktoren, die
+  // das Modul selbst erzeugt hat. Ein von Hand gebauter NSC oder ein
+  // Spielercharakter hat dieses Kennfeld nicht und bleibt damit unangetastet.
   const groups = new Map();
   for (const actor of game.actors) {
+    if (!actor.getFlag(MODULE_ID, "creature")) continue;
+    if (_hatSpielerBesitzer(actor)) continue;
     const key = `${actor.type}|${actor.name.toLowerCase().trim()}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(actor);
   }
 
   let deleted = 0;
+  let gefunden = 0;
+  const gruppen = [];
   for (const [key, actors] of groups) {
     if (actors.length <= 1) continue;
+    gefunden += actors.length - 1;
+    gruppen.push({ key, namen: actors.map(a => a.name), anzahl: actors.length });
+    if (!wirklichLoeschen) continue;
 
     // Sortiere absteigend nach Vollstaendigkeit: items.size, dann updatedAt
     actors.sort((a, b) => {
@@ -258,7 +295,7 @@ export async function deduplicateActors() {
       }
     }
 
-    // Duplikate loeschen
+    // Duplikate loeschen — nur erreichbar, wenn wirklichLoeschen gesetzt war.
     for (const dup of duplicates) {
       try {
         await dup.delete();
@@ -269,13 +306,57 @@ export async function deduplicateActors() {
     }
   }
 
-  return deleted;
+  return { gefunden, geloescht: deleted, gruppen };
 }
 
-// Globaler Helper — Duplikate manuell entfernen
+/**
+ * Gehoert der Aktor einem Spieler? Dann ist er ein Spielercharakter und wird
+ * niemals automatisch angefasst — unabhaengig von Typ und Kennfeldern.
+ */
+function _hatSpielerBesitzer(actor) {
+  const rechte = actor.ownership ?? actor.data?.permission ?? {};
+  const voll = CONST?.DOCUMENT_OWNERSHIP_LEVELS?.OWNER ?? 3;
+  return Object.entries(rechte).some(([benutzerId, stufe]) => {
+    if (benutzerId === "default") return false;
+    const benutzer = game.users?.get?.(benutzerId);
+    return stufe >= voll && benutzer && !benutzer.isGM;
+  });
+}
+
+// Globaler Helfer — Duplikate manuell entfernen. Fragt vorher nach und nennt
+// die betroffenen Namen; ohne Bestaetigung wird nichts geloescht.
 globalThis.DSADedupActors = async () => {
-  const before = game.actors.size;
-  const deleted = await deduplicateActors();
-  ui.notifications.info(`[DSA Pixel] ${deleted} Actor-Duplikat(e) entfernt (${before} → ${game.actors.size}).`);
-  return deleted;
+  if (!game.user.isGM) {
+    ui.notifications.warn("[DSA Pixel] Duplikate entfernen darf nur die Spielleitung.");
+    return { gefunden: 0, geloescht: 0, gruppen: [] };
+  }
+
+  const bericht = await deduplicateActors();           // erst nur schauen
+  if (bericht.gefunden === 0) {
+    ui.notifications.info("[DSA Pixel] Keine doppelten Kreaturen gefunden.");
+    return bericht;
+  }
+
+  const liste = bericht.gruppen
+    .map(g => `<li>${g.namen[0]} — ${g.anzahl}×</li>`)
+    .join("");
+  const bestaetigt = await Dialog.confirm({
+    title: "Doppelte Kreaturen entfernen",
+    content: `<p>${bericht.gefunden} Aktor(en) würden <strong>endgültig gelöscht</strong>.
+      Behalten wird je Gruppe der Eintrag mit den meisten Gegenständen.</p>
+      <ul style="max-height:200px;overflow:auto">${liste}</ul>
+      <p>Spielercharaktere und von Hand angelegte Aktoren sind nicht dabei.</p>`,
+    yes: () => true,
+    no: () => false,
+    defaultYes: false,
+  });
+  if (!bestaetigt) {
+    ui.notifications.info("[DSA Pixel] Abgebrochen — nichts gelöscht.");
+    return bericht;
+  }
+
+  const vorher = game.actors.size;
+  const ergebnis = await deduplicateActors({ wirklichLoeschen: true });
+  ui.notifications.info(`[DSA Pixel] ${ergebnis.geloescht} Duplikat(e) entfernt (${vorher} → ${game.actors.size}).`);
+  return ergebnis;
 };

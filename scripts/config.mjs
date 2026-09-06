@@ -1683,24 +1683,46 @@ export const REPRESENTATIONS = {
 // ─── Patzer / Glücklich Regeln ───────────────────────────────────────────────
 
 /**
- * Prüft ein 3W20-Ergebnis auf Patzer/Glücklich
- * @param {number[]} dice - Array von 3 Würfelergebnissen
- * @returns {{ patzer: boolean, gluecklich: boolean, confirm: string|null }}
+ * Prüft ein 3W20-Ergebnis auf Patzer/Glücklich (WdH S.28).
+ *
+ * ACHTUNG — gilt nur für die 3W20-Probe (Talent, Zauber, Liturgie, Ritual).
+ * Der Einzelwurf im Kampf (AT/PA, 1W20) hat andere Regeln: dort verlangt eine
+ * einzelne 1 bzw. 20 einen Bestätigungswurf. Dafür ist `confirm` gedacht; bei
+ * drei Würfeln bleibt das Feld bedeutungslos und darf nicht ausgewertet werden.
+ *
+ * @param {number[]} dice - Array von Würfelergebnissen (bei der Probe genau 3)
+ * @returns {{ patzer: boolean, gluecklich: boolean, meisterhaft: boolean,
+ *             schwererPatzer: boolean, confirm: string|null }}
  */
 export function checkCritical(dice) {
   const ones   = dice.filter(d => d === 1).length;
   const twenties = dice.filter(d => d === 20).length;
 
-  // Doppel-20 = automatischer Patzer
-  if (twenties >= 2) return { patzer: true, gluecklich: false, confirm: null };
-  // Doppel-1 = automatisches Gelingen
-  if (ones >= 2)     return { patzer: false, gluecklich: true, confirm: null };
-  // Einfache 20 → Bestätigungswurf nötig
-  if (twenties === 1) return { patzer: false, gluecklich: false, confirm: "patzer" };
-  // Einfache 1 → Bestätigungswurf nötig
-  if (ones === 1)     return { patzer: false, gluecklich: false, confirm: "gluecklich" };
+  // Dreifach-20 = schwerer Patzer, Dreifach-1 = meisterhafter Erfolg.
+  // Beide sind Sonderfälle des jeweiligen Doppelergebnisses, deshalb sind
+  // patzer/gluecklich dabei ebenfalls gesetzt — bestehende Aufrufer, die nur
+  // diese beiden Felder kennen, verhalten sich unverändert.
+  if (twenties >= 2) {
+    return { patzer: true, gluecklich: false, meisterhaft: false,
+             schwererPatzer: twenties >= 3, confirm: null };
+  }
+  if (ones >= 2) {
+    return { patzer: false, gluecklich: true, meisterhaft: ones >= 3,
+             schwererPatzer: false, confirm: null };
+  }
+  // Einzelne 20/1: bei der 3W20-Probe ohne Bedeutung, beim 1W20-Kampfwurf
+  // Anlass für einen Bestätigungswurf.
+  if (twenties === 1) {
+    return { patzer: false, gluecklich: false, meisterhaft: false,
+             schwererPatzer: false, confirm: "patzer" };
+  }
+  if (ones === 1) {
+    return { patzer: false, gluecklich: false, meisterhaft: false,
+             schwererPatzer: false, confirm: "gluecklich" };
+  }
 
-  return { patzer: false, gluecklich: false, confirm: null };
+  return { patzer: false, gluecklich: false, meisterhaft: false,
+           schwererPatzer: false, confirm: null };
 }
 
 /**
@@ -1757,10 +1779,54 @@ export function resolveProbe(dice, attrs, taw, modifier = 0) {
     : remaining;
 
   const success = remaining >= 0;
-  // bei TaP* = 0 (alles weggegessen) gilt Probe als bestanden mit Mindest-TaP* 1
-  const tapStar = success ? Math.max(1, remaining) : 0;
+  // WdH S.27: Eine Erleichterung erhöht die Trefferchance, aber es bleiben nie
+  // mehr TaP* übrig, als der Held überhaupt TaW besitzt. Ohne diese Deckelung
+  // lieferte ein ZfW 4 mit Erleichterung 5 glatte 9 ZfP* — und weil ZfP* in die
+  // Schadens- und Wirkungsdauerformeln eingehen, wurde daraus direkt mehr
+  // Schaden. Die Deckelung steht bewusst hier und nicht bei den Aufrufern: es
+  // gibt fünf davon, und der sechste würde sie vergessen.
+  // Der Mindestwert 1 sticht die Deckelung, damit TaW 0 (Probe erschwert auf
+  // null, aber gelungen) nicht zu 0 TaP* führt.
+  const tapStar = success
+    ? Math.max(1, Math.min(remaining, Math.max(taw, 0)))
+    : 0;
 
   return { success, tapStar, remainder: reportedRemainder, details, effectiveTaw, modifier };
+}
+
+/**
+ * Verrechnet das Ergebnis von `resolveProbe` mit dem von `checkCritical` zu dem,
+ * was im Spiel tatsächlich gilt.
+ *
+ * WARUM ALS EIGENE FUNKTION: Vorher machte das jeder der fünf Aufrufer selbst —
+ * und alle machten denselben Fehler. Bei einem glücklichen Wurf setzten sie
+ * `success = true` und meldeten "Maximale Wirkung", benutzten aber weiter das
+ * `tapStar` aus der misslungenen Probe, also 0. Der Zauber galt als gelungen und
+ * richtete nichts aus. Wer die Verrechnung hier vergisst, bekommt kein falsches
+ * Ergebnis, sondern gar keins — die Funktion liefert die Werte, sonst niemand.
+ *
+ * @param {object} result - Rückgabe von resolveProbe
+ * @param {object} crit   - Rückgabe von checkCritical
+ * @param {number} taw    - unmodifizierter TaW/ZfW/LkW/RkW
+ * @returns {{ success: boolean, tapStar: number, quelle: string }}
+ *          quelle: "probe" | "gluecklich" | "meisterhaft" | "patzer"
+ */
+export function applyCrit(result, crit, taw) {
+  // Patzer sticht alles: die Probe gilt als misslungen, egal was gewürfelt wurde.
+  if (crit?.patzer) return { success: false, tapStar: 0, quelle: "patzer" };
+
+  if (crit?.meisterhaft) {
+    // Drei Einsen: bestmögliches Ergebnis, also der volle TaW als TaP*.
+    return { success: true, tapStar: Math.max(1, Math.max(taw, 0)), quelle: "meisterhaft" };
+  }
+
+  if (crit?.gluecklich) {
+    // Zwei Einsen: die Probe gelingt automatisch. Eine gelungene Probe hat
+    // mindestens 1 TaP*; hat die Rechnung mehr hergegeben, bleibt der höhere Wert.
+    return { success: true, tapStar: Math.max(1, result?.tapStar ?? 0), quelle: "gluecklich" };
+  }
+
+  return { success: !!result?.success, tapStar: result?.tapStar ?? 0, quelle: "probe" };
 }
 
 // ─── GM-Relay für Player-zu-NPC-Updates ─────────────────────────────────────

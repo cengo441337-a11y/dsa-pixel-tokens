@@ -2435,6 +2435,34 @@ export class PixelArtCharacterSheet extends ActorSheet {
     "Waffenbruch oder schwere Handverletzung",
   ];
 
+  /**
+   * Besitzt der Held die genannte Sonderfertigkeit?
+   *
+   * WARUM ALS METHODE: Das war vorher eine mit `const` angelegte Hilfsfunktion
+   * mitten in `_rollAttack` — 52 Zeilen NACH ihrem ersten Aufruf. `const` wird
+   * nicht vorgezogen, also warf jedes Manöver mit SF-Voraussetzung
+   * "Cannot access 'hasSF' before initialization" und brach den Angriff
+   * kommentarlos ab (Gezielter Stich, Hammerschlag, Niederwerfen,
+   * Sturmangriff, Todesstoss, Klingensturm, Betäubungsschlag). Als Methode kann
+   * das nicht mehr passieren: Methoden stehen ab dem Erzeugen des Objekts
+   * bereit, unabhängig von der Reihenfolge im Text.
+   *
+   * @param {string|null} name - Name der SF; null/leer gilt als "vorhanden"
+   * @returns {boolean}
+   */
+  _hatSonderfertigkeit(name) {
+    if (!name) return true;
+    const gesucht = name.toLowerCase();
+    const roh = this.actor?.system?.sonderfertigkeiten ?? this.actor?.system?.sf ?? [];
+    if (Array.isArray(roh)) {
+      return roh.some(eintrag => {
+        const wert = typeof eintrag === "string" ? eintrag : (eintrag?.name ?? "");
+        return wert.toLowerCase() === gesucht;
+      });
+    }
+    return Object.keys(roh).some(k => k.toLowerCase() === gesucht);
+  }
+
   async _rollAttack(dataset) {
     const talent     = dataset.talent;
     const at         = parseInt(dataset.at) || 0;
@@ -2451,7 +2479,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const sf          = COMBAT_MANEUVERS[maneuver] ?? COMBAT_MANEUVERS.normal;
 
     // SF-Validierung: Prüfen ob nötige Sonderfertigkeit vorhanden (WdS)
-    if (sf.requiresSF && !hasSF(sf.requiresSF)) {
+    if (sf.requiresSF && !this._hatSonderfertigkeit(sf.requiresSF)) {
       ui.notifications.warn(`${sf.label} benötigt SF "${sf.requiresSF}"! Manöver nicht verfügbar.`);
       return;
     }
@@ -2502,18 +2530,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
     }
 
     // ── Manöver-Effekt berechnen ─────────────────────────────────────
-    const sfRaw = this.actor.system?.sonderfertigkeiten ?? this.actor.system?.sf ?? [];
-    const hasSF = (name) => {
-      if (!name) return true;
-      const sfLow = name.toLowerCase();
-      if (Array.isArray(sfRaw)) {
-        return sfRaw.some(entry => {
-          const val = typeof entry === "string" ? entry : (entry?.name ?? "");
-          return val.toLowerCase() === sfLow;
-        });
-      }
-      return Object.keys(sfRaw).some(k => k.toLowerCase() === sfLow);
-    };
+    const hasSF = (name) => this._hatSonderfertigkeit(name);
 
     let maneuverLine = "";
     if (hit && maneuver !== "normal" && sf.effect !== "none") {

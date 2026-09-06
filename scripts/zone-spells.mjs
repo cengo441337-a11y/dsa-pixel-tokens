@@ -708,7 +708,7 @@ async function _sumpfFreeCheck(templateId) {
       <div class="dice-row">
         <div class="die">${d1}</div><div class="die">${d2}</div><div class="die">${d3}</div>
       </div>
-      <div class="dsa-mod-hint">Talent ${taw} gg KO ${ko} − ${meta.tapErschwernis} Erschwernis · TaP: ${tap}</div>
+      <div class="dsa-mod-hint">${talentName} ${taw} auf ${probeAttrs.join("/")} ${attrs.join("/")} − ${meta.tapErschwernis ?? 0} Erschwernis · TaP*: ${tap}</div>
       <div class="result-line ${success ? "result-success" : "result-fail"}">
         ${success ? `+${tap} TaP*` : `Misslungen: −${spRoll.total} TaP*`}
         · Akkumuliert: ${state.tapAccumulated}/${meta.tapRequired}
