@@ -3,7 +3,7 @@
  * Manöver-System, Schaden-Berechnung, Fernkampf-Projektile, Wundschwellen
  */
 
-import { MODULE_ID, COMBAT_MANEUVERS, RANGED_MODIFIERS, getWoundThresholds, PROBE_SOUNDS, tpFormelZuWuerfeln, dsaChat } from "./config.mjs";
+import { MODULE_ID, COMBAT_MANEUVERS, RANGED_MODIFIERS, getWoundThresholds, PROBE_SOUNDS, tpFormelZuWuerfeln, dsaChat, getRuestungsgewoehnung, calcIniPenalty } from "./config.mjs";
 
 // ─── Passierschlag ───────────────────────────────────────────────────────────
 
@@ -463,10 +463,11 @@ function _computeInitiative(actor) {
     : Object.values(sys.sf ?? {}).map(v => v?.name ?? v);
   const iniBasis = Number(sys.INIBasis?.value ?? 0);
 
-  // Rüstungsgewöhnung-Reduktion (WdS S.76): I/II/III → BE −1/−2/−3
-  const rgLevel = sfList.includes("Rüstungsgewöhnung III") ? 3
-                : sfList.includes("Rüstungsgewöhnung II")  ? 2
-                : sfList.includes("Rüstungsgewöhnung I")   ? 1 : 0;
+  // Rüstungsgewöhnung zentral erkennen (config.mjs). Der frühere Vergleich auf
+  // den exakten Namen ging an jeder abweichenden Schreibweise vorbei — und der
+  // Heldenbogen erkannte sie an derselben Stelle anders.
+  const rg = getRuestungsgewoehnung(actor);
+  const rgLevel = rg.level;
 
   const armorItems = actor.items?.filter(i => (i.system?.type ?? "").toLowerCase() === "armor") ?? [];
   const _rawTotalBE = armorItems.reduce((s, a) => s + Number(a.system?.armor?.be ?? 0), 0);
@@ -475,8 +476,8 @@ function _computeInitiative(actor) {
   const sfKR = (sfList.includes("Kampfreflexe") && _kfEffectiveBE <= 4) ? 4 : 0;
   const sfKG = (sfList.includes("Kampfgespür") || sfList.includes("Kampfgespuer")) ? 2 : 0;
 
-  // Rüstungs-Penalty für INI: WdS S.56 — volle BE (nach RG), nicht halbiert.
-  const armorIni = Math.max(0, _rawTotalBE - rgLevel);
+  // Rüstungs-Penalty für INI — eine Formel für alle Aufrufer (config.mjs).
+  const armorIni = calcIniPenalty(_rawTotalBE, rg);
 
   // Schild-Penalty (negativer ini-Mod = Penalty)
   const equippedShield = actor.items?.find(i =>

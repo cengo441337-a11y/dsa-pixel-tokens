@@ -317,7 +317,10 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // (nur Patzer-Schwelle 19+). "Schwerfällig" und "Schlechte Reflexe" existieren
     // in DSA 4.1 nicht. Re-Audit-Finding NEU-4: vorherige Mali waren erfunden.
     const iniNachteilMalus = 0;
-    const iniArmorMalus = Math.round(armorCalc.totalGBE) - (armorCalc.rg || 0);
+    // Dieselbe Formel wie im Wurf und in der Kampfleiste (config.mjs).
+    // Vorher rechnete jede der drei Stellen anders — der angezeigte Wert war
+    // keiner der beiden gewürfelten.
+    const iniArmorMalus = calcIniPenalty(armorCalc.totalGBE, { level: armorCalc.rg || 0 });
     data.iniPenalty = Math.max(0, iniArmorMalus) + (shieldIniMod < 0 ? -shieldIniMod : 0) + iniNachteilMalus;
 
     // ── AW: WdS S.66 — "Behinderung +BE" auf JEDE Ausweichen-Probe (volle BE).
@@ -2154,17 +2157,18 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // WdS S.75: Kampfreflexe wirkt nur bei Ruestung mit BE <= 4 (nach RG).
     const _kfTotalBE = (this.actor.items?.filter(i => (i.system?.type ?? "").toLowerCase() === "armor") ?? [])
       .reduce((s, a) => s + Number(a.system?.armor?.be ?? 0), 0);
-    const sfKR     = (sf.includes("Kampfreflexe") && _kfTotalBE <= 4) ? 4 : 0;
+    const _kfEffektivBE = Math.max(0, _kfTotalBE - getRuestungsgewoehnung(this.actor).beReduction);
+    const sfKR     = (sf.includes("Kampfreflexe") && _kfEffektivBE <= 4) ? 4 : 0;
     const sfKG     = sf.includes("Kampfgespür") || sf.includes("Kampfgespuer") ? 2 : 0;
     // Ruestung-Penalty fuer INI: WdS S.56 — "der BE-Wert wird von der Initiative
     // abgezogen, nicht der eBE-Wert". Also volle BE, nicht BE/2.
-    let armorIni = 0;
+    // Die Ruestungsgewoehnung wurde hier frueher gar nicht beruecksichtigt: der
+    // Wurf lag dadurch systematisch unter dem angezeigten Wert.
     const armorItems = this.actor.items?.filter(i =>
       (i.system?.type ?? "").toLowerCase() === "armor"
     ) ?? [];
-    for (const a of armorItems) {
-      armorIni += Number(a.system?.armor?.be ?? 0);
-    }
+    const rohBE = armorItems.reduce((s, a) => s + Number(a.system?.armor?.be ?? 0), 0);
+    const armorIni = calcIniPenalty(rohBE, getRuestungsgewoehnung(this.actor));
     // Schild-INI-Penalty (vom aktiv gefuehrten Schild)
     const equippedShield = this.actor.items?.find(i =>
       (i.system?.type ?? "").toLowerCase() === "shield"
@@ -2943,6 +2947,17 @@ export class PixelArtCharacterSheet extends ActorSheet {
     }
 
     const sfPA = COMBAT_MANEUVERS[paManeuver];
+
+    // Voraussetzung prüfen — dieselbe Regel wie beim Angriff. Die Parade
+    // würfelte bisher ohne jede Prüfung los: Meisterparade, Gegenhalten und
+    // Binden verlangen alle eine Sonderfertigkeit, waren aber für jeden
+    // Charakter wählbar. Die Auswahlliste zeigte nur den Hinweistext
+    // "[SF nötig]" — ein Hinweis ist kein Riegel.
+    if (sfPA?.requiresSF && !this._hatSonderfertigkeit(sfPA.requiresSF)) {
+      ui.notifications.warn(`${sfPA.label} benötigt SF "${sfPA.requiresSF}"! Manöver nicht verfügbar.`);
+      return;
+    }
+
     const effectivePA = pa - paAnsage + getAtBase(sfPA);
 
     const roll = new Roll("1d20");
