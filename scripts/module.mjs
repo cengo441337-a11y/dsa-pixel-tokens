@@ -18,6 +18,8 @@ import { registerLiturgies, loadLiturgien, LiturgienApp } from "./liturgies.mjs"
 import { registerShamanism, loadSchamanenRituale, SchamanenApp } from "./shamanism.mjs";
 import { registerKeule, KeulenManagerApp } from "./keule.mjs";
 import { registerZustaende } from "./zustaende.mjs";
+import { registerSammelproben } from "./sammelprobe.mjs";
+import { registerKampfuebersicht } from "./kampfuebersicht.mjs";
 
 // ─── Datenbanken (werden in ready geladen) ──────────────────────────────────
 
@@ -217,6 +219,8 @@ Hooks.once("ready", async () => {
   registerShamanism();
   registerKeule();
   registerZustaende();
+  registerSammelproben();
+  registerKampfuebersicht();
   registerGmRelay();
   registerDialogTheme();
   const { registerPersistentEffectHooks } = await import("./persistent-effects.mjs");

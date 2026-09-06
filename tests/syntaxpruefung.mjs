@@ -239,6 +239,10 @@ for (const datei of dateienSuchen(join(wurzel, "scripts"), [".mjs"])) {
 // grüner Testlauf über eine Funktion, die niemand ruft, beweist nichts.
 // Rot machen: einen der Aufrufe unten aus der Zieldatei entfernen.
 const VERDRAHTUNG = [
+  { was: "registerKampfuebersicht", datei: "scripts/module.mjs",
+    warum: "sonst laesst sich die Kampfuebersicht nicht oeffnen" },
+  { was: "registerSammelproben", datei: "scripts/module.mjs",
+    warum: "sonst gibt es die Sammelproben im Spiel nicht" },
   { was: "registerZustaende", datei: "scripts/module.mjs",
     warum: "sonst gibt es die Zustandsverwaltung im Spiel nicht" },
   { was: "zustandsMalus", datei: "scripts/sheet.mjs",
