@@ -3,7 +3,7 @@
  * Registriert Sheet-Override, Hooks, und lädt Datenbanken
  */
 
-import { MODULE_ID, registerGmRelay, dsaChat } from "./config.mjs";
+import { MODULE_ID, registerGmRelay, dsaChat, nurSpielleitung } from "./config.mjs";
 import { PixelArtCharacterSheet } from "./sheet.mjs";
 import { registerDiceHooks } from "./dice-hooks.mjs";
 import { registerCombatHooks, rollPassierschlag } from "./combat.mjs";
@@ -256,7 +256,7 @@ Hooks.once("ready", async () => {
    * Nutzung: DSAImportXML("grog-helden-import.xml")
    * Oder Kurzform für Grog: DSAImportGrog()
    */
-  globalThis.DSAImportXML = async (filename) => {
+  globalThis.DSAImportXML = nurSpielleitung("DSAImportXML", async (filename) => {
     try {
       const url = `modules/${MODULE_ID}/data/${filename}`;
       const resp = await fetch(url);
@@ -272,7 +272,7 @@ Hooks.once("ready", async () => {
       ui.notifications.error(`Import fehlgeschlagen: ${err.message}`);
       return null;
     }
-  };
+  });
   globalThis.DSAImportGrog = () => DSAImportXML("grog-helden-import.xml");
 
   // Effekt-Picker in den Settings integrieren
@@ -528,9 +528,9 @@ async function _autoSetupTavernScenes() {
 }
 
 // Globaler Helper — jederzeit manuell aufrufbar
-globalThis.DSATaverneErstellen = async (variant = "v1") => {
+globalThis.DSATaverneErstellen = nurSpielleitung("DSATaverneErstellen", async (variant = "v1") => {
   await _createTavernScene(variant);
-};
+});
 
 // ─── Migration: altes Spell-Schema (system.value) → gdsa-Schema (system.zfw) ──
 
@@ -613,10 +613,10 @@ async function _migrateSpellItems() {
 
 // Globaler Shortcut zum manuellen Neu-Triggern der Migration
 // (falls jemand importiert ohne dass Migration schon lief)
-globalThis.DSASpellMigrate = async () => {
+globalThis.DSASpellMigrate = nurSpielleitung("DSASpellMigrate", async () => {
   try { await game.settings.set(MODULE_ID, MIGRATION_FLAG_KEY, false); } catch {}
   await _migrateSpellItems();
-};
+});
 
 // ─── Empfohlene Module checken ──────────────────────────────────────────────
 

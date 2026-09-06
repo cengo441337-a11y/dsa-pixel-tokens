@@ -1904,6 +1904,54 @@ export function applyCrit(result, crit, taw) {
   return { success: !!result?.success, tapStar: result?.tapStar ?? 0, quelle: "probe" };
 }
 
+/**
+ * Umhüllt einen Makro-Helfer so, dass ihn nur die Spielleitung ausführen kann.
+ *
+ * WARUM: Die globalen Helfer werden im ready-Hook für JEDEN Benutzer gesetzt.
+ * Die Stellen im Modul, die sie intern aufrufen, prüfen `game.user.isGM` — die
+ * Helfer selbst taten es nicht. Legt die Spielleitung eines davon als Makro in
+ * die Leiste (die Modulbeschreibung empfiehlt genau das), löst ein Klick eines
+ * Spielers eine Reihe serverseitig abgelehnter Schreibvorgänge aus: unbehandelte
+ * abgelehnte Versprechen, keine Fehlermeldung, und eine Oberfläche, die danach
+ * einen Zustand zeigt, den es nicht gibt.
+ *
+ * @param {string} name - Anzeigename für die Meldung
+ * @param {Function} fn - der eigentliche Helfer
+ * @returns {Function} umhüllter Helfer
+ */
+export function nurSpielleitung(name, fn) {
+  return async (...args) => {
+    if (!game?.user?.isGM) {
+      ui.notifications?.warn(`[DSA Pixel] "${name}" darf nur die Spielleitung ausführen.`);
+      return null;
+    }
+    return fn(...args);
+  };
+}
+
+/**
+ * Verrechnet die Magieresistenz des Ziels mit den erzielten ZfP* (WdZ S.30).
+ *
+ * Die MR wird VON DEN ZfP* abgezogen, nicht auf die Probe geschlagen. Der
+ * Unterschied ist im Spiel deutlich:
+ *
+ *   - Als Probenerschwernis griff bei ZfW unter der MR die Sonderregel fuer
+ *     negative Talentwerte, und der Zauber wirkte trotzdem — mit ZfP* 1. Ein
+ *     Ziel konnte sich also nie vollstaendig wehren.
+ *   - Und eine an der MR gescheiterte Probe galt als misslungen, kostete also
+ *     nur die halben AsP. Tatsaechlich ist die Probe gelungen und das Ziel hat
+ *     widerstanden: die vollen Kosten sind faellig.
+ *
+ * @param {number} zfpStar - erzielte ZfP* vor Widerstand
+ * @param {number} magieresistenz - MR des Ziels, bereits um Sonderregeln bereinigt
+ * @returns {{ zfpStar: number, widerstanden: boolean }}
+ */
+export function mrVerrechnen(zfpStar, magieresistenz = 0) {
+  const mr = Math.max(0, Number(magieresistenz) || 0);
+  const uebrig = Math.max(0, (Number(zfpStar) || 0) - mr);
+  return { zfpStar: uebrig, widerstanden: mr > 0 && uebrig <= 0 };
+}
+
 // ─── GM-Relay für Player-zu-NPC-Updates ─────────────────────────────────────
 //
 // Foundry-Permissions: ein Player darf nur Aktoren updaten, die ihm gehören.

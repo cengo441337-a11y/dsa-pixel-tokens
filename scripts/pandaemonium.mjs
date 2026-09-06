@@ -68,6 +68,15 @@ class PandaemoniumPanel extends Application {
     super.activateListeners(html);
     html.find(".pd-btn").on("click", async (e) => {
       e.preventDefault();
+      // Alle Knoepfe hier schreiben auf Templates, Aktoren oder Szenen. Der
+      // gleichwertige Weg ueber den updateCombat-Hook hat diese Pruefung; der
+      // Knopf hatte sie nicht. Ein Spieler loeste damit eine Reihe serverseitig
+      // abgelehnter Schreibvorgaenge aus — und das Panel zeigte danach einen
+      // Zustand, den es nicht gab.
+      if (!game.user?.isGM) {
+        ui.notifications?.warn("[DSA Pixel] Die Pandaemonium-Zone steuert die Spielleitung.");
+        return;
+      }
       const action = e.currentTarget.dataset.action;
       switch (action) {
         case "mut":    await _handleMutProbe(this.templateId); break;
@@ -897,7 +906,11 @@ export function registerPandaemoniumHooks() {
     const newLeP = foundry.utils.getProperty(changes, "system.LeP.value");
     if (newLeP === undefined) return;
     // Finde Token das zu diesem (unlinked) Actor gehoert
-    const scenes = [canvas.scene, ...game.scenes].filter(Boolean);
+    // canvas.scene steckt bereits in game.scenes — vorher stand die aktive Szene
+    // zweimal in der Liste, und jeder Cluster-Token darauf wurde pro Aenderung
+    // doppelt abgearbeitet: doppelte Chat-Meldung, und das zweite Loeschen lief
+    // auf eine bereits geloeschte Kennung.
+    const scenes = [...new Set([canvas.scene, ...game.scenes].filter(Boolean))];
     for (const scene of scenes) {
       for (const t of scene.tokens) {
         if (t.actor?.id !== actor.id) continue;

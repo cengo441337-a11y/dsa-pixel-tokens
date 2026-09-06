@@ -6,6 +6,7 @@
 
 import { hasVFX, hasProjectileVFX, spawnVFX, spawnProjectileVFX } from "./vfx.mjs";
 import { moveActorToCategoryFolder } from "./actor-folders.mjs";
+import { relayActorUpdate } from "./config.mjs";
 
 const MODULE_ID = "dsa-pixel-tokens";
 const SPRITE_NAME = `${MODULE_ID}-sprite`;
@@ -1337,6 +1338,7 @@ async function applyZoneDamage(templateDoc, lepDamage = 0, aspCost = 0, casterTo
   const tokens = _getTokensInTemplate(templateDoc);
   let hit = 0;
 
+  let fehlgeschlagen = 0;
   if (lepDamage > 0) {
     for (const token of tokens) {
       const actor = token.actor;
@@ -1344,18 +1346,29 @@ async function applyZoneDamage(templateDoc, lepDamage = 0, aspCost = 0, casterTo
       const hp = _getActorLeP(actor);
       if (!hp) continue;
       const newVal = Math.max(0, hp.val - lepDamage);
-      await actor.update({ [hp.path]: newVal });
-      _showDamageNumber(token, -lepDamage, 0xff3333, "SP");
-      hit++;
+      try {
+        // Ueber den Spielleiter-Umweg: ein Spieler darf fremde Aktoren nicht
+        // aendern, und ohne diesen Weg brach die Schleife beim ersten fremden
+        // Token ab — alle danach blieben unversehrt, ohne jede Meldung.
+        await relayActorUpdate(actor, { [hp.path]: newVal }, token);
+        _showDamageNumber(token, -lepDamage, 0xff3333, "SP");
+        hit++;
+      } catch (fehler) {
+        fehlgeschlagen++;
+        console.warn(`[${MODULE_ID}] Zonenschaden auf ${actor.name} fehlgeschlagen:`, fehler);
+      }
     }
     if (hit > 0) ui.notifications.info(`Zone-Schaden: ${hit} Token × ${lepDamage} LeP`);
+    if (fehlgeschlagen > 0) {
+      ui.notifications.warn(`${fehlgeschlagen} Token konnten keinen Zonenschaden erhalten — Spielleitung pruefen.`);
+    }
   }
 
   if (aspCost > 0 && casterToken?.actor) {
     const actor = casterToken.actor;
     const asp = _getActorAsP(actor);
     if (asp) {
-      await actor.update({ [asp.path]: Math.max(0, asp.val - aspCost) });
+      await relayActorUpdate(actor, { [asp.path]: Math.max(0, asp.val - aspCost) }, casterToken);
       // _showDamageNumber fires automatically via preUpdateActor hook
       ui.notifications.info(`AsP -${aspCost} (${casterToken.name})`);
     }
@@ -1403,7 +1416,13 @@ function showZonePicker(templateDoc) {
         callback: (html) => {
           const lep = parseInt(html.find("#sf-lep").val()) || 0;
           const asp = parseInt(html.find("#sf-asp").val()) || 0;
-          applyZoneDamage(templateDoc, lep, asp, casterToken);
+          // Der Aufruf war weder awaited noch abgesichert: ein Fehler darin
+          // wurde nirgends sichtbar.
+          applyZoneDamage(templateDoc, lep, asp, casterToken)
+            .catch(fehler => {
+              console.error(`[${MODULE_ID}] Zonenschaden fehlgeschlagen:`, fehler);
+              ui.notifications.error("Zonenschaden fehlgeschlagen — Einzelheiten in der Konsole.");
+            });
         },
       },
       loeschen: {

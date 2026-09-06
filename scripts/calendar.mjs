@@ -14,8 +14,19 @@ import { MODULE_ID } from "./config.mjs";
 
 const SETTING_DATE = "calendarDate";
 
-/** Default-Datum: 1. Praios, 1043 BF (Standard-Kampagnen-Start) */
-const DEFAULT_DATE = { year: 1043, month: 1, day: 1 };
+/**
+ * Default-Datum: 1. Praios, 1043 BF (Standard-Kampagnen-Start).
+ *
+ * WIRD ALS FUNKTION GELIEFERT, nicht als Objekt. Vorher war das eine Konstante,
+ * und der Blaettern-Knopf schrieb direkt hinein: `let date = settings.get(...) ??
+ * DEFAULT_DATE;` gefolgt von `date.day++`. In einer frischen Welt (oder wenn die
+ * Einstellung den Vorgabewert ungeklont zurueckgibt) veraenderte ein Klick auf
+ * "+1 Tag" damit den vermeintlich konstanten Kampagnenstart — fuer den Rest der
+ * Sitzung. Eine Funktion kann man nicht versehentlich beschreiben.
+ */
+function standardDatum() {
+  return { year: 1043, month: 1, day: 1 };
+}
 
 let _calendarData = null;
 
@@ -99,7 +110,7 @@ class DSACalendarApp extends Application {
 
   async getData() {
     const cal = await loadCalendarData();
-    const date = game.settings.get(MODULE_ID, SETTING_DATE) ?? DEFAULT_DATE;
+    const date = { ...(game.settings.get(MODULE_ID, SETTING_DATE) ?? standardDatum()) };
     const monat = date.month === 13 ? null : cal.monate[date.month - 1];
     const wochentagNr = getWeekday(date, cal);
     const wochentag = cal.wochentage[wochentagNr - 1];
@@ -239,7 +250,9 @@ class DSACalendarApp extends Application {
     // Datum-Steuerung (nur GM)
     html.find(".dsa-cal-btn").on("click", async e => {
       const act = e.currentTarget.dataset.act;
-      let date = game.settings.get(MODULE_ID, SETTING_DATE) ?? DEFAULT_DATE;
+      // Immer mit einer eigenen Kopie rechnen: die Einstellung kann dasselbe
+      // Objekt zurueckgeben, das im Speicher liegt.
+      let date = { ...(game.settings.get(MODULE_ID, SETTING_DATE) ?? standardDatum()) };
       const cal = await loadCalendarData();
       if (act === "day+1") date.day++;
       else if (act === "day-1") date.day--;
@@ -304,7 +317,7 @@ export function registerCalendar() {
     scope: "world",
     config: false,
     type: Object,
-    default: DEFAULT_DATE,
+    default: standardDatum(),
   });
 
   // Globaler Floating-Button oben links — DOM-injektion, weil Foundry v12's

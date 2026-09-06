@@ -3,7 +3,7 @@
  * Zauberprobe mit Spontanmodifikationen, AsP-Berechnung, Zone-Markierung
  */
 
-import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, applyCrit, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, BESCHWOERUNG_MISSLINGEN, BEHERRSCHUNG_MISSLINGEN, rollBeschwoerungMisslingen, relayActorUpdate, relayTokenUpdate, broadcastVFX, getLepStatus, dsaChat, dsaFlags } from "./config.mjs";
+import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, applyCrit, mrVerrechnen, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, BESCHWOERUNG_MISSLINGEN, BEHERRSCHUNG_MISSLINGEN, rollBeschwoerungMisslingen, relayActorUpdate, relayTokenUpdate, broadcastVFX, getLepStatus, dsaChat, dsaFlags } from "./config.mjs";
 
 /** Helper: LeP-Status-Flags eines Aktors lesen (Eisern, Zäher Hund, Selbstbeherrschung). */
 function _getLepStatusFlags(actor) {
@@ -553,7 +553,9 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
       extraAkt: 0,
       aspCost: null,
       // Erleichterung negativ = Erschwernis. MR + Aufrechterhaltene + Manueller Mod.
-      erleichterung: -extraMod0 - effectiveTargetMR - upkeepErschwernis - beschwAnrufungZuschlag + paktBonus,
+      // MR steckt bewusst NICHT hier drin: sie wird nach der Probe von den
+      // ZfP* abgezogen (WdZ S.30), nicht vorher auf die Probe geschlagen.
+      erleichterung: -extraMod0 - upkeepErschwernis - beschwAnrufungZuschlag + paktBonus,
       selections, selectedVariant: varIdx0 >= 0 ? (varianten[varIdx0] ?? null) : null,
       elfKlInTausch: html.find("#elf-kl-in").prop("checked") ?? false,
       // Diagnostik / Display-Felder
@@ -583,7 +585,8 @@ function _calculateModificationsFromHTML(html, baseKosten, rep = "gildenmagisch"
     aspCost: result.finalAsP + varAsp,
     // Erleichterung neg = Erschwernis. Subtrahiere MR (mit Schelm-Reduktion),
     // Aufrechterhaltene Zauber und manuellen Mod von der Erleichterung.
-    erleichterung: result.erleichterung - extraMod - effectiveTargetMR - upkeepErschwernis - beschwAnrufungZuschlag + paktBonus,
+    // MR steckt bewusst NICHT hier drin — siehe oben.
+    erleichterung: result.erleichterung - extraMod - upkeepErschwernis - beschwAnrufungZuschlag + paktBonus,
     selections,
     selectedVariant,
     elfKlInTausch,
@@ -682,11 +685,25 @@ export async function castSpell(actor, spellData) {
   // Wirkung", der Gegner nahm keinen Schaden.
   const final = applyCrit(result, crit, effectiveZfw);
   let success = final.success;
-  const zfpStar = final.tapStar;
+
+  // WdZ S.30: Die Magieresistenz des Ziels wird von den ZfP* abgezogen. Bleibt
+  // nichts uebrig, hat das Ziel widerstanden — die Probe war trotzdem gelungen,
+  // also werden die vollen AsP faellig.
+  const zfpVorMR = final.tapStar;
+  const nachWiderstand = success
+    ? mrVerrechnen(zfpVorMR, effectiveTargetMR)
+    : { zfpStar: 0, widerstanden: false };
+  const zfpStar = nachWiderstand.zfpStar;
+  const widerstanden = nachWiderstand.widerstanden;
+  if (widerstanden) success = false;
+
   let resultLabel, resultClass;
 
   if (crit.patzer) {
     resultLabel = "PATZER! Spruchstörung!";
+    resultClass = "result-fail";
+  } else if (widerstanden) {
+    resultLabel = `WIDERSTANDEN — MR ${effectiveTargetMR} ≥ ZfP* ${zfpVorMR}`;
     resultClass = "result-fail";
   } else if (crit.meisterhaft) {
     resultLabel = "MEISTERHAFT! Volle Wirkung!";
@@ -783,8 +800,11 @@ export async function castSpell(actor, spellData) {
   // 6. AsP abziehen — Hexisch: 1/3 bei Misserfolg (WdZ S.310); sonst: Hälfte (WdZ S.14)
   //    null = variable Kosten → kein Abzug, GM macht das manuell
   const failDivisor = repC === "hexisch" ? 3 : 2;
+  // Widerstandener Zauber = gelungene Probe. Volle Kosten (WdZ S.30). Nur eine
+  // wirklich misslungene Probe kostet den Bruchteil.
+  const probeGelang = success || widerstanden;
   const actualCost = aspCost === null ? null
-    : success ? aspCost
+    : probeGelang ? aspCost
     : Math.ceil(aspCost / failDivisor);
   if (aspData && actualCost !== null) {
     await actor.update({ [aspData.path]: Math.max(0, currentAsP - actualCost) });

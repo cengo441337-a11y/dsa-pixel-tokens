@@ -15,7 +15,7 @@
  *   DSA Pandaemonium/
  */
 
-import { MODULE_ID } from "./config.mjs";
+import { MODULE_ID, nurSpielleitung } from "./config.mjs";
 
 // ─── Folder-Mapping-Tabellen ────────────────────────────────────────────────
 
@@ -216,7 +216,7 @@ export async function migrateActorFolders() {
 }
 
 // Globaler Helper — jederzeit manuell re-sortieren
-globalThis.DSASortiereActors = async () => {
+globalThis.DSASortiereActors = nurSpielleitung("DSASortiereActors", async () => {
   try { await game.settings.set(MODULE_ID, MIGRATION_FLAG_KEY, false); } catch {}
   let moved = 0;
   for (const actor of game.actors) {
@@ -227,7 +227,7 @@ globalThis.DSASortiereActors = async () => {
   ui.notifications.info(`[DSA Pixel] ${moved} Actor(s) neu einsortiert.`);
   try { await game.settings.set(MODULE_ID, MIGRATION_FLAG_KEY, true); } catch {}
   return moved;
-};
+});
 
 // ─── Duplikat-Entfernung ────────────────────────────────────────────────────
 
