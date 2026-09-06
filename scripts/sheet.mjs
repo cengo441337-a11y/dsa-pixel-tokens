@@ -23,6 +23,7 @@ function _getLepStatusFlags(actor) {
 }
 import { castSpell } from "./magic.mjs";
 import { aktiveBuffs } from "./liturgy-effects.mjs";
+import { aktiveZustaende, zustandsMalus, zustandsZeile } from "./zustaende.mjs";
 import { openDatabaseBrowser } from "./db-browser.mjs";
 
 /**
@@ -2359,7 +2360,12 @@ export class PixelArtCharacterSheet extends ActorSheet {
     if (mod === null) return;
 
     // Gesamtmodifikator = User-Mod + automatischer BE-Malus + Wund-Penalty
-    const totalMod = mod + bePenalty + wp;
+    // Zustaende (Schmerz, Betaeubung, Furcht ...) schlagen auf die Probe durch.
+    // Vorher musste der Spieler den Abzug bei jeder einzelnen Probe von Hand
+    // in das Modifikator-Feld tippen.
+    const zustaende = aktiveZustaende(this.actor);
+    const zMalus = zustandsMalus(zustaende, { attribute: probeAttrs });
+    const totalMod = mod + bePenalty + wp + zMalus;
 
     const roll = new Roll("3d20");
     await roll.evaluate();
@@ -2436,6 +2442,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       <div class="chat-title">${name}</div>
       <div class="dice-row">${diceHtml}</div>
       <div class="result-line ${resultClass}">${resultText}</div>
+      ${zustandsZeile(zustaende, zMalus)}
       ${bestanden ? `<div class="tap-star">TaP*: <span>${tapStar}</span></div>${tapBreakdown}` : tapBreakdown}
       ${modLine}
     </div>`;
@@ -2549,7 +2556,10 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const zonePenalty = targetZone ? (PixelArtCharacterSheet.ZONE_PENALTIES[targetZone] ?? 0) : 0;
     // Aktiv geführte Waffe für Funktion-basierte atBase (z.B. Stumpfer Schlag)
     const _activeWeapon = this.actor.items?.find(i => i.system?.kampftalent === talent || i.name?.toLowerCase().includes(talent.toLowerCase()));
-    const effectiveAT = at + getAtBase(sf, _activeWeapon) - ansage - mod - zonePenalty;
+    // Zustaende wirken auch auf Kampfwuerfe — dieselbe Tabelle, anderer Zweig.
+    const zustaendeAT = aktiveZustaende(this.actor);
+    const zMalusAT = zustandsMalus(zustaendeAT, { kampf: true });
+    const effectiveAT = at + getAtBase(sf, _activeWeapon) - ansage - mod - zonePenalty - zMalusAT;
 
     // ── Erster Wurf ──────────────────────────────────────────────────
     const roll = new Roll("1d20");
@@ -2731,6 +2741,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
     if (ansage > 0) modParts.push(`Ansage −${ansage}`);
     if (mod !== 0)  modParts.push(`Mod ${mod >= 0 ? "+" : ""}${mod}`);
     if (zonePenalty > 0) modParts.push(`Zone −${zonePenalty}`);
+    if (zMalusAT > 0) modParts.push(`Zustände −${zMalusAT}`);
     const modLine = modParts.length
       ? `<div class="dsa-mod-hint">${modParts.join(" · ")} · Ziel ${effectiveAT}</div>`
       : "";
@@ -2958,7 +2969,9 @@ export class PixelArtCharacterSheet extends ActorSheet {
       return;
     }
 
-    const effectivePA = pa - paAnsage + getAtBase(sfPA);
+    const zustaendePA = aktiveZustaende(this.actor);
+    const zMalusPA = zustandsMalus(zustaendePA, { kampf: true });
+    const effectivePA = pa - paAnsage + getAtBase(sfPA) - zMalusPA;
 
     const roll = new Roll("1d20");
     await roll.evaluate();

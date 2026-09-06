@@ -233,6 +233,42 @@ for (const datei of dateienSuchen(join(wurzel, "scripts"), [".mjs"])) {
   });
 }
 
+// ── Prüfung 8: ist es auch verdrahtet? ──────────────────────────────────────
+// "Gebaut und getestet" heisst nicht "wird benutzt". Diese Tabelle hält fest,
+// welche Bausteine an welcher Stelle tatsächlich aufgerufen werden müssen. Ein
+// grüner Testlauf über eine Funktion, die niemand ruft, beweist nichts.
+// Rot machen: einen der Aufrufe unten aus der Zieldatei entfernen.
+const VERDRAHTUNG = [
+  { was: "registerZustaende", datei: "scripts/module.mjs",
+    warum: "sonst gibt es die Zustandsverwaltung im Spiel nicht" },
+  { was: "zustandsMalus", datei: "scripts/sheet.mjs",
+    warum: "sonst wirken Zustände auf keine Probe" },
+  { was: "aktiveBuffs", datei: "scripts/sheet.mjs",
+    warum: "sonst bleiben Liturgie-Segen wieder wirkungslos" },
+  { was: "applyCrit", datei: "scripts/magic.mjs",
+    warum: "sonst rechnet der Zauber wieder mit ZfP* 0 bei glücklichem Wurf" },
+  { was: "mrVerrechnen", datei: "scripts/magic.mjs",
+    warum: "sonst wird die Magieresistenz wieder als Probenerschwernis verrechnet" },
+  { was: "abgelaufeneEffekteEntfernen", datei: "scripts/persistent-effects.mjs",
+    warum: "sonst laufen anhaltende Effekte nie ab" },
+  { was: "calcIniPenalty", datei: "scripts/combat.mjs",
+    warum: "sonst rechnet die Kampfleiste den Rüstungsmalus wieder eigenständig" },
+  { was: "tpFormelZuWuerfeln", datei: "scripts/combat.mjs",
+    warum: "sonst entsteht wieder ein 66-seitiger Würfel aus 2W6" },
+  { was: "relayActorUpdate", datei: "scripts/pixel-tokens.mjs",
+    warum: "sonst bricht Zonenschaden beim ersten fremden Token ab" },
+];
+for (const eintrag of VERDRAHTUNG) {
+  const pfad = join(wurzel, eintrag.datei);
+  let inhalt;
+  try { inhalt = kommentareLeeren(readFileSync(pfad, "utf8")); }
+  catch { befunde.push(`${eintrag.datei} fehlt — ${eintrag.was} kann dort nicht aufgerufen werden.`); continue; }
+  const aufruf = new RegExp(`\\b${eintrag.was}\\s*\\(`);
+  if (!aufruf.test(inhalt)) {
+    befunde.push(`${eintrag.datei} ruft "${eintrag.was}" nicht auf — ${eintrag.warum}.`);
+  }
+}
+
 // ── Ergebnis ────────────────────────────────────────────────────────────────
 // Die Ergebniszeile nennt IMMER eine Zahl, damit ein Aufrufer nicht nur am
 // Rückgabewert hängt, sondern im Protokoll sieht, wie viel geprüft wurde.
