@@ -5,7 +5,7 @@
  * Quellen: Wege der Zauberei S.166-168
  */
 
-import { MODULE_ID } from "./config.mjs";
+import { MODULE_ID, dsaChat } from "./config.mjs";
 
 const RITUALE_DEFS = {
   "weihe-der-keule":   { name: "Weihe der Keule", vor: "—", kosten: "Mondmonat-Zyklus", beschreibung: "Pflicht-Ritual. Voraussetzung für alle weiteren Keulen-Rituale. Zeremonie von Neumond zu Neumond." },
@@ -169,7 +169,7 @@ export class KeulenManagerApp extends Application {
       const flags = foundry.utils.deepClone(keule.flags[MODULE_ID] || {});
       flags.LOcurrent = Math.max(0, (flags.LOcurrent ?? flags.LO ?? 0) - 1);
       await keule.update({ [`flags.${MODULE_ID}`]: flags });
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="dsa-pixel-chat">
           <div class="chat-title">🦴 Geist der Keule wirkt</div>

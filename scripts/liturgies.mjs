@@ -13,7 +13,7 @@
  *   - Wirkungsdauer-Tabelle nach Stufe (1=augenbl.) … 10=permanent
  */
 
-import { MODULE_ID, resolveProbe, checkCritical } from "./config.mjs";
+import { MODULE_ID, resolveProbe, checkCritical, applyCrit, dsaChat } from "./config.mjs";
 
 let LITURGIEN = null;
 let LITURGIEN_META = null;
@@ -150,7 +150,7 @@ export async function regenerateKaP(actor, modus = "meditation", opts = {}) {
   const actuallyGained = newKaP - kap.current;
   await setActorKaP(actor, newKaP);
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">🙏 Karma-Regeneration — ${label}</div>
@@ -333,8 +333,10 @@ export async function rollMirakel(actor, modKey = "mirakelPlus") {
   const dice = roll.terms[0].results.map(r => r.result);
   const result = resolveProbe(dice, attrs, lkw, mod);
   const crit = checkCritical(dice);
-  const erfolg = crit.gluecklich || (!crit.patzer && result.success);
-  const lkpStar = erfolg ? Math.max(1, result.tapStar) : 0;
+  // Probe und Kritischer zentral verrechnen — siehe config.mjs::applyCrit.
+  const endergebnis = applyCrit(result, crit, lkw);
+  const erfolg  = endergebnis.success;
+  const lkpStar = endergebnis.tapStar;
   const aspNeu = erfolg ? Math.max(0, kap.current - cost) : Math.max(0, kap.current - 1);
   await setActorKaP(actor, aspNeu);
 
@@ -385,7 +387,7 @@ export async function rollMirakel(actor, modKey = "mirakelPlus") {
     }
   </div>`;
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor }),
     content: html,
     rolls: [roll],
@@ -631,8 +633,10 @@ export async function castLiturgie(actor, liturgieId) {
             const result = resolveProbe(dice, attrs, lkw, totalMod);
             const crit   = checkCritical(dice);
 
-            const erfolg = crit.gluecklich || (!crit.patzer && result.success);
-            const lkpStar = erfolg ? Math.max(1, result.tapStar) : 0;
+            // Probe und Kritischer zentral verrechnen — config.mjs::applyCrit.
+            const endergebnis = applyCrit(result, crit, lkw);
+            const erfolg  = endergebnis.success;
+            const lkpStar = endergebnis.tapStar;
 
             // KaP abziehen
             let aspNeu = kap.current;
@@ -706,7 +710,7 @@ export async function castLiturgie(actor, liturgieId) {
               }
             </div>`;
 
-            ChatMessage.create({
+            dsaChat({
               speaker: ChatMessage.getSpeaker({ actor }),
               content: html2,
               rolls: [roll],

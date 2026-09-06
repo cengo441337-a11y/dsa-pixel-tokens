@@ -1,4 +1,5 @@
-/**
+
+import { dsaChat } from "./config.mjs";/**
  * GARDIANUM — Zauberschild nach Liber Cantiones Remastered S.97-98
  *
  * Grund-Gardianum:
@@ -115,7 +116,7 @@ export async function castGardianum(caster, { variant = "base", aspInvest = 3, z
     persoenlich:  "Persoenlicher Schild",
   }[variant] ?? variant;
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor: caster }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">🛡 ${spellName} — ${variantLabel}</div>
@@ -273,7 +274,7 @@ Hooks.on("updateCombat", async (combat, changed) => {
       if (flag.templateId && canvas.scene) {
         try { await canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", [flag.templateId]); } catch {}
       }
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor }),
         content: `<div class="dsa-pixel-chat"><div class="chat-title">🛡 Gardianum von ${actor.name}</div>
           <div style="text-align:center;color:#888">⏳ Wirkungsdauer abgelaufen (1 Spielrunde)</div></div>`,
@@ -421,7 +422,7 @@ class GardianumPanel extends Application {
       }
       console.log("[Gardianum] UNSET via panel-drop button for", a.name);
       await a.unsetFlag(MOD, FLAG);
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor: a }),
         content: `<div class="dsa-pixel-chat"><div class="chat-title">🛡 Gardianum aufgeloest</div>
           <div style="text-align:center;color:#888;font-size:12px">${a.name} hat den Zauber manuell aufgeloest</div></div>`,

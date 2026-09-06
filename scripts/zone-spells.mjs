@@ -13,7 +13,7 @@
  *  - Auto-Despawn nach Wirkungsdauer
  */
 
-import { MODULE_ID, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, relayActorUpdate } from "./config.mjs";
+import { MODULE_ID, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, relayActorUpdate, dsaChat } from "./config.mjs";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -277,7 +277,7 @@ async function _endZoneSpell(templateId) {
 
   await canvas.scene.deleteEmbeddedDocuments("MeasuredTemplate", [templateId]);
 
-  ChatMessage.create({
+  dsaChat({
     content: `<div class="dsa-pixel-chat"><div class="chat-title">🛑 ${meta?.spellName ?? "Zauber"} aufgeloest</div>
       <div class="result-line result-success">Die Zone loest sich auf.</div></div>`,
   });
@@ -353,7 +353,7 @@ export async function castFesselranken(caster, spellData, zfpStar, options = {})
     initialLine = `<div style="color:#e94560">🌹 Dornen: ${sp} SP initial</div>`;
   }
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor: caster }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">🌿 FESSELRANKEN auf ${target.name}</div>
@@ -387,7 +387,7 @@ async function _fesselAutoTick(actor) {
 
   if (state.remainingRounds <= 0) {
     await actor.unsetFlag(MODULE_ID, FLAG_FESSEL);
-    ChatMessage.create({
+    dsaChat({
       speaker: ChatMessage.getSpeaker({ actor }),
       content: `<div class="dsa-pixel-chat"><div class="chat-title">🌿 FESSELRANKEN loest sich auf</div>
         <div class="result-line result-success">${actor.name} ist frei.</div></div>`,
@@ -411,7 +411,7 @@ globalThis.DSAFesselKK = async () => {
   const success = r.total <= target;
   if (success) await actor.unsetFlag(MODULE_ID, FLAG_FESSEL);
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">💪 KK-Probe (FESSELRANKEN)</div>
@@ -455,7 +455,7 @@ export async function castAugeDesLimbus(caster, spellData, zfpStar, options = {}
   _openPanel(template.id);
   _startZoneVFX(template, "planastral");
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor: caster }),
     content: `<div class="dsa-pixel-chat" style="border:2px solid #6b5b95">
       <div class="chat-title" style="color:#8b6bd9">👁 AUGE DES LIMBUS</div>
@@ -486,7 +486,7 @@ async function _aolRound(template, meta) {
       const schaden = Math.floor(meta.aspInvested / 2);
       const cur = actor.system?.LeP?.value ?? 0;
       await relayActorUpdate(actor, { "system.LeP.value": Math.max(0, cur - schaden) });
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor }),
         content: `<div class="dsa-pixel-chat">
           <div class="chat-title">👁 ${actor.name} im Zentrum!</div>
@@ -518,7 +518,7 @@ async function _aolRound(template, meta) {
       dragLine = `<div style="color:#4caf50">✓ KK ${r.total}≤${target} · haelt stand</div>`;
     }
 
-    ChatMessage.create({
+    dsaChat({
       speaker: ChatMessage.getSpeaker({ actor }),
       content: `<div class="dsa-pixel-chat">
         <div class="chat-title">👁 Sog (Auge des Limbus) — ${actor.name}</div>
@@ -550,7 +550,7 @@ async function _aolPullCheck(templateId) {
   const r = new Roll("1d20"); await r.evaluate();
   const success = r.total <= target;
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">👁 KK-Probe (Auge des Limbus) — ${actor.name}</div>
@@ -592,7 +592,7 @@ export async function castSumpfstrudel(caster, spellData, zfpStar, options = {})
   _openPanel(template.id);
   _startZoneVFX(template, "fesselranken");
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor: caster }),
     content: `<div class="dsa-pixel-chat" style="border:2px solid #4a7c2a">
       <div class="chat-title" style="color:#6bba3a">🌊 SUMPFSTRUDEL</div>
@@ -620,7 +620,7 @@ async function _sumpfRound(template, meta) {
       const sp = Math.max(0, r.total - rs);
       const cur = actor.system?.LeP?.value ?? 0;
       await relayActorUpdate(actor, { "system.LeP.value": Math.max(0, cur - sp) });
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor }),
         content: `<div class="dsa-pixel-chat"><div class="chat-title">🌊 Erdranken greifen ${actor.name}</div>
           <div class="result-line result-fail">${r.total} TP − ${rs} RS = ${sp} SP</div></div>`,
@@ -669,7 +669,7 @@ async function _sumpfFreeCheck(templateId) {
   }
 
   // 3W20-Probe via resolveProbe (Variante A — TaW vor Probe um Erschwernis reduziert)
-  const { resolveProbe } = await import("./config.mjs");
+  const { resolveProbe, checkCritical, applyCrit } = await import("./config.mjs");
   const dice = [
     (await new Roll("1d20").evaluate()).total,
     (await new Roll("1d20").evaluate()).total,
@@ -677,8 +677,12 @@ async function _sumpfFreeCheck(templateId) {
   ];
   const attrs = probeAttrs.map(a => Number(actor.system?.[a]?.value ?? 10));
   const result = resolveProbe(dice, attrs, taw, meta.tapErschwernis ?? 0);
-  const tap = result.tapStar;
-  const success = result.success;
+  // Bis v0.7.18 wertete die Befreiungsprobe Patzer und gluecklichen Wurf gar
+  // nicht aus: zwei Zwanzigen zaehlten wie ein gewoehnlicher Fehlschlag.
+  const crit = checkCritical(dice);
+  const endergebnis = applyCrit(result, crit, taw);
+  const tap = endergebnis.tapStar;
+  const success = endergebnis.success;
   const [d1, d2, d3] = dice;
 
   // 1W6 SP(A) — Ausdauer
@@ -701,7 +705,7 @@ async function _sumpfFreeCheck(templateId) {
 
   const erstickung = newAuP === 0 ? `<div style="color:#ff0000;font-weight:bold">☠ AuP auf 0 — Erstickung beginnt!</div>` : "";
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">🌊 Befreiungs-Probe (Sumpfstrudel) — ${actor.name}</div>

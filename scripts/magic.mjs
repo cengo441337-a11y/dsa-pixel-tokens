@@ -3,7 +3,7 @@
  * Zauberprobe mit Spontanmodifikationen, AsP-Berechnung, Zone-Markierung
  */
 
-import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, applyCrit, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, BESCHWOERUNG_MISSLINGEN, BEHERRSCHUNG_MISSLINGEN, rollBeschwoerungMisslingen, relayActorUpdate, relayTokenUpdate, broadcastVFX, getLepStatus } from "./config.mjs";
+import { MODULE_ID, SPELL_MODIFICATIONS, resolveProbe, checkCritical, applyCrit, calculateModifications, lookupSpellEffect, resolveActorAsP, SPELL_DAMAGE_MAP, rollSpellDamage, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, BESCHWOERUNG_MISSLINGEN, BEHERRSCHUNG_MISSLINGEN, rollBeschwoerungMisslingen, relayActorUpdate, relayTokenUpdate, broadcastVFX, getLepStatus, dsaChat, dsaFlags } from "./config.mjs";
 
 /** Helper: LeP-Status-Flags eines Aktors lesen (Eisern, Zäher Hund, Selbstbeherrschung). */
 function _getLepStatusFlags(actor) {
@@ -907,6 +907,14 @@ export async function castSpell(actor, spellData) {
   await roll.toMessage({
     speaker: ChatMessage.getSpeaker({ actor }),
     flavor,
+    // Ergebnis maschinenlesbar mitgeben statt es aus dem Chattext erraten zu lassen.
+    ...dsaFlags({
+      success,
+      critical: crit.gluecklich || crit.meisterhaft,
+      fumble: crit.patzer,
+      type: "spell",
+      spellName: spellData.name,
+    }),
   });
 
   // 9. VFX auto-trigger (SPELL_EFFECT_MAP → Varianten → Keyword-Fallback)
@@ -1194,7 +1202,7 @@ async function _applySpellDamage(caster, spellData, damageInfo, alreadyPaidAsP, 
 
   const aspNote = extraAsP > 0 ? `<div style="color:#4a90d9;font-size:12px">−${extraAsP} AsP (zusaetzlich)</div>` : "";
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor: caster }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">⚡ ${spellData.name} — Schaden</div>
@@ -1442,7 +1450,7 @@ async function _applyAoESpellDamage(caster, spellData, damageInfo, alreadyPaidAs
   // Note: Diese sind im aspCost-String, muss manuell gehandhabt werden
   // → wird im Chat als Hinweis angezeigt
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor: caster }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">⚡ ${spellData.name} — Flächenschaden</div>

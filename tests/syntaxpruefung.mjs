@@ -217,6 +217,22 @@ for (const datei of dateienSuchen(join(wurzel, "scripts"), [".mjs"])) {
   befunde.push(...unbekannteNamenFinden(datei, relative(wurzel, datei)));
 }
 
+// ── Prüfung 7: Chat-Nachrichten nur über dsaChat() ──────────────────────────
+// Eine Nachricht ohne Kennfeld des Moduls wird von dice-hooks.mjs als fremde
+// Nachricht behandelt: das Ergebnis wird aus dem Text erraten und der Effekt
+// ein zweites Mal ausgelöst. Bis v0.7.18 galt das für alle 43 eigenen
+// Nachrichten. Wer eine neue schreibt, soll nicht daran denken müssen.
+// Rot machen: irgendwo ChatMessage.create({ … }) direkt aufrufen.
+for (const datei of dateienSuchen(join(wurzel, "scripts"), [".mjs"])) {
+  if (datei.endsWith("config.mjs")) continue; // dort steht dsaChat selbst
+  const zeilen = kommentareLeeren(readFileSync(datei, "utf8")).split("\n");
+  zeilen.forEach((zeile, i) => {
+    if (/\bChatMessage\.create\s*\(/.test(zeile)) {
+      befunde.push(`${relative(wurzel, datei)}:${i + 1} — ChatMessage.create direkt aufgerufen; dsaChat() aus config.mjs benutzen, sonst löst dice-hooks den Effekt doppelt aus.`);
+    }
+  });
+}
+
 // ── Ergebnis ────────────────────────────────────────────────────────────────
 // Die Ergebniszeile nennt IMMER eine Zahl, damit ein Aufrufer nicht nur am
 // Rückgabewert hängt, sondern im Protokoll sieht, wie viel geprüft wurde.

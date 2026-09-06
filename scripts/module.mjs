@@ -3,7 +3,7 @@
  * Registriert Sheet-Override, Hooks, und lädt Datenbanken
  */
 
-import { MODULE_ID, registerGmRelay } from "./config.mjs";
+import { MODULE_ID, registerGmRelay, dsaChat } from "./config.mjs";
 import { PixelArtCharacterSheet } from "./sheet.mjs";
 import { registerDiceHooks } from "./dice-hooks.mjs";
 import { registerCombatHooks, rollPassierschlag } from "./combat.mjs";
@@ -518,7 +518,7 @@ async function _autoSetupTavernScenes() {
   await _createTavernScene("big");
   try { await game.settings.set(MODULE_ID, TAVERN_SETUP_FLAG, true); } catch {}
 
-  ChatMessage.create({
+  dsaChat({
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">🏰 Taverne-Szenen erstellt</div>
       <div class="result-line result-success">Beide Taverne-Szenen sind im Scene-Tab verfuegbar!</div>
@@ -655,7 +655,7 @@ async function _checkRecommendedModules() {
     return `<li><strong>${id}</strong>${reason}</li>`;
   }).join("");
 
-  ChatMessage.create({
+  dsaChat({
     whisper: [game.user.id],
     content: `<div class="dsa-pixel-chat" style="border:1px solid #c09040">
       <div class="chat-title" style="color:#c09040">📦 Empfohlene Module</div>

@@ -3,7 +3,7 @@
  * Überschreibt das gdsa Standard-Sheet mit Pixel-Art Theme
  */
 
-import { MODULE_ID, ATTRIBUTES, DERIVED_FORMULAS, RACE_GS, SPELL_EFFECT_MAP, COMBAT_MANEUVERS, resolveProbe, checkCritical, resolveActorAsP, lookupSpellEffect, parseAspCost, ALL_ZONES, ZONE_LABELS, ZONE_KEY_MAP, HIT_ZONE_TABLE, parseBeFormula, getRuestungsgewoehnung, calcIniPenalty, getWoundThresholds, SF_MR_BONUSES, relayActorUpdate, relayTokenUpdate, broadcastVFX, getLepStatus } from "./config.mjs";
+import { MODULE_ID, ATTRIBUTES, DERIVED_FORMULAS, RACE_GS, SPELL_EFFECT_MAP, COMBAT_MANEUVERS, resolveProbe, checkCritical, applyCrit, resolveActorAsP, lookupSpellEffect, parseAspCost, ALL_ZONES, ZONE_LABELS, ZONE_KEY_MAP, HIT_ZONE_TABLE, parseBeFormula, getRuestungsgewoehnung, calcIniPenalty, getWoundThresholds, SF_MR_BONUSES, relayActorUpdate, relayTokenUpdate, broadcastVFX, getLepStatus, tpFormelZuWuerfeln, dsaChat, dsaFlags } from "./config.mjs";
 
 /**
  * Helper: Liest Vorteile/SF und liefert die LeP-Status-Flags für getLepStatus.
@@ -650,7 +650,13 @@ export class PixelArtCharacterSheet extends ActorSheet {
       let at = aktivierungsPflichtig ? 0
         : explicitAt ? Number(data.atk)
         : isRanged   ? fkBase + taw + wmAt
-        :              atBase + Math.floor(taw / 2) + wmAt;
+        // Der Talentwert wird auf AT und PA VERTEILT — die Summe der beiden
+        // Anteile muss also den TaW ergeben. Beide Seiten abzurunden liess bei
+        // jedem ungeraden TaW einen Punkt verfallen (TaW 7 → 3 + 3 statt 4 + 3).
+        // Der Rest geht an die Attacke; wer anders verteilen will, traegt AT und
+        // PA direkt ein (explicitAt/explicitPa) — das kommt so auch aus der
+        // Helden-Software.
+        :              atBase + Math.ceil(taw / 2) + wmAt;
 
       const explicitPa = data.def !== "" && data.def != null && Number(data.def) > 0;
       let pa;
@@ -1220,7 +1226,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
     html.find(".wound-reset-btn").on("click", async (e) => {
       e.preventDefault();
       await this.actor.setFlag("dsa-pixel-tokens", "wounds", {});
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="dsa-pixel-chat"><div class="chat-title">✚ Wunden geheilt</div>
           <div class="result-line result-success">Alle Wunden vollständig geheilt.</div></div>`,
@@ -1542,7 +1548,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       await roll.evaluate();
       const newAuP = Math.min(sys.AuP.max, (sys.AuP.value ?? 0) + roll.total);
       await this.actor.update({ "system.AuP.value": newAuP });
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="dsa-pixel-chat">
           <div class="chat-title">⏸ Kurze Rast</div>
@@ -1677,7 +1683,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
                         : schlafWahl === "kein" ? "💤 Wache / kein Schlaf" : "🌙 Nachtschlaf";
 
       await this.actor.update(updates);
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="dsa-pixel-chat"><div class="chat-title">${schlafTitel}</div>${chatLines}</div>`,
       });
@@ -1897,7 +1903,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       const titleIcon = (hasAsp && hasKap) ? "🧘🙏" : hasKap ? "🙏" : "🧘";
       const titleName = (hasAsp && hasKap) ? "Meditation (AsP + KaP)"
                       : hasKap ? "Karmale Meditation" : "Astrale Meditation";
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="dsa-pixel-chat">
           <div class="chat-title">${titleIcon} ${titleName}</div>
@@ -1914,7 +1920,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       if (sys.AsP?.max) updates["system.AsP.value"] = sys.AsP.max;
       if (sys.KaP?.max) updates["system.KaP.value"] = sys.KaP.max;
       await this.actor.update(updates);
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="dsa-pixel-chat"><div class="chat-title">★ Vollständige Regeneration</div>
           <div class="result-line result-crit">Alle Ressourcen vollständig wiederhergestellt!</div></div>`,
@@ -1942,7 +1948,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const aktuell = this.actor.getFlag("dsa-pixel-tokens", "eisernerWilleAktiv") === true;
     if (aktuell) {
       await this.actor.unsetFlag("dsa-pixel-tokens", "eisernerWilleAktiv");
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="dsa-pixel-chat"><div class="chat-title">⚔ Eiserner Wille DEAKTIVIERT</div>
           <div class="result-line">Bonus-MR fällt weg. Konzentrations-Penalty entfällt.</div></div>`,
@@ -1954,7 +1960,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       await this.actor.update({ "system.AuP.value": Math.max(0, aupCurrent - 1) });
       const stufe = sfList.includes("Eiserner Wille II") ? "II (+7 MR)" : "I (+3 MR)";
       const muHalf = Math.floor((this.actor.system?.MU?.value ?? 10) / 2);
-      ChatMessage.create({
+      dsaChat({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="dsa-pixel-chat"><div class="chat-title">⚔ Eiserner Wille ${stufe} AKTIVIERT</div>
           <div class="result-line result-success">Wirkungsdauer: ${muHalf} Spielrunden (MU/2)</div>
@@ -2095,7 +2101,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
         <div style="font-size:11px;color:#888;margin-top:2px">Ziel ${target} (${value}${mod > 0 ? ` −${mod}` : mod < 0 ? ` +${-mod}` : ""}${wp ? ` −${wp} Wunden` : ""})</div>
       </div>
     </div>`;
-    roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this.actor }), flavor });
+    roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this.actor }), flavor, ...dsaFlags() });
   }
 
   // ─── Initiative-Probe (1W6 + INI-Basis) ──────────────────────────────
@@ -2156,7 +2162,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       </div>
     </div>`;
 
-    roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this.actor }), flavor });
+    roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this.actor }), flavor, ...dsaFlags() });
   }
 
   // ─── Eigenschaftsprobe (1W20) ─────────────────────────────────────────
@@ -2197,6 +2203,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
     roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       flavor,
+      ...dsaFlags(),
     });
 
     // VFX
@@ -2250,7 +2257,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       ? `<div class="dsa-mod-hint">Wert ${value}${mod >= 0 ? " +" : " "}${mod} = Ziel ${target}</div>`
       : `<div class="dsa-mod-hint">Ziel ${value}</div>`;
 
-    ChatMessage.create({
+    dsaChat({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: `<div class="dsa-pixel-chat">
         <div class="chat-title">⚠ ${name} (Schlechte Eigenschaft)</div>
@@ -2334,14 +2341,25 @@ export class PixelArtCharacterSheet extends ActorSheet {
       return `<div class="die ${cls}" title="${probeAttrs[i] ?? "?"} ${attr}">${d}</div>`;
     }).join("");
 
+    // Probe und Kritischer zentral verrechnen (config.mjs::applyCrit). Vorher
+    // stand hier eine eigene Fassung: bei einem gluecklichen Wurf meldete der
+    // Chat "GLUECKLICH!", zeigte aber keine TaP*, weil weiter unten stur
+    // result.success abgefragt wurde — und das war rechnerisch falsch.
+    const endergebnis = applyCrit(result, crit, taw);
+    const bestanden   = endergebnis.success;
+    const tapStar     = endergebnis.tapStar;
+
     let resultText, resultClass;
     if (crit.patzer) {
-      resultText = "PATZER!";
+      resultText = crit.schwererPatzer ? "SCHWERER PATZER!" : "PATZER!";
       resultClass = "result-fail";
+    } else if (crit.meisterhaft) {
+      resultText = "MEISTERHAFT!";
+      resultClass = "result-crit";
     } else if (crit.gluecklich) {
       resultText = "GLÜCKLICH!";
       resultClass = "result-crit";
-    } else if (result.success) {
+    } else if (bestanden) {
       resultText = "Bestanden";
       resultClass = "result-success";
     } else {
@@ -2362,9 +2380,9 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // Misserfolg: zeige um wieviel verfehlt (remainder ist negativ)
     const overSum = (result.details ?? []).reduce((s, d) => s + (d.consumed || 0), 0);
     let tapBreakdown = "";
-    if (result.success && totalMod !== 0) {
-      tapBreakdown = `<div style="text-align:center;font-size:10px;color:#779;margin-top:-4px">TaW ${taw} − ${totalMod} (Erschw.) − ${overSum} (über) = ${result.tapStar}</div>`;
-    } else if (!result.success && !crit.patzer && !crit.gluecklich) {
+    if (bestanden && totalMod !== 0) {
+      tapBreakdown = `<div style="text-align:center;font-size:10px;color:#779;margin-top:-4px">TaW ${taw} − ${totalMod} (Erschw.) − ${overSum} (über) = ${tapStar}</div>`;
+    } else if (!bestanden && !crit.patzer && !crit.gluecklich) {
       // Misslungen: zeige fehlende Punkte
       const missing = -result.remainder;
       const breakdownLine = totalMod !== 0
@@ -2378,13 +2396,21 @@ export class PixelArtCharacterSheet extends ActorSheet {
       <div class="chat-title">${name}</div>
       <div class="dice-row">${diceHtml}</div>
       <div class="result-line ${resultClass}">${resultText}</div>
-      ${result.success ? `<div class="tap-star">TaP*: <span>${result.tapStar}</span></div>${tapBreakdown}` : tapBreakdown}
+      ${bestanden ? `<div class="tap-star">TaP*: <span>${tapStar}</span></div>${tapBreakdown}` : tapBreakdown}
       ${modLine}
     </div>`;
 
     roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       flavor,
+      // Das Ergebnis maschinenlesbar mitgeben, damit dice-hooks.mjs es nicht aus
+      // dem Chattext erraten muss — und den Effekt nicht ein zweites Mal auslöst.
+      ...dsaFlags({
+        success: bestanden,
+        critical: crit.gluecklich || crit.meisterhaft,
+        fumble: crit.patzer,
+        type: "probe",
+      }),
     });
 
     // VFX
@@ -2409,14 +2435,10 @@ export class PixelArtCharacterSheet extends ActorSheet {
     "Wurfbeile","Wurfmesser","Wurfspeere"
   ]);
 
-  // DSA 4.1 Trefferzone (W20)
-  static ZONE_TABLE = [
-    "", "Kopf","Kopf","Kopf",
-    "Brust","Brust","Brust","Brust","Brust",
-    "Bauch","Bauch","Bauch","Bauch",
-    "r. Arm","r. Arm","l. Arm","l. Arm",
-    "r. Bein","r. Bein","l. Bein","l. Bein"
-  ];
+  // Die frühere Trefferzonen-Tabelle stand hier ein zweites Mal und wich von
+  // HIT_ZONE_TABLE in config.mjs ab (Kopf 15 % statt 10 %, andere Zuordnung).
+  // Es gibt jetzt nur noch die eine in config.mjs, weil Zonenrüstung und
+  // Wundenverwaltung ohnehin mit deren Schlüsseln arbeiten.
 
   // AT-Erschwernis für gezielte Angriffe
   static ZONE_PENALTIES = {
@@ -2509,16 +2531,24 @@ export class PixelArtCharacterSheet extends ActorSheet {
     }
 
     // ── Trefferzone ──────────────────────────────────────────────────
+    // Gewürfelt wird gegen HIT_ZONE_TABLE aus config.mjs — dieselbe Tabelle,
+    // mit der auch Zonenrüstung und Wunden rechnen. Die frühere zweite Tabelle
+    // (ZONE_TABLE im Sheet) wich davon ab und ist entfallen; der Schadenswurf
+    // übernimmt jetzt die hier ermittelte Zone, statt eine eigene zu würfeln.
+    // `hitZoneKey` ist der technische Schlüssel (kopf, lArm, …), `hitZone` das,
+    // was im Chat steht.
     const hit = (success && !fumble) || confirmedCrit;
+    let hitZoneKey = null;
     let hitZone = null;
     if (hit) {
       if (targetZone) {
-        hitZone = targetZone; // Gezielter Angriff: Zone gesetzt
+        hitZoneKey = ZONE_KEY_MAP[targetZone] ?? targetZone; // Gezielter Angriff
       } else {
         const zoneRoll = new Roll("1d20");
         await zoneRoll.evaluate();
-        hitZone = PixelArtCharacterSheet.ZONE_TABLE[zoneRoll.total];
+        hitZoneKey = HIT_ZONE_TABLE[zoneRoll.total] ?? "brust";
       }
+      hitZone = ZONE_LABELS[hitZoneKey] ?? hitZoneKey;
     }
 
     // ── Patzer-Tabelle ───────────────────────────────────────────────
@@ -2563,7 +2593,9 @@ export class PixelArtCharacterSheet extends ActorSheet {
         case "gezielter_stich": {
           // WdS S.65: −4 AT, halber gegnerischer RS, Wundschwelle −2,
           // auto +1 Wunde, RS komplett ignoriert (TP=SP).
-          _pendingTpBonus.set(this.actor.id, { bonus: 0, label: "Gezielter Stich", ignoreRS: true, autoWounds: 1, reduceWS: 2 });
+          // WdS S.62: Gezielter Stich ignoriert ZWEI Punkte Ruestungsschutz, nicht
+          // den gesamten. `true` liess unten den kompletten RS auf 0 fallen.
+          _pendingTpBonus.set(this.actor.id, { bonus: 0, label: "Gezielter Stich", ignoreRS: 2, autoWounds: 1, reduceWS: 2 });
           maneuverLine = `<div class="dsa-maneuver-effect" style="color:#e94560">🎯 Gezielter Stich: RS ignoriert, WS−2, auto +1 Wunde! → nächster Schadenswurf</div>`;
           break;
         }
@@ -2618,6 +2650,14 @@ export class PixelArtCharacterSheet extends ActorSheet {
       }
     }
 
+    // Die getroffene Zone an den Schadenswurf weiterreichen. Das passiert hier
+    // und nicht im Manöver-Zweig darüber, weil ein ganz normaler Angriff ohne
+    // Manöver sonst leer ausginge — und genau der ist der Regelfall.
+    if (hit && hitZoneKey) {
+      const bisher = _pendingTpBonus.get(this.actor.id) ?? {};
+      _pendingTpBonus.set(this.actor.id, { ...bisher, hitZone: hitZoneKey });
+    }
+
     // Passierschlag-Button bei fehlgeschlagenem Manöver (Sturmangriff/Todestoß)
     const failed = !hit || confirmedFumble;
     let passierschlagBtn = "";
@@ -2660,8 +2700,10 @@ export class PixelArtCharacterSheet extends ActorSheet {
       : "";
     // Zonen-RS des Ziels ermitteln (falls Ziel selektiert)
     let zoneRSHint = "";
-    if (hitZone) {
-      const zoneKey = ZONE_KEY_MAP[hitZone];
+    if (hitZoneKey) {
+      // Direkt den Schlüssel benutzen. Ein Umweg über ZONE_KEY_MAP schlüge hier
+      // fehl, weil dort "l. Arm" steht, die Anzeige aber "L. Arm" liefert.
+      const zoneKey = hitZoneKey;
       if (zoneKey) {
         const tgtActor = [...game.user.targets][0]?.actor;
         if (tgtActor) {
@@ -2713,7 +2755,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       </div>`;
     }
 
-    ChatMessage.create({
+    dsaChat({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: `<div class="dsa-pixel-chat">
         <div class="chat-title">${icon} ${talent}${maneuverLabel}</div>
@@ -2915,7 +2957,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       ? `<div class="dsa-mod-hint">Meisterparade Ansage −${paAnsage} · Ziel ${effectivePA}</div>`
       : "";
 
-    ChatMessage.create({
+    dsaChat({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: `<div class="dsa-pixel-chat">
         <div class="chat-title">🛡 Parade: ${talent}${paManeuver !== "normal" ? ` [${sfPA?.label ?? ""}]` : ""}</div>
@@ -3071,7 +3113,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
 
     const dieClass = crit ? "crit" : fumble ? "fumble" : success ? "success" : "fail";
 
-    ChatMessage.create({
+    dsaChat({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: `<div class="dsa-pixel-chat">
         <div class="chat-title">🏃 ${modeLabel}</div>
@@ -3121,8 +3163,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const weaponName  = dataset.weapon;
     const rawTp       = dataset.tp || "1d6";
     // DSA "3W6+8" → Foundry "3d6+8", "1W+4" → "1d6+4", "2W20" → "2d20"
-    const tp = rawTp.replace(/(\d*)W(\d*)([+-]\d+)?/gi, (_, count, sides, bonus) =>
-      `${count || "1"}d${sides || "6"}${bonus || ""}`);
+    const tp = tpFormelZuWuerfeln(rawTp);
 
     // ── KK-TP Bonus/Malus (WdS) ─────────────────────────────────────────
     // Jede Waffe hat eine KK-Schwelle. Pro 5 Punkte über/unter der Schwelle
@@ -3157,10 +3198,19 @@ export class PixelArtCharacterSheet extends ActorSheet {
     const ansageMul = pending?.ansageMultiplier ?? 1;
     const total = (roll.total * tpMul) + (bonusTP * ansageMul) + kkBonus;
 
-    // ── Trefferzone würfeln (1W20) ──────────────────────────────────────
-    const zoneRoll = new Roll("1d20");
-    await zoneRoll.evaluate();
-    const hitZone = HIT_ZONE_TABLE[zoneRoll.total] ?? "brust";
+    // ── Trefferzone ─────────────────────────────────────────────────────
+    // Die Zone stammt aus dem Angriffswurf und wird hier NICHT neu gewürfelt.
+    // Vorher taten das beide Stellen — und zwar mit unterschiedlichen Tabellen:
+    // der Angriff meldete bei einer 2 "Kopf", der Schaden traf bei derselben 2
+    // das rechte Bein. Ein gezielter Kopftreffer für AT−8 landete im Bein, und
+    // Zonenrüstung wie Wunde wurden auf der falschen Zone verrechnet.
+    // Nur wenn kein Angriff vorausging (Schaden direkt geworfen), wird gewürfelt.
+    let hitZone = pending?.hitZone ?? null;
+    if (!hitZone) {
+      const zoneRoll = new Roll("1d20");
+      await zoneRoll.evaluate();
+      hitZone = HIT_ZONE_TABLE[zoneRoll.total] ?? "brust";
+    }
     const hitZoneLabel = ZONE_LABELS[hitZone] ?? hitZone;
 
     // ── RS des Ziels: Zonen-RS der getroffenen Zone ─────────────────────
@@ -3203,20 +3253,34 @@ export class PixelArtCharacterSheet extends ActorSheet {
 
     const sp = Math.max(0, total - targetRS);
 
-    // ── Auto-SP-Abzug: LeP des Ziels reduzieren + Wunden prüfen ────────
+    // ── Auto-SP-Abzug: LeP oder AuP des Ziels reduzieren + Wunden prüfen ──
+    // Stumpfer Schlag und Betäubungsschlag richten Ausdauerschaden an, TP(A).
+    // Beide Manöver setzten `asAuP` und `increaseWS` schon immer — gelesen hat
+    // die Werte bis v0.7.18 niemand, also verlor das Ziel stattdessen
+    // Lebensenergie und bekam Wunden. Genau umgekehrt zu dem, was der eigene
+    // Chattext ankündigte.
+    const alsAuP = pending?.asAuP === true;
     let lepLine = "";
     let totalNewWounds = 0; // für VFX unten
     if (targetActor && sp > 0) {
-      const oldLeP = targetActor.system?.LeP?.value ?? 0;
-      const newLeP = Math.max(0, oldLeP - sp);
+      const alterWert = alsAuP
+        ? (targetActor.system?.AuP?.value ?? 0)
+        : (targetActor.system?.LeP?.value ?? 0);
+      const neuerWert = Math.max(0, alterWert - sp);
       // Token-aware: bei unlinked NSC die Token-delta-Schicht updaten
-      await relayTokenUpdate(targetToken, { "system.LeP.value": newLeP });
+      await relayTokenUpdate(targetToken, alsAuP
+        ? { "system.AuP.value": neuerWert }
+        : { "system.LeP.value": neuerWert });
+      const oldLeP = alterWert;
+      const newLeP = neuerWert;
 
       // ── Wunden-Check (WdS Wundregeln) ──────────────────────────────
       const ko = targetActor.system?.KO?.value ?? 10;
       const ws = getWoundThresholds(ko);
-      // Manöver-Modifikation: Todesstoß → WS−2
-      const wsReduce = pending?.reduceWS ?? 0;
+      // Manöver-Modifikationen: Todesstoß senkt die Wundschwelle (reduceWS),
+      // stumpfe Manöver heben sie an (increaseWS) — mit einem Knüppel bricht
+      // seltener etwas.
+      const wsReduce = (pending?.reduceWS ?? 0) - (pending?.increaseWS ?? 0);
       const effWS1 = Math.max(1, ws.ws1 - wsReduce);
       const effWS2 = Math.max(2, ws.ws2 - wsReduce);
       const effWS3 = Math.max(3, ws.ws3 - wsReduce);
@@ -3258,14 +3322,25 @@ export class PixelArtCharacterSheet extends ActorSheet {
       // WdS S.78: getLepStatus() berücksichtigt Eisern, Zäher Hund und
       // hohe Selbstbeherrschung (≥12 = nicht kampfunfähig). Zäher Hund
       // verschiebt Tod-Schwelle auf 1.5×KO.
-      const koTarget = targetActor.system?.KO?.value ?? 10;
-      const lepFlags = _getLepStatusFlags(targetActor);
-      const lepStatus = getLepStatus(newLeP, koTarget, lepFlags);
-      const status = lepStatus.label
-        ? `<span style="color:${lepStatus.color};font-weight:bold"> — ${lepStatus.label}!</span>`
-        : "";
+      let status = "";
+      if (alsAuP) {
+        // Ausdauerschaden: kein Sterben, sondern Erschöpfung. Bei 0 AuP ist das
+        // Ziel bewusstlos (WdS S.75) — beim Betäubungsschlag ist genau das der Zweck.
+        if (neuerWert === 0) {
+          status = pending?.betaeubung
+            ? `<span style="color:#ffcc00;font-weight:bold"> — BETÄUBT / BEWUSSTLOS!</span>`
+            : `<span style="color:#ffcc00;font-weight:bold"> — ERSCHÖPFT, bewusstlos!</span>`;
+        }
+      } else {
+        const koTarget = targetActor.system?.KO?.value ?? 10;
+        const lepFlags = _getLepStatusFlags(targetActor);
+        const lepStatus = getLepStatus(newLeP, koTarget, lepFlags);
+        status = lepStatus.label
+          ? `<span style="color:${lepStatus.color};font-weight:bold"> — ${lepStatus.label}!</span>`
+          : "";
+      }
       lepLine = `<div style="font-size:13px;text-align:center;margin-top:4px;padding:3px 6px;background:rgba(233,69,96,0.15);border:1px solid rgba(233,69,96,0.3);border-radius:3px">
-        💔 ${targetActor.name}: ${oldLeP} → <strong style="color:#e94560">${newLeP}</strong> LeP
+        ${alsAuP ? "😮‍💨" : "💔"} ${targetActor.name}: ${oldLeP} → <strong style="color:#e94560">${newLeP}</strong> ${alsAuP ? "AuP" : "LeP"}
         ${status}
       </div>${woundLine}`;
     }
@@ -3315,6 +3390,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
     roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       flavor,
+      ...dsaFlags(),
     });
 
     // ── VFX broadcasten: Schadenflash + Scrolling-Schadenszahl ──────────
@@ -3452,7 +3528,7 @@ export class PixelArtCharacterSheet extends ActorSheet {
       if (placeable) placeable.control({ releaseOthers: true });
     }
 
-    ChatMessage.create({
+    dsaChat({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: `<div class="dsa-pixel-chat">
         <div class="chat-title">🔮 ${spellName}</div>

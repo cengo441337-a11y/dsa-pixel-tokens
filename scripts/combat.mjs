@@ -3,7 +3,7 @@
  * Manöver-System, Schaden-Berechnung, Fernkampf-Projektile, Wundschwellen
  */
 
-import { MODULE_ID, COMBAT_MANEUVERS, RANGED_MODIFIERS, getWoundThresholds, PROBE_SOUNDS } from "./config.mjs";
+import { MODULE_ID, COMBAT_MANEUVERS, RANGED_MODIFIERS, getWoundThresholds, PROBE_SOUNDS, tpFormelZuWuerfeln, dsaChat } from "./config.mjs";
 
 // ─── Passierschlag ───────────────────────────────────────────────────────────
 
@@ -45,8 +45,11 @@ export async function rollPassierschlag(actor) {
   const roll = new Roll("1d20");
   await roll.evaluate();
   const die     = roll.total;
-  const success = die <= effectiveAT;
+  // Eine 20 misslingt in DSA 4.1 immer, unabhaengig vom Attackewert. Vorher
+  // stand die Erfolgspruefung zuerst: bei AT 24 (effektiv 20) galt der Wurf 20
+  // als "PASSIERSCHLAG TRIFFT", der Patzerzweig war unerreichbar.
   const fumble  = die === 20;
+  const success = !fumble && die <= effectiveAT;
 
   let resultText, resultCls;
   let extraLine = "";
@@ -72,7 +75,7 @@ export async function rollPassierschlag(actor) {
     resultCls  = "result-fail";
   }
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">⚔ Passierschlag: ${weaponName}</div>
@@ -176,12 +179,9 @@ export async function showAttackDialog(actor, talentName, atValue) {
  * @returns {Promise<{tp: number, rs: number, sp: number}|null>}
  */
 export async function showDamageDialog(weaponName, tpFormula, kkBonus = 0, isCritical = false) {
-  // TP-Formel umwandeln: "1W+4" → "1d6+4"
-  const rollFormula = tpFormula
-    .replace(/(\d*)W(\+?\d*)/gi, (_, count, bonus) => {
-      const c = count || "1";
-      return `${c}d6${bonus}`;
-    });
+  // TP-Formel umwandeln — zentral in config.mjs, siehe tpFormelZuWuerfeln().
+  // Der frühere Ausdruck hier machte aus "2W6+4" ein "2d66+4".
+  const rollFormula = tpFormelZuWuerfeln(tpFormula);
 
   // Würfeln
   const roll = new Roll(rollFormula);
@@ -276,7 +276,7 @@ export async function applyDamageToActor(actor, sp) {
     </div>`;
   }
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">Schaden erlitten</div>

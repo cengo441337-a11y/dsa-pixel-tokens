@@ -14,7 +14,7 @@
  *   - Verbotene Pforten (SF): LeP statt fehlender AsP
  */
 
-import { MODULE_ID, resolveProbe, checkCritical } from "./config.mjs";
+import { MODULE_ID, resolveProbe, checkCritical, applyCrit, dsaChat } from "./config.mjs";
 
 let RITUALE = null;
 let RITUALE_META = null;
@@ -310,8 +310,10 @@ export async function castRitual(actor, ritualId) {
             const dice = roll.terms[0].results.map(r => r.result);
             const result = resolveProbe(dice, attrs, rkw, totalMod);
             const crit = checkCritical(dice);
-            const erfolg = crit.gluecklich || (!crit.patzer && result.success);
-            const rkpStar = erfolg ? Math.max(1, result.tapStar) : 0;
+            // Probe und Kritischer zentral verrechnen — config.mjs::applyCrit.
+            const endergebnis = applyCrit(result, crit, rkw);
+            const erfolg  = endergebnis.success;
+            const rkpStar = endergebnis.tapStar;
 
             // AsP würfeln (1W6 pro Grad)
             const aspRoll = await new Roll(`${effMeta.dice}d6`).evaluate();
@@ -398,7 +400,7 @@ export async function castRitual(actor, ritualId) {
               <div class="chat-row">AsP: ${asp.current} → ${aspNeu}${lepAbzug ? ` · LeP: -${lepAbzug} (Verbotene Pforten)` : ""}${pAspAbzug ? ` · pAsP: -${pAspAbzug}` : ""}</div>
             </div>`;
 
-            ChatMessage.create({
+            dsaChat({
               speaker: ChatMessage.getSpeaker({ actor }),
               content: html2,
               rolls: [roll, aspRoll],

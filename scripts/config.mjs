@@ -260,7 +260,12 @@ export const COMBAT_MANEUVERS = {
   stumpfer_schlag: {
     label: "Stumpfer Schlag",
     atBase: (weapon) => {
-      const t = (weapon?.kampftalent ?? "").toLowerCase();
+      // Uebergeben wird ein Foundry-Item — das Kampftalent steht in
+      // `item.system.kampftalent`, nicht direkt am Item. Der frühere Zugriff auf
+      // `weapon.kampftalent` war immer undefined, damit griff keine Regel und es
+      // gab pauschal −8: ein Kampfstab (Talent "Stäbe", eigentlich −2) landete
+      // bei AT 12 auf effektiv 4 statt 10.
+      const t = (weapon?.system?.kampftalent ?? weapon?.kampftalent ?? "").toLowerCase();
       // Stäbe (mit Umlaut!) / Kampfstab / Knüppel: −2
       if (/st(a|ä)b|kn(ü|ue)ppel/.test(t)) return -2;
       // Andere Hiebwaffen / Kettenwaffen: −4 (stumpfe Seite)
@@ -1634,6 +1639,76 @@ export function calcIniPenalty(totalBE, rg) {
   if (rg.level >= 3) return Math.max(0, Math.floor((totalBE - 2) / 2));
   if (rg.level >= 2) return Math.max(0, Math.floor(totalBE - 2));
   return Math.floor(totalBE);
+}
+
+// ─── Chat-Nachrichten des Moduls ────────────────────────────────────────────
+
+/**
+ * Erzeugt eine Chat-Nachricht des Moduls und stempelt sie als solche.
+ *
+ * WARUM DAS NÖTIG IST: `dice-hooks.mjs` steigt bei `renderChatMessage` aus,
+ * sobald eine Nachricht ein Kennfeld dieses Moduls trägt — "eigene Nachrichten
+ * nicht doppelt verarbeiten". Nur trug bis v0.7.18 keine der 43 eigenen
+ * Nachrichten ein solches Kennfeld. Der Riegel griff also nie: das Modul löste
+ * seinen Effekt aus, sah danach seine eigene Chatzeile, erriet aus dem Text
+ * erneut ein Ergebnis und löste denselben Effekt ein zweites Mal aus.
+ *
+ * Wer eine neue Chatzeile schreibt, nimmt diese Funktion statt
+ * `ChatMessage.create` — dann kann der Fehler nicht zurückkommen.
+ *
+ * @param {object} daten  - wie bei ChatMessage.create
+ * @param {object} probe  - optionales Probenergebnis, das andere Teile des
+ *                          Moduls maschinenlesbar auswerten können statt den
+ *                          Text zu durchsuchen:
+ *                          { success, critical, fumble, type, spellName }
+ */
+/**
+ * Liefert das Kennfeld-Objekt für Nachrichten, die nicht über `dsaChat` laufen —
+ * insbesondere `roll.toMessage({ … , ...dsaFlags(probe) })`.
+ *
+ * @param {object|null} probe - { success, critical, fumble, type, spellName }
+ */
+export function dsaFlags(probe = null) {
+  const inhalt = { eigen: true };
+  if (probe) inhalt.probe = probe;
+  return { flags: { [MODULE_ID]: inhalt } };
+}
+
+export function dsaChat(daten = {}, probe = null) {
+  const flags = { ...(daten.flags ?? {}) };
+  flags[MODULE_ID] = { ...(flags[MODULE_ID] ?? {}), eigen: true };
+  if (probe) flags[MODULE_ID].probe = probe;
+  return ChatMessage.create({ ...daten, flags });
+}
+
+// ─── Schadensformel-Umwandler ───────────────────────────────────────────────
+
+/**
+ * Wandelt eine DSA-Schadensformel in Foundry-Würfelschreibweise um.
+ *
+ *   "1W+4"    → "1d6+4"     (W ohne Seitenzahl heisst immer W6)
+ *   "2W6+4"   → "2d6+4"
+ *   "3W20"    → "3d20"
+ *   "W6"      → "1d6"
+ *   "2W6+1W4" → "2d6+1d4"   (mehrere Würfelgruppen in einer Formel)
+ *
+ * WARUM ZENTRAL: Es gab drei Umwandler im Modul, und einer davon war falsch.
+ * `combat.mjs` benutzte /(\d*)W(\+?\d*)/ — dabei landete die Seitenzahl in der
+ * Bonusgruppe: "2W6+4" wurde zu "2d66+4", also ein 66-seitiger Würfel mit
+ * Erwartungswert 71 statt 11. Wer eine vierte Kopie anlegt, wiederholt den
+ * Fehler; wer diese Funktion benutzt, kann ihn nicht machen.
+ *
+ * @param {string} formel - DSA-Schreibweise
+ * @returns {string} Foundry-Schreibweise; unbekannte Eingaben kommen unverändert zurück
+ */
+export function tpFormelZuWuerfeln(formel) {
+  if (typeof formel !== "string" || formel.trim() === "") return "1d6";
+  // Reihenfolge der Gruppen: Anzahl, "W", Seitenzahl, optionaler Zuschlag.
+  // Die Seitenzahl MUSS eine eigene Gruppe sein — sonst frisst der Zuschlag sie.
+  return formel.replace(
+    /(\d*)W(\d*)([+-]\d+)?/gi,
+    (_, anzahl, seiten, zuschlag) => `${anzahl || "1"}d${seiten || "6"}${zuschlag || ""}`
+  );
 }
 
 // ─── AsP-Kosten-Parser ────────────────────────────────────────────────────────

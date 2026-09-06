@@ -110,14 +110,24 @@ function analyzeGDSAChatMessage(message, html) {
     if (val) result.dice.push(val);
   }
 
-  // Erfolg/Misserfolg aus Text
-  const text = (content.textContent ?? "").toLowerCase();
-  if (text.includes("gelungen")   || text.includes("treffer")   || text.includes("erfolg"))   result.success = true;
-  if (text.includes("misslungen") || text.includes("daneben")   || text.includes("gescheitert")) result.success = false;
-  if (text.includes("patzer")     || text.includes("kritischer misserfolg")) { result.fumble = true;  result.success = false; }
-  if (text.includes("kritisch")   && !result.fumble)            result.critical = true;
-  if (text.includes("glücklich")  || text.includes("meisterhaft")) { result.critical = true; result.success = true; }
-  if (text.includes("zauber")     || text.includes("asp"))      { if (!result.type) result.type = "spell"; }
+  // Erfolg/Misserfolg — zuerst aus dem Kennfeld, das unsere eigenen Nachrichten
+  // mitbringen. Nur wenn keines da ist (Nachricht vom Spielsystem oder einem
+  // anderen Modul), wird der Text ausgewertet.
+  const eigenesKennfeld = message.flags?.[MODULE_ID]?.probe;
+  if (eigenesKennfeld) {
+    if (eigenesKennfeld.success !== undefined)  result.success  = eigenesKennfeld.success;
+    if (eigenesKennfeld.critical !== undefined) result.critical = eigenesKennfeld.critical;
+    if (eigenesKennfeld.fumble !== undefined)   result.fumble   = eigenesKennfeld.fumble;
+    if (eigenesKennfeld.type)                   result.type     = eigenesKennfeld.type;
+    if (eigenesKennfeld.spellName)              result.spellName = eigenesKennfeld.spellName;
+  } else {
+    const text = (content.textContent ?? "").toLowerCase();
+    const ausText = bewerteChatText(text);
+    if (ausText.success !== null)  result.success  = ausText.success;
+    if (ausText.critical)          result.critical = true;
+    if (ausText.fumble)            result.fumble   = true;
+    if (ausText.istZauber && !result.type) result.type = "spell";
+  }
 
   // Zaubernamen extrahieren (unabhängig vom erkannten Typ)
   result.spellName = result.spellName ?? extractSpellName(html);
@@ -126,6 +136,48 @@ function analyzeGDSAChatMessage(message, html) {
   if (result.spellName && !result.type) result.type = "spell";
 
   return result;
+}
+
+/**
+ * Liest ein Probenergebnis aus einem Chattext.
+ *
+ * NOTLÖSUNG MIT ANSAGE: Eine Maschinenentscheidung aus Fliesstext ist immer
+ * fragil. Für unsere eigenen Nachrichten gibt es deshalb ein Kennfeld
+ * (`flags["dsa-pixel-tokens"].probe`), das zuerst gelesen wird. Diese Funktion
+ * greift nur für Nachrichten fremder Module, an deren Aufbau wir nichts ändern
+ * können — dort ist Text alles, was es gibt.
+ *
+ * Zwei Dinge machen sie belastbarer als die frühere Fassung:
+ *   1. Wortgrenzen. `text.includes("erfolg")` traf auch in "Misserfolg" zu und
+ *      erklärte damit jede misslungene Probe zum Erfolg — mit Treffer-Effekt
+ *      und Schadensblitz auf dem Ziel. `\berfolg\b` trifft dort nicht.
+ *   2. Feste Rangfolge. Ein Misserfolgswort schlägt ein Erfolgswort, egal in
+ *      welcher Reihenfolge sie im Text stehen ("nicht gelungen").
+ *
+ * @param {string} text - Chatinhalt, bereits kleingeschrieben
+ * @returns {{ success: boolean|null, critical: boolean, fumble: boolean, istZauber: boolean }}
+ *          success === null heisst: der Text sagt nichts darüber aus.
+ */
+export function bewerteChatText(text) {
+  const t = String(text ?? "").toLowerCase();
+
+  const patzer     = /\bpatzer\b/.test(t) || /kritischer\s+misserfolg/.test(t);
+  const gluecklich = /\bgl(ü|ue)cklich\w*\b/.test(t) || /\bmeisterhaft\w*\b/.test(t);
+  const misserfolg = /\bmisslungen\b|\bmisserfolg\b|\bdaneben\b|\bgescheitert\b/.test(t)
+                  || /\bnicht\s+(gelungen|getroffen|bestanden)\b/.test(t)
+                  || /\bkein\s+treffer\b/.test(t);
+  const erfolg     = /\bgelungen\b|\btreffer\b|\berfolg\b|\bbestanden\b/.test(t);
+
+  let success = null;
+  if (patzer || misserfolg) success = false;
+  else if (gluecklich || erfolg) success = true;
+
+  return {
+    success,
+    critical: (gluecklich || (/\bkritisch\w*\b/.test(t) && !patzer)),
+    fumble: patzer,
+    istZauber: /\bzauber\w*\b/.test(t) || /\basp\b/.test(t),
+  };
 }
 
 // ─── Mapped Effect Trigger ──────────────────────────────────────────────────

@@ -16,7 +16,7 @@
  *  - Geweihte Waffen: 2x Schaden (Standard DSA-Waffenkampf ueber Counter-Angriff)
  */
 
-import { MODULE_ID, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds } from "./config.mjs";
+import { MODULE_ID, HIT_ZONE_TABLE, ZONE_LABELS, getWoundThresholds, dsaChat } from "./config.mjs";
 import { moveActorToCategoryFolder } from "./actor-folders.mjs";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -467,7 +467,7 @@ async function _onClusterTokenDamaged(tokenDoc, oldLeP, newLeP) {
 
   // Wenn alle Erscheinungen tot → Token loeschen
   if (newKrallen + newTentakel + newMaul === 0) {
-    ChatMessage.create({
+    dsaChat({
       content: `<div class="dsa-pixel-chat">
         <div class="chat-title">💀 Cluster zerschlagen</div>
         <div class="result-line result-success">Ein Pandaemonium-Cluster wurde vollstaendig vernichtet.</div>
@@ -537,7 +537,7 @@ async function _rollClusterAttacksForRound(templateId) {
   }
 
   if (chatLines.length > 0) {
-    ChatMessage.create({
+    dsaChat({
       content: `<div class="dsa-pixel-chat">
         <div class="chat-title">⚔ PANDAEMONIUM — Cluster-Angriffe (Runde)</div>
         <div style="font-size:12px;color:#888;text-align:center;margin:4px 0">${attacksTotal} Angriffe insgesamt</div>
@@ -656,7 +656,7 @@ async function _rollClusterAttacksOnHero(clusterToken, cluster, heroActor) {
 
 // Kurze Info-Nachricht im Chat (ohne Buttons — die sind im Popout-Panel)
 async function _postChatInfo(templateId, info, caster) {
-  await ChatMessage.create({
+  await dsaChat({
     speaker: ChatMessage.getSpeaker({ actor: caster }),
     content: `<div class="dsa-pixel-chat" style="border:2px solid #8b0000;background:linear-gradient(180deg,#1a0505,#0a0202)">
       <div class="chat-title" style="color:#ff4444">🔥 PANDAEMONIUM gewirkt</div>
@@ -767,7 +767,7 @@ async function _handleMutProbe(templateId) {
   const die = roll.total;
   const success = die <= target;
 
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">🧠 Mut-Probe (PANDAEMONIUM, Erschw +${meta.zfpStar})</div>
@@ -791,7 +791,7 @@ async function _handleKK(templateId) {
   const roll = new Roll("1d20"); await roll.evaluate();
   const success = roll.total <= kk;
   if (success) await actor.setFlag(MODULE_ID, FLAG_GRAPPLE, false);
-  ChatMessage.create({
+  dsaChat({
     speaker: ChatMessage.getSpeaker({ actor }),
     content: `<div class="dsa-pixel-chat">
       <div class="chat-title">💪 KK-Probe (Festhalten loesen)</div>
@@ -842,7 +842,7 @@ async function _endZone(templateId) {
     }
   }
 
-  ChatMessage.create({
+  dsaChat({
     content: `<div class="dsa-pixel-chat"><div class="chat-title">🛑 PANDAEMONIUM aufgeloest</div>
       <div class="result-line result-success">Die daemonische Zone loest sich auf. Alle Erscheinungen verschwinden.</div></div>`,
   });
