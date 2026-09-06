@@ -225,7 +225,12 @@ export class PixelArtCharacterSheet extends ActorSheet {
     // und Temp-Modifier sofort kaskadieren (nicht nur als Fallback bei 0).
     for (const key of ["INIBasis", "MR", "ATBasis", "PABasis", "FKBasis"]) {
       if (computed[key] > 0) {
-        sysClone[key] = { ...(sysClone[key] ?? {}), value: computed[key] };
+        // Der beim Import ermittelte Abstand zum Formelwert bleibt erhalten.
+        // Vorher fiel er hier weg: Aytans Vollzauberer-Senkung von −4 auf die
+        // Magieresistenz und ihre zwei gekauften Punkte waren nach dem ersten
+        // Rendern verschwunden, der Bogen zeigte 9 statt 7.
+        const bonus = Number(sysClone[key]?.bonus ?? 0) || 0;
+        sysClone[key] = { ...(sysClone[key] ?? {}), value: computed[key] + bonus };
       }
     }
     // Scalar fields WS / Dogde — immer aus Formel

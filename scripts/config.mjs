@@ -770,7 +770,12 @@ export function guessSpellEffect(spellName) {
   if (/feuer|flamm|igni|brand|glut|infern|pyro|zund/.test(s))
     return { effect: "feuerball",    type: "target" };
   // Eis / Frost
-  if (/eis|frost|kält|gefrior|blizzard|cryo/.test(s))
+  // "eis" als blosser Teilstring steckt auch in Geist, Reise, Kreis, Meister und
+  // Speise. Der Zweig steht an zweiter Stelle und fing damit 19 Zauber ab, die
+  // woandershin gehoerten — "Geisterbann" wurde zu Eis statt Daemonenbann,
+  // "Silentium Schweigekreis" zu Eis statt Stille, "Koerperlose Reise" zu Eis
+  // statt Portal. Deshalb: nur am Wortanfang, und nicht vor "en" (Eisenhart).
+  if (/(?<![a-zäöüß])eis(?!en)|frost|kält|gefrior|blizzard|cryo/.test(s))
     return { effect: "eis",          type: "target" };
   // Blitz / Luft
   if (/blitz|donner|sturm|wind|fulmin|orcan|luft|elektr/.test(s))
@@ -806,7 +811,8 @@ export function guessSpellEffect(spellName) {
   if (/silenti|stille|schloß|schloss|stumm/.test(s))
     return { effect: "silentium",    type: "aura" };
   // Teleport / Raum
-  if (/portal|transvers|foramen|hexensprung|teleport|reise/.test(s))
+  // "reise" steckt auch in "Kreise" — daher der Ausschluss des vorangehenden k.
+  if (/portal|transvers|foramen|hexensprung|teleport|(?<!k)reise/.test(s))
     return { effect: "portal",       type: "zone" };
   // Beschwörung
   if (/invoc|beschwör|manifest|monstrum|ruf/.test(s))

@@ -422,6 +422,14 @@ function _parseAdvantages(held, result) {
     "feste gewohnheit", "randgruppe", "vorurteile",
     "prinzipientreue", "sensibler geruchssinn",
     "angst vor", "phobie",
+    // Ergaenzt am 06.09.2026: Diese drei stehen weder in advantages.json noch in
+    // disadvantages.json und landeten deshalb in system.vorteile. Betroffen
+    // waren zwei der drei mitgelieferten Beispielhelden.
+    "aberglaube", "pazifismus", "niedrige geburt",
+    // Weitere gaengige Nachteile, die in keiner der beiden Listen stehen:
+    "blutrausch", "goldgier", "totenangst", "unstet", "verwoehnt",
+    "schlechte eigenschaft", "unfrei", "lasterhaft", "rachsucht",
+    "grausamkeit", "verpflichtung", "prinzipientreu",
   ]);
 
   const _isDisadvantage = (name) => {
@@ -621,9 +629,12 @@ function _parseEquipmentFull(held, result) {
     if (cBase === qBase) return true;
     const cShort = stripCommaSuffix(cand), qShort = stripCommaSuffix(query);
     if (cShort === qShort) return true;
-    // Substring: query enthält cand-Basis (Helden-Software-Detail vs DB-generic)
-    if (cBase.length > 4 && qBase.startsWith(cBase)) return true;
-    if (qBase.length > 4 && cBase.startsWith(qBase)) return true;
+    // Präfix-Treffer nur bis zur nächsten Wortgrenze. Ohne diese Bedingung galt
+    // "Granat (10 Karat)" — ein Edelstein aus Grogs Gepäck — als Treffer auf
+    // "Granatapfel" aus der Waffentabelle und wurde zur Wurfwaffe mit 4W6
+    // Schaden, samt Eintrag im Talent "Wurfspeer", das der Held gar nicht hat.
+    if (cBase.length > 4 && _istPraefixMitWortgrenze(qBase, cBase)) return true;
+    if (qBase.length > 4 && _istPraefixMitWortgrenze(cBase, qBase)) return true;
     return false;
   };
 
@@ -926,6 +937,25 @@ function _getText(el, tagName) {
 }
 
 /**
+ * Namen, bei denen die Umlaut-Ersetzung falsch liegt.
+ *
+ * "ae" → "ä" ist eine Vermutung, keine Regel. In den meisten Namen der
+ * Helden-Software stimmt sie ("Mittellaender" → "Mittelländer"), in einigen
+ * nicht: bei "Auelf" gehören das u und das e zu verschiedenen Silben, bei
+ * "Ambosszwerg" das doppelte s zum Wortstamm. Belegt am 06.09.2026: Ein
+ * importierter Auelf hiess danach "Aülf", stand damit in keiner Rassentabelle
+ * und bekam Geschwindigkeit 8 statt 9; ein Ambosszwerg wurde zu "Amboßwerg"
+ * und bekam 8 statt 6.
+ *
+ * Wer hier ergänzt: der Schlüssel ist das rohe Segment aus dem Java-Namen.
+ */
+const JAVA_NAME_AUSNAHMEN = {
+  Auelf: "Auelf",
+  Ambosszwerg: "Ambosszwerg",
+  Amboszwerg: "Ambosszwerg",
+};
+
+/**
  * Bereinigt Helden-Software Java-Klassennamen zu lesbaren deutschen Namen.
  * "helden.model.rasse.Mittellaender" → "Mittelländer"
  * "helden.model.kultur.Mittelreich"  → "Mittelreich"
@@ -935,15 +965,78 @@ function _deJavaName(str) {
   // Kein Java-Klassenname → unverändert zurück
   if (!str.includes(".")) return str;
   // Letztes Segment extrahieren
-  let name = str.split(".").pop();
+  const roh = str.split(".").pop();
+  // Bekannte Ausnahme? Dann gar nicht erst umschreiben.
+  if (Object.prototype.hasOwnProperty.call(JAVA_NAME_AUSNAHMEN, roh)) {
+    return JAVA_NAME_AUSNAHMEN[roh];
+  }
   // ASCII-Umlaute → echte Umlaute
-  name = name
+  let name = roh
     .replace(/Ae([a-z])/g, "Ä$1").replace(/Oe([a-z])/g, "Ö$1").replace(/Ue([a-z])/g, "Ü$1")
     .replace(/ae/g, "ä").replace(/oe/g, "ö").replace(/ue/g, "ü")
     .replace(/sz/g, "ß");
   // CamelCase → Leerzeichen
   name = name.replace(/([a-zäöüß])([A-ZÄÖÜ])/g, "$1 $2");
   return name;
+}
+
+export { _deJavaName as javaNamenBereinigen };
+
+/**
+ * Beginnt `text` mit `praefix`, und endet dort auch ein Wort?
+ *
+ * "kurzschwert, breit" beginnt mit "kurzschwert" und darf treffen — danach
+ * kommt ein Komma. "granatapfel" beginnt zwar auch mit "granat", danach kommt
+ * aber ein Buchstabe: dasselbe Wort geht weiter, es ist ein anderer Gegenstand.
+ *
+ * @param {string} text
+ * @param {string} praefix
+ * @returns {boolean}
+ */
+export function _istPraefixMitWortgrenze(text, praefix) {
+  const t = String(text ?? "");
+  const p = String(praefix ?? "");
+  if (!p || !t.startsWith(p)) return false;
+  if (t.length === p.length) return true;
+  // Nach dem Präfix darf kein Buchstabe und keine Ziffer folgen.
+  return !/[\p{L}\p{N}]/u.test(t.charAt(p.length));
+}
+
+/**
+ * Ermittelt die Magieresistenz aus dem, was die Helden-Software liefert.
+ *
+ * DAS PROBLEM: Das Feld `value` der Zeile `<eigenschaft name="Magieresistenz">`
+ * bedeutet nicht in jeder Datei dasselbe. Gemessen an den drei mitgelieferten
+ * Beispielen (06.09.2026):
+ *
+ *   Aytan  MU 15 KL 17 KO 13 → Formel  9 | value  2 | mod −4
+ *   Grog   MU 17 KL 15 KO 18 → Formel 10 | value 10 | mod +5
+ *   Tarvas MU 16 KL 14 KO 13 → Formel  9 | value 11 | mod  0
+ *
+ * Bei Aytan ist `value` offensichtlich der gekaufte Zuschlag (2), bei Grog und
+ * Tarvas ebenso offensichtlich der bereits fertige Wert. Die frühere Fassung
+ * addierte immer: Grog bekam 10 + 10 + 5 = 25, Tarvas 9 + 11 = 20. Eine
+ * Magieresistenz von 25 gibt es in DSA 4.1 nicht.
+ *
+ * DIE UNTERSCHEIDUNG: Liegt `value` unter dem Formelwert, kann es der fertige
+ * Wert nicht sein — dann ist es der Zuschlag. Liegt es darauf oder darüber, ist
+ * es der fertige Wert. `mod` kommt in beiden Fällen obendrauf.
+ *
+ * Das ist eine begründete Auslegung, keine dokumentierte Schnittstelle. Wenn
+ * eine Heldendatei auftaucht, bei der sie danebenliegt, gehört sie hierher —
+ * und der Test in tests/helden-import.test.mjs bekommt eine Zeile mehr.
+ *
+ * @param {number} formelwert - (MU+KL+KO)/5
+ * @param {number} value - Feld `value` aus der XML-Zeile
+ * @param {number} mod - Feld `mod` aus der XML-Zeile
+ * @returns {number} Magieresistenz
+ */
+export function mrAusImport(formelwert, value = 0, mod = 0) {
+  const formel = Number(formelwert) || 0;
+  const v = Number(value) || 0;
+  const m = Number(mod) || 0;
+  const grundwert = v >= formel ? v : formel + v;
+  return grundwert + m;
 }
 
 // ─── Token / Portrait Zuweisung ─────────────────────────────────────────────
@@ -1326,10 +1419,14 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   // Beispiel Dunya: 8 + 2 + (-2) = 8.
   {
     const mrFormula = Math.round(((attr.MU ?? 10) + (attr.KL ?? 10) + (attr.KO ?? 10)) / 5);
-    const mrBuy   = dv.MR?.value ?? 0;     // gekaufter AP-Bonus
-    const mrMod   = dv.MR?.mod ?? 0;       // Vollzauberer-Penalty
-    const mrFinal = mrFormula + mrBuy + mrMod;
-    sys.MR = { value: mrFinal, modi: mrMod, tempmodi: 0, buy: mrBuy };
+    const mrBuy   = dv.MR?.value ?? 0;     // je nach Datei: Zuschlag ODER Endwert
+    const mrMod   = dv.MR?.mod ?? 0;       // Vollzauberer-Penalty, Vorteile
+    const mrFinal = mrAusImport(mrFormula, mrBuy, mrMod);
+    // `bonus` ist der Abstand zum reinen Formelwert. Der Heldenbogen rechnet
+    // Formel + bonus und behaelt damit beides: kaskadierende Eigenschaften und
+    // die Zuschlaege aus der Heldendatei.
+    sys.MR = { value: mrFinal, modi: mrMod, tempmodi: 0, buy: mrBuy,
+               bonus: mrFinal - mrFormula };
   }
 
   // INIBasis: schema { value, modi, tempmodi, sysModi }
@@ -1338,7 +1435,8 @@ export async function createActorFromImport(heroData, updateExisting = false) {
     const iniFromXml = dv.INI?.value ?? 0;
     const iniFormula = Math.round(((attr.MU ?? 10) * 2 + (attr.IN ?? 10) + (attr.GE ?? 10)) / 5);
     const iniFinal   = iniFromXml > 0 ? iniFromXml : iniFormula;
-    sys.INIBasis = { value: iniFinal, modi: 0, tempmodi: 0, sysModi: 0 };
+    sys.INIBasis = { value: iniFinal, modi: 0, tempmodi: 0, sysModi: 0,
+                     bonus: iniFinal - iniFormula };
     if (dv.INI) sys.INI = { value: dv.INI.value, tempmodi: 0 }; // Legacy
   }
 
@@ -1346,8 +1444,10 @@ export async function createActorFromImport(heroData, updateExisting = false) {
   const atFormula = Math.round(((attr.MU ?? 10) + (attr.GE ?? 10) + (attr.KK ?? 10)) / 5);
   const paFormula = Math.round(((attr.IN ?? 10) + (attr.GE ?? 10) + (attr.KK ?? 10)) / 5);
   const fkFormula = Math.round(((attr.IN ?? 10) + (attr.FF ?? 10) + (attr.KK ?? 10)) / 5);
-  sys.ATBasis = { value: (dv.AT?.value > 0 ? dv.AT.value : atFormula), tempmodi: 0 };
-  sys.PABasis = { value: (dv.PA?.value > 0 ? dv.PA.value : paFormula), tempmodi: 0 };
+  const atFinal = dv.AT?.value > 0 ? dv.AT.value : atFormula;
+  const paFinal = dv.PA?.value > 0 ? dv.PA.value : paFormula;
+  sys.ATBasis = { value: atFinal, tempmodi: 0, bonus: atFinal - atFormula };
+  sys.PABasis = { value: paFinal, tempmodi: 0, bonus: paFinal - paFormula };
   sys.FKBasis = { value: (dv.FK?.value > 0 ? dv.FK.value : fkFormula), tempmodi: 0 };
 
   // ── 3. Kampftalente → system.skill ──────────────────────────────────────

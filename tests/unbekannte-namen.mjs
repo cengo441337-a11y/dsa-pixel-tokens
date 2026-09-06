@@ -221,6 +221,9 @@ function gebundeneNamen(code) {
   for (const m of code.matchAll(/(?:^|[^\w$.])([A-Za-z_$][\w$]*)\s*=>/g)) merke(m[1]);
   for (const m of code.matchAll(/\bcatch\s*\(\s*([A-Za-z_$][\w$]*)/g)) merke(m[1]);
   for (const m of code.matchAll(/import\s+([^;]+?)\s+from/g)) merke(m[1]);
+  // Export-Umbenennungen: `export { intern as extern };` — beide Namen sind
+  // hier gebunden, "extern" ist ein Aliasname und keine Benutzung.
+  for (const m of code.matchAll(/export\s*\{([^}]*)\}/g)) merke(m[1]);
   // Methodendefinitionen: Name und Parameter sind beide gebunden.
   for (const m of code.matchAll(/^\s*(?:static\s+)?(?:async\s+)?(?:get\s+|set\s+)?([A-Za-z_$#][\w$]*)\s*\(([^()]*)\)\s*\{/gm)) {
     merke(m[1]); merke(m[2]);
