@@ -6,6 +6,161 @@ Format: [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionen nach
 
 ---
 
+## [0.8.0] — 2026-09-06 (Regel-Durchsicht, Sicherheitsnetz, drei neue Systeme)
+
+Die grösste Durchsicht seit Bestehen des Moduls. 22.861 Zeilen JavaScript hatten
+bis hierhin keinen einzigen Test und kein Prüfwerkzeug. Beides gibt es jetzt —
+und der Weg dahin hat eine Reihe von Fehlern zutage gefördert, die im Spiel nie
+aufgefallen wären, weil sie nicht abstürzen, sondern still falsch rechnen.
+
+### Würfel und Regeln
+
+- **Erleichterungen blähten die Qualität eines Zaubers auf.** Ein Zauberer mit
+  ZfW 4 und einer Erleichterung von 5 erzielte ZfP* 9 statt 4. Da die ZfP* in
+  Schadens- und Wirkungsdauerformeln eingehen, wurde daraus unmittelbar mehr
+  Schaden. Die übrig gebliebenen Punkte sind jetzt auf den unmodifizierten
+  Talent- bzw. Zauberfertigkeitswert gedeckelt.
+- **Ein glücklicher Wurf gelang und richtete nichts aus.** Bei zwei Einsen
+  meldete der Chat „GLÜCKLICH! Maximale Wirkung", der Zauber rechnete aber
+  weiter mit den ZfP* der rechnerisch misslungenen Probe — also mit 0. Probe und
+  Kritischer werden jetzt an einer Stelle verrechnet, für alle fünf Aufrufer.
+  Dreifach-Einsen und Dreifach-Zwanzigen gelten dabei erstmals als meisterhafter
+  Erfolg bzw. schwerer Patzer.
+- **Sieben Kampfmanöver waren unbenutzbar.** Gezielter Stich, Hammerschlag,
+  Niederwerfen, Sturmangriff, Todesstoss, Klingensturm und Betäubungsschlag
+  brachen beim Auswählen kommentarlos ab — ohne Wurf, ohne Chatmeldung, nur mit
+  einem Fehler in der Konsole.
+- **Die Trefferzone wurde zweimal gewürfelt, mit zwei verschiedenen Tabellen.**
+  Der Angriff meldete bei einer 2 „Kopf", der Schadenswurf traf mit derselben 2
+  das rechte Bein. Zonenrüstung und Wunde landeten dadurch auf der falschen
+  Zone, und ein gezielter Kopftreffer für AT−8 war reine Dekoration.
+- **Stumpfer Schlag und Betäubungsschlag** richteten Lebensenergieschaden an und
+  erzeugten Wunden, statt Ausdauer zu kosten — genau das Gegenteil dessen, was
+  ihr eigener Chattext ankündigte.
+- **Aus „2W6+4" wurde ein 66-seitiger Würfel.** Erwartungswert 71 statt 11. Es
+  gab drei Umwandler im Modul; jetzt gibt es einen.
+- **Die Magieresistenz wirkte an der falschen Stelle.** Sie floss als
+  Probenerschwernis ein statt von den ZfP* abgezogen zu werden. Bei einem
+  Zauberfertigkeitswert unter der Magieresistenz wirkte der Zauber trotzdem —
+  mit ZfP* 1; ein Ziel konnte sich also nie ganz wehren. Bei hoher
+  Magieresistenz misslang die Probe, und der Zauberer zahlte nur die halben
+  Astralpunkte, obwohl die vollen fällig sind. „Widerstanden" ist jetzt ein
+  eigenes Ergebnis.
+- Weiter: Passierschlag wertete ab AT 24 eine 20 als Treffer; bei jedem
+  ungeraden Kampftalentwert verfiel ein Verteilungspunkt zwischen Attacke und
+  Parade; der Gezielte Stich ignorierte den gesamten Rüstungsschutz statt zwei
+  Punkte; und Parade-Manöver liefen ohne Prüfung der Sonderfertigkeit.
+
+### Was der Chat versprach und nicht hielt
+
+- **21 Liturgien meldeten einen Segen, den es nicht gab.** „Goldene Rüstung,
+  RS +3" landete in einem Kennfeld, das im ganzen Modul niemand las. Der
+  Rüstungsschutz änderte sich um null. Der Segen wirkt jetzt wirklich, auf
+  Rüstungsschutz sowie Attacke und Parade.
+- **Anhaltende Effekte liefen nie ab.** Eine Liturgie mit Wirkungsdauer
+  „LkP* Spielrunden" blieb samt Aura und Token-Symbol bestehen, bis jemand von
+  Hand rechtsklickte. Rundeneffekte laufen bewusst nur während eines Kampfes ab,
+  damit ein Kampfende nicht alle Segen auf einmal aufhebt.
+- **Jeder eigene Effekt feuerte zweimal.** Das Modul stieg bei eigenen
+  Chatnachrichten aus, sobald sie ein Kennfeld tragen — nur trug keine der 43
+  eines. Es löste also seinen Effekt aus, las danach seine eigene Chatzeile,
+  erriet aus dem Text erneut ein Ergebnis und löste denselben Effekt nochmal aus.
+- **„Misserfolg" enthält „erfolg".** Jede misslungene Probe eines fremden Moduls
+  galt als gelungen, samt Treffer-Effekt und Schadensblitz auf dem Ziel.
+
+### Helden-Import
+
+- **Der Umlaut-Ersetzer zerstörte Rassennamen.** Aus „Auelf" wurde „Aülf", aus
+  „Ambosszwerg" wurde „Amboßwerg" — beide standen danach in keiner Rassentabelle
+  und bekamen Geschwindigkeit 8 statt 9 bzw. 6.
+- **Die Magieresistenz wurde doppelt addiert.** Grog kam auf 25, Tarvas auf 20.
+  Solche Werte gibt es in DSA 4.1 nicht.
+- **Der Heldenbogen überschrieb importierte Zuschläge.** Die
+  Vollzauberer-Senkung von −4 und gekaufte Punkte waren nach dem ersten Öffnen
+  des Bogens verschwunden.
+- Aberglaube, Pazifismus und Niedrige Geburt landeten unter den Vorteilen. Und
+  ein Edelstein namens „Granat (10 Karat)" wurde als „Granatapfel" erkannt und
+  zur Wurfwaffe mit 4W6 Schaden.
+- Der Keyword-Rater für Zaubereffekte prüfte „eis" als blossen Teilstring —
+  enthalten in Geist, Reise, Kreis, Meister. 19 Zauber bekamen den falschen
+  Effekt; „Geisterbann" wurde zu einem Eiszauber. Jetzt sind es 4 Treffer, alle
+  echte Eiszauber.
+
+### Datenverlust und Rechte
+
+- **Beim Weltstart wurden ungefragt Aktoren gelöscht.** Die Duplikatsuche lief
+  bei jedem Start, ohne Rückfrage, ohne Typfilter — Spielercharaktere
+  eingeschlossen, und endgültig. Sie meldet jetzt nur noch; gelöscht wird auf
+  ausdrückliche Anweisung mit Bestätigung und Namensliste.
+- **Helden wanderten nach „DSA Untote".** Der Namensabgleich lief vor der
+  Kreatur-Prüfung; jeder Held mit „Schatten", „Knochen" oder „Ghul" im Namen
+  wurde einsortiert.
+- **Zonenschaden hörte beim ersten fremden Token auf.** Legte ein Spieler die
+  Zone, lehnte der Server ab, und alle weiteren Token im Bereich blieben
+  stillschweigend unversehrt.
+- Vier schreibende Makro-Helfer und die Knöpfe des Pandaemonium-Panels waren für
+  jeden Benutzer erreichbar.
+- **Der Kalender veränderte seine eigene Vorgabe.** In einer frischen Welt
+  verschob ein Klick auf „+1 Tag" den Kampagnenstart 1. Praios 1043 BF für den
+  Rest der Sitzung.
+
+### Nichts mehr, das im Hintergrund weiterläuft
+
+- Die Ticker für Schadenszahl und Würfelanimation schrieben nach einem
+  Szenenwechsel auf zerstörte Objekte, warfen dabei — und erreichten ihre eigene
+  Abmeldezeile nie. Der tote Rückruf lief bis zum Neuladen bei jedem Bild weiter.
+- Ein falsch getippter Sprite-Pfad löste einen Ladeversuch pro Bild aus,
+  dauerhaft.
+- Zwei gleichzeitig gesetzte Statuseffekte hinterliessen einen doppelten
+  Symbol-Container am Token.
+- Die aktive Szene stand doppelt in der Szenenliste; jeder Cluster-Token wurde
+  pro Änderung zweimal abgearbeitet.
+
+### Neu im Spiel
+
+- **Zustände.** Die acht DSA-4.1-Zustände (Schmerz, Betäubung, Verwirrung,
+  Furcht, Paralyse, Belastung, Berauschung, Entrückung) in Stufe 0 bis 4. Der
+  Abzug wirkt automatisch auf Talentproben — eigenschaftsgenau, Paralyse trifft
+  die Körperprobe und nicht die Klugheitsprobe — sowie auf Attacke und Parade.
+  Stufe 4 heisst handlungsunfähig. Bedienung: `DSAZustaende(held)`.
+- **Sammelproben.** Für alles, was mehr als einen Wurf braucht: Ritual
+  vorbereiten, Rüstung schmieden, Bibliothek durchforsten, Verletzten pflegen.
+  Das Modul sammelt die TaP* über beliebig viele Versuche, kennt Zielwert,
+  Versuchsgrenze und Zeitintervall und zeigt den Fortschritt im Chat. Was bei
+  einem Patzer passiert, ist einstellbar — Spielrunden regeln das
+  unterschiedlich. Bedienung: `DSASammelprobe(held)`.
+- **Kampfübersicht.** Eine Tafel mit allen Kämpfern: Lebensenergie, Ausdauer und
+  Astralenergie als Balken, Wunden je Körperzone samt Probenmalus, aktive
+  Zustände mit ihren Abzügen, und eine deutliche Zeile, wenn jemand
+  handlungsunfähig ist. Sie liest nur und zeigt fremde Werte ausschliesslich dem,
+  der sie ohnehin sehen darf. Bedienung: `DSAKampfuebersicht()`.
+
+### Für alle, die am Modul arbeiten
+
+`npm run check` prüft ohne ein einziges Fremdpaket:
+
+- 144 Regeltests gegen die DSA-Rechenwege
+- Syntax aller Quelldateien und Lesbarkeit aller Daten-Dateien
+- sich selbst zuweisende Deklarationen (`const x = x`)
+- Helfer, die vor ihrer Deklaration aufgerufen werden
+- Bezeichner, die nirgends deklariert sind
+- ob jedes Modul kopflos lädt
+- ob Chatnachrichten über `dsaChat()` laufen
+- ob neue Bausteine auch wirklich aufgerufen werden
+
+`npm run mutation` baut 19 Fehler absichtlich ein und verlangt, dass die Tests
+rot werden. Beim ersten Lauf rutschten zwei durch — daraus wurden ein fehlender
+Test und ein echter Fehler in der Schadensformel („2W6+1W4" ergab „2d6+11d4").
+
+### An der Bedienung ändert sich sonst nichts
+
+Wer das Modul bisher benutzt hat, findet alles am gewohnten Platz. Die einzige
+sichtbare Änderung ausserhalb der drei neuen Systeme: die Duplikat-Entfernung
+läuft nicht mehr von selbst. Wer sie will, ruft `DSADedupActors()` auf und
+bekommt vorher die Liste zu sehen.
+
+---
+
 ## [0.7.5] — 2026-04-30 (Mirakel/LkW User-Bugfix Praiodun)
 
 User-Bug gemeldet: Praiodun Zornbrecht (Praios-Geweihter, Profession="Geweihter")

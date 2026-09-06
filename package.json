@@ -1,6 +1,6 @@
 {
   "name": "dsa-pixel-tokens",
-  "version": "0.7.18",
+  "version": "0.8.0",
   "description": "Testgerüst für das FoundryVTT-Modul. Foundry selbst liest module.json, nicht diese Datei — hier steht ausschliesslich, wie die Regeltests laufen.",
   "private": true,
   "type": "module",

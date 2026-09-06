@@ -1698,6 +1698,10 @@ export function dsaChat(daten = {}, probe = null) {
  *   "W6"      → "1d6"
  *   "2W6+1W4" → "2d6+1d4"   (mehrere Würfelgruppen in einer Formel)
  *
+ * Der Zuschlag gilt nur, wenn danach KEIN W folgt: sonst nahm der Ausdruck bei
+ * "2W6+1W4" das "+1" als Zuschlag, obwohl die 1 die Würfelzahl der nächsten
+ * Gruppe ist — heraus kam "2d6+11d4".
+ *
  * WARUM ZENTRAL: Es gab drei Umwandler im Modul, und einer davon war falsch.
  * `combat.mjs` benutzte /(\d*)W(\+?\d*)/ — dabei landete die Seitenzahl in der
  * Bonusgruppe: "2W6+4" wurde zu "2d66+4", also ein 66-seitiger Würfel mit
@@ -1712,7 +1716,7 @@ export function tpFormelZuWuerfeln(formel) {
   // Reihenfolge der Gruppen: Anzahl, "W", Seitenzahl, optionaler Zuschlag.
   // Die Seitenzahl MUSS eine eigene Gruppe sein — sonst frisst der Zuschlag sie.
   return formel.replace(
-    /(\d*)W(\d*)([+-]\d+)?/gi,
+    /(\d*)W(\d*)((?:[+-]\d+)(?![wW]))?/gi,
     (_, anzahl, seiten, zuschlag) => `${anzahl || "1"}d${seiten || "6"}${zuschlag || ""}`
   );
 }

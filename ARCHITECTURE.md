@@ -179,3 +179,134 @@ Hook: renderChatMessage
 - Animierte HP/AsP/AuP Balken
 - Retro Tab-Navigation
 - Pixel-Art Würfel-Icons
+
+
+---
+
+# Prüfen und Ändern (seit v0.8.0)
+
+## Das Sicherheitsnetz
+
+```bash
+npm run check      # statische Prüfung + 144 Regeltests
+npm run test       # nur die Tests
+npm run mutation   # baut 19 Fehler ein und verlangt rote Tests
+```
+
+Kein Fremdpaket, keine Installation. Wer das Modul frisch klont, kann sofort
+prüfen — das war Absicht: eine Prüfung, für die man erst etwas einrichten muss,
+läuft irgendwann nicht mehr.
+
+### `tests/foundry-stub.mjs`
+
+Notdürftiger Ersatz für die Foundry-Laufzeitumgebung, damit sich die
+Modul-Dateien in einem nackten Node-Prozess importieren lassen. Er ist bewusst
+KEIN Foundry-Nachbau: gerade genug, dass der Import durchläuft. Wer eine
+Funktion testen will, die echtes Foundry-Verhalten braucht, setzt dieses
+Verhalten im Test selbst — nicht heimlich im Ersatz. Sonst prüft der Test am
+Ende den Ersatz statt das Modul.
+
+### `tests/syntaxpruefung.mjs`
+
+Acht Prüfungen für Fehlerklassen, die `node --check` durchwinkt:
+
+| Prüfung | Fängt |
+|---|---|
+| Syntax | kaputte Klammern |
+| JSON | unlesbare Daten-Dateien |
+| Selbstzuweisung | `const x = x` — gültige Syntax, wirft zur Laufzeit |
+| Aufruf vor Deklaration | `const helfer` unterhalb seines Aufrufs |
+| Ladbarkeit | jedes Modul lädt kopflos |
+| Unbekannte Bezeichner | benutzt, aber nirgends deklariert |
+| Chat | direkte `ChatMessage.create`-Aufrufe |
+| Verdrahtung | neue Bausteine, die niemand aufruft |
+
+Jede dieser Prüfungen war einmal rot — wie man das nachstellt, steht im
+Kommentar der jeweiligen Prüfung.
+
+### `tests/mutationspruefung.mjs`
+
+Prüft die Tests, nicht den Code. Ein grüner Testlauf beweist nur, dass die Tests
+durchlaufen — nicht, dass sie etwas merken würden. **Wer eine neue Regel
+absichert, trägt hier eine Mutation dazu ein.** Eine Regel ohne Mutation ist
+eine Regel, von der niemand weiss, ob ihr Test greift.
+
+## Wiederkehrende Muster
+
+**Eine Regel, eine Stelle.** Wo dieselbe Rechnung an mehreren Orten stand, lief
+sie auseinander: der Initiative-Malus wurde an vier Stellen verschieden
+gerechnet, die Trefferzone aus zwei verschiedenen Tabellen gewürfelt, die
+Schadensformel von drei Umwandlern übersetzt — einer davon falsch. Neue Regeln
+gehören nach `config.mjs` und werden von dort aufgerufen.
+
+**Vergessen darf nicht stillschweigend funktionieren.** `deduplicateActors()`
+löscht nur mit ausdrücklichem Schalter; wer ihn vergisst, bekommt eine Liste
+statt eines Verlusts. `applyCrit()` liefert die einzigen gültigen Werte; wer den
+Aufruf vergisst, bekommt kein falsches Ergebnis, sondern gar keins.
+
+**Maschinenentscheidungen nicht aus Fliesstext.** Eigene Chatnachrichten tragen
+ihr Ergebnis maschinenlesbar im Kennfeld (`dsaChat` / `dsaFlags`). Die
+Textauswertung in `dice-hooks.mjs` ist ausdrücklich eine Notlösung für fremde
+Module, deren Aufbau wir nicht ändern können.
+
+## Neue Systeme seit v0.8.0
+
+```
+scripts/zustaende.mjs        Die acht DSA-4.1-Zustände, Stufe 0–4.
+                             zustandsMalus() wird von sheet.mjs bei jeder
+                             Probe und jedem Kampfwurf gelesen.
+
+scripts/sammelprobe.mjs      Kumulative Proben über mehrere Versuche.
+                             versuchVerrechnen() ist rein — die Würfel kommen
+                             von aussen, nur deshalb prüfbar.
+
+scripts/kampfuebersicht.mjs  Lesende Tafel über alle Kämpfer.
+                             sichtbarFuer() entscheidet, wer welche Werte sieht.
+```
+
+---
+
+# Was bewusst offen ist
+
+Damit niemand sucht und denkt, er habe etwas übersehen.
+
+**Rundung der Fünftel-Formeln.** `DERIVED_FORMULAS` benutzt `Math.round` für
+AT-, PA-, FK-, INI-Basis und Magieresistenz, mit Verweis auf WdH S.20 („echt
+gerundet"). Ein Prüfbericht hat `Math.ceil` gefordert. Ich konnte die Quelle
+nicht einsehen und habe die dokumentierte Entscheidung stehen lassen — eine
+begründete Wahl gegen eine ungeprüfte Behauptung auszutauschen wäre keine
+Verbesserung. Wer das Regelwerk zur Hand hat, entscheidet es an genau einer
+Stelle: `config.mjs::DERIVED_FORMULAS`.
+
+**Ausweichen-Basiswert.** `AW` entspricht dem PA-Basiswert (Verweis auf
+WdS S.66). Es gibt Fassungen, die GE/2 nennen. Der Widerspruch im Modul selbst —
+ein Fallback in `_rollDodge`, der `PA-Basis/2` rechnete — ist beseitigt; die
+Regelfrage bleibt offen.
+
+**Geltungsbereich einzelner Zustände.** Dass pro Stufe ein Punkt abgezogen wird
+und Stufe 4 handlungsunfähig macht, ist einheitlich. Welche Eigenschaften ein
+einzelner Zustand genau betrifft, ist zwischen den Regelwerken unterschiedlich
+beschrieben. Die Tabelle steht deshalb gebündelt in `zustaende.mjs::ZUSTAENDE`
+und ist an einer Stelle korrigierbar.
+
+**Auslegung von `value` im Helden-Import.** Das Feld bedeutet in den drei
+vorliegenden Heldendateien nicht dasselbe — mal Zukauf, mal Endwert.
+`mrAusImport()` unterscheidet am Formelwert. Das ist eine begründete Auslegung,
+keine dokumentierte Schnittstelle. Taucht eine Datei auf, bei der sie
+danebenliegt, gehört sie als Testfall in `tests/helden-import.test.mjs`.
+
+**Nicht geprüft: die Oberfläche.** Getestet wird, was gerechnet wird. Dialoge,
+Fenster und HTML bleiben ungetestet — Oberflächen ändern sich schneller, als
+ihre Tests nützen.
+
+**Nicht geprüft: eine laufende Foundry-Instanz.** Alle Befunde und alle
+Reparaturen sind gegen den Quelltext und gegen die Regeltests belegt, nicht
+gegen eine laufende Welt. Die Ressourcen- und Rechte-Reparaturen
+(Ticker-Absicherung, Spielleiter-Umweg, Statussymbole) sollten beim nächsten
+Spielabend beobachtet werden.
+
+**Offen aus den Prüfberichten, noch nicht angefasst:** die Reihenfolgeabhängigkeit
+beim `_finalMax`-Schnappschuss im Import, die fehlende Weitergabe von `merkmal`
+und `isBeschwoerung` aus dem Heldenbogen an `castSpell` (dadurch laufen
+Beschwörungen als gewöhnliche Zauber), die Kosten-Auslegung bei 165 Zaubern mit
+Zusatzterm, und der Radius von Zonenzaubern bei Szenen mit `grid.distance` ≠ 1.

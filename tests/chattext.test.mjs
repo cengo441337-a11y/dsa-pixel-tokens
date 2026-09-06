@@ -38,6 +38,16 @@ describe("bewerteChatText — Ergebnis aus fremdem Chattext", () => {
     assert.equal(bewerteChatText("Angriff: kein Treffer").success, false);
   });
 
+  test("ohne Erfolg ist kein Erfolg", () => {
+    // Gefunden in der Mutationspruefung am 06.09.2026: "erfolg" mit Wortgrenze
+    // trifft in "ohne Erfolg" — und kein Misserfolgswort stand dagegen.
+    assert.equal(bewerteChatText("Der Wurf blieb ohne Erfolg").success, false);
+  });
+
+  test("erfolglos ist kein Erfolg", () => {
+    assert.equal(bewerteChatText("Die Probe war erfolglos").success, false);
+  });
+
   test("gelungene Probe wird als Erfolg erkannt", () => {
     assert.equal(bewerteChatText("Schwerter: Probe gelungen").success, true);
   });

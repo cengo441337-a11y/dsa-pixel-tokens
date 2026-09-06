@@ -164,6 +164,8 @@ export function bewerteChatText(text) {
   const patzer     = /\bpatzer\b/.test(t) || /kritischer\s+misserfolg/.test(t);
   const gluecklich = /\bgl(ü|ue)cklich\w*\b/.test(t) || /\bmeisterhaft\w*\b/.test(t);
   const misserfolg = /\bmisslungen\b|\bmisserfolg\b|\bdaneben\b|\bgescheitert\b/.test(t)
+                  || /\berfolglos\w*\b/.test(t)
+                  || /\bohne\s+erfolg\b/.test(t)
                   || /\bnicht\s+(gelungen|getroffen|bestanden)\b/.test(t)
                   || /\bkein\s+treffer\b/.test(t);
   const erfolg     = /\bgelungen\b|\btreffer\b|\berfolg\b|\bbestanden\b/.test(t);
