@@ -113,6 +113,54 @@ function findToken(actor) {
  * @param {object} opts - { name, vfx, duration: { rounds?, seconds? }, lit, lkpStar }
  * @returns {Promise<string|null>} effectId (für späteres remove) oder null
  */
+/**
+ * Rechnet eine Wirkungsdauer in einen Ablaufzeitpunkt um, der sich später ohne
+ * Foundry-Interna prüfen lässt.
+ *
+ * WARUM EIGENE BUCHFÜHRUNG: Foundry zeigt abgelaufene Effekte zwar ausgegraut an,
+ * löscht sie aber nicht. Bis v0.7.18 gab es hier gar keinen Ablauf — eine
+ * Liturgie mit "LkP* SR" blieb samt Aura und Token-Symbol bestehen, bis jemand
+ * von Hand rechtsklickte. Nach einem Spielabend hingen an einem Geweihten
+ * beliebig viele davon.
+ *
+ * @param {object|null} duration - { rounds } oder { seconds }, wie parseDuration liefert
+ * @returns {{ runde?: number, zeit?: number }|null} null = laeuft nie ab
+ */
+export function ablaufBerechnen(duration) {
+  if (!duration) return null;
+  if (Number.isFinite(duration.rounds)) {
+    const jetzt = game.combat?.round ?? 0;
+    return { runde: jetzt + duration.rounds };
+  }
+  if (Number.isFinite(duration.seconds)) {
+    const jetzt = game.time?.worldTime ?? 0;
+    return { zeit: jetzt + duration.seconds };
+  }
+  return null;
+}
+
+/**
+ * Ist dieser Ablaufzeitpunkt erreicht?
+ *
+ * @param {{ runde?: number, zeit?: number }|null} ablauf
+ * @param {{ runde?: number, zeit?: number }} jetzt
+ * @returns {boolean} false bei null — was nie ablaeuft, laeuft auch jetzt nicht ab
+ */
+export function istAbgelaufen(ablauf, jetzt = {}) {
+  if (!ablauf) return false;
+  if (Number.isFinite(ablauf.runde)) {
+    // Rundenzaehler laeuft nur, solange ein Kampf laeuft. Ohne Kampf bleibt der
+    // Effekt stehen — sonst verschwaende ein Kampfende alle Segen auf einmal.
+    if (!Number.isFinite(jetzt.runde)) return false;
+    return jetzt.runde >= ablauf.runde;
+  }
+  if (Number.isFinite(ablauf.zeit)) {
+    if (!Number.isFinite(jetzt.zeit)) return false;
+    return jetzt.zeit >= ablauf.zeit;
+  }
+  return false;
+}
+
 export async function addPersistentEffect(actor, opts) {
   if (!actor) return null;
   const { name, vfx, duration, lit, lkpStar } = opts;
@@ -131,12 +179,25 @@ export async function addPersistentEffect(actor, opts) {
         vfx: vfx ?? "holy_aura",
         lkpStar: lkpStar ?? 0,
         managedAura: true,
+        ablauf: ablaufBerechnen(duration),
       },
     },
     changes: [],
     transfer: false,
     statuses: [`liturgy-${vfx}`],  // markiert als Status (Foundry-Token-HUD zeigt es)
   };
+
+  // Dieselbe Liturgie zweimal wirken heisst erneuern, nicht stapeln. Vorher
+  // legte jeder Wurf einen weiteren Effekt an: derselbe Segen hing am Ende
+  // fuenfmal am Token, mit fuenf Auren uebereinander.
+  const gleicher = (actor.effects ?? []).find(e => {
+    const k = e.flags?.[MODULE_ID];
+    if (!k?.managedAura) return false;
+    return (lit?.id && k.liturgyId === lit.id) || (e.name && e.name === aeData.name);
+  });
+  if (gleicher) {
+    await removePersistentEffect(actor, gleicher.id);
+  }
 
   let effect;
   try {
@@ -216,7 +277,49 @@ export function rehydrateAurasForToken(token) {
 
 // ─── Hooks ───────────────────────────────────────────────────────────────────
 
+/**
+ * Entfernt alle abgelaufenen Effekte dieses Moduls.
+ *
+ * Läuft nur bei der Spielleitung: das Löschen fremder Effekte lehnt der Server
+ * bei Spielern ohnehin ab, und zwei Clients, die gleichzeitig aufräumen,
+ * erzeugen nur Fehler in der Konsole.
+ *
+ * @returns {Promise<number>} Anzahl der entfernten Effekte
+ */
+export async function abgelaufeneEffekteEntfernen() {
+  if (!game.user?.isGM) return 0;
+  const jetzt = {
+    runde: game.combat ? (game.combat.round ?? 0) : undefined,
+    zeit: game.time?.worldTime ?? 0,
+  };
+
+  let entfernt = 0;
+  for (const actor of game.actors ?? []) {
+    const faellig = [];
+    for (const effekt of actor.effects ?? []) {
+      const kennfeld = effekt.flags?.[MODULE_ID];
+      if (!kennfeld?.managedAura) continue;
+      if (istAbgelaufen(kennfeld.ablauf, jetzt)) faellig.push(effekt.id);
+    }
+    for (const id of faellig) {
+      await removePersistentEffect(actor, id);
+      entfernt++;
+    }
+  }
+  return entfernt;
+}
+
 export function registerPersistentEffectHooks() {
+  // Ablauf prüfen, wenn die Zeit weiterläuft — beim Rundenwechsel im Kampf und
+  // wenn die Spielleitung die Weltzeit verstellt.
+  Hooks.on("updateCombat", async (_combat, changed) => {
+    if (changed?.round === undefined && changed?.turn === undefined) return;
+    await abgelaufeneEffekteEntfernen();
+  });
+  Hooks.on("updateWorldTime", async () => {
+    await abgelaufeneEffekteEntfernen();
+  });
+
   // Wenn AE gelöscht wird (UI-Klick auf Token-HUD oder anderswo) → Aura killen
   Hooks.on("deleteActiveEffect", (effect, options, userId) => {
     const flag = effect.flags?.[MODULE_ID];

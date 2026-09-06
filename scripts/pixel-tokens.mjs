@@ -59,6 +59,21 @@ const _sheetCache = new Map();
 /** Verhindert gleichzeitige applySprite-Aufrufe auf demselben Token */
 const _applyInProgress = new Set();
 
+/**
+ * Sprite-Pfade, die sich nachweislich nicht laden lassen — je Token gemerkt.
+ *
+ * WARUM: `refreshToken` feuert bei jeder Auswahl, Bewegung und Sichtbarkeits-
+ * änderung, also praktisch bei jedem Bild. Fehlt das Sprite, startete der Hook
+ * sofort einen neuen Versuch. Bei einem falsch getippten oder umbenannten
+ * Sheet-Pfad wurde daraus ein Dauerfeuer: ein Ladeversuch pro Bild, solange der
+ * Token auf der Szene liegt — mit einer Fehlerzeile pro Versuch in der Konsole.
+ * Ein gescheiterter Pfad wird deshalb gemerkt und erst wieder versucht, wenn
+ * der Pfad sich ändert (oder der Cache über applySprite mit bustCache läuft).
+ *
+ * @type {Map<string, string>} tokenId → Pfad, der zuletzt scheiterte
+ */
+const _fehlgeschlageneSprites = new Map();
+
 async function getSheetTextures(src, cfg) {
   const key = `${src}|${cfg.frameWidth}|${cfg.frameHeight}|${cfg.framesPerDir}`;
   if (_sheetCache.has(key)) return _sheetCache.get(key);
@@ -149,6 +164,15 @@ function removeSprite(token) {
 async function applySprite(token, { bustCache = false } = {}) {
   const tokenId = token.document?.id;
   if (tokenId && _applyInProgress.has(tokenId)) return;
+
+  // Pfad, der zuletzt nicht geladen werden konnte, nicht erneut versuchen —
+  // sonst laeuft pro Bild ein Ladeversuch. Ein ausdruecklicher Cache-Bust
+  // (Knopf "Sprite anwenden") hebt die Sperre auf.
+  const gewuenschterPfad = getTokenConfig(token)?.spriteSheet ?? null;
+  if (bustCache && tokenId) _fehlgeschlageneSprites.delete(tokenId);
+  if (tokenId && gewuenschterPfad
+      && _fehlgeschlageneSprites.get(tokenId) === gewuenschterPfad) return;
+
   if (tokenId) _applyInProgress.add(tokenId);
 
   try {
@@ -183,9 +207,15 @@ async function _doApplySprite(token, bustCache) {
 
   const sheet = await getSheetTextures(cfg.spriteSheet, cfg);
   if (!sheet) {
-    console.warn(`[${MODULE_ID}] Could not load sheet for token ${token.document?.name}`);
+    // Pfad merken, damit refreshToken nicht bei jedem Bild einen neuen Versuch
+    // startet. Die Warnung erscheint dadurch genau einmal statt endlos.
+    const tokenId = token.document?.id;
+    if (tokenId) _fehlgeschlageneSprites.set(tokenId, cfg.spriteSheet);
+    console.warn(`[${MODULE_ID}] Sprite-Sheet nicht ladbar für ${token.document?.name}: ${cfg.spriteSheet} — weitere Versuche werden ausgesetzt, bis der Pfad sich ändert.`);
     return;
   }
+  // Geklappt: eine frühere Sperre für diesen Token aufheben.
+  if (token.document?.id) _fehlgeschlageneSprites.delete(token.document.id);
 
   const idleFrames = sheet.textures.get(DIR.DOWN);
   if (!idleFrames?.length) return;
@@ -453,9 +483,32 @@ const STATUS_ICONS = {
 };
 
 async function refreshStatusIcons(token) {
-  // Alte Icons entfernen
-  const old = token.children?.find(c => c.name === STATUS_LAYER);
-  if (old) old.destroy({ children: true });
+  // Diese Funktion wartet mitten drin auf geladene Bilder. Ohne Sperre laufen
+  // zwei Aufrufe ineinander: Werden zwei Statuseffekte in einem Rutsch gesetzt,
+  // feuert der Hook zweimal, beide finden denselben alten Container, beide
+  // haengen danach einen neuen an — und `find` entfernt spaeter immer nur den
+  // ersten. Pro Doppelschlag blieb ein kompletter Satz Symbole am Token haengen.
+  const tokenId = token?.document?.id;
+  if (tokenId) {
+    if (_statusInProgress.has(tokenId)) return;
+    _statusInProgress.add(tokenId);
+  }
+  try {
+    await _refreshStatusIcons(token);
+  } finally {
+    if (tokenId) _statusInProgress.delete(tokenId);
+  }
+}
+
+/** Sperre gegen ineinanderlaufende refreshStatusIcons-Aufrufe je Token. */
+const _statusInProgress = new Set();
+
+async function _refreshStatusIcons(token) {
+  // Alte Icons entfernen — ALLE, nicht nur den ersten. Ein Altbestand aus
+  // frueheren Versionen kann mehrere Container hinterlassen haben.
+  for (const alt of (token.children ?? []).filter(c => c.name === STATUS_LAYER)) {
+    alt.destroy({ children: true });
+  }
 
   const statuses = token.document?.statuses ?? new Set();
   if (!statuses.size) return;
@@ -1178,7 +1231,14 @@ function _showDamageNumber(token, amount, color = 0xff3333, label = "SP") {
   const startY = cy;
   const drift = canvas.grid.size * 0.9;
 
+  // Der ganze Rückruf liegt in einem try/catch, und BEIDE Zweige räumen auf.
+  // Grund: `canvas.app` überlebt einen Szenenwechsel, die
+  // PIXI-Objekte darin nicht. Wechselt jemand die Szene, während die Zahl noch
+  // fliegt, schreibt der Rückruf auf ein zerstörtes Objekt und wirft — und die
+  // Abmeldezeile am Ende wurde nie erreicht. Der tote Rückruf lief dann bis zum
+  // Neuladen bei jedem Bild weiter und warf jedes Mal.
   const onTick = () => {
+    try {
     tick++;
     const t = tick / total;
     // Zuerst schnell nach oben, dann langsamer (ease-out)
@@ -1198,12 +1258,39 @@ function _showDamageNumber(token, amount, color = 0xff3333, label = "SP") {
     labelText.y = text.y - text.height * text.scale.y * 0.85;
 
     if (tick >= total) {
-      canvas.app.ticker.remove(onTick);
-      if (!text.destroyed)      { layer.removeChild(text);      text.destroy(); }
-      if (!labelText.destroyed) { layer.removeChild(labelText); labelText.destroy(); }
+      _schadenszahlAufraeumen(onTick, layer, text, labelText);
+    }
+    } catch (fehler) {
+      // Beim Szenenwechsel ist das erwartbar; hier endet die Animation eben.
+      _schadenszahlAufraeumen(onTick, layer, text, labelText);
     }
   };
   canvas.app.ticker.add(onTick);
+}
+
+/**
+ * Meldet den Würfel-Ticker ab und räumt den Würfel-Container weg.
+ * Wird sowohl am regulären Ende der Animation als auch im Fehlerfall gerufen.
+ */
+function _wuerfelAufraeumen(onTick, layer, container) {
+  try { canvas.app?.ticker?.remove(onTick); } catch { /* Canvas schon weg */ }
+  try {
+    if (container && !container.destroyed) {
+      layer?.removeChild?.(container);
+      container.destroy({ children: true });
+    }
+  } catch { /* schon zerstört */ }
+}
+
+/**
+ * Meldet den Ticker-Rückruf ab und räumt die beiden Textobjekte weg.
+ * Steht als eigene Funktion da, weil sie aus zwei Zweigen aufgerufen wird —
+ * dem regulären Ende und dem Fehlerfall — und beide dasselbe tun müssen.
+ */
+function _schadenszahlAufraeumen(onTick, layer, text, labelText) {
+  try { canvas.app?.ticker?.remove(onTick); } catch { /* Canvas schon weg */ }
+  try { if (text && !text.destroyed) { layer?.removeChild?.(text); text.destroy(); } } catch { /* schon zerstört */ }
+  try { if (labelText && !labelText.destroyed) { layer?.removeChild?.(labelText); labelText.destroy(); } } catch { /* schon zerstört */ }
 }
 
 /**
@@ -1723,7 +1810,10 @@ function showDiceAnimation(x, y, result, dieType = "d20") {
   const FADE_TICKS    = 30;   // Ausblenden
   const TOTAL         = ROLL_TICKS + SETTLE_TICKS + FADE_TICKS;
 
+  // try/catch wie bei der Schadenszahl: ein Szenenwechsel darf keinen
+  // Rueckruf hinterlassen, der bei jedem Bild erneut wirft.
   const onTick = () => {
+    try {
     tick++;
 
     if (tick <= ROLL_TICKS) {
@@ -1762,11 +1852,11 @@ function showDiceAnimation(x, y, result, dieType = "d20") {
     }
 
     if (tick >= TOTAL) {
-      canvas.app.ticker.remove(onTick);
-      if (!container.destroyed) {
-        layer.removeChild(container);
-        container.destroy({ children: true });
-      }
+      _wuerfelAufraeumen(onTick, layer, container);
+    }
+    } catch (fehler) {
+      // Szenenwechsel waehrend der Animation: Objekte sind weg, wir hoeren auf.
+      _wuerfelAufraeumen(onTick, layer, container);
     }
   };
 

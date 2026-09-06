@@ -22,6 +22,7 @@ function _getLepStatusFlags(actor) {
   };
 }
 import { castSpell } from "./magic.mjs";
+import { aktiveBuffs } from "./liturgy-effects.mjs";
 import { openDatabaseBrowser } from "./db-browser.mjs";
 
 /**
@@ -142,6 +143,13 @@ export class PixelArtCharacterSheet extends ActorSheet {
       };
     }
     data.attrTemp = attrTemp;
+
+    // ── Liturgie-Segen einmal einlesen ──────────────────────────────────────
+    // Steht bewusst VOR den abgeleiteten Werten: die Magieresistenz weiter
+    // unten braucht ihn. Die Kampfwerte holen ihn sich in
+    // _prepareCombatTalents selbst, weil das eine eigene Methode ist.
+    const segen = aktiveBuffs(this.actor);
+    data.liturgieSegen = segen;
 
     // ── Abgeleitete Werte (INI, MR, WS, AT, PA, FK, AW, GS) ───────────────────
     // gdsa aktualisiert diese Felder nicht automatisch nach XML-Import oder
@@ -427,6 +435,18 @@ export class PixelArtCharacterSheet extends ActorSheet {
       }
     }
 
+    // ── Liturgie-Segen anwenden ──
+    // Bis v0.7.18 landeten diese Werte in einem Kennfeld, das niemand las: der
+    // Chat meldete "Goldene Rüstung, RS +3", der Rüstungsschutz des Geweihten
+    // blieb unverändert. Hier werden sie erstmals wirksam.
+    const segenRS = Math.max(segen.rs ?? 0, segen.RS ?? 0);
+    if (segenRS > 0) {
+      data.totalRS += segenRS;
+      for (const z of Object.keys(data.zoneRS)) {
+        data.zoneRS[z] = (data.zoneRS[z] ?? 0) + segenRS;
+      }
+    }
+
     // ── Liturgien / Schamanen-Erkennung ──
     // Geweiht = hat KaP-Pool > 0 ODER Liturgiekenntnis (Item ODER system.talente)
     //           ODER Profession matcht Gott ODER profession enthält "geweiht"
@@ -587,6 +607,9 @@ export class PixelArtCharacterSheet extends ActorSheet {
   // ─── Kampftalente vorbereiten ─────────────────────────────────────────
 
   _prepareCombatTalents(eBE = 0, shieldAtMod = 0, shieldPaMod = 0, woundPenalty = 0) {
+    // Liturgie-Segen fuer AT/PA. Wird hier eigens geholt, weil diese Methode
+    // ihre Daten nicht von getData durchgereicht bekommt.
+    const kampfSegen = aktiveBuffs(this.actor);
     const sys = this.actor.system;
     const talents = [];
     const atBase = sys.ATBasis?.value ?? 10;
@@ -701,6 +724,14 @@ export class PixelArtCharacterSheet extends ActorSheet {
       // ist totalWounds × 2, wir ziehen einfach den vorberechneten Wert ab).
       at -= woundPenalty;
       if (typeof pa === "number") pa -= woundPenalty;
+
+      // Liturgie-Segen auf AT und PA (z.B. Rondras Schlachtruf). Nur Nahkampf —
+      // der Segen gilt fuer die Waffenhand, nicht fuer den Bogen.
+      const segenAtPa = kampfSegen.at_pa ?? 0;
+      if (segenAtPa > 0 && !isRanged) {
+        at += segenAtPa;
+        if (typeof pa === "number") pa += segenAtPa;
+      }
 
       // WM-Label für Tooltip: "WM +1/−1", leer wenn beide 0
       const wmLabel = (wmAt !== 0 || wmPa !== 0)

@@ -102,16 +102,91 @@ async function applyAsPDrain(token, asp) {
 
 // ─── Buff via DSA-Pixel-Flag (wirkt wie ActiveEffect, dauerts via Combat-Tracker) ─
 
-async function applyBuffFlag(actor, buffData) {
+/**
+ * Rechnet die Formel eines Liturgie-Buffs in eine Zahl um.
+ *
+ * @param {string} formel - "lkp", "lkp_half", "lkp_plus_5", "permanent" oder eine Zahl
+ * @param {number} lkpStar
+ * @returns {number|null} null = keine Zahl (z.B. "permanent" bei einem Eid)
+ */
+export function buffWertBerechnen(formel, lkpStar) {
+  const lkp = Number(lkpStar) || 0;
+  switch (String(formel ?? "").toLowerCase()) {
+    case "lkp":         return lkp;
+    case "lkp_half":    return Math.ceil(lkp / 2);   // DSA rundet auf
+    case "lkp_plus_5":  return lkp + 5;
+    case "permanent":   return null;
+    default: {
+      const n = Number(formel);
+      return Number.isFinite(n) ? n : null;
+    }
+  }
+}
+
+/**
+ * Hinterlegt einen Liturgie-Buff am Aktor.
+ *
+ * Bis v0.7.18 schrieb diese Funktion in ein Kennfeld `liturgyBuffs`, das im
+ * ganzen Modul an keiner einzigen Stelle gelesen wurde. 21 Liturgien mit einem
+ * `buff:`-Eintrag meldeten im Chat also eine Wirkung, die es nicht gab — und
+ * das Feld wuchs bei jedem Wirken weiter, ohne je geleert zu werden.
+ *
+ * Jetzt wird der Buff zusaetzlich im Effekt-Kennfeld abgelegt, das der
+ * Heldenbogen auswertet, und mit einem berechneten Zahlenwert versehen, damit
+ * "RS plus LkP* halbe" nicht Text bleibt, sondern eine Zahl ist.
+ */
+async function applyBuffFlag(actor, buffData, lkpStar = 0) {
   if (!actor) return;
   const flagKey = "liturgyBuffs";
-  const existing = actor.getFlag(MODULE_ID, flagKey) ?? [];
-  const newBuff = {
-    id: `lit_${Date.now()}_${Math.floor(Math.random()*1000)}`,
+  const vorhandene = actor.getFlag(MODULE_ID, flagKey) ?? [];
+  const wert = buffWertBerechnen(buffData?.formula, lkpStar);
+  const neuerBuff = {
+    id: `lit_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
     appliedAt: Date.now(),
+    lkpStar,
+    wert,
     ...buffData,
   };
-  await actor.setFlag(MODULE_ID, flagKey, [...existing, newBuff]);
+  // Gleiche Buff-Art nicht stapeln — der staerkere Wert gewinnt.
+  const ohneGleichartige = vorhandene.filter(b => b.type !== buffData?.type);
+  const alterGleicher = vorhandene.find(b => b.type === buffData?.type);
+  if (alterGleicher && Number(alterGleicher.wert ?? 0) > Number(wert ?? 0)) {
+    return; // bestehender Segen ist staerker, bleibt stehen
+  }
+  await actor.setFlag(MODULE_ID, flagKey, [...ohneGleichartige, neuerBuff]);
+}
+
+/**
+ * Liefert die aktiven Liturgie-Buffs eines Aktors als Zahlen, gruppiert nach Art.
+ * Wird vom Heldenbogen benutzt, um RS, AT/PA und Magieresistenz anzupassen.
+ *
+ * @param {Actor} actor
+ * @returns {Record<string, number>} z.B. { rs: 3, at_pa: 2 }
+ */
+export function aktiveBuffs(actor) {
+  const liste = actor?.getFlag?.(MODULE_ID, "liturgyBuffs") ?? [];
+  const summe = {};
+  for (const b of liste) {
+    // null bewusst zuerst abfangen: Number(null) ist 0 und damit endlich —
+    // ein Eid ohne Zahlenwert wuerde sonst als Bonus 0 in der Liste stehen und
+    // im Heldenbogen als "Segen aktiv" erscheinen, obwohl er nichts bewirkt.
+    if (b?.wert === null || b?.wert === undefined) continue;
+    const wert = Number(b.wert);
+    if (!Number.isFinite(wert)) continue;
+    const art = String(b.type ?? "").toLowerCase();
+    if (!art) continue;
+    summe[art] = Math.max(summe[art] ?? 0, wert); // gleichartige Segen stapeln nicht
+  }
+  return summe;
+}
+
+/**
+ * Loescht alle Liturgie-Buffs eines Aktors. Wird beim Beenden eines
+ * anhaltenden Effekts und vom Aufraeum-Makro benutzt.
+ */
+export async function buffsLoeschen(actor) {
+  if (!actor) return;
+  await actor.unsetFlag(MODULE_ID, "liturgyBuffs");
 }
 
 // ─── Effekt-Dispatch-Map ─────────────────────────────────────────────────────
@@ -678,7 +753,7 @@ export async function applyLiturgyEffects(actor, lit, lkpStar) {
         broadcastVFX({ kind: "effect", x: c.x, y: c.y, effect: vfxName });
         if (spec.buff) {
           const value = applyFormula(spec.buff.formula, lkpStar);
-          await applyBuffFlag(actor, { ...spec.buff, value, source: lit.name, lkpStar });
+          await applyBuffFlag(actor, { ...spec.buff, value, source: lit.name, lkpStar }, lkpStar);
           out.mech = `Buff: ${spec.buff.desc}`;
           broadcastVFX({
             kind: "scrollingText",
@@ -788,7 +863,7 @@ export async function applyLiturgyEffects(actor, lit, lkpStar) {
         broadcastVFX({ kind: "effect", x: c.x, y: c.y, effect: vfxName });
         if (spec.buff && t.actor) {
           const value = applyFormula(spec.buff.formula, lkpStar);
-          await applyBuffFlag(t.actor, { ...spec.buff, value, source: lit.name, lkpStar });
+          await applyBuffFlag(t.actor, { ...spec.buff, value, source: lit.name, lkpStar }, lkpStar);
           broadcastVFX({
             kind: "scrollingText",
             tgtTokenId: t.id,
